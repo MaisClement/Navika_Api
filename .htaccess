@@ -1,0 +1,34 @@
+# Disable directory browsing 
+Options -Indexes
+
+# Deny access to .htaccess
+<Files "^\.">
+    Order allow,deny
+    Deny from all
+</Files>
+
+<IfModule mod_rewrite.c>
+    <IfModule mod_negotiation.c>
+        Options -MultiViews
+    </IfModule>
+
+    RewriteEngine On
+
+    # Redirect Trailing Slashes...
+    RewriteRule ^(.*)/$ /$1 [L,R=301]
+
+    # Handle Front Controller...
+    RewriteCond %{REQUEST_FILENAME} !-d
+    RewriteCond %{REQUEST_FILENAME} !-f
+    RewriteRule ^ index.php [L]
+</IfModule>
+
+#Technique de schlag
+ErrorDocument 404 /index.php
+ErrorDocument 400 /src/err/400.php
+ErrorDocument 401 /src/err/401.php
+ErrorDocument 403 /src/err/403.php
+ErrorDocument 404 /src/err/404.php     
+ErrorDocument 500 /src/err/500.php
+ErrorDocument 502 /src/err/502.php
+ErrorDocument 503 /src/err/503.php
