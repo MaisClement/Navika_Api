@@ -33,35 +33,35 @@ if ( isset($_GET['q']) && isset($_GET['lat']) && isset($_GET['lon']) ){
 
 // ------ Request
 //
+$type = 1; // Area
 
 if ($search_type == 3){
-    $result = getStopByQueryAndGeoCoords($query, $lat, $lon, $_GET['distance']);
+    $result = getStopByQueryAndGeoCoords($type, $query, $lat, $lon, $_GET['distance']);
 
 } else if ($search_type == 2){
-    $result = getStopByQueryAndGeoCoords($query, $lat, $lon, $_GET['distance']);
+    $result = getStopByGeoCoords($type, $lat, $lon, $_GET['distance']);
 
 } else if ($search_type == 1){
-    $result = getStopByQueryAndGeoCoords($query, $lat, $lon, $_GET['distance']);
+    $result = getStopByQuery($type, $query);
 
 } else {
     ErrorMessage(500);
 }
 
 $places = [];
-
 while ($obj = $result->fetch()) {
     $places[] = array(
         'id'        =>  (String)    $obj['stop_id'],
         'name'      =>  (String)    $obj['stop_name'],
-        'type'      =>  (String)    '',
+        'type'      =>  (String)    $LOCATION_TYPE[$obj['location_type']],
         'quality'   =>  (int)       0 ?? 0,
         'distance'  =>  (int)       0 ?? 0,
-        'zone'      =>  (int)       0 ?? 0,
+        'zone'      =>  (int)       $obj['zone_id'] ?? 0,
         'town'      =>  (String)    '',
         'zip_code'  =>  (String)    '',
         'coord'     => array(
-            'lat'       =>      '',
-            'lon'       =>      '',
+            'lat'       =>      $obj['stop_lat'],
+            'lon'       =>      $obj['stop_lon'],
         ),
         'lines'     => array(),
         'modes'     => array(),

@@ -40,7 +40,6 @@ if (isset($_GET['debug']) && $_GET['debug'] == 'y'){
 
 $path = 'src/';
 
-
 //------------
 
 $uri = urldecode($_SERVER['REQUEST_URI']);
@@ -65,7 +64,8 @@ include('src/base/request.php');
 //------------
 try {
     if (strpos($file, "/base/")){
-        ErrorMessage(403);
+        //ErrorMessage(403);
+        echo $file;
 
     } else if (is_file($file_php)){
         chdir($path);
