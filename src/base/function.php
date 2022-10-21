@@ -20,4 +20,9 @@ function ErrorMessage($http_code, $details = ''){
     exit;
 }
 
+
+function getTown($lat, $lon){
+    getTownByGeoPoint($lat, $lon);
+}
+
 ?>

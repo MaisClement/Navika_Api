@@ -36,20 +36,23 @@ if ( isset($_GET['q']) && isset($_GET['lat']) && isset($_GET['lon']) ){
 $type = 1; // Area
 
 if ($search_type == 3){
-    $result = getStopByQueryAndGeoCoords($type, $query, $lat, $lon, $_GET['distance']);
+    $request = getStopByQueryAndGeoCoords($type, $query, $lat, $lon, $_GET['distance']);
 
 } else if ($search_type == 2){
-    $result = getStopByGeoCoords($type, $lat, $lon, $_GET['distance']);
+    $request = getStopByGeoCoords($type, $lat, $lon, $_GET['distance']);
 
 } else if ($search_type == 1){
-    $result = getStopByQuery($type, $query);
+    $request = getStopByQuery($type, $query);
 
 } else {
     ErrorMessage(500);
 }
 
+// ------ Ville et code postal
+//
+
 $places = [];
-while ($obj = $result->fetch()) {
+while ($obj = $request->fetch()) {
     $places[] = array(
         'id'        =>  (String)    $obj['stop_id'],
         'name'      =>  (String)    $obj['stop_name'],
@@ -57,8 +60,8 @@ while ($obj = $result->fetch()) {
         'quality'   =>  (int)       0 ?? 0,
         'distance'  =>  (int)       0 ?? 0,
         'zone'      =>  (int)       $obj['zone_id'] ?? 0,
-        'town'      =>  (String)    '',
-        'zip_code'  =>  (String)    '',
+        'town'      =>  (String)    getTownByGeoPoint($obj['stop_lat'], $obj['stop_lon'])->fetch()['town_name'],
+        'zip_code'  =>  (String)    getTownByGeoPoint($obj['stop_lat'], $obj['stop_lon'])->fetch()['zip_code'],
         'coord'     => array(
             'lat'       =>      $obj['stop_lat'],
             'lon'       =>      $obj['stop_lon'],
