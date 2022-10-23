@@ -5,14 +5,21 @@ function getStopByQuery($type, $query, $count = 15){
     $query = strtolower( trim( $query ) );
 
     $req = $db->prepare("
-        SELECT stop_id, stop_code, stop_name, stop_lat, stop_lon,
-        GeomFromText(CONCAT('POINT (', stop_lat, ' ', stop_lon, ')')) AS geo_point,
-        ( 0 ) AS distance,
-        stop_desc, zone_id, stop_url, location_type, stop_timezone, level_id, platform_code 
-        FROM stops 
-        WHERE LOWER( stops.stop_name ) LIKE ?
+        SELECT S.stop_id, S.stop_code, S.stop_name, S.stop_lat, S.stop_lon, point(S.stop_lat, S.stop_lon) AS geo_point, 0 AS distance, S.stop_desc, S.zone_id, S.location_type, S.level_id, S.platform_code, 
+        CONCAT((
+            SELECT CONCAT(Z.zip_code,'; ', T.town_name)
+            FROM town T
+            LEFT JOIN zip_code Z
+            ON T.town_id = Z.town_id
+            WHERE ST_CONTAINS(T.town_polygon, GeomFromText(CONCAT('POINT (', S.stop_lat, ' ', S.stop_lon, ')')))
+            LIMIT 1
+        )) as town
+        FROM stops S
+
+        WHERE LOWER( S.stop_name ) LIKE ?
         AND location_type = ?
-        LIMIT 15
+
+        LIMIT 15; 
     ");
     $req->execute( array( '%'.$query.'%', $type) );
     return $req;
@@ -23,19 +30,30 @@ function getStopByGeoCoords($type, $lat, $lon, $distance = 1000){
     $lon = trim( $lon );
 
     $req = $db->prepare("
-        SELECT stop_id, stop_code, stop_name, stop_lat, stop_lon,
-        ( ST_distance_sphere(
-            GeomFromText(CONCAT('POINT (', stop_lat, ' ', stop_lon, ')')), 
-            ST_GeomFromText('POINT(? ?)')) 
-        ) AS distance,
-        stop_desc, zone_id, stop_url, location_type, stop_timezone, level_id, platform_code
-        FROM stops 
-        WHERE ( ST_distance_sphere(
-            GeomFromText(CONCAT('POINT (', stop_lat, ' ', stop_lon, ')')), 
-            ST_GeomFromText('POINT(? ?)')) 
-        ) < ?
-        ORDER BY `distance` ASC
+        SELECT S.stop_id, S.stop_code, S.stop_name, S.stop_lat, S.stop_lon, point(S.stop_lat, S.stop_lon) AS geo_point,
+        ST_Distance_Sphere(
+            point(S.stop_lat, S.stop_lon),
+            point(?, ?)
+        ) AS distance, S.stop_desc, S.zone_id, S.location_type, S.level_id, S.platform_code, 
+        CONCAT((
+            SELECT CONCAT(Z.zip_code,'; ', T.town_name)
+            FROM town T
+            LEFT JOIN zip_code Z
+            ON T.town_id = Z.town_id
+            WHERE ST_CONTAINS(T.town_polygon, point(S.stop_lat, S.stop_lon))
+            LIMIT 1
+        )) as town
+        FROM stops S
+
+        WHERE  LOWER( S.stop_name ) LIKE ?
+        AND(ST_Distance_Sphere(
+            point(S.stop_lat, S.stop_lon),
+            point(?, ?)
+        )) < ?
         AND location_type = ?
+
+        ORDER BY distance ASC
+
         LIMIT 15
     ");
     $req->execute( array($lat, $lon, $lat, $lon, $distance, $type) );
@@ -48,23 +66,32 @@ function getStopByQueryAndGeoCoords($type, $query, $lat, $lon, $distance = 1000)
     $lon = trim( $lon );
 
     $req = $db->prepare("
-        SELECT stop_id, stop_code, stop_name, stop_lat, stop_lon,
-        ( ST_distance_sphere(
-            GeomFromText(CONCAT('POINT (', stop_lat, ' ', stop_lon, ')')), 
-            ST_GeomFromText('POINT(? ?)')) 
-        ) AS distance,
-        stop_desc, zone_id, stop_url, location_type, stop_timezone, level_id, platform_code
-        FROM stops 
-        WHERE ( ST_distance_sphere(
-            GeomFromText(CONCAT('POINT (', stop_lat, ' ', stop_lon, ')')), 
-            ST_GeomFromText('POINT(? ?)')) 
-        ) < ?
-        AND LOWER( stops.stop_name ) LIKE  '%?%'
-        ORDER BY `distance` ASC
+        SELECT S.stop_id, S.stop_code, S.stop_name, S.stop_lat, S.stop_lon, point(S.stop_lat, S.stop_lon) AS geo_point,
+        ST_Distance_Sphere(
+            point(S.stop_lat, S.stop_lon),
+            point(?, ?)
+        ) AS distance, S.stop_desc, S.zone_id, S.location_type, S.level_id, S.platform_code, 
+        CONCAT((
+            SELECT CONCAT(Z.zip_code,'; ', T.town_name)
+            FROM town T
+            LEFT JOIN zip_code Z
+            ON T.town_id = Z.town_id
+            WHERE ST_CONTAINS(T.town_polygon, point(S.stop_lat, S.stop_lon))
+            LIMIT 1
+        )) as town
+        FROM stops S
+
+        WHERE (ST_Distance_Sphere(
+            point(S.stop_lat, S.stop_lon),
+            point(?, ?)
+        )) < ?
         AND location_type = ?
+
+        ORDER BY distance ASC
+
         LIMIT 15
     ");
-    $req->execute( array($lat, $lon, $lat, $lon, $distance, $query, $type) );
+    $req->execute( array($lat, $lon, $lat, $lon, $distance, '%'.$query.'%', $type) );
     return $req;
 }
 

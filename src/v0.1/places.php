@@ -8,14 +8,14 @@
 
 if ( isset($_GET['q']) && isset($_GET['lat']) && isset($_GET['lon']) ){
     $query = $_GET['q'];
-    $latitude = $_GET['lat'];
-    $longitude = $_GET['lon'];
+    $lat = $_GET['lat'];
+    $lon = $_GET['lon'];
 
     $search_type = 3;
 
 } else if ( isset($_GET['lat']) && isset($_GET['lon']) ) {
-    $latitude = $_GET['lat'];
-    $longitude = $_GET['lon'];
+    $lat = $_GET['lat'];
+    $lon = $_GET['lon'];
 
     $search_type = 2;
 
@@ -36,10 +36,10 @@ if ( isset($_GET['q']) && isset($_GET['lat']) && isset($_GET['lon']) ){
 $type = 1; // Area
 
 if ($search_type == 3){
-    $request = getStopByQueryAndGeoCoords($type, $query, $lat, $lon, $_GET['distance']);
+    $request = getStopByQueryAndGeoCoords($type, $query, $lat, $lon);
 
 } else if ($search_type == 2){
-    $request = getStopByGeoCoords($type, $lat, $lon, $_GET['distance']);
+    $request = getStopByGeoCoords($type, $lat, $lon);
 
 } else if ($search_type == 1){
     $request = getStopByQuery($type, $query);
@@ -60,8 +60,8 @@ while ($obj = $request->fetch()) {
         'quality'   =>  (int)       0 ?? 0,
         'distance'  =>  (int)       0 ?? 0,
         'zone'      =>  (int)       $obj['zone_id'] ?? 0,
-        'town'      =>  (String)    getTownByGeoPoint($obj['stop_lat'], $obj['stop_lon'])->fetch()['town_name'],
-        'zip_code'  =>  (String)    getTownByGeoPoint($obj['stop_lat'], $obj['stop_lon'])->fetch()['zip_code'],
+        'town'      =>  (String)    substr($obj['town'], strpos($obj['town'], ';')+2),
+        'zip_code'  =>  (String)    substr($obj['town'], 0, strpos($obj['town'], ';')),
         'coord'     => array(
             'lat'       =>      $obj['stop_lat'],
             'lon'       =>      $obj['stop_lon'],

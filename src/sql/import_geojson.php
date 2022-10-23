@@ -19,7 +19,7 @@ foreach($geojson->features as $feature){
 
     $i = 0;
     foreach($coordinates[0] as $coordinate){
-        $polygon_text .= $coordinate[0] . ' ' . $coordinate[1];
+        $polygon_text .= $coordinate[1] . ' ' . $coordinate[0];
         if ((count($coordinates[0]) -1 ) > ($i)){
             $polygon_text .= ',';
         }

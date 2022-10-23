@@ -8,7 +8,6 @@ TRUNCATE stops;
 TRUNCATE stop_times;
 TRUNCATE transfers;
 TRUNCATE pathways;
-
 TRUNCATE zip_code;
 
 LOAD DATA INFILE '/var/www/navika/data/file/gtfs/prim/agency.txt'			INTO TABLE agency FIELDS TERMINATED BY ',' ENCLOSED BY '"'LINES TERMINATED BY '\n'IGNORE 1 ROWS;

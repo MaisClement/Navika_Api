@@ -9,6 +9,7 @@ function createReportMessage($title, $text) {
 }
 
 function ErrorMessage($http_code, $details = ''){
+    http_response_code($http_code);
     $json = array(
         'error' => array(
             'code'      =>  (int)       $http_code,
