@@ -1,4 +1,6 @@
-/data
+data/cache
+data/file
+data/report
 
 *.config
 credential.php

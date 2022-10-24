@@ -114,19 +114,17 @@ function addTown($id, $name, $polygon){
     $req->execute( array($id, $name, $polygon) );
     return $req;
 }
-function getTownByGeoPoint($lat, $lon){
+
+function getZipCodeByInsee ($code) {
     $db = $GLOBALS["db"];
-    $lat = trim( $lat );
-    $lon = trim( $lon );
+    $code = trim( $code );
 
     $req = $db->prepare("
-                    SELECT T.town_name, Z.zip_code
-                    FROM town T
-                    LEFT JOIN zip_code Z
-                    ON T.town_id = Z.town_id
-                    WHERE ST_CONTAINS(T.town_polygon, ST_GeomFromText('POINT($lat $lon)') );
+            SELECT * 
+            FROM zip_code
+            WHERE town_id = ?;
     ");
-    $req->execute( ); // $req->execute( array($lat, $lon) );
+    $req->execute( array($code) );
     return $req;
 }
 

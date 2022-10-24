@@ -54,15 +54,40 @@ AND location_type = '1'
 LIMIT 15; 
 
 ---------------------
--- FONCTIONNE ! Mais lent ET uniquement si une ville
--- (5.454 sec)
-SELECT S.stop_id, S.stop_code, S.stop_name, GeomFromText(CONCAT('POINT (', S.stop_lat, ' ', S.stop_lon, ')')) AS geo_point, 0 AS distance, S.stop_desc, S.zone_id, S.level_id, S.platform_code, T.town_name
-FROM town T
+-- 
+SELECT DISTINCT R.route_id, R.route_short_name, R.route_long_name, R.route_type, R.route_color, R.route_text_color
+FROM routes R
 
-LEFT JOIN stops S
-ON ST_CONTAINS(T.town_polygon, GeomFromText(CONCAT('POINT (', S.stop_lat, ' ', S.stop_lon, ')')))
+LEFT JOIN trips T
+ON R.route_id = T.route_id 
 
-WHERE LOWER( S.stop_name ) LIKE '%Grignon%'
-AND location_type = '1'
+LEFT JOIN stop_times S
+ON T.trip_id = S.trip_id
 
-LIMIT 15;
+LEFT JOIN stops TT
+ON S.stop_id = TT.stop_id
+
+WHERE S.stop_id = 'IDFM:64199' OR TT.parent_station = 'IDFM:64199';
+
+---------------------
+-- 
+SELECT DISTINCT R.route_id, R.route_short_name, R.route_long_name, R.route_type, R.route_color, R.route_text_color
+FROM stop_times S
+
+LEFT JOIN trips T
+ON S.trip_id = T.trip_id
+
+LEFT JOIN routes R
+ON R.route_id = T.route_id
+
+WHERE S.stop_id = 'IDFM:64199' OR parent_station = 'IDFM:64199';
+
+SELECT stop_id, stop_name FROM stops WHERE stop_id IN (
+  SELECT DISTINCT stop_id FROM stop_times WHERE trip_id IN (
+    SELECT trip_id FROM trips WHERE route_id = <route_id>));
+
+select * from routes where trips IN (
+    select * from stop_times where stop_id IN (
+        select stop_id from stops where stop_id = 'IDFM:64199' OR parent_station = 'IDFM:64199'
+    )
+)

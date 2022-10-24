@@ -1,15 +1,16 @@
 <?php
 
-// ------ Parameters
-// q
-// lat
-// lon
-// distance
+$fichier = '../data/cache/places/';
+$type = 'stop_area';
 
 if ( isset($_GET['q']) && isset($_GET['lat']) && isset($_GET['lon']) ){
     $query = $_GET['q'];
+    $query = strtolower( $query );
     $lat = $_GET['lat'];
     $lon = $_GET['lon'];
+
+    $url = $BASE_URL . '/places?q=' . $query . '&from' . $lon .';' . $lat . '=&type[]=' . $type;
+    $fichier .= 'PRIM_' . $query . '_' . $lat . '_' . $lon . '.json';
 
     $search_type = 3;
 
@@ -17,11 +18,18 @@ if ( isset($_GET['q']) && isset($_GET['lat']) && isset($_GET['lon']) ){
     $lat = $_GET['lat'];
     $lon = $_GET['lon'];
 
+    $url = $BASE_URL . '/coord/' . $lon .';' . $lat . '/places_nearby?type[]=' . $type;
+    $fichier .= 'PRIM_' . $lat . '_' . $lon . '.json';
+
     $search_type = 2;
 
 } else if (isset($_GET['q'])){
     $query = $_GET['q'];
-    
+    $query = strtolower( $query );
+
+    $url = $BASE_URL . '/places?q=' . $query . '&type[]=' . $type;
+    $fichier .= 'PRIM_' . $query . '.json';
+
     $search_type = 1;
 
 } else {
@@ -31,46 +39,54 @@ if ( isset($_GET['q']) && isset($_GET['lat']) && isset($_GET['lon']) ){
     );
 }
 
-// ------ Request
-//
-$type = 1; // Area
+if (is_file($fichier) && filesize($fichier) > 5 && (time() - filemtime($fichier) < 60 * 60)) {
+    echo file_get_contents($fichier);
+    exit;
+}
+
+// ------------
+
+$results = curl_PRIM($url);
+$results = json_decode($results);
 
 if ($search_type == 3){
-    $request = getStopByQueryAndGeoCoords($type, $query, $lat, $lon);
+    $results = $results->places;
 
 } else if ($search_type == 2){
-    $request = getStopByGeoCoords($type, $lat, $lon);
+    $results = $results->places_nearby;
 
 } else if ($search_type == 1){
-    $request = getStopByQuery($type, $query);
+    $results = $results->places;
 
 } else {
     ErrorMessage(500);
 }
 
-// ------ Ville et code postal
-//
-
 $places = [];
-while ($obj = $request->fetch()) {
+foreach($results as $result){
     $places[] = array(
-        'id'        =>  (String)    $obj['stop_id'],
-        'name'      =>  (String)    $obj['stop_name'],
-        'type'      =>  (String)    $LOCATION_TYPE[$obj['location_type']],
-        'quality'   =>  (int)       0 ?? 0,
-        'distance'  =>  (int)       0 ?? 0,
-        'zone'      =>  (int)       $obj['zone_id'] ?? 0,
-        'town'      =>  (String)    substr($obj['town'], strpos($obj['town'], ';')+2),
-        'zip_code'  =>  (String)    substr($obj['town'], 0, strpos($obj['town'], ';')),
-        'coord'     => array(
-            'lat'       =>      $obj['stop_lat'],
-            'lon'       =>      $obj['stop_lon'],
+        "id"        =>  (String)    $result->id,
+        "name"      =>  (String)    $result->stop_area->name,
+        "type"      =>  (String)    "stop_area",
+        "quality"   =>  (int)       0,
+        "distance"  =>  (int)       isset($result->distance) ? $result->distance : 0,
+        "zone"      =>  (int)       0,
+        "town"      =>  (String)    getTownByAdministrativeRegions( $result->stop_area->administrative_regions ),
+        "zip_code"  =>  (String)    getZipCodeByInsee( getZipByAdministrativeRegions( $result->stop_area->administrative_regions ) )->fetch()['zip_code'],
+        "coord"     => array(
+            "lat"       =>  floatval( $result->stop_area->coord->lat ),
+            "lon"       =>  floatval( $result->stop_area->coord->lon ),
         ),
-        'lines'     => array(),
-        'modes'     => array(),
+        "lines"     =>              getAllLines( $result->stop_area->lines ),
+        "modes"     =>              getPhysicalModes( $result->stop_area->physical_modes ),
     );
 }
 
-echo json_encode($places);
+$echo["places"] = $places;
+
+$echo = json_encode($echo);
+file_put_contents($fichier, $echo);
+echo $echo;
 exit;
+
 ?>
