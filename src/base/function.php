@@ -4,9 +4,9 @@ function curl_PRIM( $url ) {
     $ch = curl_init();
     curl_setopt($ch, CURLOPT_HEADER, false);
     curl_setopt($ch, CURLOPT_HTTPHEADER, 
-    array(
-        'apiKey: FxOUH4z0kwaBwtBDDVCJYfhKOADOk1CG'
-    )
+        array(
+            'apiKey: ' . $APIKEY
+        )
     );
     curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1); //Set curl to return the data instead of printing it to the browser.
     curl_setopt($ch, CURLOPT_URL, $url);
@@ -78,4 +78,34 @@ function getAllLines ($lines){
     return $list;
 }
 
+function getSeverity( $effect, $cause, $status ) {
+    if ($status == 'past'){
+        return 0;
+
+    } else if ($status == 'future'){
+        return 2;
+
+    } else if ($cause == 'travaux') {
+        return 3;
+
+    } else if (in_array($effect, array('REDUCED_SERVICE', 'SIGNIFICANT_DELAYS', 'DETOUR', 'ADDITIONAL_SERVICE', 'MODIFIED_SERVICE', 'OTHER_EFFECT'))) {
+        return 4;
+
+    } else if (in_array($effect, array('NO_SERVICE', 'STOP_MOVED'))) {
+        return 5;
+
+    } else if (in_array($effect, array('UNKNOWN_EFFECT', 'NO_EFFECT', 'ACCESSIBILITY_ISSUE'))) {
+        return 1;
+
+    } else {
+        return 0;
+
+    } 
+}
+
 ?>
+
+
+
+
+

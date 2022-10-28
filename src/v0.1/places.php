@@ -5,7 +5,7 @@ $type = 'stop_area';
 
 if ( isset($_GET['q']) && isset($_GET['lat']) && isset($_GET['lon']) ){
     $query = $_GET['q'];
-    $query = strtolower( $query );
+    $query = strtolower( trim($query) );
     $lat = $_GET['lat'];
     $lon = $_GET['lon'];
 
@@ -25,7 +25,7 @@ if ( isset($_GET['q']) && isset($_GET['lat']) && isset($_GET['lon']) ){
 
 } else if (isset($_GET['q'])){
     $query = $_GET['q'];
-    $query = strtolower( $query );
+    $query = strtolower( trim($query) );
 
     $url = $BASE_URL . '/places?q=' . $query . '&type[]=' . $type;
     $fichier .= 'PRIM_' . $query . '.json';
