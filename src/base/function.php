@@ -5,7 +5,7 @@ function curl_PRIM( $url ) {
     curl_setopt($ch, CURLOPT_HEADER, false);
     curl_setopt($ch, CURLOPT_HTTPHEADER, 
         array(
-            'apiKey: ' . $APIKEY
+            'apiKey: FxOUH4z0kwaBwtBDDVCJYfhKOADOk1CG'
         )
     );
     curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1); //Set curl to return the data instead of printing it to the browser.
@@ -78,6 +78,41 @@ function getAllLines ($lines){
     return $list;
 }
 
+function getReportsMesageTitle( $messages ) {
+    foreach($messages as $message) {
+        if ($message->channel->name == 'titre') {
+            return $message->text;
+        }
+    }
+    return '';
+}
+function getReportsMesageText( $messages ) {
+    $search = ['<br>', '</p>'];
+    $replace = [PHP_EOL, PHP_EOL];
+
+    foreach($messages as $message) {
+        if ($message->channel->name == 'moteur') {
+            $msg = str_replace($search, $replace, $message->text);
+            $msg = strip_tags($msg);
+            $msg = html_entity_decode($msg);
+            return $msg;
+
+        } else if ($message->channel->name == 'email') {
+            $msg = str_replace($search, $replace, $message->text);
+            $msg = strip_tags($msg);
+            $msg = html_entity_decode($msg);
+            return $msg;
+
+        } else if ($message->channel->name != 'titre') {
+            $msg = str_replace($search, $replace, $message->text);
+            $msg = strip_tags($msg);
+            $msg = html_entity_decode($msg);
+            return $msg;
+            
+        }
+    }
+}
+
 function getSeverity( $effect, $cause, $status ) {
     if ($status == 'past'){
         return 0;
@@ -88,13 +123,13 @@ function getSeverity( $effect, $cause, $status ) {
     } else if ($cause == 'travaux') {
         return 3;
 
-    } else if (in_array($effect, array('REDUCED_SERVICE', 'SIGNIFICANT_DELAYS', 'DETOUR', 'ADDITIONAL_SERVICE', 'MODIFIED_SERVICE', 'OTHER_EFFECT'))) {
+    } else if (in_array($effect, array('REDUCED_SERVICE', 'SIGNIFICANT_DELAYS', 'DETOUR', 'ADDITIONAL_SERVICE', 'MODIFIED_SERVICE'))) {
         return 4;
 
     } else if (in_array($effect, array('NO_SERVICE', 'STOP_MOVED'))) {
         return 5;
 
-    } else if (in_array($effect, array('UNKNOWN_EFFECT', 'NO_EFFECT', 'ACCESSIBILITY_ISSUE'))) {
+    } else if (in_array($effect, array('UNKNOWN_EFFECT', 'OTHER_EFFECT', 'NO_EFFECT', 'ACCESSIBILITY_ISSUE'))) {
         return 1;
 
     } else {

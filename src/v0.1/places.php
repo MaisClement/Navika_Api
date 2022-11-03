@@ -9,7 +9,7 @@ if ( isset($_GET['q']) && isset($_GET['lat']) && isset($_GET['lon']) ){
     $lat = $_GET['lat'];
     $lon = $_GET['lon'];
 
-    $url = $BASE_URL . '/places?q=' . $query . '&from' . $lon .';' . $lat . '=&type[]=' . $type;
+    $url = $BASE_URL . '/places?q=' . $query . '&from' . $lon .';' . $lat . '=&type[]=' . $type . '&distance=1000';
     $fichier .= 'PRIM_' . $query . '_' . $lat . '_' . $lon . '.json';
 
     $search_type = 3;
@@ -18,7 +18,7 @@ if ( isset($_GET['q']) && isset($_GET['lat']) && isset($_GET['lon']) ){
     $lat = $_GET['lat'];
     $lon = $_GET['lon'];
 
-    $url = $BASE_URL . '/coord/' . $lon .';' . $lat . '/places_nearby?type[]=' . $type;
+    $url = $BASE_URL . '/coord/' . $lon .';' . $lat . '/places_nearby?type[]=' . $type . '&distance=1000';
     $fichier .= 'PRIM_' . $lat . '_' . $lon . '.json';
 
     $search_type = 2;
@@ -27,7 +27,7 @@ if ( isset($_GET['q']) && isset($_GET['lat']) && isset($_GET['lon']) ){
     $query = $_GET['q'];
     $query = strtolower( trim($query) );
 
-    $url = $BASE_URL . '/places?q=' . $query . '&type[]=' . $type;
+    $url = $BASE_URL . '/places?q=' . $query . '&type[]=' . $type . '&distance=1000';
     $fichier .= 'PRIM_' . $query . '.json';
 
     $search_type = 1;
