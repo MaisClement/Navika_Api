@@ -18,12 +18,25 @@ $json = array("api"         => array(
             "status"        =>  (String)    "active",
             "cause"         =>  (String)    "incidents",
             "category"      =>  (String)    "Incidents",
-            "severity"      =>  (int)       1,
+            "severity"      =>  (int)       5,
             "effect"        =>  (String)    "OTHER",
             "updated_at"    =>  (String)    "20221029T105845",
             "message"       =>  array(
-                "title"     =>      "Coucou",
-                "text"      =>      "Pas content",
+                "title"     =>      "Test",
+                "text"      =>      "Test",
+            ),
+        ),
+        array(
+            "id"            =>  (String)    "message-01",
+            "status"        =>  (String)    "active",
+            "cause"         =>  (String)    "incidents",
+            "category"      =>  (String)    "Incidents",
+            "severity"      =>  (int)       0,
+            "effect"        =>  (String)    "OTHER",
+            "updated_at"    =>  (String)    "20221029T105845",
+            "message"       =>  array(
+                "title"     =>      "Test",
+                "text"      =>      "Test",
             ),
         )
     ],
