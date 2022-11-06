@@ -1,6 +1,7 @@
 <?php
 
-$fichier = '../data/cache/places/';
+$fichier = '../data/cache/stop_point/';
+$type = 'stop_point';
 
 if ( isset($_GET['q']) && isset($_GET['lat']) && isset($_GET['lon']) ){
     $query = $_GET['q'];
@@ -8,7 +9,7 @@ if ( isset($_GET['q']) && isset($_GET['lat']) && isset($_GET['lon']) ){
     $lat = $_GET['lat'];
     $lon = $_GET['lon'];
 
-    $url = $BASE_URL . '/places?q=' . $query . '&from' . $lon .';' . $lat . '=&depth=2';
+    $url = $BASE_URL . '/places?q=' . $query . '&from' . $lon .';' . $lat . '=&type[]=' . $type . '&depth=2&distance=1000';
     $fichier .= 'PRIM_' . $query . '_' . $lat . '_' . $lon . '.json';
 
     $search_type = 3;
@@ -17,7 +18,7 @@ if ( isset($_GET['q']) && isset($_GET['lat']) && isset($_GET['lon']) ){
     $lat = $_GET['lat'];
     $lon = $_GET['lon'];
 
-    $url = $BASE_URL . '/coord/' . $lon .';' . $lat . '/places_nearby?depth=2&distance=1000';
+    $url = $BASE_URL . '/coord/' . $lon .';' . $lat . '/places_nearby?type[]=' . $type . '&depth=2&distance=1000';
     $fichier .= 'PRIM_' . $lat . '_' . $lon . '.json';
 
     $search_type = 2;
@@ -26,7 +27,7 @@ if ( isset($_GET['q']) && isset($_GET['lat']) && isset($_GET['lon']) ){
     $query = $_GET['q'];
     $query = urlencode( trim($query) );
 
-    $url = $BASE_URL . '/places?q=' . $query . '&depth=2';
+    $url = $BASE_URL . '/places?q=' . $query . '&type[]=' . $type . '&depth=2&distance=1000';
     $fichier .= 'PRIM_' . $query . '.json';
 
     $search_type = 1;
@@ -65,19 +66,19 @@ $places = [];
 foreach($results as $result){
     $places[] = array(
         "id"        =>  (String)    $result->id,
-        "name"      =>  (String)    $result->{$result->embedded_type}->name,
-        "type"      =>  (String)    $result->embedded_type,
+        "name"      =>  (String)    $result->stop_area->name,
+        "type"      =>  (String)    $type,
         "quality"   =>  (int)       0,
         "distance"  =>  (int)       isset($result->distance) ? $result->distance : 0,
         "zone"      =>  (int)       0,
-        "town"      =>  (String)    getTownByAdministrativeRegions( $result->{$result->embedded_type}->administrative_regions ),
-        "zip_code"  =>  (String)    getZipCodeByInsee( getZipByAdministrativeRegions( $result->{$result->embedded_type}->administrative_regions ) )->fetch()['zip_code'],
+        "town"      =>  (String)    getTownByAdministrativeRegions( $result->stop_area->administrative_regions ),
+        "zip_code"  =>  (String)    getZipCodeByInsee( getZipByAdministrativeRegions( $result->stop_area->administrative_regions ) )->fetch()['zip_code'],
         "coord"     => array(
-            "lat"       =>  floatval( $result->{$result->embedded_type}->coord->lat ),
-            "lon"       =>  floatval( $result->{$result->embedded_type}->coord->lon ),
+            "lat"       =>  floatval( $result->stop_area->coord->lat ),
+            "lon"       =>  floatval( $result->stop_area->coord->lon ),
         ),
-        "lines"     =>              isset( $result->{$result->embedded_type}->lines ) ? getAllLines( $result->{$result->embedded_type}->lines ) : [],
-        "modes"     =>              isset( $result->stop_area->physical_modes ) ? getPhysicalModes( $result->stop_area->physical_modes ) : [],
+        "lines"     =>              getAllLines( $result->stop_area->lines ),
+        "modes"     =>              getPhysicalModes( $result->stop_area->physical_modes ),
     );
 }
 

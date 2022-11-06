@@ -18,27 +18,14 @@ $json = array("api"         => array(
             "status"        =>  (String)    "active",
             "cause"         =>  (String)    "incidents",
             "category"      =>  (String)    "Incidents",
-            "severity"      =>  (int)       5,
+            "severity"      =>  (int)       3,
             "effect"        =>  (String)    "OTHER",
             "updated_at"    =>  (String)    "20221029T105845",
             "message"       =>  array(
-                "title"     =>      "Test",
-                "text"      =>      "Test",
+                "title"     =>      "Travaux ce week-end",
+                "text"      =>      "Des trains supprimés et stations fermées les samedis et le dimanches sur les lignes du réseau SNCF et RATP. Retrouvez le détail de ces travaux sur la période. ",
             ),
         ),
-        array(
-            "id"            =>  (String)    "message-01",
-            "status"        =>  (String)    "active",
-            "cause"         =>  (String)    "incidents",
-            "category"      =>  (String)    "Incidents",
-            "severity"      =>  (int)       0,
-            "effect"        =>  (String)    "OTHER",
-            "updated_at"    =>  (String)    "20221029T105845",
-            "message"       =>  array(
-                "title"     =>      "Test",
-                "text"      =>      "Test",
-            ),
-        )
     ],
     
 );
