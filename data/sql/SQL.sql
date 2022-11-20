@@ -138,3 +138,31 @@ CREATE TABLE `zip_code` (
     `libelle` VARCHAR(255),
     `coords` VARCHAR(255)
 ); 
+
+DROP TABLE IF EXISTS `lines`;
+CREATE TABLE `lines` (
+    id_line VARCHAR(255) PRIMARY KEY NOT NULL,
+    externalcode_line VARCHAR(255),
+    name_line VARCHAR(255),
+    shortname_line VARCHAR(255),
+    transportmode VARCHAR(255),
+    transportsubmode VARCHAR(255),
+    type VARCHAR(255),
+    operatorref VARCHAR(255),
+    operatorname VARCHAR(255),
+    additionaloperators VARCHAR(255),
+    networkname VARCHAR(255),
+    colourweb_hexa VARCHAR(255),
+    textcolourweb_hexa VARCHAR(255),
+    colourprint_cmjn VARCHAR(255),
+    textcolourprint_hexa VARCHAR(255),
+    accessibility VARCHAR(255),
+    audiblesigns_available VARCHAR(255),
+    visualsigns_available VARCHAR(255),
+    id_groupoflines VARCHAR(255),
+    shortname_groupoflines VARCHAR(255),
+    notice_title TEXT,
+    notice_text TEXT,
+    picto VARCHAR(255),
+    status VARCHAR(255) 
+);

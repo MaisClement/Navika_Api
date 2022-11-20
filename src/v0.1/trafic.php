@@ -10,7 +10,7 @@ if (is_file($fichier) && filesize($fichier) > 5 && (time() - filemtime($fichier)
 // ------------
 
 $url = 'https://prim.iledefrance-mobilites.fr/marketplace/navitia/coverage/fr-idf/line_reports?forbidden_uris[]=commercial_mode:Bus';
-$results = curl_PRIM($url);
+$results = curl_Navitia($url);
 $results = json_decode($results);
 
 $reports = [];

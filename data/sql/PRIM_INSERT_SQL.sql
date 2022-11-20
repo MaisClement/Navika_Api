@@ -8,7 +8,9 @@ TRUNCATE stops;
 TRUNCATE stop_times;
 TRUNCATE transfers;
 TRUNCATE pathways;
+
 TRUNCATE zip_code;
+TRUNCATE `lines`;
 
 LOAD DATA INFILE '/var/www/navika/data/file/gtfs/prim/agency.txt'			INTO TABLE agency FIELDS TERMINATED BY ',' ENCLOSED BY '"'LINES TERMINATED BY '\n'IGNORE 1 ROWS;
 LOAD DATA INFILE '/var/www/navika/data/file/gtfs/prim/calendar.txt'		    INTO TABLE calendar FIELDS TERMINATED BY ',' ENCLOSED BY '"'LINES TERMINATED BY '\n'IGNORE 1 ROWS;
@@ -22,5 +24,6 @@ LOAD DATA INFILE '/var/www/navika/data/file/gtfs/prim/transfers.txt'		INTO TABLE
 LOAD DATA INFILE '/var/www/navika/data/file/gtfs/prim/trips.txt'			INTO TABLE trips FIELDS TERMINATED BY ',' ENCLOSED BY '"'LINES TERMINATED BY '\n'IGNORE 1 ROWS;
 
 LOAD DATA INFILE '/var/www/navika/data/file/geo/laposte_hexasmal.csv'		INTO TABLE zip_code FIELDS TERMINATED BY ';' ENCLOSED BY '"'LINES TERMINATED BY '\n'IGNORE 1 ROWS;
+LOAD DATA INFILE '/var/www/navika/data/file/lines.csv'               		INTO TABLE `lines` FIELDS TERMINATED BY ';' ENCLOSED BY '"'LINES TERMINATED BY '\n'IGNORE 1 ROWS;
 
-
+-- wget -0 lines.csv https://data.iledefrance-mobilites.fr/explore/dataset/referentiel-des-lignes/download/?format=csv&timezone=Europe/Berlin&lang=fr&use_labels_for_header=true&csv_separator=%3B

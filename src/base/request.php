@@ -129,4 +129,18 @@ function getZipCodeByInsee ($code) {
 }
 
 
+function getLinesById ($id) {
+    $db = $GLOBALS["db"];
+    $id = trim( $id );
+
+    $req = $db->prepare("
+            SELECT * 
+            FROM `lines`
+            WHERE id_line = ?;
+    ");
+    $req->execute( array($id) );
+    return $req;
+}
+
+
 ?>

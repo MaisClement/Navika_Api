@@ -42,42 +42,79 @@ $results = curl_PRIM($url);
 $results = json_decode($results);
 
 $results = $results->Siri->ServiceDelivery->StopMonitoringDelivery[0]->MonitoredStopVisit;
-echo json_encode($results);
-exit;
+// echo json_encode($results);
+// exit;
 
-$lines[] = array(
-    "id"         =>  (String)    $line->id,
-    "code"       =>  (String)    $line->code,
-    "name"       =>  (String)    $line->name,
-    "mode"       =>  (String)    $line->commercial_mode->id,
-    "color"      =>  (String)    $line->color,
-    "text_color" =>  (String)    $line->text_color,
-    "terminus_schedules" => [],
-);
+$schedules = [];
 
-$terminus_schedules[] = array(
-    "id"         =>  (String)    $stop->id,
-    "name"       =>  (String)    $stop->name,
-    "mode"       =>  (String)    $line->commercial_mode->id,
-    "color"      =>  (String)    $line->color,
-    "text_color" =>  (String)    $line->text_color,
-    "terminus_schedules" => [],
-);
+foreach($results as $result){
+    $call = $result->MonitoredVehicleJourney;
 
-$schedules[$line_ref][$destination_ref][] = array(
+    $line_ref = $call->LineRef->value;
+    $destination_ref = $call->DestinationRef->value;
 
-    "stop_date_time" => array(
-        "base_departure_date_time"  =>  (String)  "2022-10-18 14:05:00",
-        "departure_date_time"       =>  (String)  "2022-10-18 14:05:00",
-        "base_arrival_date_time"    =>  (String)  "2022-10-18 14:06:00",
-        "arrival_date_time"         =>  (String)  "2022-10-18 14:06:00",
-        "platform"                  =>  (String)  "B"
-    )
+    
+    if (!isset( $lines_data[$line_ref] )) { 
+        $search = ['Line', 'STIF', 'IDFM', ':'];
+        $replace = ['', '', '', ''];
+        $line_id = str_replace($search, $replace, $line_ref);
 
-);
+        $request = getLinesById($line_id);
+        $obj = $request->fetch();
+        
+        $lines_data[$line_ref] = array(
+            "id"         =>  (String)    $line_ref,
+            "code"       =>  (String)    $obj['shortname_line'],
+            "name"       =>  (String)    $obj['name_line'],
+            "mode"       =>  (String)    $obj['transportmode'],
+            "color"      =>  (String)    $obj['colourweb_hexa'] ?? "000000",
+            "text_color" =>  (String)    $obj['textcolourweb_hexa'] ?? "000000",
+        );
+    }
+    if (!isset( $terminus_data[$line_ref][$destination_ref] )) { 
+        $terminus_data[$line_ref][$destination_ref] = array(
+            "id"         =>  (String)    $destination_ref,
+            "name"       =>  (String)    $destination_ref,
+        );
+    }
+    $schedules[$line_ref][$destination_ref][] = array(
+        "informations" => array(
+            "id"                =>  (String)  $result->ItemIdentifier ?? "",
+            "name"              =>  (String)  "165417",
+            "mode"              =>  (String)  $lines_data[$line_ref]['mode'], // "rail",
+            "trip_name"         =>  (String)  $call->TrainNumbers->TrainNumberRef[0]->value,
+            "code"              =>  (String)  $lines_data[$line_ref]['code'], // "Transilien N",
+            "network"           =>  (String)  $lines_data[$line_ref]['name'], // "Transilien N",
+            "headsign"          =>  (String)  $call->JourneyNote[0]->value,
+            "description"       =>  (String)  "",
+            "message"           =>  (String)  "",
+            "state"             =>  (String)  "ontime"
+        ),
+        "stop_date_time" => array(
+            "base_departure_date_time"  =>  (String)  ($call->MonitoredCall->AimedDepartureTime) ?? "",
+            "departure_date_time"       =>  (String)  ($call->MonitoredCall->ExpectedDepartureTime) ?? "",
+            "base_arrival_date_time"    =>  (String)  ($call->MonitoredCall->AimedArrivalTime) ?? "",
+            "arrival_date_time"         =>  (String)  ($call->MonitoredCall->ExpectedArrivalTime) ?? "",
+            "platform"                  =>  (String)  "" // $call->MonitoredCall->ArrivalPlatformName ?? ""
+        )
+    );
+}
 
+$json = [];
+foreach($lines_data as $line){
+    foreach($terminus_data[$line['id']] as $term){
+        foreach($schedules[$line['id']][$term['id']] as $schedule){
+            
+            $term['schedules'][] = $schedule;
+        }
+        
+        $line['terminus_schedules'][] = $term;
+    }
 
-$echo = json_encode($echo);
+    $json['schedules'][] = $line;
+}
+
+$echo = json_encode($json);
 file_put_contents($fichier, $echo);
 echo $echo;
 exit;
