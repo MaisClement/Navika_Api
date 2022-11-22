@@ -21,9 +21,7 @@ if (!isset($_GET['s']) || $_GET['s'] == null){
         ErrorMessage( 400, 'Invalid data, type of parameter not recognized' );
     }
 
-    $search = ['stop_area', 'stop_point', 'IDFM', ':'];
-    $replace = ['', '', '', ''];
-    $id = str_replace($search, $replace, $stop_id);
+    $id = idfm_format($stop_id);
 
     // ------------
 
@@ -31,9 +29,26 @@ if (!isset($_GET['s']) || $_GET['s'] == null){
     $fichier .= 'ddd_' . $id . '.json';
 }
 
-if (is_file($fichier) && filesize($fichier) > 5 && (time() - filemtime($fichier) < 60 * 60)) {
+if (is_file($fichier) && filesize($fichier) > 5 && (time() - filemtime($fichier) < 20)) {
     echo file_get_contents($fichier);
     exit;
+}
+
+// ------------
+// On récupère toutes les lignes a l'arrets
+
+$request = getAllLinesAtStop ('IDFM:' . $id);
+
+while($obj = $request->fetch()) {
+    $lines_data[$obj['id_line']] = array(
+        "id"         =>  (String)    idfm_format( $obj['id_line'] ),
+        "code"       =>  (String)    $obj['shortname_line'],
+        "name"       =>  (String)    $obj['name_line'],
+        "mode"       =>  (String)    $obj['transportmode'],
+        "color"      =>  (String)    strlen($obj['colourweb_hexa']) < 6 ? "000000" : $obj['colourweb_hexa'],
+        "text_color" =>  (String)    strlen($obj['textcolourweb_hexa']) < 6 ? "000000" : $obj['textcolourweb_hexa'],
+        "terminus_schedules"  =>  array()
+    );
 }
 
 // ------------
@@ -42,9 +57,6 @@ $results = curl_PRIM($url);
 $results = json_decode($results);
 
 $results = $results->Siri->ServiceDelivery->StopMonitoringDelivery[0]->MonitoredStopVisit;
-// echo json_encode($results);
-// exit;
-
 $schedules = [];
 
 foreach($results as $result){
@@ -53,52 +65,52 @@ foreach($results as $result){
     $line_ref = $call->LineRef->value;
     $destination_ref = $call->DestinationRef->value;
 
-    
-    if (!isset( $lines_data[$line_ref] )) { 
-        $search = ['Line', 'STIF', 'IDFM', ':'];
-        $replace = ['', '', '', ''];
-        $line_id = str_replace($search, $replace, $line_ref);
+    $line_id = idfm_format( $line_ref );
 
-        $request = getLinesById($line_id);
-        $obj = $request->fetch();
+    if (1 == 2){
+        // no
+    } else {
+        if (!isset( $lines_data[$line_id] )) { 
+            $request = getLinesById($line_id);
+            $obj = $request->fetch();
+            
+            $lines_data[$line_id] = array(
+                "id"         =>  (String)    $line_id,
+                "code"       =>  (String)    $obj['shortname_line'],
+                "name"       =>  (String)    $obj['name_line'],
+                "mode"       =>  (String)    $obj['transportmode'],
+                "color"      =>  (String)    strlen($obj['colourweb_hexa']) < 6 ? "000000" : $obj['colourweb_hexa'],
+                "text_color" =>  (String)    strlen($obj['textcolourweb_hexa']) < 6 ? "000000" : $obj['textcolourweb_hexa'],
+                "terminus_schedules"  =>  array()
+            );
+        }
+        if (!isset( $terminus_data[$line_id][$destination_ref] )) { 
+            $terminus_data[$line_id][$destination_ref] = array(
+                "id"         =>  (String)    $destination_ref,
+                "name"       =>  (String)    $call->MonitoredCall->DestinationDisplay[0]->value,
+                "schedules"  =>  array()
+            );
+        }
         
-        $lines_data[$line_ref] = array(
-            "id"         =>  (String)    $line_ref,
-            "code"       =>  (String)    $obj['shortname_line'],
-            "name"       =>  (String)    $obj['name_line'],
-            "mode"       =>  (String)    $obj['transportmode'],
-            "color"      =>  (String)    $obj['colourweb_hexa'] ?? "000000",
-            "text_color" =>  (String)    $obj['textcolourweb_hexa'] ?? "000000",
-        );
+        if ($call->MonitoredCall->ExpectedDepartureTime !== null && $call->MonitoredCall->ExpectedDepartureTime !== ""){
+            $schedules[$line_id][$destination_ref][] = array(
+                "base_departure_date_time"  =>  (String)  $call->MonitoredCall->AimedDepartureTime ?? "",
+                "departure_date_time"       =>  (String)  $call->MonitoredCall->ExpectedDepartureTime ?? $call->MonitoredCall->AimedDepartureTime ?? "",
+                "base_arrival_date_time"    =>  (String)  $call->MonitoredCall->AimedArrivalTime ?? "",
+                "arrival_date_time"         =>  (String)  $call->MonitoredCall->ExpectedArrivalTime ?? "",
+
+    //          noReport, onTime, delayed
+                "state"                     =>  (String)  $call->MonitoredCall->DepartureStatus ?? $call->MonitoredCall->ArrivalStatus ?? "noReport",
+                "platform"                  =>  (String)  "" // $call->MonitoredCall->ArrivalPlatformName ?? ""
+            );
+        }
     }
-    if (!isset( $terminus_data[$line_ref][$destination_ref] )) { 
-        $terminus_data[$line_ref][$destination_ref] = array(
-            "id"         =>  (String)    $destination_ref,
-            "name"       =>  (String)    $destination_ref,
-        );
-    }
-    $schedules[$line_ref][$destination_ref][] = array(
-        "informations" => array(
-            "id"                =>  (String)  $result->ItemIdentifier ?? "",
-            "name"              =>  (String)  "165417",
-            "mode"              =>  (String)  $lines_data[$line_ref]['mode'], // "rail",
-            "trip_name"         =>  (String)  $call->TrainNumbers->TrainNumberRef[0]->value,
-            "code"              =>  (String)  $lines_data[$line_ref]['code'], // "Transilien N",
-            "network"           =>  (String)  $lines_data[$line_ref]['name'], // "Transilien N",
-            "headsign"          =>  (String)  $call->JourneyNote[0]->value,
-            "description"       =>  (String)  "",
-            "message"           =>  (String)  "",
-            "state"             =>  (String)  "ontime"
-        ),
-        "stop_date_time" => array(
-            "base_departure_date_time"  =>  (String)  ($call->MonitoredCall->AimedDepartureTime) ?? "",
-            "departure_date_time"       =>  (String)  ($call->MonitoredCall->ExpectedDepartureTime) ?? "",
-            "base_arrival_date_time"    =>  (String)  ($call->MonitoredCall->AimedArrivalTime) ?? "",
-            "arrival_date_time"         =>  (String)  ($call->MonitoredCall->ExpectedArrivalTime) ?? "",
-            "platform"                  =>  (String)  "" // $call->MonitoredCall->ArrivalPlatformName ?? ""
-        )
-    );
 }
+
+
+
+// usort($schedules, "order_departure");
+usort($lines_data, "order_line");
 
 $json = [];
 foreach($lines_data as $line){

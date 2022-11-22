@@ -10,7 +10,7 @@ if (is_file($fichier) && filesize($fichier) > 5 && (time() - filemtime($fichier)
 // ------------
 
 $url = 'https://prim.iledefrance-mobilites.fr/marketplace/navitia/coverage/fr-idf/line_reports?forbidden_uris[]=commercial_mode:Bus';
-$results = curl_Navitia($url);
+$results = curl_PRIM($url);
 $results = json_decode($results);
 
 $reports = [];
@@ -63,7 +63,7 @@ foreach($results->line_reports as $line) {
     }
     
     $lines[] = array(
-        "id"         =>  (String)    str_replace('line:', '', $line->line->id),
+        "id"         =>  (String)    idfm_format( $line->line->id ),
         "code"       =>  (String)    $line->line->code,
         "name"       =>  (String)    $line->line->name,
         "mode"       =>  (String)    $line->line->commercial_mode->id,

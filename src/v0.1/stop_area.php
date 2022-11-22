@@ -46,7 +46,7 @@ if (is_file($fichier) && filesize($fichier) > 5 && (time() - filemtime($fichier)
 
 // ------------
 
-$results = curl_Navitia($url);
+$results = curl_PRIM($url);
 $results = json_decode($results);
 
 if ($search_type == 3){

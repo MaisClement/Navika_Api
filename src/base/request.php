@@ -135,8 +135,26 @@ function getLinesById ($id) {
 
     $req = $db->prepare("
             SELECT * 
-            FROM `lines`
+            FROM lignes
             WHERE id_line = ?;
+    ");
+    $req->execute( array($id) );
+    return $req;
+}
+
+function getAllLinesAtStop ($id) {
+    $db = $GLOBALS["db"];
+    $id = trim( $id );
+
+    $req = $db->prepare("
+            SELECT L.*
+            FROM stops S
+            INNER JOIN arrets_lignes A
+            ON S.stop_id = A.stop_id 
+            INNER JOIN lignes L
+            ON REPLACE(A.id, 'IDFM:', '') = L.id_line
+            
+            WHERE parent_station = ?;
     ");
     $req->execute( array($id) );
     return $req;

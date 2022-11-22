@@ -139,8 +139,8 @@ CREATE TABLE `zip_code` (
     `coords` VARCHAR(255)
 ); 
 
-DROP TABLE IF EXISTS `lines`;
-CREATE TABLE `lines` (
+DROP TABLE IF EXISTS lignes;
+CREATE TABLE `lignes` (
     id_line VARCHAR(255) PRIMARY KEY NOT NULL,
     externalcode_line VARCHAR(255),
     name_line VARCHAR(255),
@@ -166,3 +166,18 @@ CREATE TABLE `lines` (
     picto VARCHAR(255),
     status VARCHAR(255) 
 );
+
+DROP TABLE IF EXISTS arrets_lignes;
+CREATE TABLE `arrets_lignes` (
+    id VARCHAR(255),
+    route_long_name VARCHAR(255),
+    stop_id VARCHAR(255),
+    stop_name VARCHAR(255),
+    stop_lon VARCHAR(255),
+    stop_lat VARCHAR(255),
+    operatorname VARCHAR(255),
+    pointgeo VARCHAR(255),
+    nom_commune VARCHAR(255),
+    code_insee VARCHAR(255)
+);
+

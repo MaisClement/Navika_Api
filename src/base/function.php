@@ -67,7 +67,7 @@ function getAllLines ($lines){
 
     foreach($lines as $line){
         $list[] = array(
-            "id"         =>  (String)    $line->id,
+            "id"         =>  (String)    idfm_format( $line->id ),
             "code"       =>  (String)    $line->code,
             "name"       =>  (String)    $line->name,
             "mode"       =>  (String)    $line->commercial_mode->id,
@@ -75,6 +75,7 @@ function getAllLines ($lines){
             "text_color" =>  (String)    $line->text_color,
         );
     }
+    usort($list, "order_line");
     return $list;
 }
 
@@ -173,6 +174,62 @@ function clear_directory($dirPath){
             unlink($file);
         }
     }
+}
+
+// ------
+
+function order_line($a, $b) {
+    //type
+    $type_list = [
+        'commercial_mode:Train' ,
+        'commercial_mode:RapidTransit' ,
+        'commercial_mode:RailShuttle' ,
+        'commercial_mode:LocalTrain' ,
+        'commercial_mode:LongDistanceTrain' ,
+        'commercial_mode:Metro' ,
+        'commercial_mode:RailShuttle' ,
+        'commercial_mode:Tramway' ,
+        'commercial_mode:Bus' ,
+    ];
+
+    $ta = array_search($a['mode'], $type_list);
+    $tb = array_search($b['mode'], $type_list);
+
+    if ($ta != $tb) {
+        return ($ta < $tb) ? -1 : 1;
+    }
+    
+    $a = $a['code'];
+    $b = $b['code'];
+
+    if ($a == $b) {
+        return 0;
+    }
+    return ($a < $b) ? -1 : 1;
+}
+function order_departure($a, $b) {
+    $a = new DateTime($a['departure_date_time']);
+    $b = new DateTime($b['departure_date_time']);
+
+    if ($a == $b) {
+        return 0;
+    }
+    return ($a < $b) ? -1 : 1;
+}
+
+function idfm_format($str) {
+    $search = [
+        'stop_area', 
+        'stop_point', 
+        'IDFM', 
+        'STIF', 
+        'line', 
+        'Line',
+        '::',
+        ':'
+    ];
+    $replace = '';
+    return str_replace($search, $replace, $str);
 }
 
 ?>
