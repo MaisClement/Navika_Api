@@ -176,6 +176,12 @@ function clear_directory($dirPath){
     }
 }
 
+function doTime($dt) {
+    $dt = date_create($dt);
+    $dt = date_timezone_set($dt, timezone_open('Europe/Paris'));
+    return date_format($dt, DATE_ISO8601);
+}
+
 // ------
 
 function order_line($a, $b) {
@@ -208,8 +214,8 @@ function order_line($a, $b) {
     return ($a < $b) ? -1 : 1;
 }
 function order_departure($a, $b) {
-    $a = new DateTime($a['departure_date_time']);
-    $b = new DateTime($b['departure_date_time']);
+    $a = new DateTime($a['stop_date_time']['departure_date_time']);
+    $b = new DateTime($b['stop_date_time']['departure_date_time']);
 
     if ($a == $b) {
         return 0;
