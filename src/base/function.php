@@ -176,10 +176,34 @@ function clear_directory($dirPath){
     }
 }
 
-function doTime($dt) {
-    $dt = date_create($dt);
-    $dt = date_timezone_set($dt, timezone_open('Europe/Paris'));
-    return date_format($dt, DATE_ISO8601);
+function getMessage($call) {
+    // terminus
+    // origin
+    
+    if ($call->ExpectedDepartureTime == "" && $call->AimedDepartureTime == "")
+        return "terminus";
+
+    if ($call->ExpectedArrivalTime == "" && $call->AimedArrivalTime == "")
+        return "origin";
+}
+
+function getState($call) {
+    // theorical
+    // ontime
+    // delayed
+    // cancelled
+    //  - modified
+
+    if ($call->DepartureStatus == "cancelled" || $call->DepartureStatus == "delayed")
+        return $call->DepartureStatus;
+
+    if ($call->ArrivalStatus == "cancelled" || $call->ArrivalStatus == "delayed")
+        return $call->ArrivalStatus;
+
+    if ($call->DepartureStatus == "onTime" || $call->ArrivalStatus == "onTime")
+        return "ontime";
+    
+    return "theorical";
 }
 
 // ------
