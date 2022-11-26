@@ -28,5 +28,5 @@ LOAD DATA INFILE '/var/www/navika/data/file/geo/laposte_hexasmal.csv'		INTO TABL
 LOAD DATA INFILE '/var/www/navika/data/file/lignes.csv'               		INTO TABLE lignes FIELDS TERMINATED BY ';' ENCLOSED BY '"'LINES TERMINATED BY '\n'IGNORE 1 ROWS;
 LOAD DATA INFILE '/var/www/navika/data/file/arrets_lignes.csv'              INTO TABLE arrets_lignes FIELDS TERMINATED BY ';' ENCLOSED BY '"'LINES TERMINATED BY '\n'IGNORE 1 ROWS;
 
--- wget -O lines.csv https://data.iledefrance-mobilites.fr/explore/dataset/referentiel-des-lignes/download/?format=csv&timezone=Europe/Berlin&lang=fr&use_labels_for_header=true&csv_separator=%3B
--- wget -O stops_lines.csv https://data.iledefrance-mobilites.fr/explore/dataset/arrets-lignes/download/?format=csv&timezone=Europe/Berlin&lang=fr&use_labels_for_header=true&csv_separator=%3B
+-- wget -O lignes.csv https://data.iledefrance-mobilites.fr/explore/dataset/referentiel-des-lignes/download/?format=csv&timezone=Europe/Berlin&lang=fr&use_labels_for_header=true&csv_separator=%3B
+-- wget -O arrets_lignes.csv https://data.iledefrance-mobilites.fr/explore/dataset/arrets-lignes/download/?format=csv&timezone=Europe/Berlin&lang=fr&use_labels_for_header=true&csv_separator=%3B
