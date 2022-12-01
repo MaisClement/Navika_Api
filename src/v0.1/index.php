@@ -41,22 +41,6 @@ foreach($results as $result) {
     );
 }
 
-$messages[] = array(
-    "id"            =>  (String)    "1",
-    "status"        =>  (String)    "active",
-    "cause"         =>  (String)    "",
-    "category"      =>  (String)    "",
-    "severity"      =>  (int)       "1",
-    "effect"        =>  (String)    "OTHER",
-    "updated_at"    =>  (String)    "2022-12-01T10:26:00.000Z",
-    "message"       =>  array(
-        "title"     =>      "Bienvenue sur Navika",
-        "text"      =>      "Ceci est un test d'affichage",
-        "button"    =>      "",
-        "link"      =>      "",
-    ),
-);
-
 $json = array("api"         => array(
         "current_version"      =>  (float)       0.1 ,
         "lastest_version"      =>  (float)       0.1 ,

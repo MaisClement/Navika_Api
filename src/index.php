@@ -41,18 +41,17 @@ foreach($results as $result) {
     );
 }
 
-
 $json = array("api"         => array(
         "current_version"      =>  (float)       0.1 ,
         "lastest_version"      =>  (float)       0.1 ,
         "oldest_version"       =>  (float)       0.1 ,
-        "support"              =>  (String)       "active",
+        "support"              =>  (String)      "active",
     ),
     "app"         => array(
         "current_version"      =>  (float)       0.1 ,
         "lastest_version"      =>  (float)       0.1 ,
         "oldest_version"       =>  (float)       0.1 ,
-        "support"              =>  (String)       "active",
+        "support"              =>  (String)      "active",
     ),
     "message"     => $messages,
     
