@@ -28,7 +28,7 @@ foreach($results->disruptions as $disruption) {
             "updated_at"    =>  (String)    $disruption->updated_at,
             "message"       =>  array(
                 "title"     =>      getReportsMesageTitle( $disruption->messages ),
-                "text"      =>      getReportsMesageText( $disruption->messages ),
+                "text"      =>      trim( getReportsMesageText( $disruption->messages ) ),
             ),
         );
     }

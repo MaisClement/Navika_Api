@@ -258,6 +258,19 @@ function order_departure($a, $b) {
     return ($a < $b) ? -1 : 1;
 }
 
+function gare_format($id) {
+    $allowed_name = [
+        "Gare de l'Est"
+    ];
+
+    if (in_array($id, $allowed_name))
+        return $id;
+
+    $id = str_replace('Gare de ', '', $id);
+    $id = ucfirst($id);
+    return $id;
+}
+
 function idfm_format($str) {
     $search = [
         'stop_area', 

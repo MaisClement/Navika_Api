@@ -101,7 +101,7 @@ foreach($results as $result){
             "informations" => array(
                 "direction" => array(
                   "id"         =>  (String)   $destination_ref,
-                  "name"       =>  (String)   ucfirst( str_replace('Gare de ', '', $call->DestinationDisplay[0]->value) ),
+                  "name"       =>  (String)   gare_format( $call->DestinationDisplay[0]->value) ),
                 ),
                 "id"            =>  (String)  $result->ItemIdentifier,
                 "name"          =>  (String)  $result->MonitoredVehicleJourney->TrainNumbers->TrainNumberRef[0]->value,
