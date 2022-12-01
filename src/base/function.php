@@ -39,8 +39,8 @@ function ErrorMessage($http_code, $details = ''){
     $json = array(
         'error' => array(
             'code'      =>  (int)       $http_code,
-            'message'   =>  (String)    $GLOBALS['HTTP_CODE'][$http_code]['message'],
-            'details'   =>  (String)    $details == '' ? $GLOBALS['HTTP_CODE'][$http_code]['details'] : $details,
+            'message'   =>  (String)    isset($GLOBALS['HTTP_CODE']) ? $GLOBALS['HTTP_CODE'] : "",
+            'details'   =>  (String)    $details == ''               ? $GLOBALS['HTTP_CODE'] : "",
         )
     );
     echo json_encode($json);
@@ -150,8 +150,6 @@ function getSeverity( $effect, $cause, $status ) {
     } 
 }
 
-
-
 function remove_directory($dirPath){
     if (!is_dir($dirPath)) {
         throw new InvalidArgumentException("$dirPath must be a directory");
@@ -187,31 +185,38 @@ function clear_directory($dirPath){
     }
 }
 
-function getMessage($call) {
-    // terminus
-    // origin
+function ifisset($a, $b) {
+    if ( isset($a) )
+        return $a;
     
-    if ($call->ExpectedDepartureTime == "" && $call->AimedDepartureTime == "")
+    else if ( isset($b) )
+        return $b;
+        
+    else return "";
+    
+}
+
+function getMessage($call) {
+    // terminus - origin
+    if (!isset($call->ExpectedDepartureTime) && !isset($call->AimedDepartureTime))
         return "terminus";
 
-    if ($call->ExpectedArrivalTime == "" && $call->AimedArrivalTime == "")
+    else if (!isset($call->ExpectedArrivalTime) && !isset($call->AimedArrivalTime))
         return "origin";
+
+    else
+        return "";
 }
 
 function getState($call) {
-    // theorical
-    // ontime
-    // delayed
-    // cancelled
-    //  - modified
-
-    if ($call->DepartureStatus == "cancelled" || $call->DepartureStatus == "delayed")
+    // theorical - ontime - delayed - cancelled - modified
+    if (isset($call->DepartureStatus) && ($call->DepartureStatus == "cancelled" || $call->DepartureStatus == "delayed"))
         return $call->DepartureStatus;
 
-    if ($call->ArrivalStatus == "cancelled" || $call->ArrivalStatus == "delayed")
+    if (isset($call->ArrivalStatus) && ($call->ArrivalStatus == "cancelled" || $call->ArrivalStatus == "delayed"))
         return $call->ArrivalStatus;
 
-    if ($call->DepartureStatus == "onTime" || $call->ArrivalStatus == "onTime")
+    if ((isset($call->DepartureStatus) && $call->DepartureStatus == "onTime") || (isset($call->ArrivalStatus) && $call->ArrivalStatus == "onTime"))
         return "ontime";
     
     return "theorical";

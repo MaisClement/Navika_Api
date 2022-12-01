@@ -1,9 +1,9 @@
 <?php
 
-$fichier = '../data/cache/schedules_line/';
+$dossier = '../data/cache/schedules/';
 
-if (!isset($_GET['s']) || $_GET['s'] == null || !isset($_GET['l']) || $_GET['l'] == null){
-    ErrorMessage( 400, 'Required parameter "s" and "l" is missing or null.' );
+if (!isset($_GET['s']) || $_GET['s'] == null){
+    ErrorMessage( 400, 'Required parameter "s" is missing or null.' );
 } else {
     $stop_id = $_GET['s'];
 
@@ -22,12 +22,11 @@ if (!isset($_GET['s']) || $_GET['s'] == null || !isset($_GET['l']) || $_GET['l']
     }
 
     $id = idfm_format($stop_id);
-    $id_line = $_GET['l'];
 
     // ------------
 
     $url = 'https://prim.iledefrance-mobilites.fr/marketplace/stop-monitoring?MonitoringRef=STIF:' . $type . ':Q:' . $id . ':';
-    $fichier .= $id . '.json';
+    $fichier = $dossier . $id . '.json';
 }
 
 if (is_file($fichier) && filesize($fichier) > 5 && (time() - filemtime($fichier) < 20)) {
@@ -36,7 +35,8 @@ if (is_file($fichier) && filesize($fichier) > 5 && (time() - filemtime($fichier)
 }
 
 // ------------
-// On récupère LA ligne
+// On récupère toutes les lignes a l'arrets
+
 $request = getLinesById ($id_line);
 
 $obj = $request->fetch();
@@ -63,6 +63,8 @@ if ($obj['transportmode'] == "rail"){
 $results = curl_PRIM($url);
 $results = json_decode($results);
 
+file_put_contents($dossier . 'api_' . $id . '.json', json_encode($results));
+
 $responseTimestamp = date_create($results->Siri->ServiceDelivery->ResponseTimestamp);
 $results = $results->Siri->ServiceDelivery->StopMonitoringDelivery[0]->MonitoredStopVisit;
 
@@ -71,13 +73,19 @@ $departures = [];
 $departures_lines = [];
 
 foreach($results as $result){
+    if (!isset($result->MonitoredVehicleJourney->MonitoredCall)){
+        ErrorMessage(
+            520,
+            'Invalid fecthed data'
+        );
+    }
     $call = $result->MonitoredVehicleJourney->MonitoredCall;
 
     $line_id = idfm_format( $result->MonitoredVehicleJourney->LineRef->value );
     $destination_ref = $result->MonitoredVehicleJourney->DestinationRef->value;
 
     if (isset( $lines_data[$line_id] )) { 
-        if ($lines_data[$line_id]['mode'] == "rail" && date_create($call->ExpectedDepartureTime == "" ? $call->AimedDepartureTime ?? "" : $call->ExpectedDepartureTime) >= $responseTimestamp){
+        if ($lines_data[$line_id]['mode'] == "rail" && date_create(isset($call->ExpectedDepartureTime) ? $call->ExpectedDepartureTime : (isset($call->AimedDepartureTime) ? $call->AimedDepartureTime : "")) >= $responseTimestamp){
             // Si c'est du ferré, l'affichage est different
     
             if (!in_array($line_id, $departures_lines)){
@@ -90,21 +98,22 @@ foreach($results as $result){
                       "name"       =>  (String)   gare_format( $call->DestinationDisplay[0]->value),
                     ),
                     "id"            =>  (String)  $result->ItemIdentifier,
-                    "name"          =>  (String)  $result->MonitoredVehicleJourney->TrainNumbers->TrainNumberRef[0]->value,
+                    "name"          =>  (String)  isset($result->MonitoredVehicleJourney->TrainNumbers->TrainNumberRef[0]->value) ? $result->MonitoredVehicleJourney->TrainNumbers->TrainNumberRef[0]->value : "",
                     "mode"          =>  (String)  $lines_data[$line_id]['mode'],
-                    "trip_name"     =>  (String)  $result->MonitoredVehicleJourney->TrainNumbers->TrainNumberRef[0]->value,
-                    "headsign"      =>  (String)  $result->MonitoredVehicleJourney->JourneyNote[0]->value,
+                    "trip_name"     =>  (String)  isset($result->MonitoredVehicleJourney->TrainNumbers->TrainNumberRef[0]->value) ? $result->MonitoredVehicleJourney->TrainNumbers->TrainNumberRef[0]->value : "",
+                    "headsign"      =>  (String)  isset($result->MonitoredVehicleJourney->JourneyNote[0]->value) ? $result->MonitoredVehicleJourney->JourneyNote[0]->value : "",
                     "description"   =>  (String)  "",
                     "message"       =>  (String)  getMessage($call),
                 ),
                 "stop_date_time" => array(
-                    "base_departure_date_time"  =>  (String)  $call->AimedDepartureTime == "" ? $call->ExpectedDepartureTime ?? "" : $call->AimedDepartureTime,
-                    "departure_date_time"       =>  (String)  $call->ExpectedDepartureTime == "" ? $call->AimedDepartureTime ?? "" : $call->ExpectedDepartureTime,
-                    "base_arrival_date_time"    =>  (String)  $call->AimedArrivalTime == "" ? $call->ExpectedArrivalTime ?? "" : $call->AimedArrivalTime,
-                    "arrival_date_time"         =>  (String)  $call->ExpectedArrivalTime == "" ? $call->AimedArrivalTime ?? "" : $call->ExpectedArrivalTime,
-                    "state"                     =>  (String)  getState($call),
-                    "atStop"                    =>  (String)  $call->VehicleAtStop ? "true" : "false",
-                    "platform"                  =>  (String)  $call->ArrivalPlatformName->value == "" ? "-" : $call->ArrivalPlatformName->value
+                                                          // Si l'horaires est present          On affiche l'horaires est             Sinon, si l'autre est present            On affiche l'autre            Ou rien  
+                "base_departure_date_time"  =>  (String)  isset($call->AimedDepartureTime)      ? $call->AimedDepartureTime         : (isset($call->ExpectedDepartureTime)   ? $call->ExpectedDepartureTime  : ""),
+                "departure_date_time"       =>  (String)  isset($call->ExpectedDepartureTime)   ? $call->ExpectedDepartureTime      : (isset($call->AimedDepartureTime)      ? $call->AimedDepartureTime     : ""),
+                "base_arrival_date_time"    =>  (String)  isset($call->AimedArrivalTime)        ? $call->AimedArrivalTime           : (isset($call->ExpectedArrivalTime)     ? $call->ExpectedArrivalTime    : ""),
+                "arrival_date_time"         =>  (String)  isset($call->ExpectedArrivalTime)     ? $call->ExpectedArrivalTime        : (isset($call->AimedArrivalTime)        ? $call->AimedArrivalTime       : ""),
+                "state"                     =>  (String)  getState($call),
+                "atStop"                    =>  (String)  isset($call->VehicleAtStop)               ? ($call->VehicleAtStop ? 'true' : 'false') : "false",
+                "platform"                  =>  (String)  isset($call->ArrivalPlatformName->value)  ? $call->ArrivalPlatformName->value : "-"
                 )
             );
         } else {
@@ -118,15 +127,16 @@ foreach($results as $result){
                 );
             }
             
-            if ($call->ExpectedDepartureTime !== null && $call->ExpectedDepartureTime !== ""){
+            if (isset($call->ExpectedDepartureTime)){
                 $schedules[$line_id][$destination_ref][] = array(
-                    "base_departure_date_time"  =>  (String)  $call->AimedDepartureTime == "" ? $call->ExpectedDepartureTime ?? "" : $call->AimedDepartureTime,
-                    "departure_date_time"       =>  (String)  $call->ExpectedDepartureTime == "" ? $call->AimedDepartureTime ?? "" : $call->ExpectedDepartureTime,
-                    "base_arrival_date_time"    =>  (String)  $call->AimedArrivalTime == "" ? $call->ExpectedArrivalTime ?? "" : $call->AimedArrivalTime,
-                    "arrival_date_time"         =>  (String)  $call->ExpectedArrivalTime == "" ? $call->AimedArrivalTime ?? "" : $call->ExpectedArrivalTime,
+                                                              // Si l'horaires est present          On affiche l'horaires est             Sinon, si l'autre est present            On affiche l'autre            Ou rien  
+                    "base_departure_date_time"  =>  (String)  isset($call->AimedDepartureTime)      ? $call->AimedDepartureTime         : (isset($call->ExpectedDepartureTime)   ? $call->ExpectedDepartureTime  : ""),
+                    "departure_date_time"       =>  (String)  isset($call->ExpectedDepartureTime)   ? $call->ExpectedDepartureTime      : (isset($call->AimedDepartureTime)      ? $call->AimedDepartureTime     : ""),
+                    "base_arrival_date_time"    =>  (String)  isset($call->AimedArrivalTime)        ? $call->AimedArrivalTime           : (isset($call->ExpectedArrivalTime)     ? $call->ExpectedArrivalTime    : ""),
+                    "arrival_date_time"         =>  (String)  isset($call->ExpectedArrivalTime)     ? $call->ExpectedArrivalTime        : (isset($call->AimedArrivalTime)        ? $call->AimedArrivalTime       : ""),
                     "state"                     =>  (String)  getState($call),
-                    "atStop"                    =>  (String)  $call->VehicleAtStop ? "true" : "false",
-                    "platform"                  =>  (String)  $call->ArrivalPlatformName->value == "" ? "-" : $call->ArrivalPlatformName->value
+                    "atStop"                    =>  (String)  isset($call->VehicleAtStop)               ? ($call->VehicleAtStop ? 'true' : 'false') : "false",
+                    "platform"                  =>  (String)  isset($call->ArrivalPlatformName->value)  ? $call->ArrivalPlatformName->value : "-"
                 );
             }
         }
@@ -149,17 +159,22 @@ usort($lines_data, "order_line");
 
 foreach($lines_data as $line){
     if ($line['mode'] != 'rail'){
-        foreach($terminus_data[$line['id']] as $term){
-            foreach($schedules[$line['id']][$term['id']] as $schedule){
-                $term['schedules'][] = $schedule;
+
+        if (isset($terminus_data[$line['id']])){
+            foreach($terminus_data[$line['id']] as $term){
+
+                if (isset($schedules[$line['id']][$term['id']])){
+                    foreach($schedules[$line['id']][$term['id']] as $schedule){
+                        $term['schedules'][] = $schedule;
+                        
+                    }
+                    $line['terminus_schedules'][] = $term;
+                }
             }
-            $line['terminus_schedules'][] = $term;
+            $json['schedules'][] = $line;
         }
-        $json['schedules'][] = $line;
     }
 }
-
-$json['mode'] = $obj['transportmode'];
 
 $echo = json_encode($json);
 file_put_contents($fichier, $echo);
