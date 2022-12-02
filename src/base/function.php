@@ -39,7 +39,7 @@ function ErrorMessage($http_code, $details = ''){
     $json = array(
         'error' => array(
             'code'      =>  (int)       $http_code,
-            'message'   =>  (String)    isset($GLOBALS['HTTP_CODE']) ? $GLOBALS['HTTP_CODE'] : "",
+            'message'   =>  (String)    isset($GLOBALS['HTTP_CODE'][$http_code]) ? $GLOBALS['HTTP_CODE'][$http_code] : "",
             'details'   =>  (String)    $details == ''               ? $GLOBALS['HTTP_CODE'] : "",
         )
     );
