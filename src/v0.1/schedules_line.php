@@ -2,8 +2,8 @@
 
 $dossier = '../data/cache/schedules/';
 
-if (!isset($_GET['s']) || $_GET['s'] == null){
-    ErrorMessage( 400, 'Required parameter "s" is missing or null.' );
+if (!isset($_GET['s']) || $_GET['s'] == null || !isset($_GET['l']) || $_GET['l'] == null){
+    ErrorMessage( 400, 'Required parameter "s" or "l" is missing or null.' );
 } else {
     $stop_id = $_GET['s'];
 
@@ -22,6 +22,7 @@ if (!isset($_GET['s']) || $_GET['s'] == null){
     }
 
     $id = idfm_format($stop_id);
+    $id_line = idfm_format($_GET['l']);
 
     // ------------
 
@@ -36,6 +37,7 @@ if (is_file($fichier) && filesize($fichier) > 5 && (time() - filemtime($fichier)
 
 // ------------
 // On récupère toutes les lignes a l'arrets
+
 
 $request = getLinesById ($id_line);
 
@@ -57,6 +59,8 @@ if ($obj['transportmode'] == "rail"){
     $lines_data[$obj['id_line']]['terminus_schedules'] = [];
 
 }
+
+
 
 // ------------
 
@@ -144,6 +148,7 @@ foreach($results as $result){
 }
 
 $json = [];
+$json['mode'] = $obj['transportmode'];
 
 // usort($departures, "order_departure");
 
