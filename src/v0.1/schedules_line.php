@@ -1,6 +1,6 @@
 <?php
 
-$dossier = '../data/cache/schedules/';
+$dossier = '../data/cache/schedules_line/';
 
 if (!isset($_GET['s']) || $_GET['s'] == null || !isset($_GET['l']) || $_GET['l'] == null){
     ErrorMessage( 400, 'Required parameter "s" or "l" is missing or null.' );
