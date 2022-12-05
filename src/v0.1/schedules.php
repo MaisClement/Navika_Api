@@ -184,8 +184,8 @@ foreach($lines_data as $line){
                     $line['terminus_schedules'][] = $term;
                 }
             }
-            $json['schedules'][] = $line;
         }
+        $json['schedules'][] = $line;
     }
 }
 
