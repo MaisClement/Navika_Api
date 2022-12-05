@@ -128,7 +128,6 @@ function getZipCodeByInsee ($code) {
     return $req;
 }
 
-
 function getLinesById ($id) {
     $db = $GLOBALS["db"];
     $id = trim( $id );
@@ -160,5 +159,52 @@ function getAllLinesAtStop ($id) {
     return $req;
 }
 
+
+function clearLignes () {
+    $db = $GLOBALS["db"];
+
+    $req = $db->prepare("
+        TRUNCATE lignes;
+    ");
+    $req->execute( );
+    return $req;
+}
+function clearArretsLignes () {
+    $db = $GLOBALS["db"];
+
+    $req = $db->prepare("
+        TRUNCATE arrets_lignes;
+    ");
+    $req->execute( );
+    return $req;
+}
+function writeLignes () {
+    $db = $GLOBALS["db"];
+
+    $req = $db->prepare("
+        LOAD DATA INFILE 
+        '/var/www/navika/data/file/lignes.csv'
+        INTO TABLE lignes 
+        FIELDS TERMINATED BY ';' 
+        ENCLOSED BY '\"'LINES TERMINATED BY '\n'
+        IGNORE 1 ROWS;
+    ");
+    $req->execute(  );
+    return $req;
+}
+function writeArretsLignes () {
+    $db = $GLOBALS["db"];
+
+    $req = $db->prepare("
+        LOAD DATA INFILE 
+        '/var/www/navika/data/file/arrets_lignes.csv'
+        INTO TABLE arrets_lignes 
+        FIELDS TERMINATED BY ';' 
+        ENCLOSED BY '\"'LINES TERMINATED BY '\n'
+        IGNORE 1 ROWS;
+    ");
+    $req->execute(  );
+    return $req;
+}
 
 ?>

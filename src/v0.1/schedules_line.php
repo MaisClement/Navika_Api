@@ -40,6 +40,9 @@ if (is_file($fichier) && filesize($fichier) > 5 && (time() - filemtime($fichier)
 
 
 $request = getLinesById ($id_line);
+$count = $request->rowCount();
+
+if ($count <= 0) ErrorMessage( 202, 'Nothing found.');
 
 $obj = $request->fetch();
 $lines_data[$obj['id_line']] = array(
