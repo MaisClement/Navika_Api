@@ -10,7 +10,7 @@ if ( isset($_GET['from']) && isset($_GET['to']) ){
     $to = $_GET['to'];
     $to = urlencode( trim($to) );
 
-    $url = $BASE_URL . '/journeys?from=' . $from . '&to=' . $to . '&depth=2';
+    $url = $BASE_URL . '/journeys?from=' . $from . '&to=' . $to . '&depth=3&data_freshness=realtime';
     $fichier .= $from . '_' . $to . '.json';
 
 } else {
@@ -19,6 +19,7 @@ if ( isset($_GET['from']) && isset($_GET['to']) ){
         'Required parameter "from" and "to" is missing or null.'
     );
 }
+
 
 if (is_file($fichier) && filesize($fichier) > 5 && (time() - filemtime($fichier) < 60)) {
     echo file_get_contents($fichier);
@@ -58,14 +59,13 @@ foreach($results->journeys as $result){
                 ),
             );
         }
-        
         $sections[] = array(
             "id"            =>  (String) $section->id,
             "type"          =>  (String) $section->type,
             "mode"          =>  (String) isset($section->mode) ? $section->mode : $section->type,
             "arrival_date_time"     =>  (String) $section->arrival_date_time,
             "departure_date_time"   =>  (String) $section->departure_date_time,
-            "duration"      =>  (String) $section->duration,
+            "duration"      =>  (int) $section->duration,
             "informations"  => isset($informations) ? $informations : [],
             "from" => array(
                 "id"        =>  (String)    $section->from->id,
@@ -95,13 +95,12 @@ foreach($results->journeys as $result){
                     "lon"       =>  floatval( $section->to->{$section->to->embedded_type}->coord->lon ),
                 ),
             ),
-
         );
     }
 
     $journeys[] = array(
         "type"                  =>  (String) $result->type,
-        "duration"              =>  (String) $result->duration,
+        "duration"              =>  (int) $result->duration,
 
         "requested_date_time"   => $result->requested_date_time,
         "departure_date_time"   => $result->departure_date_time,
