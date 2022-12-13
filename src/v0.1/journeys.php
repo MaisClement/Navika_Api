@@ -10,7 +10,7 @@ if ( isset($_GET['from']) && isset($_GET['to']) ){
     $to = $_GET['to'];
     $to = urlencode( trim($to) );
 
-    $url = $BASE_URL . '/journeys?from=' . $from . '&to=' . $to . '&depth=3&data_freshness=realtime';
+    $url = $BASE_URL . '/journeys?from=' . $from . '&to=' . $to . '&depth=2&data_freshness=realtime';
     $fichier .= $from . '_' . $to . '.json';
 
 } else {
