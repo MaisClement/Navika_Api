@@ -2,7 +2,7 @@
 
 $fichier = '../data/cache/actualites.json';
 
-$url = 'https://data.iledefrance-mobilites.fr/explore/dataset/actualites/download/?format=json&timezone=Europe/Berlin&lang=fr';
+$url = 'https://api-iv.iledefrance-mobilites.fr/banners';
 
 if (is_file($fichier) && filesize($fichier) > 5 && (time() - filemtime($fichier) < 60)) {
     $results = file_get_contents($fichier);
@@ -17,26 +17,26 @@ $results = json_decode($results);
 // ------------
 
 $severity_i = array(
-    0 => 4,
-    1 => 4,
+    0 => 5,
+    1 => 5,
     2 => 1,
 );
 
 $messages = [];
 foreach($results as $result) {
     $messages[] = array(
-        "id"            =>  (String)    $result->fields->id,
+        "id"            =>  (String)    $result->id,
         "status"        =>  (String)    "active",
         "cause"         =>  (String)    "",
         "category"      =>  (String)    "",
-        "severity"      =>  (int)       $severity_i[$result->fields->type],
+        "severity"      =>  (int)       $severity_i[$result->type],
         "effect"        =>  (String)    "OTHER",
-        "updated_at"    =>  (String)    $result->fields->updateddate,
+        "updated_at"    =>  (String)    $result->updatedDate,
         "message"       =>  array(
-            "title"     =>      $result->fields->title,
-            "text"      =>      $result->fields->description,
-            "button"      =>    $result->fields->buttontext,
-            "link"      =>      $result->fields->link,
+            "title"     =>      $result->title,
+            "text"      =>      $result->description,
+            "button"      =>    $result->buttonText,
+            "link"      =>      $result->link,
         ),
     );
 }

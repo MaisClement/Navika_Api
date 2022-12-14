@@ -99,8 +99,8 @@ function getReportsMesageTitle( $messages ) {
     return '';
 }
 function getReportsMesageText( $messages ) {
-    $search = ['<br>', '</p>'];
-    $replace = [PHP_EOL, PHP_EOL];
+    $search = ['<br>', '</p>', "Plus d'informations sur le site ratp.fr", "  "];
+    $replace = [PHP_EOL, PHP_EOL, '', ' '];
 
     foreach($messages as $message) {
         if ($message->channel->name == 'moteur') {
@@ -108,19 +108,23 @@ function getReportsMesageText( $messages ) {
             $msg = strip_tags($msg);
             $msg = html_entity_decode($msg);
             return $msg;
-
-        } else if ($message->channel->name == 'email') {
-            $msg = str_replace($search, $replace, $message->text);
-            $msg = strip_tags($msg);
-            $msg = html_entity_decode($msg);
-            return $msg;
-
-        } else if ($message->channel->name != 'titre') {
+        }
+    }
+    foreach($messages as $message) {
+        if ($message->channel->name == 'email') {
             $msg = str_replace($search, $replace, $message->text);
             $msg = strip_tags($msg);
             $msg = html_entity_decode($msg);
             return $msg;
             
+        }
+    }
+    foreach($messages as $message) {
+        if ($message->channel->name != 'titre') {
+            $msg = str_replace($search, $replace, $message->text);
+            $msg = strip_tags($msg);
+            $msg = html_entity_decode($msg);
+            return $msg;
         }
     }
 }
@@ -129,11 +133,14 @@ function getSeverity( $effect, $cause, $status ) {
     if ($status == 'past'){
         return 0;
 
-    } else if ($status == 'future'){
+    } else if ($status == 'future' && $cause == 'travaux'){
         return 2;
 
     } else if ($cause == 'travaux') {
         return 3;
+
+    } else if ($status == 'future'){
+        return 4;
 
     } else if (in_array($effect, array('REDUCED_SERVICE', 'SIGNIFICANT_DELAYS', 'DETOUR', 'ADDITIONAL_SERVICE', 'MODIFIED_SERVICE'))) {
         return 4;
