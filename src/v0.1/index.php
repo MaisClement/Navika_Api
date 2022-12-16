@@ -17,8 +17,8 @@ $results = json_decode($results);
 // ------------
 
 $severity_i = array(
-    0 => 5,
-    1 => 5,
+    0 => 4,
+    1 => 4,
     2 => 1,
 );
 

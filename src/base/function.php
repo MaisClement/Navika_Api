@@ -90,6 +90,12 @@ function getAllLines ($lines){
     return $list;
 }
 
+function prepareTime($dt) {
+    $datetime = date_create( $dt );
+    $datetime->modify('+1 hour');
+    return date_format($datetime, DATE_ISO8601);
+}
+
 function getReportsMesageTitle( $messages ) {
     foreach($messages as $message) {
         if ($message->channel->name == 'titre') {

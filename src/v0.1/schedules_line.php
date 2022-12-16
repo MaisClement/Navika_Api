@@ -92,7 +92,7 @@ foreach($results as $result){
     $destination_ref = $result->MonitoredVehicleJourney->DestinationRef->value;
 
     if (isset( $lines_data[$line_id] )) { 
-        if ($lines_data[$line_id]['mode'] == "rail" && date_create(isset($call->ExpectedDepartureTime) ? $call->ExpectedDepartureTime : (isset($call->AimedDepartureTime) ? $call->AimedDepartureTime : "")) >= $responseTimestamp){
+        if ($lines_data[$line_id]['mode'] == "rail" && date_create(isset($call->ExpectedDepartureTime) ? $call->ExpectedDepartureTime : "") >= date_create()){
             // Si c'est du ferré, l'affichage est different
     
             if (!in_array($line_id, $departures_lines)){
@@ -113,11 +113,11 @@ foreach($results as $result){
                     "message"       =>  (String)  getMessage($call),
                 ),
                 "stop_date_time" => array(
-                                                          // Si l'horaires est present          On affiche l'horaires est             Sinon, si l'autre est present            On affiche l'autre            Ou rien  
-                "base_departure_date_time"  =>  (String)  isset($call->AimedDepartureTime)      ? $call->AimedDepartureTime         : (isset($call->ExpectedDepartureTime)   ? $call->ExpectedDepartureTime  : ""),
-                "departure_date_time"       =>  (String)  isset($call->ExpectedDepartureTime)   ? $call->ExpectedDepartureTime      : (isset($call->AimedDepartureTime)      ? $call->AimedDepartureTime     : ""),
-                "base_arrival_date_time"    =>  (String)  isset($call->AimedArrivalTime)        ? $call->AimedArrivalTime           : (isset($call->ExpectedArrivalTime)     ? $call->ExpectedArrivalTime    : ""),
-                "arrival_date_time"         =>  (String)  isset($call->ExpectedArrivalTime)     ? $call->ExpectedArrivalTime        : (isset($call->AimedArrivalTime)        ? $call->AimedArrivalTime       : ""),
+                                                            // Si l'horaires est present          On affiche l'horaires est             Sinon, si l'autre est present            On affiche l'autre            Ou rien  
+                "base_departure_date_time"  =>  (String)  isset($call->AimedDepartureTime)      ? prepareTime($call->AimedDepartureTime)         : (isset($call->ExpectedDepartureTime)   ? prepareTime($call->ExpectedDepartureTime)  : ""),
+                "departure_date_time"       =>  (String)  isset($call->ExpectedDepartureTime)   ? prepareTime($call->ExpectedDepartureTime)      : (isset($call->AimedDepartureTime)      ? prepareTime($call->AimedDepartureTime)     : ""),
+                "base_arrival_date_time"    =>  (String)  isset($call->AimedArrivalTime)        ? prepareTime($call->AimedArrivalTime)           : (isset($call->ExpectedArrivalTime)     ? prepareTime($call->ExpectedArrivalTime)    : ""),
+                "arrival_date_time"         =>  (String)  isset($call->ExpectedArrivalTime)     ? prepareTime($call->ExpectedArrivalTime)        : (isset($call->AimedArrivalTime)        ? prepareTime($call->AimedArrivalTime)       : ""),
                 "state"                     =>  (String)  getState($call),
                 "atStop"                    =>  (String)  isset($call->VehicleAtStop)               ? ($call->VehicleAtStop ? 'true' : 'false') : "false",
                 "platform"                  =>  (String)  isset($call->ArrivalPlatformName->value)  ? $call->ArrivalPlatformName->value : "-"
@@ -136,11 +136,11 @@ foreach($results as $result){
             
             if (isset($call->ExpectedDepartureTime)){
                 $schedules[$line_id][$destination_ref][] = array(
-                                                              // Si l'horaires est present          On affiche l'horaires est             Sinon, si l'autre est present            On affiche l'autre            Ou rien  
-                    "base_departure_date_time"  =>  (String)  isset($call->AimedDepartureTime)      ? $call->AimedDepartureTime         : (isset($call->ExpectedDepartureTime)   ? $call->ExpectedDepartureTime  : ""),
-                    "departure_date_time"       =>  (String)  isset($call->ExpectedDepartureTime)   ? $call->ExpectedDepartureTime      : (isset($call->AimedDepartureTime)      ? $call->AimedDepartureTime     : ""),
-                    "base_arrival_date_time"    =>  (String)  isset($call->AimedArrivalTime)        ? $call->AimedArrivalTime           : (isset($call->ExpectedArrivalTime)     ? $call->ExpectedArrivalTime    : ""),
-                    "arrival_date_time"         =>  (String)  isset($call->ExpectedArrivalTime)     ? $call->ExpectedArrivalTime        : (isset($call->AimedArrivalTime)        ? $call->AimedArrivalTime       : ""),
+                                                                // Si l'horaires est present          On affiche l'horaires est             Sinon, si l'autre est present            On affiche l'autre            Ou rien  
+                    "base_departure_date_time"  =>  (String)  isset($call->AimedDepartureTime)      ? prepareTime($call->AimedDepartureTime)         : (isset($call->ExpectedDepartureTime)   ? prepareTime($call->ExpectedDepartureTime)  : ""),
+                    "departure_date_time"       =>  (String)  isset($call->ExpectedDepartureTime)   ? prepareTime($call->ExpectedDepartureTime)      : (isset($call->AimedDepartureTime)      ? prepareTime($call->AimedDepartureTime)     : ""),
+                    "base_arrival_date_time"    =>  (String)  isset($call->AimedArrivalTime)        ? prepareTime($call->AimedArrivalTime)           : (isset($call->ExpectedArrivalTime)     ? prepareTime($call->ExpectedArrivalTime)    : ""),
+                    "arrival_date_time"         =>  (String)  isset($call->ExpectedArrivalTime)     ? prepareTime($call->ExpectedArrivalTime)        : (isset($call->AimedArrivalTime)        ? prepareTime($call->AimedArrivalTime)       : ""),
                     "state"                     =>  (String)  getState($call),
                     "atStop"                    =>  (String)  isset($call->VehicleAtStop)               ? ($call->VehicleAtStop ? 'true' : 'false') : "false",
                     "platform"                  =>  (String)  isset($call->ArrivalPlatformName->value)  ? $call->ArrivalPlatformName->value : "-"

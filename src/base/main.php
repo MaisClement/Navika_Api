@@ -4,6 +4,7 @@
 //
 include('credential.php');
 include('data/http_code.php');
+include('data/lines.php');
 
 $db = new pdo($dsn, $usr, $psw);
 
