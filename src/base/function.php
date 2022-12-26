@@ -92,7 +92,7 @@ function getAllLines ($lines){
 
 function prepareTime($dt) {
     $datetime = date_create( $dt );
-    $datetime->modify('+1 hour');
+    // $datetime->modify('+1 hour');
     return date_format($datetime, DATE_ISO8601);
 }
 
@@ -138,6 +138,9 @@ function getReportsMesageText( $messages ) {
 function getSeverity( $effect, $cause, $status ) {
     if ($status == 'past'){
         return 0;
+
+    } else if ($cause == 'information') {
+        return 1;
 
     } else if ($status == 'future' && $cause == 'travaux'){
         return 2;
