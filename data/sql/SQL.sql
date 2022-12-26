@@ -145,6 +145,8 @@ CREATE TABLE `lignes` (
     externalcode_line VARCHAR(255),
     name_line VARCHAR(255),
     shortname_line VARCHAR(255),
+    valid_fromdate VARCHAR(255),
+    valid_todate VARCHAR(255),
     transportmode VARCHAR(255),
     transportsubmode VARCHAR(255),
     type VARCHAR(255),

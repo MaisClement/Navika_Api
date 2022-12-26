@@ -36,6 +36,12 @@ ON REPLACE(A.id, 'IDFM:', '') = L.id_line
 WHERE parent_station = 'IDFM:71545';
 
 ---------------------
+-- Select lines at stop
+SELECT stop_name
+FROM stops
+WHERE stop_id = 'IDFM:5829' OR parent_station = 'IDFM:5829';
+
+---------------------
 -- 
 SELECT DISTINCT R.route_id, R.route_short_name, R.route_long_name, R.route_type, R.route_color, R.route_text_color
 FROM routes R

@@ -159,6 +159,21 @@ function getAllLinesAtStop ($id) {
     return $req;
 }
 
+function getDirection ($id) {
+    $db = $GLOBALS["db"];
+    $id = idfm_format( $id );
+    $id = trim( $id );
+    $id = 'IDFM:' . $id;
+
+    $req = $db->prepare("
+            SELECT stop_name
+            FROM stops
+            WHERE stop_id = ? OR parent_station = ?;
+    ");
+    $req->execute( array($id, $id) );
+    return $req;
+}
+
 
 function clearLignes () {
     $db = $GLOBALS["db"];

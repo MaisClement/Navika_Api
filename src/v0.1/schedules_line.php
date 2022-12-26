@@ -63,8 +63,6 @@ if ($obj['transportmode'] == "rail"){
 
 }
 
-
-
 // ------------
 
 $results = curl_PRIM($url);
@@ -78,6 +76,7 @@ $results = $results->Siri->ServiceDelivery->StopMonitoringDelivery[0]->Monitored
 $schedules = [];
 $departures = [];
 $departures_lines = [];
+$direction = [];
 
 foreach($results as $result){
     if (!isset($result->MonitoredVehicleJourney->MonitoredCall)){
@@ -91,7 +90,16 @@ foreach($results as $result){
     $line_id = idfm_format( $result->MonitoredVehicleJourney->LineRef->value );
     $destination_ref = $result->MonitoredVehicleJourney->DestinationRef->value;
 
-    if (isset( $lines_data[$line_id] )) { 
+    if (isset( $lines_data[$line_id] )) {
+        if ( !isset( $direction[$destination_ref] ) ){
+            $request = getDirection($destination_ref);
+            $dir_obj = $request->fetch();
+            if (isset($dir_obj['stop_name']) && is_string($dir_obj['stop_name'])){
+                $direction[$destination_ref] = gare_format($dir_obj['stop_name']);
+            } else {
+                $direction[$destination_ref] = gare_format($call->DestinationDisplay[0]->value);
+            }
+        }
         if ($lines_data[$line_id]['mode'] == "rail" && date_create(isset($call->ExpectedDepartureTime) ? $call->ExpectedDepartureTime : "") >= date_create()){
             // Si c'est du ferré, l'affichage est different
     
@@ -102,7 +110,7 @@ foreach($results as $result){
                 "informations" => array(
                     "direction" => array(
                       "id"         =>  (String)   $destination_ref,
-                      "name"       =>  (String)   gare_format( $call->DestinationDisplay[0]->value),
+                      "name"       =>  (String)   $direction[$destination_ref], // gare_format( $call->DestinationDisplay[0]->value),
                     ),
                     "id"            =>  (String)  $result->ItemIdentifier,
                     "name"          =>  (String)  isset($result->MonitoredVehicleJourney->TrainNumbers->TrainNumberRef[0]->value) ? $result->MonitoredVehicleJourney->TrainNumbers->TrainNumberRef[0]->value : "",
@@ -129,7 +137,7 @@ foreach($results as $result){
             if (!isset( $terminus_data[$line_id][$destination_ref] )) { 
                 $terminus_data[$line_id][$destination_ref] = array(
                     "id"         =>  (String)    $destination_ref,
-                    "name"       =>  (String)    $call->DestinationDisplay[0]->value,
+                    "name"       =>  (String)    $direction[$destination_ref], // $call->DestinationDisplay[0]->value,
                     "schedules"  =>  array()
                 );
             }
@@ -152,12 +160,16 @@ foreach($results as $result){
 
 $json = [];
 $json['mode'] = $obj['transportmode'];
-
-// usort($departures, "order_departure");
+$l = [];
 
 foreach($departures_lines as $line){
-    $l = $lines_data[$line];
-    foreach($departures[$line] as $departure){
+    $l[] = $lines_data[$line];
+}
+
+usort($l, "order_line");
+
+foreach($l as $line){
+    foreach($departures[$line['id']] as $departure){
         $l['departures'][] = $departure;
     }
     $json['departures'][] = $l;

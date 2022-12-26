@@ -296,10 +296,13 @@ function idfm_format($str) {
     $search = [
         'stop_area', 
         'stop_point', 
+        'stopArea', 
+        'StopPoint', 
         'IDFM', 
         'STIF', 
         'line', 
         'Line',
+        ':Q:',
         '::',
         ':'
     ];
