@@ -278,6 +278,15 @@ function order_departure($a, $b) {
     }
     return ($a < $b) ? -1 : 1;
 }
+function order_reports($a, $b) {
+    $a = $a['severity'];
+    $b = $b['severity'];
+
+    if ($a == $b) {
+        return 0;
+    }
+    return ($a > $b) ? -1 : 1;
+}
 
 function gare_format($id) {
     $allowed_name = [

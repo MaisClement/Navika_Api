@@ -34,6 +34,8 @@ foreach($results->disruptions as $disruption) {
     }
 }
 
+
+
 $lines = [];
 foreach($results->line_reports as $line) {
     $current_trafic = [];
@@ -61,6 +63,10 @@ foreach($results->line_reports as $line) {
             }
         }
     }
+
+    usort($current_trafic, "order_reports");
+    usort($current_work, "order_reports");
+    usort($future_work, "order_reports");
     
     $lines[] = array(
         "id"         =>  (String)    idfm_format( $line->line->id ),

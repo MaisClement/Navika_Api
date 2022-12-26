@@ -56,6 +56,7 @@ $lines_data[$obj['id_line']] = array(
 if ($obj['transportmode'] == "rail"){
     // Si c'est du ferré, l'affichage est different
     $lines_data[$obj['id_line']]['departures'] = [];
+    $departures_lines[] = $obj['id_line'];
 
 } else {
     // Affichage normal
@@ -75,7 +76,6 @@ $results = $results->Siri->ServiceDelivery->StopMonitoringDelivery[0]->Monitored
 
 $schedules = [];
 $departures = [];
-$departures_lines = [];
 $direction = [];
 
 foreach($results as $result){
@@ -167,12 +167,15 @@ foreach($departures_lines as $line){
 }
 
 usort($l, "order_line");
+$departures_l = [];
 
 foreach($l as $line){
-    foreach($departures[$line['id']] as $departure){
-        $l['departures'][] = $departure;
+    if (isset($departures[$line['id']])){
+        foreach($departures[$line['id']] as $departure){
+            $line['departures'][] = $departure;
+        }
     }
-    $json['departures'][] = $l;
+    $json['departures'][] = $line;
 }
 
 usort($lines_data, "order_line");
