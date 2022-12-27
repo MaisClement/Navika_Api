@@ -1,6 +1,6 @@
 <?php
 
-$fichier = '../data/cache/places/sql';
+$fichier = '../data/cache/places/';
 
 if ( isset($_GET['q']) && isset($_GET['lat']) && isset($_GET['lon']) ){
     $query = $_GET['q'];
@@ -51,7 +51,7 @@ if ($search_type == 3){
     $request = getStopByGeoCoords($type, $lat, $lon);
 
 } else if ($search_type == 1){
-    $request = getStopByQuery($type, $query);
+    $request = getStopByQuery($query);
 
 } else {
     ErrorMessage(500);
@@ -61,28 +61,27 @@ if ($search_type == 3){
 //
 
 $places = [];
-
 while ($obj = $request->fetch()) {
     
     $lines = [];
     $modes = [];
+
+    // if ($search_type != 2){ // On récupere les lignes a l'arret
+    //     $request_line = getAllLinesAtStop ($obj['stop_id']);
+
+    //     while($obj_line = $request_line->fetch()) {
+    //         $lines[] = array(
+    //             "id"         =>  (String)    idfm_format( $obj_line['id_line'] ),
+    //             "code"       =>  (String)    $obj_line['shortname_line'],
+    //             "name"       =>  (String)    $obj_line['name_line'],
+    //             "mode"       =>  (String)    $obj_line['transportmode'],
+    //             "color"      =>  (String)    strlen($obj_line['colourweb_hexa']) < 6 ? "000000" : $obj_line['colourweb_hexa'],
+    //             "text_color" =>  (String)    strlen($obj_line['textcolourweb_hexa']) < 6 ? "000000" : $obj_line['textcolourweb_hexa'],
+    //         );
+    //         $modes[] = $obj_line['transportmode'];
+    //     }
+    // }
     
-    if ($search_type != 2){ // On récupere les lignes a l'arret
-        $request_line = getAllLinesAtStop ($obj['stop_id']);
-
-        while($obj_line = $request_line->fetch()) {
-            $lines[] = array(
-                "id"         =>  (String)    idfm_format( $obj_line['id_line'] ),
-                "code"       =>  (String)    $obj_line['shortname_line'],
-                "name"       =>  (String)    $obj_line['name_line'],
-                "mode"       =>  (String)    $obj_line['transportmode'],
-                "color"      =>  (String)    strlen($obj_line['colourweb_hexa']) < 6 ? "000000" : $obj_line['colourweb_hexa'],
-                "text_color" =>  (String)    strlen($obj_line['textcolourweb_hexa']) < 6 ? "000000" : $obj_line['textcolourweb_hexa'],
-            );
-            $modes[] = $obj_line['transportmode'];
-        }
-    }
-
     $places[] = array(
         'id'        =>  (String)    $obj['stop_id'],
         'name'      =>  (String)    $obj['stop_name'],
@@ -90,8 +89,8 @@ while ($obj = $request->fetch()) {
         'quality'   =>  (int)       0,
         'distance'  =>  (int)       0,
         'zone'      =>  (int)       $obj['zone_id'] ?? 0,
-        'town'      =>  (String)    substr($obj['town'], strpos($obj['town'], ';')+2),
-        'zip_code'  =>  (String)    substr($obj['town'], 0, strpos($obj['town'], ';')),
+        'town'      =>  (String)    $obj['town'],
+        'zip_code'  =>  (String)    substr($obj['zip_code'], 0, 2),
         'coord'     => array(
             'lat'       =>      floatval( $obj['stop_lat'] ),
             'lon'       =>      floatval( $obj['stop_lon'] ),

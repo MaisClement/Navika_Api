@@ -25,28 +25,33 @@ ORDER BY distance ASC
 
 ---------------------
 -- 
-SELECT S.stop_id, S.stop_code, S.stop_name, S.stop_lat, S.stop_lon, point(S.stop_lat, S.stop_lon) AS geo_point, 0 AS distance, S.stop_desc, S.zone_id, S.location_type, S.level_id, S.platform_code, 
-CONCAT((
-    SELECT CONCAT(Z.zip_code,'; ', T.town_name)
-    FROM town T
-    LEFT JOIN zip_code Z
-    ON T.town_id = Z.town_id
-    WHERE ST_CONTAINS(T.town_polygon, GeomFromText(CONCAT('POINT (', S.stop_lat, ' ', S.stop_lon, ')')))
-    LIMIT 1
-)) as town
-FROM stops S
+SELECT S2.stop_id, S2.stop_code, S2.stop_name, S2.stop_lat, S2.stop_lon, S2.zone_id, A.nom_commune AS town, A.code_insee AS zip_code
+FROM arrets_lignes A
 
-WHERE LOWER( S.stop_name ) LIKE ?
-OR (
-    SELECT Z.nom_de_la_commune
-    FROM town T
-    LEFT JOIN zip_code Z
-    ON T.town_id = Z.town_id
-    WHERE ST_CONTAINS(T.town_polygon, point(S.stop_lat, S.stop_lon))
-)
-AND location_type = ?
+INNER JOIN stops S
+ON A.stop_id = S.stop_id
 
-LIMIT 15;
+INNER JOIN stops S2
+ON S.parent_station = S2.stop_id
+
+WHERE LOWER( A.stop_name ) LIKE ?
+
+UNION DISTINCT
+
+SELECT S2.stop_id, S2.stop_code, S2.stop_name, S2.stop_lat, S2.stop_lon, S2.zone_id, A.nom_commune AS town, A.code_insee AS zip_code
+FROM arrets_lignes A
+
+INNER JOIN stops S
+ON A.stop_id = S.stop_id
+
+INNER JOIN stops S2
+ON S.parent_station = S2.stop_id
+
+WHERE LOWER ( A.nom_commune ) LIKE ?
+
+LIMIT 15
+
+GROUP BY S2.stop_id;
 
 ---------------------
 -- Select lines at stop

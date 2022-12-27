@@ -63,9 +63,9 @@ include('src/base/request.php');
 
 //------------
 try {
-    if (strpos($file, "/base/")){
-        //ErrorMessage(403);
-        echo $file;
+    if (strpos($file, "/base/") || strpos($file, "/sql/")){
+        ErrorMessage(403);
+        // echo $file;
 
     } else if (is_file($file_php)){
         chdir($path);

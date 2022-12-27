@@ -181,4 +181,3 @@ CREATE TABLE `arrets_lignes` (
     nom_commune VARCHAR(255),
     code_insee VARCHAR(255)
 );
-

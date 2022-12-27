@@ -55,7 +55,7 @@ function ErrorMessage($http_code, $details = ''){
         'error' => array(
             'code'      =>  (int)       $http_code,
             'message'   =>  (String)    isset($GLOBALS['HTTP_CODE'][$http_code]) ? $GLOBALS['HTTP_CODE'][$http_code] : "",
-            'details'   =>  (String)    $details == ''               ? $GLOBALS['HTTP_CODE'] : "",
+            'details'   =>  (String)    $details == ''               ? "" : $details,
         )
     );
     echo json_encode($json);

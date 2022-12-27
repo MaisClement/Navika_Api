@@ -3,7 +3,7 @@
 echo "   GeoJson Import, let's start !" . PHP_EOL;
 echo '      Tuncate GeoJson...' . PHP_EOL;
 
-clearTown();
+    clearTown();
 
 echo '      Tuncate GeoJson ✅' . PHP_EOL;
 echo '      Read data...' . PHP_EOL;

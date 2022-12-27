@@ -17,9 +17,6 @@ echo 'Clearing cache...' . PHP_EOL;
 echo 'Clearing cache ✅' . PHP_EOL;
 echo 'Updating tables...' . PHP_EOL;
 
-
-// Looking for GTFS...
-
 echo '   Looking for GTFS...' . PHP_EOL;
     $gtfs = curl_GTFS('https://data.iledefrance-mobilites.fr/explore/dataset/offre-horaires-tc-gtfs-idfm/download/?format=csv&timezone=Europe/Berlin&lang=fr&csv_separator=%3B');
     file_put_contents($dossier . 'gtfs.csv', $gtfs);
@@ -34,9 +31,7 @@ echo '   Looking for GTFS...' . PHP_EOL;
             echo '   Fetching GTFS ✅' . PHP_EOL;
         } 
     }
-
-    // Unzip
-    echo '   Unzip GTFS...' . PHP_EOL;
+echo '   Unzip GTFS...' . PHP_EOL;
     $zip = new ZipArchive;
     if ( $zip->open($dossier . 'gtfs.zip') ) {
         $zip->extractTo($dossier . 'gtfs/');
@@ -70,6 +65,7 @@ echo '   Fetching lignes.csv ✅' . PHP_EOL;
 echo '   Truncate Tables ...' . PHP_EOL;
     clearLignes ();
     clearArretsLignes();
+    clearArrets();
 echo '   Truncate Tables ✅' . PHP_EOL;
 
 echo '   Write lignes.csv...' . PHP_EOL;
@@ -81,6 +77,7 @@ echo '   Write arrets_lignes.csv...' . PHP_EOL;
 echo '   Write arrets_lignes.csv ✅' . PHP_EOL;
 
 echo '   Write ✅' . PHP_EOL;
-echo 'Updating tables ✅' . PHP_EOL;
+
+echo 'Update ✅' . PHP_EOL;
 
 ?>

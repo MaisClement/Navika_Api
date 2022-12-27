@@ -1,27 +1,38 @@
 <?php
 
-function getStopByQuery($type, $query, $count = 15){
+function getStopByQuery($query){
     $db = $GLOBALS["db"];
     $query = strtolower( trim( $query ) );
 
     $req = $db->prepare("
-        SELECT S.stop_id, S.stop_code, S.stop_name, S.stop_lat, S.stop_lon, point(S.stop_lat, S.stop_lon) AS geo_point, 0 AS distance, S.stop_desc, S.zone_id, S.location_type, S.level_id, S.platform_code, 
-        CONCAT((
-            SELECT CONCAT(Z.zip_code,'; ', T.town_name)
-            FROM town T
-            LEFT JOIN zip_code Z
-            ON T.town_id = Z.town_id
-            WHERE ST_CONTAINS(T.town_polygon, GeomFromText(CONCAT('POINT (', S.stop_lat, ' ', S.stop_lon, ')')))
-            LIMIT 1
-        )) as town
-        FROM stops S
-
-        WHERE LOWER( S.stop_name ) LIKE ?
-        AND location_type = ?
-
-        LIMIT 15; 
+        SELECT S2.stop_id, S2.stop_code, S2.stop_name, S2.stop_lat, S2.stop_lon, S2.zone_id, A.nom_commune AS town, A.code_insee AS zip_code
+        FROM arrets_lignes A
+        
+        INNER JOIN stops S
+        ON A.stop_id = S.stop_id
+        
+        INNER JOIN stops S2
+        ON S.parent_station = S2.stop_id
+        
+        WHERE LOWER( A.stop_name ) LIKE ?
+        
+        UNION DISTINCT
+        
+        SELECT S2.stop_id, S2.stop_code, S2.stop_name, S2.stop_lat, S2.stop_lon, S2.zone_id, A.nom_commune AS town, A.code_insee AS zip_code
+        FROM arrets_lignes A
+        
+        INNER JOIN stops S
+        ON A.stop_id = S.stop_id
+        
+        INNER JOIN stops S2
+        ON S.parent_station = S2.stop_id
+        
+        WHERE LOWER ( A.nom_commune ) LIKE ?
+        
+        GROUP BY S2.stop_id
+        LIMIT 15;
     ");
-    $req->execute( array( '%'.$query.'%', $type) );
+    $req->execute( array( '%'.$query.'%', '%'.$query.'%') );
     return $req;
 }
 function getStopByGeoCoords($type, $lat, $lon, $distance = 1000){
@@ -95,13 +106,6 @@ function getStopByQueryAndGeoCoords($type, $query, $lat, $lon, $distance = 1000)
     return $req;
 }
 
-function clearTown(){
-    $db = $GLOBALS["db"];
-
-    $req = $db->prepare("TRUNCATE town");
-    $req->execute( );
-    return $req;
-}
 function addTown($id, $name, $polygon){
     $db = $GLOBALS["db"];
     $id = trim( $id );
@@ -146,14 +150,17 @@ function getAllLinesAtStop ($id) {
     $id = trim( $id );
 
     $req = $db->prepare("
-            SELECT L.*
-            FROM stops S
-            INNER JOIN arrets_lignes A
-            ON S.stop_id = A.stop_id 
-            INNER JOIN lignes L
-            ON REPLACE(A.id, 'IDFM:', '') = L.id_line
-            
-            WHERE parent_station = ?;
+        SELECT L.id_line, L.name_line, L.shortname_line, L.transportmode, L.colourweb_hexa, L.textcolourweb_hexa
+        FROM lignes L
+        
+        INNER JOIN arrets_lignes A
+        ON REPLACE(A.id, 'IDFM:', '') = L.id_line
+        
+        INNER JOIN stops S
+        ON S.stop_id = A.stop_id 
+        
+        WHERE S.parent_station = ?
+        GROUP BY L.id_line;
     ");
     $req->execute( array($id) );
     return $req;
@@ -173,6 +180,9 @@ function getDirection ($id) {
     $req->execute( array($id, $id) );
     return $req;
 }
+
+// --------------------------------------------------------
+
 function clearGTFS () {
     $db = $GLOBALS["db"];
 
@@ -209,12 +219,28 @@ function clearArretsLignes () {
     $req->execute( );
     return $req;
 }
+function clearArrets () {
+    $db = $GLOBALS["db"];
+
+    $req = $db->prepare("
+        TRUNCATE arrets;
+    ");
+    $req->execute( );
+    return $req;
+}
 function clearLaPoste () {
     $db = $GLOBALS["db"];
 
     $req = $db->prepare("
         TRUNCATE zip_code;
     ");
+    $req->execute( );
+    return $req;
+}
+function clearTown(){
+    $db = $GLOBALS["db"];
+
+    $req = $db->prepare("TRUNCATE town");
     $req->execute( );
     return $req;
 }
@@ -279,5 +305,7 @@ function writeLaPoste () {
     $req->execute(  );
     return $req;
 }
+
+// ------------------------------------------------
 
 ?>
