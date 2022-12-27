@@ -57,8 +57,8 @@ while ($obj = $request->fetch()) {
         'id'        =>  (String)    $obj['stop_id'],
         'name'      =>  (String)    $obj['stop_name'],
         'type'      =>  (String)    $LOCATION_TYPE[$obj['location_type']],
-        'quality'   =>  (int)       0 ?? 0,
-        'distance'  =>  (int)       0 ?? 0,
+        'quality'   =>  (int)       0,
+        'distance'  =>  (int)       0,
         'zone'      =>  (int)       $obj['zone_id'] ?? 0,
         'town'      =>  (String)    substr($obj['town'], strpos($obj['town'], ';')+2),
         'zip_code'  =>  (String)    substr($obj['town'], 0, strpos($obj['town'], ';')),
@@ -71,6 +71,11 @@ while ($obj = $request->fetch()) {
     );
 }
 
-echo json_encode($places);
+$echo["places"] = $places;
+
+$echo = json_encode($echo);
+file_put_contents($fichier, $echo);
+echo $echo;
 exit;
+
 ?>

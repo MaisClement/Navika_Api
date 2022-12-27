@@ -6,7 +6,6 @@ CREATE TABLE `agency` (
 	agency_timezone VARCHAR(255) NOT NULL,
 	agency_lang VARCHAR(255),
 	agency_phone VARCHAR(255),
-	agency_fare_url VARCHAR(255),
 	agency_email VARCHAR(255)
 );
 
@@ -131,7 +130,7 @@ CREATE TABLE `town` (
 
 DROP TABLE IF EXISTS zip_code;
 CREATE TABLE `zip_code` (
-    `town_id` VARCHAR(255) PRIMARY KEY NOT NULL,
+    `town_id` VARCHAR(255) NOT NULL,
     `town_name` VARCHAR(255) NOT NULL,
     `zip_code` VARCHAR(255) NOT NULL,
     `line_5` VARCHAR(255),

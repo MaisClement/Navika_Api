@@ -173,8 +173,24 @@ function getDirection ($id) {
     $req->execute( array($id, $id) );
     return $req;
 }
+function clearGTFS () {
+    $db = $GLOBALS["db"];
 
-
+    $req = $db->prepare("
+        TRUNCATE agency;
+        TRUNCATE calendar;
+        TRUNCATE calendar_dates;
+        TRUNCATE pathways;
+        TRUNCATE routes;
+        TRUNCATE stop_extensions;
+        TRUNCATE stop_times;
+        TRUNCATE stops;
+        TRUNCATE transfers;
+        TRUNCATE trips;
+    ");
+    $req->execute( );
+    return $req;
+}
 function clearLignes () {
     $db = $GLOBALS["db"];
 
@@ -191,6 +207,34 @@ function clearArretsLignes () {
         TRUNCATE arrets_lignes;
     ");
     $req->execute( );
+    return $req;
+}
+function clearLaPoste () {
+    $db = $GLOBALS["db"];
+
+    $req = $db->prepare("
+        TRUNCATE zip_code;
+    ");
+    $req->execute( );
+    return $req;
+}
+
+function writeGTFS () {
+    $db = $GLOBALS["db"];
+
+    $req = $db->prepare("
+        LOAD DATA INFILE '/var/www/navika/data/file/gtfs/agency.txt'			INTO TABLE agency FIELDS TERMINATED BY ',' ENCLOSED BY '\"'LINES TERMINATED BY '\n'IGNORE 1 ROWS;
+        LOAD DATA INFILE '/var/www/navika/data/file/gtfs/calendar.txt'		    INTO TABLE calendar FIELDS TERMINATED BY ',' ENCLOSED BY '\"'LINES TERMINATED BY '\n'IGNORE 1 ROWS;
+        LOAD DATA INFILE '/var/www/navika/data/file/gtfs/calendar_dates.txt'	INTO TABLE calendar_dates FIELDS TERMINATED BY ',' ENCLOSED BY '\"'LINES TERMINATED BY '\n'IGNORE 1 ROWS;
+        LOAD DATA INFILE '/var/www/navika/data/file/gtfs/pathways.txt'		    INTO TABLE pathways FIELDS TERMINATED BY ',' ENCLOSED BY '\"'LINES TERMINATED BY '\n'IGNORE 1 ROWS;
+        LOAD DATA INFILE '/var/www/navika/data/file/gtfs/routes.txt'			INTO TABLE routes FIELDS TERMINATED BY ',' ENCLOSED BY '\"'LINES TERMINATED BY '\n'IGNORE 1 ROWS;
+        LOAD DATA INFILE '/var/www/navika/data/file/gtfs/stop_extensions.txt'	INTO TABLE stop_extensions FIELDS TERMINATED BY ',' ENCLOSED BY '\"'LINES TERMINATED BY '\n'IGNORE 1 ROWS;
+        LOAD DATA INFILE '/var/www/navika/data/file/gtfs/stop_times.txt'		INTO TABLE stop_times FIELDS TERMINATED BY ',' ENCLOSED BY '\"'LINES TERMINATED BY '\n'IGNORE 1 ROWS;
+        LOAD DATA INFILE '/var/www/navika/data/file/gtfs/stops.txt'			    INTO TABLE stops FIELDS TERMINATED BY ',' ENCLOSED BY '\"'LINES TERMINATED BY '\n'IGNORE 1 ROWS;
+        LOAD DATA INFILE '/var/www/navika/data/file/gtfs/transfers.txt'		    INTO TABLE transfers FIELDS TERMINATED BY ',' ENCLOSED BY '\"'LINES TERMINATED BY '\n'IGNORE 1 ROWS;
+        LOAD DATA INFILE '/var/www/navika/data/file/gtfs/trips.txt'			    INTO TABLE trips FIELDS TERMINATED BY ',' ENCLOSED BY '\"'LINES TERMINATED BY '\n'IGNORE 1 ROWS;    
+    ");
+    $req->execute(  );
     return $req;
 }
 function writeLignes () {
@@ -214,6 +258,20 @@ function writeArretsLignes () {
         LOAD DATA INFILE 
         '/var/www/navika/data/file/arrets_lignes.csv'
         INTO TABLE arrets_lignes 
+        FIELDS TERMINATED BY ';' 
+        ENCLOSED BY '\"'LINES TERMINATED BY '\n'
+        IGNORE 1 ROWS;
+    ");
+    $req->execute(  );
+    return $req;
+}
+function writeLaPoste () {
+    $db = $GLOBALS["db"];
+
+    $req = $db->prepare("
+        LOAD DATA INFILE 
+        '/var/www/navika/data/file/laposte_hexasmal.csv'
+        INTO TABLE zip_code 
         FIELDS TERMINATED BY ';' 
         ENCLOSED BY '\"'LINES TERMINATED BY '\n'
         IGNORE 1 ROWS;
