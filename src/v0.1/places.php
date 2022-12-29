@@ -67,7 +67,6 @@ foreach($results as $result){
         "id"        =>  (String)    $result->id,
         "name"      =>  (String)    $result->{$result->embedded_type}->name,
         "type"      =>  (String)    $result->embedded_type,
-        "quality"   =>  (int)       0,
         "distance"  =>  (int)       isset($result->distance) ? $result->distance : 0,
         "zone"      =>  (int)       0,
         "town"      =>  (String)    getTownByAdministrativeRegions( $result->{$result->embedded_type}->administrative_regions ),

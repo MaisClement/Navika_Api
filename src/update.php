@@ -65,7 +65,6 @@ echo '   Fetching lignes.csv ✅' . PHP_EOL;
 echo '   Truncate Tables ...' . PHP_EOL;
     clearLignes ();
     clearArretsLignes();
-    clearArrets();
 echo '   Truncate Tables ✅' . PHP_EOL;
 
 echo '   Write lignes.csv...' . PHP_EOL;

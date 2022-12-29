@@ -1,5 +1,6 @@
 <?php
 
+// --- CURL ---
 function curl_GTFS( $url ) {
     $ch = curl_init();
     curl_setopt($ch, CURLOPT_HEADER, false);
@@ -8,13 +9,12 @@ function curl_GTFS( $url ) {
             'Authorization: ' . $GLOBALS['GTFSKEY']
         )
     );
-    curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1); //Set curl to return the data instead of printing it to the browser.
+    curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
     curl_setopt($ch, CURLOPT_URL, $url);
     $data = curl_exec($ch);
     curl_close($ch);
     return $data;
 }
-
 function curl_PRIM( $url ) {
     $ch = curl_init();
     curl_setopt($ch, CURLOPT_HEADER, false);
@@ -23,32 +23,24 @@ function curl_PRIM( $url ) {
             'apiKey: ' . $GLOBALS['APIKEY']
         )
     );
-    curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1); //Set curl to return the data instead of printing it to the browser.
+    curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
     curl_setopt($ch, CURLOPT_URL, $url);
     $data = curl_exec($ch);
     curl_close($ch);
     return $data;
 }
-
 function curl( $url ) {
     $ch = curl_init();
     curl_setopt($ch, CURLOPT_HEADER, false);
     curl_setopt($ch, CURLOPT_HTTPHEADER, []);
-    curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1); //Set curl to return the data instead of printing it to the browser.
+    curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
     curl_setopt($ch, CURLOPT_URL, $url);
     $data = curl_exec($ch);
     curl_close($ch);
     return $data;
 }
 
-function createReportMessage($title, $text) {
-    $json = array(
-        'title'         =>  (String)    $title,
-        'text'          =>  (String)    $text,
-    );
-    return $json;
-}
-
+// --- ERROR ---
 function ErrorMessage($http_code, $details = ''){
     http_response_code($http_code);
     $json = array(
@@ -62,6 +54,13 @@ function ErrorMessage($http_code, $details = ''){
     exit;
 }
 
+// --- Schedules ---
+function prepareTime($dt) {
+    $datetime = date_create( $dt );
+    return date_format($datetime, DATE_ISO8601);
+}
+
+// --- GetInfo ---
 function getTownByAdministrativeRegions($administrative_regions) {
     foreach($administrative_regions as $region){
         if ($region->level == 8){
@@ -70,7 +69,6 @@ function getTownByAdministrativeRegions($administrative_regions) {
     }
     return "";
 }
-
 function getZipByAdministrativeRegions($administrative_regions) {
     foreach($administrative_regions as $region){
         if ($region->level == 8){
@@ -79,7 +77,6 @@ function getZipByAdministrativeRegions($administrative_regions) {
     }
     return "";
 }
-
 function getPhysicalModes($physical_modes) {
     $list = [];
     foreach($physical_modes as $modes){
@@ -87,7 +84,6 @@ function getPhysicalModes($physical_modes) {
     }
     return $list;
 }
-
 function getAllLines ($lines){
     $list = [];
 
@@ -105,12 +101,8 @@ function getAllLines ($lines){
     return $list;
 }
 
-function prepareTime($dt) {
-    $datetime = date_create( $dt );
-    // $datetime->modify('+1 hour');
-    return date_format($datetime, DATE_ISO8601);
-}
 
+// --- Trafic message ---
 function getReportsMesageTitle( $messages ) {
     foreach($messages as $message) {
         if ($message->channel->name == 'titre') {
@@ -149,7 +141,6 @@ function getReportsMesageText( $messages ) {
         }
     }
 }
-
 function getSeverity( $effect, $cause, $status ) {
     if ($status == 'past'){
         return 0;
@@ -181,24 +172,6 @@ function getSeverity( $effect, $cause, $status ) {
     } 
 }
 
-function remove_directory($dirPath){
-    if (!is_dir($dirPath)) {
-        throw new InvalidArgumentException("$dirPath must be a directory");
-    }
-    if (substr($dirPath, strlen($dirPath) - 1, 1) != '/') {
-        $dirPath .= '/';
-    }
-    $files = glob($dirPath . '*', GLOB_MARK);
-    foreach ($files as $file) {
-        if (is_dir($file)) {
-            remove_directory($file);
-        } else {
-            unlink($file);
-        }
-    }
-    rmdir($dirPath);
-}
-
 function clear_directory($dirPath){
     if (!is_dir($dirPath)) {
         throw new InvalidArgumentException("$dirPath must be a directory");
@@ -216,16 +189,6 @@ function clear_directory($dirPath){
     }
 }
 
-function ifisset($a, $b) {
-    if ( isset($a) )
-        return $a;
-    
-    else if ( isset($b) )
-        return $b;
-        
-    else return "";
-    
-}
 
 function getMessage($call) {
     // terminus - origin
@@ -238,7 +201,6 @@ function getMessage($call) {
     else
         return "";
 }
-
 function getState($call) {
     // theorical - ontime - delayed - cancelled - modified
     if (isset($call->DepartureStatus) && ($call->DepartureStatus == "cancelled" || $call->DepartureStatus == "delayed"))
@@ -253,20 +215,25 @@ function getState($call) {
     return "theorical";
 }
 
-// ------
-
+// --- ORDER ---
 function order_line($a, $b) {
-    //type
     $type_list = [
+        'nationalrail' ,
+        'regionalrail' ,
         'commercial_mode:Train' ,
+        'rail' ,
         'commercial_mode:RapidTransit' ,
         'commercial_mode:RailShuttle' ,
+        'funicular' ,
         'commercial_mode:LocalTrain' ,
         'commercial_mode:LongDistanceTrain' ,
         'commercial_mode:Metro' ,
+        'metro' ,
         'commercial_mode:RailShuttle' ,
         'commercial_mode:Tramway' ,
+        'tram' ,
         'commercial_mode:Bus' ,
+        'bus' ,
     ];
 
     $ta = array_search($a['mode'], $type_list);
@@ -302,7 +269,24 @@ function order_reports($a, $b) {
     }
     return ($a > $b) ? -1 : 1;
 }
+function order_places($a, $b) {
+    $a_modes = count($a["modes"]);
+    $b_modes = count($b["modes"]);
 
+    if ($a_modes == $b_modes) {
+        $a_lines = count($a["lines"]);
+        $b_lines = count($b["lines"]);
+
+        if ($a_lines == $b_lines) {
+            return 0;
+        }
+        return ($a_lines < $b_lines) ? 1 : -1;
+    }
+    return ($a_modes < $b_modes) ? 1 : -1;
+    
+}
+
+// --- FORMAT ---
 function gare_format($id) {
     $allowed_name = [
         "Gare de l'Est"
@@ -315,7 +299,6 @@ function gare_format($id) {
     $id = ucfirst($id);
     return $id;
 }
-
 function idfm_format($str) {
     $search = [
         'stop_area', 

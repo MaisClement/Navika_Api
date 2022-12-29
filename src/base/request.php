@@ -1,12 +1,19 @@
 <?php
 
+$search = ["À", "Á", "Â", "Ã", "Ä", "Å", "Ç", "È", "É", "Ê", "Ë", "Ì", "Í", "Î", "Ï", "Ñ", "Ò", "Ó", "Ô", "Õ", "Ö", "Ù", "Ú", "Û", "Ü", "Ý", "ß", "à", "á", "â", "ã", "ä", "å", "ç", "è", "é", "ê", "ë", "ì", "í", "î", "ï", "ñ", "ò", "ó", "ô", "õ", "ö", "ù", "ú", "û", "ü", "ý", "ÿ", "Ā", "ā", "Ă", "ă", "Ą", "ą", "Ć", "ć", "Ĉ", "ĉ", "Ċ", "ċ", "Č", "č", "Ď", "ď", "Đ", "đ", "Ē", "ē", "Ĕ", "ĕ", "Ė", "ė", "Ę", "ę", "Ě", "ě", "Ĝ", "ĝ", "Ğ", "ğ", "Ġ", "ġ", "Ģ", "ģ", "Ĥ", "ĥ", "Ħ", "ħ", "Ĩ", "ĩ", "Ī", "ī", "Ĭ", "ĭ", "Į", "į", "İ", "ı", "Ĳ", "ĳ", "Ĵ", "ĵ", "Ķ", "ķ", "ĸ", "Ĺ", "ĺ", "Ļ", "ļ", "Ľ", "ľ", "Ŀ", "ŀ", "Ł", "ł", "Ń", "ń", "Ņ", "ņ", "Ň", "ň", "ŉ", "Ŋ", "ŋ", "Ō", "ō", "Ŏ", "ŏ", "Ő", "ő", "Œ", "œ", "Ŕ", "ŕ", "Ŗ", "ŗ", "Ř", "ř", "Ś", "ś", "Ŝ", "ŝ", "Ş", "ş", "Š", "š", "Ţ", "ţ", "Ť", "ť", "Ŧ", "ŧ", "Ũ", "ũ", "Ū", "ū", "Ŭ", "ŭ", "Ů", "ů", "Ű", "ű", "Ų", "ų", "Ŵ", "ŵ", "Ŷ", "ŷ", "Ÿ", "Ź", "ź", "Ż", "ż", "Ž", "ž", "ſ"];
+
 function getStopByQuery($query){
     $db = $GLOBALS["db"];
-    $query = strtolower( trim( $query ) );
+    $query = urldecode( strtolower( trim( $query ) ) );
+    $query = preg_replace('/[^A-Za-z0-9 ]/', '', $query);
+    $query = str_replace( $GLOBALS['search'], '', $query);
 
     $req = $db->prepare("
-        SELECT S2.stop_id, S2.stop_code, S2.stop_name, S2.stop_lat, S2.stop_lon, S2.zone_id, A.nom_commune AS town, A.code_insee AS zip_code
-        FROM arrets_lignes A
+        SELECT L.id_line, L.name_line, L.shortname_line, L.transportmode, L.colourweb_hexa, L.textcolourweb_hexa, S2.stop_id, S2.stop_name, S2.stop_lat, S2.stop_lon, S2.zone_id, A.nom_commune AS town, A.code_insee AS zip_code
+        FROM lignes L
+        
+        INNER JOIN arrets_lignes A
+        ON L.id_line = REPLACE(A.id, 'IDFM:', '')
         
         INNER JOIN stops S
         ON A.stop_id = S.stop_id
@@ -14,12 +21,15 @@ function getStopByQuery($query){
         INNER JOIN stops S2
         ON S.parent_station = S2.stop_id
         
-        WHERE LOWER( A.stop_name ) LIKE ?
+        WHERE LOWER( REGEXP_REPLACE(A.stop_name, '[^0-9a-zA-Z]', '') ) LIKE ?
         
         UNION DISTINCT
         
-        SELECT S2.stop_id, S2.stop_code, S2.stop_name, S2.stop_lat, S2.stop_lon, S2.zone_id, A.nom_commune AS town, A.code_insee AS zip_code
-        FROM arrets_lignes A
+        SELECT L.id_line, L.name_line, L.shortname_line, L.transportmode, L.colourweb_hexa, L.textcolourweb_hexa, S2.stop_id, S2.stop_name, S2.stop_lat, S2.stop_lon, S2.zone_id, A.nom_commune AS town, A.code_insee AS zip_code
+        FROM lignes L
+        
+        INNER JOIN arrets_lignes A
+        ON L.id_line = REPLACE(A.id, 'IDFM:', '')
         
         INNER JOIN stops S
         ON A.stop_id = S.stop_id
@@ -27,82 +37,93 @@ function getStopByQuery($query){
         INNER JOIN stops S2
         ON S.parent_station = S2.stop_id
         
-        WHERE LOWER ( A.nom_commune ) LIKE ?
-        
-        GROUP BY S2.stop_id
-        LIMIT 15;
+        WHERE LOWER( REGEXP_REPLACE(A.nom_commune, '[^0-9a-zA-Z]', '') ) LIKE ?;
     ");
     $req->execute( array( '%'.$query.'%', '%'.$query.'%') );
     return $req;
 }
-function getStopByGeoCoords($type, $lat, $lon, $distance = 1000){
+function getStopByGeoCoords($lat, $lon, $distance = 1000){
     $db = $GLOBALS["db"];
     $lat = trim( $lat );
     $lon = trim( $lon );
 
     $req = $db->prepare("
-        SELECT S.stop_id, S.stop_code, S.stop_name, S.stop_lat, S.stop_lon, point(S.stop_lat, S.stop_lon) AS geo_point,
+        SELECT L.id_line, L.name_line, L.shortname_line, L.transportmode, L.colourweb_hexa, L.textcolourweb_hexa, S2.stop_id, S2.stop_name, S2.stop_lat, S2.stop_lon, 
         ST_Distance_Sphere(
-            point(S.stop_lat, S.stop_lon),
-            point(?, ?)
-        ) AS distance, S.stop_desc, S.zone_id, S.location_type, S.level_id, S.platform_code, 
-        CONCAT((
-            SELECT CONCAT(Z.zip_code,'; ', T.town_name)
-            FROM town T
-            LEFT JOIN zip_code Z
-            ON T.town_id = Z.town_id
-            WHERE ST_CONTAINS(T.town_polygon, point(S.stop_lat, S.stop_lon))
-            LIMIT 1
-        )) as town
-        FROM stops S
-
-        WHERE  LOWER( S.stop_name ) LIKE ?
-        AND(ST_Distance_Sphere(
-            point(S.stop_lat, S.stop_lon),
-            point(?, ?)
-        )) < ?
-        AND location_type = ?
-
-        ORDER BY distance ASC
-
-        LIMIT 15
+                point(S2.stop_lat, S2.stop_lon),
+                point(?, ?)
+        ) AS distance, S2.zone_id, A.nom_commune AS town, A.code_insee AS zip_code
+        FROM lignes L
+        
+        INNER JOIN arrets_lignes A
+        ON L.id_line = REPLACE(A.id, 'IDFM:', '')
+        
+        INNER JOIN stops S
+        ON A.stop_id = S.stop_id
+        
+        INNER JOIN stops S2
+        ON S.parent_station = S2.stop_id
+        
+        WHERE ST_Distance_Sphere(
+                point(S2.stop_lat, S2.stop_lon),
+                point(?, ?)
+        ) < ?
+        
+        ORDER BY distance
+        
+        LIMIT 15;
     ");
-    $req->execute( array($lat, $lon, $lat, $lon, $distance, $type) );
+    $req->execute( array($lat, $lon, $lat, $lon, $distance) );
     return $req;
 }
-function getStopByQueryAndGeoCoords($type, $query, $lat, $lon, $distance = 1000){
+function getStopByQueryAndGeoCoords($query, $lat, $lon){
     $db = $GLOBALS["db"];
-    $query = strtolower( trim( $query ) );
+    $query = urldecode( strtolower( trim( $query ) ) );
+    $query = preg_replace('/[^A-Za-z0-9 ]/', '', $query);
+    $query = str_replace( $GLOBALS['search'], '', $query);
     $lat = trim( $lat );
     $lon = trim( $lon );
 
     $req = $db->prepare("
-        SELECT S.stop_id, S.stop_code, S.stop_name, S.stop_lat, S.stop_lon, point(S.stop_lat, S.stop_lon) AS geo_point,
+        SELECT L.id_line, L.name_line, L.shortname_line, L.transportmode, L.colourweb_hexa, L.textcolourweb_hexa, S2.stop_id, S2.stop_name, S2.stop_lat, S2.stop_lon, S2.zone_id, A.nom_commune AS town, A.code_insee AS zip_code,
         ST_Distance_Sphere(
-            point(S.stop_lat, S.stop_lon),
-            point(?, ?)
-        ) AS distance, S.stop_desc, S.zone_id, S.location_type, S.level_id, S.platform_code, 
-        CONCAT((
-            SELECT CONCAT(Z.zip_code,'; ', T.town_name)
-            FROM town T
-            LEFT JOIN zip_code Z
-            ON T.town_id = Z.town_id
-            WHERE ST_CONTAINS(T.town_polygon, point(S.stop_lat, S.stop_lon))
-            LIMIT 1
-        )) as town
-        FROM stops S
-
-        WHERE (ST_Distance_Sphere(
-            point(S.stop_lat, S.stop_lon),
-            point(?, ?)
-        )) < ?
-        AND location_type = ?
-
-        ORDER BY distance ASC
-
-        LIMIT 15
+                point(S2.stop_lat, S2.stop_lon),
+                point(?, ?)
+        ) AS distance
+        FROM lignes L
+        
+        INNER JOIN arrets_lignes A
+        ON L.id_line = REPLACE(A.id, 'IDFM:', '')
+        
+        INNER JOIN stops S
+        ON A.stop_id = S.stop_id
+        
+        INNER JOIN stops S2
+        ON S.parent_station = S2.stop_id
+        
+        WHERE LOWER( REGEXP_REPLACE(A.stop_name, '[^0-9a-zA-Z]', '') ) LIKE ?
+        
+        UNION DISTINCT
+        
+        SELECT L.id_line, L.name_line, L.shortname_line, L.transportmode, L.colourweb_hexa, L.textcolourweb_hexa, S2.stop_id, S2.stop_name, S2.stop_lat, S2.stop_lon, S2.zone_id, A.nom_commune AS town, A.code_insee AS zip_code,
+        ST_Distance_Sphere(
+                point(S2.stop_lat, S2.stop_lon),
+                point(?, ?)
+        ) AS distance
+        FROM lignes L
+        
+        INNER JOIN arrets_lignes A
+        ON L.id_line = REPLACE(A.id, 'IDFM:', '')
+        
+        INNER JOIN stops S
+        ON A.stop_id = S.stop_id
+        
+        INNER JOIN stops S2
+        ON S.parent_station = S2.stop_id
+        
+        WHERE LOWER( REGEXP_REPLACE(A.nom_commune, '[^0-9a-zA-Z]', '') ) LIKE ?;
     ");
-    $req->execute( array($lat, $lon, $lat, $lon, $distance, '%'.$query.'%', $type) );
+    $req->execute( array($lat, $lon, '%'.$query.'%', $lat, $lon, '%'.$query.'%') );
     return $req;
 }
 
@@ -215,15 +236,6 @@ function clearArretsLignes () {
 
     $req = $db->prepare("
         TRUNCATE arrets_lignes;
-    ");
-    $req->execute( );
-    return $req;
-}
-function clearArrets () {
-    $db = $GLOBALS["db"];
-
-    $req = $db->prepare("
-        TRUNCATE arrets;
     ");
     $req->execute( );
     return $req;
