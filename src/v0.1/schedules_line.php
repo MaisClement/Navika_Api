@@ -53,7 +53,7 @@ $lines_data[$obj['id_line']] = array(
     "color"      =>  (String)    strlen($obj['colourweb_hexa']) < 6 ? "000000" : $obj['colourweb_hexa'],
     "text_color" =>  (String)    strlen($obj['textcolourweb_hexa']) < 6 ? "000000" : $obj['textcolourweb_hexa'],
 );
-if ($obj['transportmode'] == "rail"){
+if (($obj['transportmode'] == "rail" || $obj['transportmode'] == "nationalrail" || $obj['transportmode'] == "regionalrail"){
     // Si c'est du ferré, l'affichage est different
     $lines_data[$obj['id_line']]['departures'] = [];
     $departures_lines[] = $obj['id_line'];
@@ -100,7 +100,7 @@ foreach($results as $result){
                 $direction[$destination_ref] = gare_format($call->DestinationDisplay[0]->value);
             }
         }
-        if ($lines_data[$line_id]['mode'] == "rail" && date_create(isset($call->ExpectedDepartureTime) ? $call->ExpectedDepartureTime : "") >= date_create()){
+        if (($obj['transportmode'] == "rail" || $obj['transportmode'] == "nationalrail" || $obj['transportmode'] == "regionalrail") && date_create(isset($call->ExpectedDepartureTime) ? $call->ExpectedDepartureTime : "") >= date_create()){
             // Si c'est du ferré, l'affichage est different
     
             if (!in_array($line_id, $departures_lines)){
