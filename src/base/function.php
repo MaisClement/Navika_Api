@@ -219,7 +219,6 @@ function getState($call) {
 function order_line($a, $b) {
     $type_list = [
         'nationalrail' ,
-        'regionalrail' ,
         'commercial_mode:Train' ,
         'rail' ,
         'commercial_mode:RapidTransit' ,
@@ -239,6 +238,9 @@ function order_line($a, $b) {
     $ta = array_search($a['mode'], $type_list);
     $tb = array_search($b['mode'], $type_list);
 
+    if ($a['code'] == 'SNCF') return -1;
+    else if ($b['code'] == 'SNCF') return +1;
+
     if ($ta != $tb) {
         return ($ta < $tb) ? -1 : 1;
     }
@@ -249,6 +251,10 @@ function order_line($a, $b) {
     if ($a == $b) {
         return 0;
     }
+    
+    if ($a == 'TER') return +1;
+    else if ($b == 'TER') return -1;
+
     return ($a < $b) ? -1 : 1;
 }
 function order_departure($a, $b) {
