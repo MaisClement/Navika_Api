@@ -62,6 +62,11 @@ echo '   Fetching lignes.csv...' . PHP_EOL;
     file_put_contents($dossier . 'lignes.csv', $lignes);
 echo '   Fetching lignes.csv ✅' . PHP_EOL;
 
+echo '   Fetching sncf.json...' . PHP_EOL;
+    $sncf = file_get_contents('https://ressources.data.sncf.com/explore/dataset/referentiel-gares-voyageurs/download/?format=json&timezone=Europe/Berlin&lang=fr');
+    file_put_contents($dossier . 'sncf.json', $sncf);
+echo '   Fetching sncf.json ✅' . PHP_EOL;
+
 echo '   Truncate Tables ...' . PHP_EOL;
     clearLignes ();
     clearArretsLignes();
@@ -74,6 +79,45 @@ echo '   Write lignes.csv ✅' . PHP_EOL;
 echo '   Write arrets_lignes.csv...' . PHP_EOL;
     writeArretsLignes ($dossier . 'arrets_lignes.csv');
 echo '   Write arrets_lignes.csv ✅' . PHP_EOL;
+
+echo '   Write sncf.json...' . PHP_EOL;
+    $sncf = json_decode($sncf);
+    foreach ($sncf as $gare) {
+        if (!in_array($gare->fields->departement_numero, $SNCF_FORBIDDEN_DEPT) || in_array($fields->gare_alias_libelle_noncontraint, $SNCF_FORCE)) {
+
+            $fields = $gare->fields;
+            
+            $id = 'SNCF';
+            $route_long_name = 'Trains SNCF';
+            $operatorname = 'SNCF';
+
+            $stop_id            = 'SNCF:' . $fields->code_gare;
+            $parent_station     = 'SNCF:' . substr($fields->uic_code, 2);
+            $stop_code          = $fields->tvs;
+            $stop_name          = $fields->gare_alias_libelle_noncontraint;
+            $stop_lon           = isset($fields->geometry) ? $fields->geometry->coordinates[0] : "";
+            $stop_lat           = isset($fields->geometry) ? $fields->geometry->coordinates[1] : "";
+            $pointgeo           = isset($fields->geometry) ? $fields->geometry->coordinates[0] . ',' . $fields->geometry->coordinates[1] : "";
+            $nom_commune        = $fields->commune_libellemin;
+            $code_insee         = $fields->departement_numero . $fields->commune_code;
+
+            if (strpos($fields->code_gare, '-') === false) {
+                try {
+                    // location_type = 0
+                    insertStops ($stop_id, $stop_code, $stop_name, "", $stop_lon, $stop_lat, "0", "", "0", $parent_station, "", "", "0", "");
+                    // location_type = 1
+                    insertStops ($parent_station, $stop_code, $stop_name, "", $stop_lon, $stop_lat, "0", "", "1", "", "", "", "0", "");
+                    
+                    insertArretLigne ($id, $route_long_name, $stop_id, $stop_name, $stop_lon, $stop_lat, $operatorname, $pointgeo, $nom_commune, $code_insee);
+                } catch (Exception $e) {
+                    echo $e;
+                }
+            } else {
+                echo 'Gare déja enregistré ?' . PHP_EOL;
+            }    
+        }
+    }
+echo '   Write sncf.json ✅' . PHP_EOL;
 
 echo '   Write ✅' . PHP_EOL;
 

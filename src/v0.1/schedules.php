@@ -100,6 +100,9 @@ foreach($results as $result){
     if (!isset( $lines_data[$line_id] )) { 
         $request = getLinesById($line_id);
         $obj = $request->fetch();
+        if ($obj['shortname_line'] == 'TER') {
+            $line_id = 'TER';
+        }
         $lines_data[$line_id] = array(
             "id"         =>  (String)    $line_id,
             "code"       =>  (String)    $obj['shortname_line'],
@@ -110,7 +113,7 @@ foreach($results as $result){
         );
     }
     if (($lines_data[$line_id]['mode'] == "rail" || $lines_data[$line_id]['mode'] == "nationalrail") && date_create(isset($call->ExpectedDepartureTime) ? $call->ExpectedDepartureTime : "") >= date_create()){
-            // Si c'est du ferré, l'affichage est different
+            // Si c'est du ferré, l'affichage est different          
 
         if (!in_array($line_id, $departures_lines)){
             $departures_lines[] = $line_id;

@@ -279,6 +279,13 @@ function order_places($a, $b) {
     $a_modes = count($a["modes"]);
     $b_modes = count($b["modes"]);
 
+    if (in_array('nationalrail', $a["modes"])) {
+        $a_modes++;
+    }
+    if (in_array('nationalrail', $b["modes"])) {
+        $b_modes++;
+    }
+
     if ($a_modes == $b_modes) {
         $a_lines = count($a["lines"]);
         $b_lines = count($b["lines"]);
@@ -311,8 +318,9 @@ function idfm_format($str) {
         'stop_point', 
         'stopArea', 
         'StopPoint', 
-        'IDFM', 
-        'STIF', 
+        'IDFM:', 
+        'STIF:', 
+        'SNCF:', 
         'line', 
         'Line',
         ':Q:',
