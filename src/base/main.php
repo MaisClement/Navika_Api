@@ -9,6 +9,13 @@ include('data/sncf_forbidden_dept.php');
 
 $db = new pdo($dsn, $usr, $psw);
 
-$GLOBALS["db"] = $db;
+try {
+    $conn = new PDO($dsn, $usr, $psw);
+    $conn->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+}
+catch (PDOException $e) {
+    print("Error connecting to SQL Server.");
+    die(print_r($e));
+}
 
 ?>

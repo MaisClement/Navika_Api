@@ -14,6 +14,9 @@ echo 'Clearing cache...' . PHP_EOL;
     $fichier = '../data/report/';
     clear_directory($fichier);
 
+    $fichier = '../data/file/';
+    clear_directory($fichier);
+
 echo 'Clearing cache ✅' . PHP_EOL;
 echo 'Updating tables...' . PHP_EOL;
 
@@ -41,16 +44,7 @@ echo '   Unzip GTFS...' . PHP_EOL;
         echo '   Unzip GTFS ⚠️' . PHP_EOL;
     }
 
-echo '   Truncate GTFS ...' . PHP_EOL;
-    clearGTFS();
-echo '   Truncate GTFS ✅' . PHP_EOL;
-
-echo '   Write GTFS...' . PHP_EOL;
-    writeGTFS();
-echo '   Write GTFS ✅' . PHP_EOL;
-
 echo '   GTFS ✅' . PHP_EOL;
-
 
 echo '   Fetching arrets_lignes.csv...' . PHP_EOL;
     $arrets_lignes = file_get_contents('https://data.iledefrance-mobilites.fr/explore/dataset/arrets-lignes/download/?format=csv&timezone=Europe/Berlin&lang=fr&use_labels_for_header=true&csv_separator=%3B');
@@ -70,7 +64,12 @@ echo '   Fetching sncf.json ✅' . PHP_EOL;
 echo '   Truncate Tables ...' . PHP_EOL;
     clearLignes ();
     clearArretsLignes();
+    clearGTFS();
 echo '   Truncate Tables ✅' . PHP_EOL;
+
+echo '   Write GTFS...' . PHP_EOL;
+    writeGTFS();
+echo '   Write GTFS ✅' . PHP_EOL;
 
 echo '   Write lignes.csv...' . PHP_EOL;
     writeLignes ($dossier . 'lignes.csv');
@@ -83,7 +82,18 @@ echo '   Write arrets_lignes.csv ✅' . PHP_EOL;
 echo '   Write sncf.json...' . PHP_EOL;
     $sncf = json_decode($sncf);
     foreach ($sncf as $gare) {
-        if (!in_array($gare->fields->departement_numero, $SNCF_FORBIDDEN_DEPT) || in_array($fields->gare_alias_libelle_noncontraint, $SNCF_FORCE)) {
+        $allowed = true;
+
+        if (in_array($gare->fields->departement_numero, $SNCF_FORBIDDEN_DEPT))
+            $allowed = false;
+
+        if (in_array($fields->gare_alias_libelle_noncontraint, $SNCF_FORBIDDEN))
+            $allowed = false;
+
+        if (in_array($fields->gare_alias_libelle_noncontraint, $SNCF_FORCE))
+            $allowed = true;
+
+        if ($allowed == true) {
 
             $fields = $gare->fields;
             
@@ -118,9 +128,12 @@ echo '   Write sncf.json...' . PHP_EOL;
         }
     }
 echo '   Write sncf.json ✅' . PHP_EOL;
-
 echo '   Write ✅' . PHP_EOL;
-
+echo '   Write insert admin...' . PHP_EOL;
+    writeAdmin ();
+echo '   Write insert admin ✅' . PHP_EOL;
+// source /var/www/navika/data/sql/insert_admin.sql;
+// mysql -u root Navika < /var/www/navika/data/sql/insert_admin.sql
 echo 'Update ✅' . PHP_EOL;
 
 ?>

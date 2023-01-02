@@ -1,12 +1,13 @@
 <?php
 
-$search = [" ", "À", "Á", "Â", "Ã", "Ä", "Å", "Ç", "È", "É", "Ê", "Ë", "Ì", "Í", "Î", "Ï", "Ñ", "Ò", "Ó", "Ô", "Õ", "Ö", "Ù", "Ú", "Û", "Ü", "Ý", "ß", "à", "á", "â", "ã", "ä", "å", "ç", "è", "é", "ê", "ë", "ì", "í", "î", "ï", "ñ", "ò", "ó", "ô", "õ", "ö", "ù", "ú", "û", "ü", "ý", "ÿ", "Ā", "ā", "Ă", "ă", "Ą", "ą", "Ć", "ć", "Ĉ", "ĉ", "Ċ", "ċ", "Č", "č", "Ď", "ď", "Đ", "đ", "Ē", "ē", "Ĕ", "ĕ", "Ė", "ė", "Ę", "ę", "Ě", "ě", "Ĝ", "ĝ", "Ğ", "ğ", "Ġ", "ġ", "Ģ", "ģ", "Ĥ", "ĥ", "Ħ", "ħ", "Ĩ", "ĩ", "Ī", "ī", "Ĭ", "ĭ", "Į", "į", "İ", "ı", "Ĳ", "ĳ", "Ĵ", "ĵ", "Ķ", "ķ", "ĸ", "Ĺ", "ĺ", "Ļ", "ļ", "Ľ", "ľ", "Ŀ", "ŀ", "Ł", "ł", "Ń", "ń", "Ņ", "ņ", "Ň", "ň", "ŉ", "Ŋ", "ŋ", "Ō", "ō", "Ŏ", "ŏ", "Ő", "ő", "Œ", "œ", "Ŕ", "ŕ", "Ŗ", "ŗ", "Ř", "ř", "Ś", "ś", "Ŝ", "ŝ", "Ş", "ş", "Š", "š", "Ţ", "ţ", "Ť", "ť", "Ŧ", "ŧ", "Ũ", "ũ", "Ū", "ū", "Ŭ", "ŭ", "Ů", "ů", "Ű", "ű", "Ų", "ų", "Ŵ", "ŵ", "Ŷ", "ŷ", "Ÿ", "Ź", "ź", "Ż", "ż", "Ž", "ž", "ſ"];
+$search = ["À", "Á", "Â", "Ã", "Ä", "Å", "Ç", "È", "É", "Ê", "Ë", "Ì", "Í", "Î", "Ï", "Ñ", "Ò", "Ó", "Ô", "Õ", "Ö", "Ù", "Ú", "Û", "Ü", "Ý", "ß", "à", "á", "â", "ã", "ä", "å", "ç", "è", "é", "ê", "ë", "ì", "í", "î", "ï", "ñ", "ò", "ó", "ô", "õ", "ö", "ù", "ú", "û", "ü", "ý", "ÿ", "Ā", "ā", "Ă", "ă", "Ą", "ą", "Ć", "ć", "Ĉ", "ĉ", "Ċ", "ċ", "Č", "č", "Ď", "ď", "Đ", "đ", "Ē", "ē", "Ĕ", "ĕ", "Ė", "ė", "Ę", "ę", "Ě", "ě", "Ĝ", "ĝ", "Ğ", "ğ", "Ġ", "ġ", "Ģ", "ģ", "Ĥ", "ĥ", "Ħ", "ħ", "Ĩ", "ĩ", "Ī", "ī", "Ĭ", "ĭ", "Į", "į", "İ", "ı", "Ĵ", "ĵ", "Ķ", "ķ", "ĸ", "Ĺ", "ĺ", "Ļ", "ļ", "Ľ", "ľ", "Ŀ", "ŀ", "Ł", "ł", "Ń", "ń", "Ņ", "ņ", "Ň", "ň", "ŉ", "Ŋ", "ŋ", "Ō", "ō", "Ŏ", "ŏ", "Ő", "ő", "Œ", "œ", "Ŕ", "ŕ", "Ŗ", "ŗ", "Ř", "ř", "Ś", "ś", "Ŝ", "ŝ", "Ş", "ş", "Š", "š", "Ţ", "ţ", "Ť", "ť", "Ŧ", "ŧ", "Ũ", "ũ", "Ū", "ū", "Ŭ", "ŭ", "Ů", "ů", "Ű", "ű", "Ų", "ų", "Ŵ", "ŵ", "Ŷ", "ŷ", "Ÿ", "Ź", "ź", "Ż", "ż", "Ž", "ž", "ſ"];
+$replace = ["A", "A", "A", "A", "A", "A", "C", "E", "E", "E", "E", "I", "I", "I", "I", "N", "O", "O", "O", "O", "O", "U", "U", "U", "U", "Y", "s", "a", "a", "a", "a", "a", "a", "c", "e", "e", "e", "e", "i", "i", "i", "i", "n", "o", "o", "o", "o", "o", "u", "u", "u", "u", "y", "y", "A", "a", "A", "a", "A", "a", "C", "c", "C", "c", "C", "c", "C", "c", "D", "d", "D", "d", "E", "e", "E", "e", "E", "e", "E", "e", "E", "e", "G", "g", "G", "g", "G", "g", "G", "g", "H", "h", "H", "h", "I", "i", "I", "i", "I", "i", "I", "i", "I", "i", "J", "j", "K", "k", "k", "L", "l", "L", "l", "L", "l", "L", "l", "L", "l", "N", "n", "N", "n", "N", "n", "N", "n", "N", "O", "o", "O", "o", "O", "o", "OE", "oe", "R", "r", "R", "r", "R", "r", "S", "s", "S", "s", "S", "s", "S", "s", "T", "t", "T", "t", "T", "t", "U", "u", "U", "u", "U", "u", "U", "u", "U", "u", "U", "u", "W", "w", "Y", "y", "Y", "Z", "z", "Z", "z", "Z", "z", "s"];
 
 function getStopByQuery($query){
     $db = $GLOBALS["db"];
     $query = urldecode( strtolower( trim( $query ) ) );
+    $query = str_replace( $GLOBALS['search'], $GLOBALS['replace'], $query);
     $query = preg_replace('/[^A-Za-z0-9 ]/', '', $query);
-    $query = str_replace( $GLOBALS['search'], '', $query);
 
     $req = $db->prepare("
         SELECT L.id_line, L.name_line, L.shortname_line, L.transportmode, L.colourweb_hexa, L.textcolourweb_hexa, S2.stop_id, S2.stop_name, S2.stop_lat, S2.stop_lon, S2.zone_id, A.nom_commune AS town, A.code_insee AS zip_code
@@ -21,7 +22,7 @@ function getStopByQuery($query){
         INNER JOIN stops S2
         ON S.parent_station = S2.stop_id
         
-        WHERE LOWER( REGEXP_REPLACE(A.stop_name, '[^0-9a-zA-Z]', '') ) LIKE ?
+        WHERE LOWER( A.stop_name ) LIKE ?
         
         UNION DISTINCT
         
@@ -37,7 +38,7 @@ function getStopByQuery($query){
         INNER JOIN stops S2
         ON S.parent_station = S2.stop_id
         
-        WHERE LOWER( REGEXP_REPLACE(A.nom_commune, '[^0-9a-zA-Z]', '') ) LIKE ?;
+        WHERE LOWER( A.nom_commune ) LIKE ?;
     ");
     $req->execute( array( '%'.$query.'%', '%'.$query.'%') );
     return $req;
@@ -79,8 +80,8 @@ function getStopByGeoCoords($lat, $lon, $distance = 1000){
 function getStopByQueryAndGeoCoords($query, $lat, $lon){
     $db = $GLOBALS["db"];
     $query = urldecode( strtolower( trim( $query ) ) );
+    $query = str_replace( $GLOBALS['search'], $GLOBALS['replace'], $query);
     $query = preg_replace('/[^A-Za-z0-9 ]/', '', $query);
-    $query = str_replace( $GLOBALS['search'], '', $query);
     $lat = trim( $lat );
     $lon = trim( $lon );
 
@@ -101,7 +102,7 @@ function getStopByQueryAndGeoCoords($query, $lat, $lon){
         INNER JOIN stops S2
         ON S.parent_station = S2.stop_id
         
-        WHERE LOWER( REGEXP_REPLACE(A.stop_name, '[^0-9a-zA-Z]', '') ) LIKE ?
+        WHERE LOWER( A.stop_name ) LIKE ?
         
         UNION DISTINCT
         
@@ -121,7 +122,7 @@ function getStopByQueryAndGeoCoords($query, $lat, $lon){
         INNER JOIN stops S2
         ON S.parent_station = S2.stop_id
         
-        WHERE LOWER( REGEXP_REPLACE(A.nom_commune, '[^0-9a-zA-Z]', '') ) LIKE ?;
+        WHERE LOWER( A.nom_commune ) LIKE ?;
     ");
     $req->execute( array($lat, $lon, '%'.$query.'%', $lat, $lon, '%'.$query.'%') );
     return $req;
@@ -317,6 +318,15 @@ function writeLaPoste () {
     $req->execute(  );
     return $req;
 }
+function writeAdmin() {
+    $db = $GLOBALS["db"];
+
+    $req = $db->prepare("
+        SOURCE /var/www/navika/data/sql/insert_admin.sql;
+    ");
+    $req->execute(  );
+    return $req;
+}
 
 function insertStops ($stop_id, $stop_code, $stop_name, $stop_desc, $stop_lon, $stop_lat, $zone_id, $stop_url, $location_type, $parent_station, $wheelchair_boarding, $stop_timezone, $level_id, $platform_code) {
     $db = $GLOBALS["db"];
@@ -343,5 +353,13 @@ function insertArretLigne ($id, $route_long_name, $stop_id, $stop_name, $stop_lo
 }
 
 // ------------------------------------------------
+
+function SQLinit($query){
+    $db = $GLOBALS["db"];
+
+    $req = $db->prepare( $query );
+    $req->execute(  );
+    return $req;
+}
 
 ?>
