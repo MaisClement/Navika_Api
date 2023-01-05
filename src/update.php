@@ -56,10 +56,10 @@ echo '   Fetching lignes.csv...' . PHP_EOL;
     file_put_contents($dossier . 'lignes.csv', $lignes);
 echo '   Fetching lignes.csv ✅' . PHP_EOL;
 
-echo '   Fetching sncf.json...' . PHP_EOL;
-    $sncf = file_get_contents('https://ressources.data.sncf.com/explore/dataset/referentiel-gares-voyageurs/download/?format=json&timezone=Europe/Berlin&lang=fr');
-    file_put_contents($dossier . 'sncf.json', $sncf);
-echo '   Fetching sncf.json ✅' . PHP_EOL;
+echo '   Fetching sncf.csv...' . PHP_EOL;
+    $sncf = file_get_contents('https://ressources.data.sncf.com/explore/dataset/referentiel-gares-voyageurs/download/?format=csv&timezone=Europe/Berlin&lang=fr');
+    file_put_contents($dossier . 'sncf.csv', $sncf);
+echo '   Fetching sncf.csv ✅' . PHP_EOL;
 
 echo '   Truncate Tables ...' . PHP_EOL;
     clearLignes ();
@@ -79,39 +79,41 @@ echo '   Write arrets_lignes.csv...' . PHP_EOL;
     writeArretsLignes ($dossier . 'arrets_lignes.csv');
 echo '   Write arrets_lignes.csv ✅' . PHP_EOL;
 
-echo '   Write sncf.json...' . PHP_EOL;
-    $sncf = json_decode($sncf);
-    foreach ($sncf as $gare) {
-        $allowed = true;
-
-        if (in_array($gare->fields->departement_numero, $SNCF_FORBIDDEN_DEPT))
-            $allowed = false;
-
-        if (in_array($fields->gare_alias_libelle_noncontraint, $SNCF_FORBIDDEN))
-            $allowed = false;
-
-        if (in_array($fields->gare_alias_libelle_noncontraint, $SNCF_FORCE))
-            $allowed = true;
-
-        if ($allowed == true) {
-
-            $fields = $gare->fields;
-            
+echo '   Write sncf.csv...' . PHP_EOL;
+    $sncf = read_csv($dossier . 'sncf.csv');
+    
+    foreach ($sncf as $row) {
+        if ($row[0] != 'code' && $row[1] != '' && $row[1] != false) {
+                        
             $id = 'SNCF';
             $route_long_name = 'Trains SNCF';
             $operatorname = 'SNCF';
 
-            $stop_id            = 'SNCF:' . $fields->code_gare;
-            $parent_station     = 'SNCF:' . substr($fields->uic_code, 2);
-            $stop_code          = $fields->tvs;
-            $stop_name          = $fields->gare_alias_libelle_noncontraint;
-            $stop_lon           = isset($fields->geometry) ? $fields->geometry->coordinates[0] : "";
-            $stop_lat           = isset($fields->geometry) ? $fields->geometry->coordinates[1] : "";
-            $pointgeo           = isset($fields->geometry) ? $fields->geometry->coordinates[0] . ',' . $fields->geometry->coordinates[1] : "";
-            $nom_commune        = $fields->commune_libellemin;
-            $code_insee         = $fields->departement_numero . $fields->commune_code;
+            $stop_id            = 'SNCF:' . $row[1];
+            $parent_station     = 'SNCF:' . substr($row[2], 2);
+            $stop_code          = $row[27];
+            $stop_name          = $row[4];
+            $stop_lon           = isset($row[10]) ? $row[10] : "";
+            $stop_lat           = isset($row[11]) ? $row[11] : "";
+            $pointgeo           = isset($row[10]) ? $row[10] . ',' . $row[11] : "";
+            $nom_commune        = $row[7];
+            $code_insee         = $row[8] . $row[6];
+            $departement        = $row[8];
 
-            if (strpos($fields->code_gare, '-') === false) {
+            $allowed = true;
+
+            if (in_array($departement, $SNCF_FORBIDDEN_DEPT)) {
+                $allowed = false;
+                echo $stop_id . ' - ' . $stop_name . ' - Departement non autorisé' . PHP_EOL;
+            } 
+            if (in_array($stop_name, $SNCF_FORBIDDEN)) {
+                $allowed = false;
+                echo $stop_id . ' - ' . $stop_name . ' - Nom non autorisé' . PHP_EOL;
+            } 
+            if (in_array($stop_name, $SNCF_FORCE))
+                $allowed = true;
+
+            if ($allowed == true) {
                 try {
                     // location_type = 0
                     insertStops ($stop_id, $stop_code, $stop_name, "", $stop_lon, $stop_lat, "0", "", "0", $parent_station, "", "", "0", "");
@@ -122,18 +124,14 @@ echo '   Write sncf.json...' . PHP_EOL;
                 } catch (Exception $e) {
                     echo $e;
                 }
-            } else {
-                echo 'Gare déja enregistré ?' . PHP_EOL;
-            }    
-        }
+            }
+        } 
     }
-echo '   Write sncf.json ✅' . PHP_EOL;
+
+echo '   Write sncf.csv ✅' . PHP_EOL;
 echo '   Write ✅' . PHP_EOL;
-echo '   Write insert admin...' . PHP_EOL;
-    writeAdmin ();
-echo '   Write insert admin ✅' . PHP_EOL;
-// source /var/www/navika/data/sql/insert_admin.sql;
-// mysql -u root Navika < /var/www/navika/data/sql/insert_admin.sql
+    $query = file_get_contents('../data/sql/insert_admin.sql');
+    SQLinit($query);
 echo 'Update ✅' . PHP_EOL;
 
 ?>

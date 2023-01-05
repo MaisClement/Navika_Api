@@ -15,12 +15,26 @@ function curl_GTFS( $url ) {
     curl_close($ch);
     return $data;
 }
+function curl_SNCF( $url ) {
+    $password = '';
+    $user = $GLOBALS['SNCFKEY'];
+    $ch = curl_init();
+    curl_setopt($ch, CURLOPT_HEADER, false);
+    curl_setopt($ch, CURLOPT_HTTPHEADER, []);
+	curl_setopt($ch, CURLOPT_HTTPAUTH, CURLAUTH_BASIC);
+	curl_setopt($ch, CURLOPT_USERPWD, "$user:$password");
+	curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
+    curl_setopt($ch, CURLOPT_URL, $url);
+    $data = curl_exec($ch);
+    curl_close($ch);
+    return $data;
+}
 function curl_PRIM( $url ) {
     $ch = curl_init();
     curl_setopt($ch, CURLOPT_HEADER, false);
     curl_setopt($ch, CURLOPT_HTTPHEADER, 
         array(
-            'apiKey: ' . $GLOBALS['APIKEY']
+            'apiKey: ' . $GLOBALS['PRIMKEY']
         )
     );
     curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
@@ -58,6 +72,17 @@ function ErrorMessage($http_code, $details = ''){
 function prepareTime($dt) {
     $datetime = date_create( $dt );
     return date_format($datetime, DATE_ISO8601);
+}
+function timeSort($a, $b){
+
+	$ad = new DateTime($a['stop_date_time']->base_departure_date_time);
+	$bd = new DateTime($b['stop_date_time']->base_departure_date_time);
+
+	if ($ad == $bd) {
+		return 0;
+	}
+
+	return $ad < $bd ? -1 : 1;
 }
 
 // --- GetInfo ---
@@ -200,6 +225,13 @@ function getMessage($call) {
 
     else
         return "";
+}
+function getSNCFid( $links ) {
+    foreach($links as $link) {
+        if ($link->type == 'vehicle_journey') {
+            return $link->id;
+        }
+    }
 }
 function getState($call) {
     // theorical - ontime - delayed - cancelled - modified

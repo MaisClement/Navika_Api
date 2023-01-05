@@ -63,7 +63,7 @@ include('src/base/request.php');
 
 //------------
 try {
-    if (strpos($file, "/base/") || strpos($file, "/sql/")){
+    if (strpos($file, "/base/") || strpos($file, "/data/") || strpos($file, "/back/")){
         ErrorMessage(403);
         // echo $file;
 
