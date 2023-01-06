@@ -85,8 +85,6 @@ echo '   Write sncf.csv...' . PHP_EOL;
     foreach ($sncf as $row) {
         if ($row[0] != 'code' && $row[1] != '' && $row[1] != false) {
                         
-            $id = 'SNCF';
-            $route_long_name = 'Trains SNCF';
             $operatorname = 'SNCF';
 
             $stop_id            = 'SNCF:' . $row[1];
@@ -120,7 +118,8 @@ echo '   Write sncf.csv...' . PHP_EOL;
                     // location_type = 1
                     insertStops ($parent_station, $stop_code, $stop_name, "", $stop_lon, $stop_lat, "0", "", "1", "", "", "", "0", "");
                     
-                    insertArretLigne ($id, $route_long_name, $stop_id, $stop_name, $stop_lon, $stop_lat, $operatorname, $pointgeo, $nom_commune, $code_insee);
+                    insertArretLigne ("SNCF", 'Trains SNCF', $stop_id, $stop_name, $stop_lon, $stop_lat, $operatorname, $pointgeo, $nom_commune, $code_insee);
+
                 } catch (Exception $e) {
                     echo $e;
                 }
@@ -132,6 +131,8 @@ echo '   Write sncf.csv ✅' . PHP_EOL;
 echo '   Write ✅' . PHP_EOL;
     $query = file_get_contents('../data/sql/insert_admin.sql');
     SQLinit($query);
+// source /var/www/navika/data/sql/insert_admin.sql;
+// mysql -u root Navika < /var/www/navika/data/sql/insert_admin.sql
 echo 'Update ✅' . PHP_EOL;
 
 ?>

@@ -75,6 +75,17 @@ function prepareTime($dt) {
 }
 function timeSort($a, $b){
 
+	$ad = new DateTime($a['stop_date_time']->departure_date_time);
+	$bd = new DateTime($b['stop_date_time']->departure_date_time);
+
+	if ($ad == $bd) {
+		return 0;
+	}
+
+	return $ad < $bd ? -1 : 1;
+}
+function timeSortSNCF($a, $b){
+
 	$ad = new DateTime($a['stop_date_time']->base_departure_date_time);
 	$bd = new DateTime($b['stop_date_time']->base_departure_date_time);
 

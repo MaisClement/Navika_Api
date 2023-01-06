@@ -60,7 +60,6 @@ while($obj = $request->fetch()) {
 }
 
 // ------------
-// On récupère toutes les lignes a l'arrets
 
 if ($provider == 'SNCF') {
     include('back/schedules_sncf.php');

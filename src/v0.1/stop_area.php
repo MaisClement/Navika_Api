@@ -48,7 +48,7 @@ if ($search_type == 3){
     $request = getStopByQueryAndGeoCoords($query, $lat, $lon);
 
 } else if ($search_type == 2){
-    $request = getStopByGeoCoords($lat, $lon);
+    $request = getStopByGeoCoords($lat, $lon, 5000);
 
 } else if ($search_type == 1){
     $request = getStopByQuery($query);

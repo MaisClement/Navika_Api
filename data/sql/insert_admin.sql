@@ -1,6 +1,8 @@
 INSERT INTO lignes
 VALUES
 ('SNCF', 'SNCF', 'Trains SNCF', 'SNCF', '2023-01-01T02:00:00+02:00', '' , 'nationalrail', 'nationalrail', '', 800, 'SNCF', '', 'SNCF', 'aaaaaa', '000000', '0 0 0 1', '000000', '', '', '', '', 'Trains SNCF', '', '', '', 'active'),
+('SNCFd', 'SNCF', 'Départs SNCF', 'SNCF', '2023-01-01T02:00:00+02:00', '' , 'nationalrail', 'nationalrail', '', 800, 'SNCF', '', 'SNCF', 'aaaaaa', '000000', '0 0 0 1', '000000', '', '', '', '', 'Trains SNCF', '', '', '', 'active'),
+('SNCFa', 'SNCF', 'Arrivées SNCF', 'SNCF', '2023-01-01T02:00:00+02:00', '' , 'nationalrail', 'nationalrail', '', 800, 'SNCF', '', 'SNCF', 'aaaaaa', '000000', '0 0 0 1', '000000', '', '', '', '', 'Trains SNCF', '', '', '', 'active'),
 ('TER',  'TER',  'TER',         'TER',  '2023-01-01T02:00:00+02:00', '' , 'rail', 'rail', '', 800, 'SNCF', '', 'SNCF', 'aaaaaa', '000000', '0 0 0 1', '000000', '', '', '', '', 'TER'        , '', '', '', 'active');
 
 
