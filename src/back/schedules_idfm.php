@@ -38,15 +38,26 @@ foreach($results as $result){
         $obj = $request->fetch();
         if ($obj['shortname_line'] == 'TER') {
             $line_id = 'TER';
+            $lines_data['TER'] = array(
+                "id"         =>  (String)    $line_id,
+                "code"       =>  (String)    'TER',
+                "name"       =>  (String)    'TER',
+                "mode"       =>  (String)    'rail',
+                "color"      =>  (String)    "000000",
+                "text_color" =>  (String)    "aaaaaa",
+            );
+            
+        } else {
+            $lines_data[$line_id] = array(
+                "id"         =>  (String)    $line_id,
+                "code"       =>  (String)    $obj['shortname_line'],
+                "name"       =>  (String)    $obj['name_line'],
+                "mode"       =>  (String)    $obj['transportmode'],
+                "color"      =>  (String)    strlen($obj['colourweb_hexa']) < 6 ? "000000" : $obj['colourweb_hexa'],
+                "text_color" =>  (String)    strlen($obj['textcolourweb_hexa']) < 6 ? "000000" : $obj['textcolourweb_hexa'],
+            );
         }
-        $lines_data[$line_id] = array(
-            "id"         =>  (String)    $line_id,
-            "code"       =>  (String)    $obj['shortname_line'],
-            "name"       =>  (String)    $obj['name_line'],
-            "mode"       =>  (String)    $obj['transportmode'],
-            "color"      =>  (String)    strlen($obj['colourweb_hexa']) < 6 ? "000000" : $obj['colourweb_hexa'],
-            "text_color" =>  (String)    strlen($obj['textcolourweb_hexa']) < 6 ? "000000" : $obj['textcolourweb_hexa'],
-        );
+        
     }
     if (($lines_data[$line_id]['mode'] == "rail" || $lines_data[$line_id]['mode'] == "nationalrail") && date_create(isset($call->ExpectedDepartureTime) ? $call->ExpectedDepartureTime : "") >= date_create()){
             // Si c'est du ferré, l'affichage est different          

@@ -1,11 +1,8 @@
+
 INSERT INTO lignes
 VALUES
 ('SNCF', 'SNCF', 'Trains SNCF', 'SNCF', '2023-01-01T02:00:00+02:00', '' , 'nationalrail', 'nationalrail', '', 800, 'SNCF', '', 'SNCF', 'aaaaaa', '000000', '0 0 0 1', '000000', '', '', '', '', 'Trains SNCF', '', '', '', 'active'),
-('SNCFd', 'SNCF', 'Départs SNCF', 'SNCF', '2023-01-01T02:00:00+02:00', '' , 'nationalrail', 'nationalrail', '', 800, 'SNCF', '', 'SNCF', 'aaaaaa', '000000', '0 0 0 1', '000000', '', '', '', '', 'Trains SNCF', '', '', '', 'active'),
-('SNCFa', 'SNCF', 'Arrivées SNCF', 'SNCF', '2023-01-01T02:00:00+02:00', '' , 'nationalrail', 'nationalrail', '', 800, 'SNCF', '', 'SNCF', 'aaaaaa', '000000', '0 0 0 1', '000000', '', '', '', '', 'Trains SNCF', '', '', '', 'active'),
 ('TER',  'TER',  'TER',         'TER',  '2023-01-01T02:00:00+02:00', '' , 'rail', 'rail', '', 800, 'SNCF', '', 'SNCF', 'aaaaaa', '000000', '0 0 0 1', '000000', '', '', '', '', 'TER'        , '', '', '', 'active');
-
-
 
 INSERT INTO arrets_lignes
 (id,     route_long_name, stop_id,    stop_name,                          stop_lon,              stop_lat,              operatorname, pointgeo,                           nom_commune,                        code_insee)
@@ -50,20 +47,7 @@ VALUES
 INSERT INTO stops
 (stop_id,     stop_code, stop_name,                    stop_desc, stop_lon,       stop_lat,              zone_id, stop_url, location_type, parent_station, wheelchair_boarding, stop_timezone, level_id, platform_code)
 VALUES
-("SNCF:87116582", "", "Château-Thierry"                 , "", "3.4094551756509444" , "49.03803714166139"  , "0", "", "0", "IDFM:411379" , "", "", "0", ""),
-("SNCF:87271593", "", "Crépy-en-Valois"                 , "", "2.8876260684564095" , "49.231226048139426" , "0", "", "0", "IDFM:411397" , "", "", "0", ""),
-("SNCF:87276006", "", "Creil"                           , "", "2.468932722996438"  , "49.2638259762795"   , "0", "", "0", "IDFM:411441" , "", "", "0", ""),
-("SNCF:87684001", "", "Montargis"                       , "", "2.7429394830349696" , "48.00672778886036"  , "0", "", "0", "IDFM:411483" , "", "", "0", ""),
-("SNCF:87684415", "", "Malesherbes"                     , "", "2.4012858739096004" , "48.293634553791804" , "0", "", "0", "IDFM:411486" , "", "", "0", ""),
-("SNCF:87393488", "", "Dreux"                           , "", "1.3710627915334217" , "48.73157378987803"  , "0", "", "0", "IDFM:411493" , "", "", "0", ""),
-("SNCF:87545244", "", "Juvisy"                          , "", "2.38418315891281"   , "48.68960585601327"  , "0", "", "0", "IDFM:478505" , "", "", "0", ""),
-("SNCF:87545137", "", "Etampes"                         , "", "2.159956601313322"  , "48.4369213474364"   , "0", "", "0", "IDFM:478855" , "", "", "0", ""),
-("SNCF:87540179", "", "Dourdan"                         , "", "2.008393202332081"  , "48.533919414085894" , "0", "", "0", "IDFM:59836"  , "", "", "0", ""),
-("SNCF:87393314", "", "Rambouillet"                     , "", "1.8321617680989135" , "48.643467276907465" , "0", "", "0", "IDFM:60665"  , "", "", "0", ""),
-("SNCF:87682302", "", "Montereau"                       , "", "2.942946687501169"  , "48.37997743815116"  , "0", "", "0", "IDFM:61414"  , "", "", "0", ""),
-("SNCF:87682005", "", "Melun"                           , "", "2.654837989014943"  , "48.52788300025775"  , "0", "", "0", "IDFM:61926"  , "", "", "0", ""),
-("SNCF:87393579", "", "Massy - Palaiseau"               , "", "2.258703107078832"  , "48.72480359870355"  , "0", "", "0", "IDFM:63244"  , "", "", "0", ""),
-("SNCF:87393009", "", "Versailles Chantiers"            , "", "2.1354700907472384" , "48.79583621479475"  , "0", "", "0", "IDFM:63880"  , "", "", "0", ""),
+("SNCF:87393009", "", "Versailles Chantiers"            , "", "2.1354700907472384" , "48.79583621479475"  , "0", "", "0", "IDFM:63880"  , "", "", "0", "");
 ("SNCF:87381590", "", "Mantes-la-Jolie"                 , "", "1.7033904939259679" , "48.989035968118294" , "0", "", "0", "IDFM:65931"  , "", "", "0", ""),
 ("SNCF:87276469", "", "Persan - Beaumont"               , "", "2.278474737910587"  , "49.147663878395456" , "0", "", "0", "IDFM:67292"  , "", "", "0", ""),
 ("SNCF:87111849", "", "Marne-la-Vallée Chessy"          , "", "2.78336655061271"   , "48.86868601691091"  , "0", "", "0", "IDFM:68385"  , "", "", "0", ""),
@@ -88,3 +72,4 @@ VALUES
 SET NAMES 'utf8' COLLATE 'utf8_unicode_ci';
 UPDATE arrets_lignes SET stop_name = REPLACE(stop_name, '-', '');
 UPDATE arrets_lignes SET stop_name = REPLACE(stop_name, ' ', '');
+UPDATE arrets_lignes SET stop_name = REPLACE(stop_name, "'", "");
