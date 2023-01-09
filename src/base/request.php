@@ -48,7 +48,7 @@ function getStopByGeoCoords($lat, $lon, $distance = 1000){
     $lon = trim( $lon );
 
     $req = $db->prepare("
-        SELECT L.id_line, L.name_line, L.shortname_line, L.transportmode, L.colourweb_hexa, L.textcolourweb_hexa, S2.stop_id, S2.stop_name, S2.stop_lat, S2.stop_lon, 
+        SELECT DISTINCT L.id_line, L.name_line, L.shortname_line, L.transportmode, L.colourweb_hexa, L.textcolourweb_hexa, S2.stop_id, S2.stop_name, S2.stop_lat, S2.stop_lon, 
         ST_Distance_Sphere(
                 point(S2.stop_lat, S2.stop_lon),
                 point(?, ?)
