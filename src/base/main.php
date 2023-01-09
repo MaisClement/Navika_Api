@@ -3,9 +3,9 @@
 // Connexion à la base de données
 //
 include('credential.php');
-include('data/http_code.php');
-include('data/lines.php');
-include('data/sncf_forbidden_dept.php');
+include('src/data/http_code.php');
+include('src/data/lines.php');
+include('src/data/sncf_forbidden_dept.php');
 
 $db = new pdo($dsn, $usr, $psw);
 
