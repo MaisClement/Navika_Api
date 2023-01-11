@@ -387,6 +387,12 @@ function idfm_format($str) {
     $replace = '';
     return str_replace($search, $replace, $str);
 }
+function journeys_line_format($str) {
+    $search = ['Train Transilien'];
+    $replace = ['Transilien'];
+    
+    return str_replace($search, $replace, $str);
+}
 
 function read_csv($csv){
     $file = fopen($csv, 'r');

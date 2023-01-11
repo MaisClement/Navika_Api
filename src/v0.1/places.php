@@ -82,8 +82,12 @@ foreach($results as $result){
 
 $echo["places"] = $places;
 
+if (isset($_GET['flag'])) {
+    $echo["flag"] = (int) $_GET['flag'];
+}
+
 $echo = json_encode($echo);
-file_put_contents($fichier, $echo);
+// file_put_contents($fichier, $echo);
 echo $echo;
 exit;
 

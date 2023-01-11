@@ -50,10 +50,10 @@ foreach($results->journeys as $result){
                 "description"   =>  (String)    $section->display_informations->description,
                 "message"       =>  (String)    "",
                 "line"     => array(
-                    "id"         =>  (String)   $LINES[$section->display_informations->physical_mode . ' ' . $section->display_informations->code],
+                    "id"         =>  (String)   $LINES[journeys_line_format($section->display_informations->physical_mode) . ' ' . $section->display_informations->code],
                     "code"       =>  (String)   $section->display_informations->code,
                     "name"       =>  (String)   $section->display_informations->network . ' ' . $section->display_informations->name,
-                    "mode"       =>  (String)   $section->display_informations->physical_mode,
+                    "mode"       =>  (String)   journeys_line_format($section->display_informations->physical_mode),
                     "color"      =>  (String)   $section->display_informations->color,
                     "text_color" =>  (String)   $section->display_informations->text_color,
                 ),
