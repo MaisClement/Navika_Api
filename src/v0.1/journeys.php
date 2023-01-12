@@ -10,7 +10,7 @@ if ( isset($_GET['from']) && isset($_GET['to']) ){
     $to = $_GET['to'];
     $to = urlencode( trim($to) );
 
-    $url = $BASE_URL . '/journeys?from=' . $from . '&to=' . $to . '&depth=2&data_freshness=realtime';
+    $url = $BASE_URL . '/journeys?from=' . $from . '&to=' . $to . '&depth=3&data_freshness=realtime';
     $fichier .= $from . '_' . $to . '.json';
 
 } else {
@@ -66,7 +66,7 @@ foreach($results->journeys as $result){
             "arrival_date_time"     =>  (String) $section->arrival_date_time,
             "departure_date_time"   =>  (String) $section->departure_date_time,
             "duration"      =>  (int) $section->duration,
-            "informations"  => isset($informations) ? $informations : [],
+            "informations"  => isset($section->display_informations) ? $informations : null,
             "from" => array(
                 "id"        =>  (String)    $section->from->id,
                 "name"      =>  (String)    $section->from->{$section->from->embedded_type}->name,
@@ -93,6 +93,7 @@ foreach($results->journeys as $result){
                     "lon"       =>  floatval( $section->to->{$section->to->embedded_type}->coord->lon ),
                 ),
             ),
+            "geojson"       => isset($section->geojson) ? $section->geojson : null,
         );
     }
 
