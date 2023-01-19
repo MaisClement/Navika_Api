@@ -352,5 +352,12 @@ function insertArretLigne ($id, $route_long_name, $stop_id, $stop_name, $stop_lo
 
 // ------------------------------------------------
 
+function SQLinit($query){
+    $db = $GLOBALS["db"];
+
+    $req = $db->prepare( $query );
+    $req->execute(  );
+    return $req;
+}
 
 ?>

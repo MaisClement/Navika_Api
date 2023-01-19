@@ -3,548 +3,404 @@
 $search = [" ", "-", "À", "Á", "Â", "Ã", "Ä", "Å", "Ç", "È", "É", "Ê", "Ë", "Ì", "Í", "Î", "Ï", "Ñ", "Ò", "Ó", "Ô", "Õ", "Ö", "Ù", "Ú", "Û", "Ü", "Ý", "ß", "à", "á", "â", "ã", "ä", "å", "ç", "è", "é", "ê", "ë", "ì", "í", "î", "ï", "ñ", "ò", "ó", "ô", "õ", "ö", "ù", "ú", "û", "ü", "ý", "ÿ", "Ā", "ā", "Ă", "ă", "Ą", "ą", "Ć", "ć", "Ĉ", "ĉ", "Ċ", "ċ", "Č", "č", "Ď", "ď", "Đ", "đ", "Ē", "ē", "Ĕ", "ĕ", "Ė", "ė", "Ę", "ę", "Ě", "ě", "Ĝ", "ĝ", "Ğ", "ğ", "Ġ", "ġ", "Ģ", "ģ", "Ĥ", "ĥ", "Ħ", "ħ", "Ĩ", "ĩ", "Ī", "ī", "Ĭ", "ĭ", "Į", "į", "İ", "ı", "Ĵ", "ĵ", "Ķ", "ķ", "ĸ", "Ĺ", "ĺ", "Ļ", "ļ", "Ľ", "ľ", "Ŀ", "ŀ", "Ł", "ł", "Ń", "ń", "Ņ", "ņ", "Ň", "ň", "ŉ", "Ŋ", "ŋ", "Ō", "ō", "Ŏ", "ŏ", "Ő", "ő", "Œ", "œ", "Ŕ", "ŕ", "Ŗ", "ŗ", "Ř", "ř", "Ś", "ś", "Ŝ", "ŝ", "Ş", "ş", "Š", "š", "Ţ", "ţ", "Ť", "ť", "Ŧ", "ŧ", "Ũ", "ũ", "Ū", "ū", "Ŭ", "ŭ", "Ů", "ů", "Ű", "ű", "Ų", "ų", "Ŵ", "ŵ", "Ŷ", "ŷ", "Ÿ", "Ź", "ź", "Ż", "ż", "Ž", "ž", "ſ"];
 $replace = ["", "", "A", "A", "A", "A", "A", "A", "C", "E", "E", "E", "E", "I", "I", "I", "I", "N", "O", "O", "O", "O", "O", "U", "U", "U", "U", "Y", "s", "a", "a", "a", "a", "a", "a", "c", "e", "e", "e", "e", "i", "i", "i", "i", "n", "o", "o", "o", "o", "o", "u", "u", "u", "u", "y", "y", "A", "a", "A", "a", "A", "a", "C", "c", "C", "c", "C", "c", "C", "c", "D", "d", "D", "d", "E", "e", "E", "e", "E", "e", "E", "e", "E", "e", "G", "g", "G", "g", "G", "g", "G", "g", "H", "h", "H", "h", "I", "i", "I", "i", "I", "i", "I", "i", "I", "i", "J", "j", "K", "k", "k", "L", "l", "L", "l", "L", "l", "L", "l", "L", "l", "N", "n", "N", "n", "N", "n", "N", "n", "N", "O", "o", "O", "o", "O", "o", "OE", "oe", "R", "r", "R", "r", "R", "r", "S", "s", "S", "s", "S", "s", "S", "s", "T", "t", "T", "t", "T", "t", "U", "u", "U", "u", "U", "u", "U", "u", "U", "u", "U", "u", "W", "w", "Y", "y", "Y", "Z", "z", "Z", "z", "Z", "z", "s"];
 
-function addDatasets($opt) {
-    // create a function to add datasets in the database with parameters in $opt associative array :
-    // id, title, type, updated, url, flag
-    // where all parameter are required. Trow an exception if required parameter are missing.
-    // other parameters are optional and defined by default to ''
-
-    if (!isset($opt['id'])){
-        throw new Exception("id is required");
-    }
-
-    if (!isset($opt['title'])){
-        throw new Exception("title is required");
-    }
-
-    if (!isset($opt['type'])){
-        throw new Exception("type is required");
-    }
-
-    if (!isset($opt['updated'])){
-        throw new Exception("updated is required");
-    }
-
-    if (!isset($opt['url'])){
-        throw new Exception("url is required");
-    }
-
-    if (!isset($opt['flag'])){
-        throw new Exception("flag is required");
-    }
-
-    $id = ['id'];
-    $title = ['title'];
-    $type = ['type'];
-    $updated = ['updated'];
-    $url = ['url'];
-    $flag = ['flag'];
-    
+function insertAgency($opt, $provider){
     $db = $GLOBALS["db"];
 
     $req = $db->prepare("
-        INSERT INTO datasets
-        (id, title, type, updated, url, flag)
-        VALUES
-        (?,?,?,?,?,?)
-        ");
-    $req->execute(array($id, $title, $type, $updated, $url, $flag));
-
+	  INSERT INTO agency
+	  (provider_id, agency_id, agency_name, agency_url, agency_timezone, agency_lang, agency_phone, agency_fare_url, agency_email)
+	  VALUES
+	  (?, ?, ?, ?, ?, ?, ?, ?, ?)
+	  ");
+    $req->execute(array(
+        $provider,
+        isset($opt['agency_id']) ? $opt['agency_id'] : '',
+        isset($opt['agency_name']) ? $opt['agency_name'] : '',
+        isset($opt['agency_url']) ? $opt['agency_url'] : '',
+        isset($opt['agency_timezone']) ? $opt['agency_timezone'] : '',
+        isset($opt['agency_lang']) ? $opt['agency_lang'] : '',
+        isset($opt['agency_phone']) ? $opt['agency_phone'] : '',
+        isset($opt['agency_fare_url']) ? $opt['agency_fare_url'] : '',
+        isset($opt['agency_email']) ? $opt['agency_email'] : '',
+    ));
     return $req;
 }
 
-function addAgency($opt){
-    // create a function to add an agency in the database with parameters in $opt associative array :
-    // agency_id, agency_name, agency_url, agency_timezone, agency_phone, agency_lang
-    // where agency_id is required. Trow an exception if agency_id is missing.
-    // other parameters are optional and defined by default to ''
-
-    if (!isset($opt["agency_id"])) {
-        throw new Exception("agency_id is required");
-    }
-
-    $agency_id = $opt["agency_id"];
-    $agency_name = isset($opt['agency_name']) ? $opt['agency_name'] : '';
-    $agency_url = isset($opt['agency_url']) ? $opt['agency_url'] : '';
-    $agency_timezone = isset($opt['agency_timezone']) ? $opt['agency_timezone'] : '';
-    $agency_phone = isset($opt['agency_phone']) ? $opt['agency_phone'] : '';
-    $agency_lang = isset($opt['agency_lang']) ? $opt['agency_lang'] : '';
-
+function insertStops($opt, $provider){
     $db = $GLOBALS["db"];
 
     $req = $db->prepare("
-        INSERT INTO agencies
-        (agency_id, agency_name, agency_url, agency_timezone, agency_phone, agency_lang)
-        VALUES
-        (?,?,?,?,?,?)
-        ");
-    $req->execute(array($agency_id, $agency_name, $agency_url, $agency_timezone, $agency_phone, $agency_lang));
-
+	  INSERT INTO stops
+	  (provider_id, stop_id, stop_code, stop_name, stop_desc, stop_lat, stop_lon, zone_id, stop_url, location_type, parent_station, stop_timezone, wheelchair_boarding, level_id, platform_code)
+	  VALUES
+	  (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+	");
+    $req->execute(array(
+        $provider,
+        isset($opt['stop_id']) ? $opt['stop_id'] : '',
+        isset($opt['stop_code']) ? $opt['stop_code'] : '',
+        isset($opt['stop_name']) ? $opt['stop_name'] : '',
+        isset($opt['stop_desc']) ? $opt['stop_desc'] : '',
+        isset($opt['stop_lat']) ? $opt['stop_lat'] : '',
+        isset($opt['stop_lon']) ? $opt['stop_lon'] : '',
+        isset($opt['zone_id']) ? $opt['zone_id'] : '',
+        isset($opt['stop_url']) ? $opt['stop_url'] : '',
+        isset($opt['location_type']) ? $opt['location_type'] : '',
+        isset($opt['parent_station']) ? $opt['parent_station'] : '',
+        isset($opt['stop_timezone']) ? $opt['stop_timezone'] : '',
+        isset($opt['wheelchair_boarding']) ? $opt['wheelchair_boarding'] : '',
+        isset($opt['level_id']) ? $opt['level_id'] : '',
+        isset($opt['platform_code']) ? $opt['platform_code'] : '',
+    ));
     return $req;
 }
 
-function addStop($opt){
-    // create a function to add stops in the database with parameters in $opt associative array :
-    // stop_id, stop_code, stop_name, stop_desc, stop_lon, stop_lat, zone_id, location_type, parent_station, wheelchair_boarding
-    // where stop_id, stop_name is required. Trow an exception if stop_id is missing.
-    // other parameters are optional and defined by default to ''
-
-    if (!isset($opt["stop_id"])) {
-        throw new Exception("stop_id is required");
-    }
-
-    if (!isset($opt["stop_name"])) {
-        throw new Exception("stop_name is required");
-    }
-
-    $stop_id = $opt["stop_id"];
-    $stop_code = isset($opt['stop_code']) ? $opt['stop_code'] : '';
-    $stop_name = $opt['stop_name'];
-    $stop_desc = isset($opt['stop_desc']) ? $opt['stop_desc'] : '';
-    $stop_lon = isset($opt['stop_lon']) ? $opt['stop_lon'] : '';
-    $stop_lat = isset($opt['stop_lat']) ? $opt['stop_lat'] : '';
-    $zone_id = isset($opt['zone_id']) ? $opt['zone_id'] : '';
-    $location_type = isset($opt['location_type']) ? $opt['location_type'] : '';
-    $parent_station = isset($opt['parent_station']) ? $opt['parent_station'] : '';
-    $wheelchair_boarding = isset($opt['wheelchair_boarding']) ? $opt['wheelchair_boarding'] : '';
-
+function insertRoutes($opt, $provider){
     $db = $GLOBALS["db"];
 
     $req = $db->prepare("
-        INSERT INTO stops
-        (stop_id, stop_code, stop_name, stop_desc, stop_lon, stop_lat, zone_id, location_type, parent_station, wheelchair_boarding)
-        VALUES
-        (?,?,?,?,?,?,?,?,?,?,?)
-        ");
-    $req->execute(array($stop_id, $stop_code, $stop_name, $stop_desc, $stop_lon, $stop_lat, $zone_id, $location_type, $parent_station, $wheelchair_boarding));
+	  INSERT INTO routes
+	  (provider_id, route_id, agency_id, route_short_name, route_long_name, route_desc, route_type, route_url, route_color, route_text_color, route_sort_order, continuous_pickup, continuous_drop_off)
+	  VALUES
+	  (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+	");
+    $req->execute(array(
+        $provider,
+        isset($opt['route_id']) ? $opt['route_id'] : '',
+        isset($opt['agency_id']) ? $opt['agency_id'] : '',
+        isset($opt['route_short_name']) ? $opt['route_short_name'] : '',
+        isset($opt['route_long_name']) ? $opt['route_long_name'] : '',
+        isset($opt['route_desc']) ? $opt['route_desc'] : '',
+        isset($opt['route_type']) ? $opt['route_type'] : '',
+        isset($opt['route_url']) ? $opt['route_url'] : '',
+        isset($opt['route_color']) ? $opt['route_color'] : '',
+        isset($opt['route_text_color']) ? $opt['route_text_color'] : '',
+        isset($opt['route_sort_order']) ? $opt['route_sort_order'] : '',
+        isset($opt['continuous_pickup']) ? $opt['continuous_pickup'] : '',
+        isset($opt['continuous_drop_off']) ? $opt['continuous_drop_off'] : '',
+    ));
     return $req;
 }
 
-function addRoute($opt){
-    // create a function to add routes in the database with parameters in $opt associative array :
-    // route_id, agency_id, route_short_name, route_long_name, route_type, route_color, route_text_color
-    // where stop_id and agency_id are required. Trow an exception if stop_id or agency_id is missing.
-    // other parameters are optional and defined by default to ''
-
-    if (!isset($opt["route_id"])) {
-        throw new Exception("route_id is required");
-    }
-
-    if (!isset($opt["agency_id"])) {
-        throw new Exception("agency_id is required");
-    }
-
-    $route_id = $opt["route_id"];
-    $agency_id = $opt["agency_id"];
-    $route_short_name = isset($opt['route_short_name']) ? $opt['route_short_name'] : '';
-    $route_long_name = isset($opt['route_long_name']) ? $opt['route_long_name'] : '';
-    $route_type = isset($opt['route_type']) ? $opt['route_type'] : '';
-    $route_color = isset($opt['route_color']) ? $opt['route_color'] : '';
-    $route_text_color = isset($opt['route_text_color']) ? $opt['route_text_color'] : '';
-
+function insertTrips($opt, $provider){
     $db = $GLOBALS["db"];
 
     $req = $db->prepare("
-        INSERT INTO routes
-        (route_id, agency_id, route_short_name, route_long_name, route_type, route_color, route_text_color)
-        VALUES
-        (?,?,?,?,?,?,?)
-        ");
-    $req->execute(array($route_id, $agency_id, $route_short_name, $route_long_name, $route_type, $route_color, $route_text_color));
+	INSERT INTO trips
+	(provider_id, route_id, service_id, trip_id, trip_headsign, trip_short_name, direction_id, block_id, shape_id, wheelchair_accessible, bikes_allowed)
+	VALUES
+	(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+	");
+    $req->execute(array(
+        $provider,
+        isset($opt['route_id']) ? ['route_id'] : '',
+        isset($opt['service_id']) ? ['service_id'] : '',
+        isset($opt['trip_id']) ? ['trip_id'] : '',
+        isset($opt['trip_headsign']) ? ['trip_headsign'] : '',
+        isset($opt['trip_short_name']) ? ['trip_short_name'] : '',
+        isset($opt['direction_id']) ? ['direction_id'] : '',
+        isset($opt['block_id']) ? ['block_id'] : '',
+        isset($opt['shape_id']) ? ['shape_id'] : '',
+        isset($opt['wheelchair_accessible']) ? ['wheelchair_accessible'] : '',
+        isset($opt['bikes_allowed']) ? ['bikes_allowed'] : '',
+    ));
     return $req;
 }
 
-function addTrip($opt){
-    // create a function to add trips in the database with parameters in $opt associative array :
-    // route_id, service_id, trip_id, trip_headsign, trip_short_name, direction_id, wheelchair_accessible, bikes_allowed
-    // where route_id, service_id and trip_id are required. Trow an exception if route_id, service_id and trip_id is missing.
-    // other parameters are optional and defined by default to ''
-
-    if (!isset($opt["route_id"])) {
-        throw new Exception("route_id is required");
-    }
-
-    if (!isset($opt["service_id"])) {
-        throw new Exception("service_id is required");
-    }
-
-    if (!isset($opt["trip_id"])) {
-        throw new Exception("trip_id is required");
-    }
-
-    $route_id = $opt["route_id"];
-    $service_id = $opt["service_id"];
-    $trip_id = $opt["trip_id"];
-    $trip_headsign = isset($opt['trip_headsign']) ? $opt['trip_headsign'] : '';
-    $trip_short_name = isset($opt['trip_short_name']) ? $opt['trip_short_name'] : '';
-    $direction_id = isset($opt['direction_id']) ? $opt['direction_id'] : '';
-    $wheelchair_accessible = isset($opt['wheelchair_accessible']) ? $opt['wheelchair_accessible'] : '';
-    $bikes_allowed = isset($opt['bikes_allowed']) ? $opt['bikes_allowed'] : '';
-
+function insertStopTimes($opt, $provider){
     $db = $GLOBALS["db"];
 
     $req = $db->prepare("
-        INSERT INTO trips
-        (route_id, service_id, trip_id, trip_headsign, trip_short_name, direction_id, wheelchair_accessible, bikes_allowed)
-        VALUES
-        (?,?,?,?,?,?,?,?)
-        ");
-    $req->execute(array($route_id, $service_id, $trip_short_name, $direction_id, $wheelchair_accessible, $bikes_allowed));
+	INSERT INTO stop_times
+	(provider_id, trip_id, arrival_time, departure_time, stop_id, stop_sequence, stop_headsign, pickup_type, drop_off_type, continuous_pickup, continuous_drop_off, shape_dist_traveled, timepoint)
+	VALUES
+	(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+	");
+    $req->execute(array(
+        $provider,
+        isset($opt['trip_id']) ? $opt['trip_id'] : "",
+        isset($opt['arrival_time']) ? $opt['arrival_time'] : "",
+        isset($opt['departure_time']) ? $opt['departure_time'] : "",
+        isset($opt['stop_id']) ? $opt['stop_id'] : "",
+        isset($opt['stop_sequence']) ? $opt['stop_sequence'] : "",
+        isset($opt['stop_headsign']) ? $opt['stop_headsign'] : "",
+        isset($opt['pickup_type']) ? $opt['pickup_type'] : "",
+        isset($opt['drop_off_type']) ? $opt['drop_off_type'] : "",
+        isset($opt['continuous_pickup']) ? $opt['continuous_pickup'] : "",
+        isset($opt['continuous_drop_off']) ? $opt['continuous_drop_off'] : "",
+        isset($opt['shape_dist_traveled']) ? $opt['shape_dist_traveled'] : "",
+        isset($opt['timepoint']) ? $opt['timepoint'] : "",
+    ));
     return $req;
 }
 
-function addStopTimes($opt) {
-    // create a function to add trips in the database with parameters in $opt associative array :
-    // trip_id, stop_id, stop_sequence, stop_headsign, arrival_time, departure_time, pickup_type, drop_off_type, shape_dist_traveled, timepoint
-    // where trip_id, stop_id, stop_sequence, arrival_time, departure_time are required. Trow an exception if required parameter are missing.
-    // other parameters are optional and defined by default to ''
-
-    if (!isset($opt["trip_id"])) {
-        throw new Exception("trip_id is required");
-    }
-
-    if (!isset($opt["stop_id"])) {
-        throw new Exception("stop_id is required");
-    }
-
-    if (!isset($opt["stop_sequence"])) {
-        throw new Exception("stop_sequence is required");
-    }
-
-    if (!isset($opt["arrival_time"])) {
-        throw new Exception("arrival_time is required");
-    }
-    
-    if (!isset($opt["departure_time"])) {
-        throw new Exception("departure_time is required");
-    }
-
-    $trip_id                = $opt["trip_id"];
-    $stop_id                = $opt["stop_id"];
-    $stop_sequence          = $opt["stop_sequence"];
-    $stop_headsign          = isset($opt['stop_headsign'])          ? $opt['stop_headsign']         : '';
-    $arrival_time           = $opt["arrival_time"]; 
-    $departure_time         = $opt["departure_time"];   
-    $pickup_type            = isset($opt['pickup_type'])            ? $opt['pickup_type']           : '';
-    $drop_off_type          = isset($opt['drop_off_type'])          ? $opt['drop_off_type']         : '';
-    $shape_dist_traveled    = isset($opt['shape_dist_traveled'])    ? $opt['shape_dist_traveled']   : '';
-    $timepoint              = isset($opt['timepoint'])              ? $opt['timepoint']             : '';
-
+function insertCalendar($opt, $provider){
     $db = $GLOBALS["db"];
 
     $req = $db->prepare("
-        INSERT INTO trips_stop_times
-        (trip_id, stop_id, stop_sequence, stop_headsign, arrival_time, departure_time, pickup_type, drop_off_type, shape_dist_traveled, timepoint)
-        VALUES
-        (?,?,?,?,?,?,?,?,?)
-        ");
-    $req->execute(array($trip_id, $stop_id, $stop_sequence, $stop_headsign, $arrival_time, $departure_time, $pickup_type, $drop_off_type, $shape_dist_traveled, $timepoint));
+	INSERT INTO calendar
+	(provider_id, service_id, monday, tuesday, wednesday, thrusday, friday, saturday, sunday, start_date, end_date)
+	VALUES
+	(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+	");
+    $req->execute(array(
+        $provider,
+        isset($opt['service_id']) ? $opt['service_id'] : "",
+        isset($opt['monday']) ? $opt['monday'] : "",
+        isset($opt['tuesday']) ? $opt['tuesday'] : "",
+        isset($opt['wednesday']) ? $opt['wednesday'] : "",
+        isset($opt['thrusday']) ? $opt['thrusday'] : "",
+        isset($opt['friday']) ? $opt['friday'] : "",
+        isset($opt['saturday']) ? $opt['saturday'] : "",
+        isset($opt['sunday']) ? $opt['sunday'] : "",
+        isset($opt['start_date']) ? $opt['start_date'] : "",
+        isset($opt['end_date']) ? $opt['end_date'] : "",
+    ));
     return $req;
 }
 
-function addCalendar() {
-    // create a function to add calendar in the database with parameters in $opt associative array :
-    // service_id, monday, tuesday, wednesday, thursday, friday, saturday, sunday, start_day, end_date
-    // where all parameters are required. Trow an exception if required parameter are missing.
-    // other parameters are optional and defined by default to ''
-
-    if (!isset($opt["service_id"])) {
-        throw new Exception("service_id is required");
-    }
-
-    if (!isset($opt["monday"])) {
-        throw new Exception("monday is required");
-    }
-    
-    if (!isset($opt["tuesday"])) {
-        throw new Exception("tuesday is required");
-    }
-    
-    if (!isset($opt["wednesday"])) {
-        throw new Exception("wednesday is required");
-    }
-
-    if (!isset($opt["thursday"])) {
-        throw new Exception("thursday is required");
-    }
-    
-    if (!isset($opt["friday"])) {
-        throw new Exception("friday is required");
-    }
-
-    if (!isset($opt["saturday"])) {
-        throw new Exception("saturday is required");
-    }
-
-    if (!isset($opt["sunday"])) {
-        throw new Exception("sunday is required");
-    }
-
-    if (!isset($opt["start_day"])) {
-        throw new Exception("start_day is required");
-    }
-
-    if (!isset($opt["end_date"])) {
-        throw new Exception("end_date is required");
-    }
-
-    $service_id     = $opt['service_id'];
-    $monday         = $opt['monday'];
-    $tuesday        = $opt['tuesday'];
-    $wednesday      = $opt['wednesday'];
-    $thursday       = $opt['thursday'];
-    $friday         = $opt['friday'];
-    $saturday       = $opt['saturday'];
-    $sunday         = $opt['sunday'];
-    $start_day      = $opt['start_day'];
-    $end_date       = $opt['end_date'];
-
+function insertCalendarDates($opt, $provider){
     $db = $GLOBALS["db"];
 
     $req = $db->prepare("
-        INSERT INTO calendar
-        (service_id, monday, tuesday, wednesday, thursday, friday, saturday, sunday, start_day, end_date)
-        VALUES
-        (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-        ");
-    $req->execute(array($service_id, $monday, $tuesday, $wednesday, $thursday, $friday, $saturday, $sunday, $start_day, $end_date));
+	INSERT INTO calendar_dates
+	(provider_id, service_id, `date`, exception_type)
+	VALUES
+	(?, ?, ?, ?)
+	");
+    $req->execute(array(
+        $provider,
+        isset($opt['service_id']) ? $opt['service_id'] : "",
+        isset($opt['date']) ? $opt['date'] : "",
+        isset($opt['exception_type']) ? $opt['exception_type'] : "",
+    ));
     return $req;
 }
 
-function addCalendarDate() {
-    // create a function to add calendar date in the database with parameters in $opt associative array :
-    // service_id, date, exception_type
-    // where all parameters are required. Trow an exception if required parameter are missing.
-    // other parameters are optional and defined by default to ''
-
-    if (!isset($opt["service_id"])) {
-        throw new Exception("service_id is required");
-    }
-
-    if (!isset($opt["date"])) {
-        throw new Exception("date is required");
-    }
-
-    if (!isset($opt["exception_type"])) {
-        throw new Exception("exception_type is required");
-    }
-
-    $service_id     = $opt['service_id'];
-    $date           = $opt['date'];
-    $exception_type = $opt['exception_type'];
-
+function insertFareAttributes($opt, $provider){
     $db = $GLOBALS["db"];
 
     $req = $db->prepare("
-        INSERT INTO calendar_date
-        (service_id, date, exception_type)
-        VALUES
-        (?,?,?)
-        ");
-    $req->execute(array($service_id, $date, $exception_type));
+	INSERT INTO fare_attributes
+	(provider_id, fare_id, price, currency_type, payment_method, transfers, agency_id, transfer_duration)
+	VALUES
+	(?, ?, ?, ?, ?, ?, ?, ?)
+	");
+    $req->execute(array(
+        $provider,
+        isset($opt['fare_id']) ? $opt['fare_id'] : "",
+        isset($opt['price']) ? $opt['price'] : "",
+        isset($opt['currency_type']) ? $opt['currency_type'] : "",
+        isset($opt['payment_method']) ? $opt['payment_method'] : "",
+        isset($opt['transfers']) ? $opt['transfers'] : "",
+        isset($opt['agency_id']) ? $opt['agency_id'] : "",
+        isset($opt['transfer_duration']) ? $opt['transfer_duration'] : "",
+    ));
     return $req;
 }
 
-function addShapes() {
-    // create a function to add shapes in the database with parameters in $opt associative array :
-    // shape_id, shape_pt_lat, shape_pt_lon, shape_pt_sequence, shape_dist_traveled
-    // where all parameters are required. Trow an exception if required parameter are missing.
-    // other parameters are optional and defined by default to ''
-
-    if (!isset($opt["shape_id"])) {
-        throw new Exception("shape_id is required");
-    }
-
-    if (!isset($opt["shape_pt_lat"])) {
-        throw new Exception("shape_pt_lat is required");
-    }
-
-    if (!isset($opt["shape_pt_lon"])) {
-        throw new Exception("shape_pt_lon is required");
-    }
-
-    if (!isset($opt["shape_pt_sequence"])) {
-        throw new Exception("shape_pt_sequence is required");
-    }
-
-    if (!isset($opt["shape_dist_traveled"])) {
-        throw new Exception("shape_dist_traveled is required");
-    }
-
-    $shape_id = $opt["shape_id"];
-    $shape_pt_lat = $opt["shape_pt_lat"];
-    $shape_pt_lon = $opt['shape_pt_lon'];
-    $shape_pt_sequence = $opt['shape_pt_sequence'];
-    $shape_dist_traveled = $opt['shape_dist_traveled'];
-
+function insertFareRules($opt, $provider){
     $db = $GLOBALS["db"];
 
     $req = $db->prepare("
-        INSERT INTO shapes
-        (shape_id, shape_pt_lat, shape_pt_lon, shape_pt_sequence, shape_dist_traveled)
-        VALUES
-        (?,?,?,?,?)
-        ");
-    $req->execute(array($shape_id, $shape_pt_lat, $shape_pt_lon, $shape_pt_sequence, $shape_dist_traveled));
+	INSERT INTO fare_rules
+	(provider_id, fare_id, route_id, origin_id, destination_id, contains_id)
+	VALUES
+	(?, ?, ?, ?, ?, ?)
+	");
+    $req->execute(array(
+        $provider,
+        isset($opt['fare_id']) ? $opt['fare_id'] : "",
+        isset($opt['route_id']) ? $opt['route_id'] : "",
+        isset($opt['origin_id']) ? $opt['origin_id'] : "",
+        isset($opt['destination_id']) ? $opt['destination_id'] : "",
+        isset($opt['contains_id']) ? $opt['contains_id'] : "",
+    ));
     return $req;
 }
 
-function addFrequencies($opt) {
-    // create a function to add frequencies in the database with parameters in $opt associative array :
-    // trip_id, start_time, end_time, headway_secs, exact_times
-    // where all parameters are required except for exact_times who is optional. Trow an exception if required parameter are missing.
-    // other parameters are optional and defined by default to ''
-
-    if (!isset($opt["trip_id"])) {
-        throw new Exception("trip_id is required");
-    }
-
-    if (!isset($opt["start_time"])) {
-        throw new Exception("start_time is required");
-    }
-
-    if (!isset($opt["end_time"])) {
-        throw new Exception("end_time is required");
-    }
-
-    if (!isset($opt["headway_secs"])) {
-        throw new Exception("headway_secs is required");
-    }
-
-    $trip_id        = $opt["trip_id"];
-    $start_time     = $opt["start_time"];
-    $end_time       = $opt["end_time"];
-    $headway_secs   = $opt["headway_secs"];
-    $exact_times    = isset($opt["exact_times"])    ?   $opt["exact_times"] : '';
-
+function insertShapes($opt, $provider){
     $db = $GLOBALS["db"];
 
     $req = $db->prepare("
-        INSERT INTO frequencies
-        (trip_id, start_time, end_time, headway_secs, exact_times)
-        VALUES
-        (?,?,?,?,?)
-        ");
-    $req->execute(array($trip_id, $start_time, $end_time, $headway_secs, $exact_times));
+	INSERT INTO shapes
+	(provider_id, shape_id, shape_pt_lat, shape_pt_lon, shape_pt_sequence, shape_dist_traveled)
+	VALUES
+	(?, ?, ?, ?, ?, ?)
+	");
+    $req->execute(array(
+        $provider,
+        isset($opt['shape_id']) ? $opt['shape_id'] : "",
+        isset($opt['shape_pt_lat']) ? $opt['shape_pt_lat'] : "",
+        isset($opt['shape_pt_lon']) ? $opt['shape_pt_lon'] : "",
+        isset($opt['shape_pt_sequence']) ? $opt['shape_pt_sequence'] : "",
+        isset($opt['shape_dist_traveled']) ? $opt['shape_dist_traveled'] : "",
+    ));
     return $req;
 }
 
-function addTransfers($opt) {
-    // create a function to add frequencies in the database with parameters in $opt associative array :
-    // from_stop_id, to_stop_id, transfer_type, min_transfer_time
-    // where from_stop_id, to_stop_id and transfer_type required. Trow an exception if required parameter are missing.
-    // other parameters are optional and defined by default to ''
-    
-    if (!isset($opt["from_stop_id"])) {
-        throw new Exception("from_stop_id is required");
-    }
-
-    if (!isset($opt["to_stop_id"])) {
-        throw new Exception("to_stop_id is required");
-    }
-
-    if (!isset($opt["transfer_type"])) {
-        throw new Exception("transfer_type is required");
-    }
-
-    if (!isset($opt["min_transfer_time"])) {
-        throw new Exception("min_transfer_time is required");
-    }
-
-    $from_stop_id = $opt["from_stop_id"];
-    $to_stop_id   = $opt["to_stop_id"];
-    $transfer_type = $opt["transfer_type"];
-    $min_transfer_time = isset($opt["min_transfer_time"]) ? $opt["min_transfer_time"] : "";
-
+function insertFrequencies($opt, $provider){
     $db = $GLOBALS["db"];
 
     $req = $db->prepare("
-        INSERT INTO transfers
-        (from_stop_id, to_stop_id, transfer_type, min_transfer_time)
-        VALUES
-        (?,?,?,?)
-        ");
-    $req->execute(array($from_stop_id, $to_stop_id, $transfer_type, $min_transfer_time));
+	INSERT INTO frequencies
+	(provider_id, trip_id, start_time, end_time, headway_secs, exact_times)
+	VALUES
+	(?, ?, ?, ?, ?, ?)
+	");
+    $req->execute(array(
+        $provider,
+        isset($opt['trip_id']) ? $opt['trip_id'] : "",
+        isset($opt['start_time']) ? $opt['start_time'] : "",
+        isset($opt['end_time']) ? $opt['end_time'] : "",
+        isset($opt['headway_secs']) ? $opt['headway_secs'] : "",
+        isset($opt['exact_times']) ? $opt['exact_times'] : "",
+    ));
     return $req;
 }
 
-function addPathways($opt) {
-    // create a function to add pathways in the database with parameters in $opt associative array :
-    // pathway_id, from_stop_id, to_stop_id, pathway_mode, is_bidirectional, length, traversal_time, stair_count, max_slope, min_width, signposted_as, reversed_signposted_as
-    // where pathway_id, from_stop_id, to_stop_id, pathway_mode and is_bidirectional required. Trow an exception if required parameter are missing.
-    // other parameters are optional and defined by default to ''
-
-    if (!isset($opt["pathway_id"])) {
-        throw new Exception("pathway_id is required");
-    }
-
-    if (!isset($opt["from_stop_id"])) {
-        throw new Exception("from_stop_id is required");
-    }
-
-    if (!isset($opt["to_stop_id"])) {
-        throw new Exception("to_stop_id is required");
-    }
-
-    if (!isset($opt["pathway_mode"])) {
-        throw new Exception("pathway_mode is required");
-    }
-
-    if (!isset($opt["is_bidirectional"])) {
-        throw new Exception("is_bidirectional is required");
-    }
-    
-    $pathway_id = $opt['pathway_id'];
-    $from_stop_id = $opt['from_stop_id'];
-    $to_stop_id = $opt['to_stop_id'];
-    $pathway_mode = $opt['pathway_mode'];
-    $is_bidirectional = $opt['is_bidirectional'];
-    $length = isset($opt["length"])? $opt["length"] : "";
-    $traversal_time = isset($opt["traversal_time"])? $opt["traversal_time"] : "";
-    $stair_count = isset($opt["stair_count"])? $opt["stair_count"] : '';
-    $max_slope = isset($opt["max_slope"])? $opt["max_slope"] : "";
-    $min_width = isset($opt["min_width"])? $opt["min_widht"] : "";
-    $signposted_as = isset($opt["signposted_as"])? $opt["signposted_as"] : "";
-    $reversed_signposted_as = isset($opt["reversed_signposted_as"]) ? $opt["reversed_signposted_as"] : "";
-
+function insertTransfers($opt, $provider){
     $db = $GLOBALS["db"];
 
     $req = $db->prepare("
-        INSERT INTO pathways
-        (pathway_id, from_stop_id, to_stop_id, pathway_mode, is_bidirectional, length, traversal_time, stair_count, max_slope, min_width, signposted_as, reversed_signposted_as)
-        VALUES
-        (?,?,?,?,?,?,?,?,?,?,?,?)
-        ");
-    $req->execute(array($pathway_id, $from_stop_id, $to_stop_id, $pathway_mode, $is_bidirectional, $length, $traversal_time, $stair_count, $max_slope, $min_width, $signposted_as, $reversed_signposted_as));
+	INSERT INTO transfers
+	(provider_id, from_stop_id, to_stop_id, transfer_type, min_transfer_time)
+	VALUES
+	(?, ?, ?, ?, ?)
+	");
+    $req->execute(array(
+        $provider,
+        isset($opt['from_stop_id']) ? $opt['from_stop_id'] : "",
+        isset($opt['to_stop_id']) ? $opt['to_stop_id'] : "",
+        isset($opt['transfer_type']) ? $opt['transfer_type'] : "",
+        isset($opt['min_transfer_time']) ? $opt['min_transfer_time'] : "",
+    ));
     return $req;
 }
 
-function addLevels($opt) {
-    // create a function to add levels in the database with parameters in $opt associative array :
-    // level_id, level_index, level_name
-    // where level_id and level_index required. Trow an exception if required parameter are missing.
-    // other parameters are optional and defined by default to ''
-
-    if (!isset($opt["level_id"])) {
-        throw new Exception("level_id is required");
-    }
-
-    if (!isset($opt["level_index"])) {
-        throw new Exception("level_index is required");
-    }
-
-    $level_id = $opt["level_id"];
-    $level_index = $opt["level_index"];
-    $level_name = isset($opt["level_name"]) ? $opt["level_name"] : '';
-
+function insertPathways($opt, $provider){
     $db = $GLOBALS["db"];
 
     $req = $db->prepare("
-        INSERT INTO levels
-        (level_id, level_index, level_name)
-        VALUES
-        (?,?,?)
-        ");
-    $req->execute(array($level_id, $level_index, $level_name));
+	INSERT INTO pathways
+	(provider_id, pathway_id, from_stop_id, to_stop_id, pathway_mode, is_bidirectional, length, traversal_time, stair_count, max_slope, min_width, signposted_as, reversed_signposted_as)
+	VALUES
+	(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+	");
+    $req->execute(array(
+        $provider,
+        isset($opt['pathway_id']) ? $opt['pathway_id'] : "",
+        isset($opt['from_stop_id']) ? $opt['from_stop_id'] : "",
+        isset($opt['to_stop_id']) ? $opt['to_stop_id'] : "",
+        isset($opt['pathway_mode']) ? $opt['pathway_mode'] : "",
+        isset($opt['is_bidirectional']) ? $opt['is_bidirectional'] : "",
+        isset($opt['length']) ? $opt['length'] : "",
+        isset($opt['traversal_time']) ? $opt['traversal_time'] : "",
+        isset($opt['stair_count']) ? $opt['stair_count'] : "",
+        isset($opt['max_slope']) ? $opt['max_slope'] : "",
+        isset($opt['min_width']) ? $opt['min_width'] : "",
+        isset($opt['signposted_as']) ? $opt['signposted_as'] : "",
+        isset($opt['reversed_signposted_as']) ? $opt['reversed_signposted_as'] : "",
+    ));
+    return $req;
+}
+
+function insertLevels($opt, $provider){
+    $db = $GLOBALS["db"];
+
+    $req = $db->prepare("
+	INSERT INTO levels
+	(provider_id, level_id, level_index, level_name)
+	VALUES
+	(?, ?, ?, ?)
+	");
+    $req->execute(array(
+        $provider,
+        isset($opt['level_id']) ? $opt['level_id'] : "",
+        isset($opt['level_index']) ? $opt['level_index'] : "",
+        isset($opt['level_name']) ? $opt['level_name'] : "",
+    ));
+    return $req;
+}
+
+function insertFeedInfo($opt, $provider){
+    $db = $GLOBALS["db"];
+
+    $req = $db->prepare("
+	INSERT INTO feed_info
+	(provider_id, feed_publisher_name, feed_publisher_url, feed_lang, default_lang, feed_start_date, feed_end_date, feed_version, feed_contact_email, feed_contact_url)
+	VALUES
+	(?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+	");
+    $req->execute(array(
+        $provider,
+        isset($opt['feed_publisher_name']) ? $opt['feed_publisher_name'] : "",
+        isset($opt['feed_publisher_url']) ? $opt['feed_publisher_url'] : "",
+        isset($opt['feed_lang']) ? $opt['feed_lang'] : "",
+        isset($opt['default_lang']) ? $opt['default_lang'] : "",
+        isset($opt['feed_start_date']) ? $opt['feed_start_date'] : "",
+        isset($opt['feed_end_date']) ? $opt['feed_end_date'] : "",
+        isset($opt['feed_version']) ? $opt['feed_version'] : "",
+        isset($opt['feed_contact_email']) ? $opt['feed_contact_email'] : "",
+        isset($opt['feed_contact_url']) ? $opt['feed_contact_url'] : "",
+    ));
+    return $req;
+}
+
+function insertTranslations($opt, $provider){
+    $db = $GLOBALS["db"];
+
+    $req = $db->prepare("
+	INSERT INTO translations
+	(provider_id, table_name, field_name, language, translation, record_id, record_sub_id, field_value)
+	VALUES
+	(?, ?, ?, ?, ?, ?, ?, ?)
+	");
+    $req->execute(array(
+        $provider,
+        isset($opt['table_name']) ? $opt['table_name'] : "",
+        isset($opt['field_name']) ? $opt['field_name'] : "",
+        isset($opt['language']) ? $opt['language'] : "",
+        isset($opt['translation']) ? $opt['translation'] : "",
+        isset($opt['record_id']) ? $opt['record_id'] : "",
+        isset($opt['record_sub_id']) ? $opt['record_sub_id'] : "",
+        isset($opt['field_value']) ? $opt['field_value'] : "",
+    ));
+    return $req;
+}
+
+function insertAttributions($opt, $provider){
+    $db = $GLOBALS["db"];
+
+    $req = $db->prepare("
+	INSERT INTO attributions
+	(provider_id, attribution_id, agency_id, route_id, trip_id, organization_name, is_producer, is_operator, is_authority, attribution_url, attribution_email, attribution_phone)
+	VALUES
+	(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+	");
+    $req->execute(array(
+        $provider,
+        isset($opt['attribution_id']) ? $opt['attribution_id'] : "",
+        isset($opt['agency_id']) ? $opt['agency_id'] : "",
+        isset($opt['route_id']) ? $opt['route_id'] : "",
+        isset($opt['trip_id']) ? $opt['trip_id'] : "",
+        isset($opt['organization_name']) ? $opt['organization_name'] : "",
+        isset($opt['is_producer']) ? $opt['is_producer'] : "",
+        isset($opt['is_operator']) ? $opt['is_operator'] : "",
+        isset($opt['is_authority']) ? $opt['is_authority'] : "",
+        isset($opt['attribution_url']) ? $opt['attribution_url'] : "",
+        isset($opt['attribution_email']) ? $opt['attribution_email'] : "",
+        isset($opt['attribution_phone']) ? $opt['attribution_phone'] : "",
+    ));
+    return $req;
+}
+
+// create a function to delete an element foreach table used
+
+function deleteTable($opt, $provider){
+    $db = $GLOBALS["db"];
+
+    $req = $db->prepare("DELETE FROM $opt");
+    $req->execute();
     return $req;
 }
