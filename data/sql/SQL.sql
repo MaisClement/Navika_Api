@@ -231,107 +231,107 @@ CREATE TABLE `attributions` (
   attribution_phone  VARCHAR(255)
 );
 
-ALTER TABLE agency
-ADD CONSTRAINT FK_agency_provider_id
-FOREIGN KEY  (provider_id) REFERENCES provider(provider_id) ON DELETE CASCADE; 
-
-ALTER TABLE stops
-ADD CONSTRAINT FK_stops_provider_id
-FOREIGN KEY  (provider_id) REFERENCES provider(provider_id) ON DELETE CASCADE; 
-
-ALTER TABLE routes
-ADD CONSTRAINT FK_routes_provider_id
-FOREIGN KEY  (provider_id) REFERENCES provider(provider_id) ON DELETE CASCADE; 
-
-ALTER TABLE trips
-ADD CONSTRAINT FK_trips_provider_id
-FOREIGN KEY  (provider_id) REFERENCES provider(provider_id) ON DELETE CASCADE; 
-
-ALTER TABLE stop_times
-ADD CONSTRAINT FK_stop_times_provider_id
-FOREIGN KEY  (provider_id) REFERENCES provider(provider_id) ON DELETE CASCADE; 
-
-ALTER TABLE calendar
-ADD CONSTRAINT FK_calendar_provider_id
-FOREIGN KEY  (provider_id) REFERENCES provider(provider_id) ON DELETE CASCADE; 
-
-ALTER TABLE calendar_dates
-ADD CONSTRAINT FK_calendar_dates_provider_id
-FOREIGN KEY  (provider_id) REFERENCES provider(provider_id) ON DELETE CASCADE; 
-
-ALTER TABLE fare_attributes
-ADD CONSTRAINT FK_fare_attributes_provider_id
-FOREIGN KEY  (provider_id) REFERENCES provider(provider_id) ON DELETE CASCADE; 
-
-ALTER TABLE fare_rules
-ADD CONSTRAINT FK_fare_rules_provider_id
-FOREIGN KEY  (provider_id) REFERENCES provider(provider_id) ON DELETE CASCADE; 
-
-ALTER TABLE shapes
-ADD CONSTRAINT FK_shapes_provider_id
-FOREIGN KEY  (provider_id) REFERENCES provider(provider_id) ON DELETE CASCADE; 
-
-ALTER TABLE frequencies
-ADD CONSTRAINT FK_frequencies_provider_id
-FOREIGN KEY  (provider_id) REFERENCES provider(provider_id) ON DELETE CASCADE; 
-
-ALTER TABLE transfers
-ADD CONSTRAINT FK_transfers_provider_id
-FOREIGN KEY  (provider_id) REFERENCES provider(provider_id) ON DELETE CASCADE; 
-
-ALTER TABLE pathways
-ADD CONSTRAINT FK_pathways_provider_id
-FOREIGN KEY  (provider_id) REFERENCES provider(provider_id) ON DELETE CASCADE; 
-
-ALTER TABLE levels
-ADD CONSTRAINT FK_levels_provider_id
-FOREIGN KEY  (provider_id) REFERENCES provider(provider_id) ON DELETE CASCADE; 
-
-ALTER TABLE feed_info
-ADD CONSTRAINT FK_feed_info_provider_id
-FOREIGN KEY  (provider_id) REFERENCES provider(provider_id) ON DELETE CASCADE; 
-
-ALTER TABLE translations
-ADD CONSTRAINT FK_translations_provider_id
-FOREIGN KEY  (provider_id) REFERENCES provider(provider_id) ON DELETE CASCADE; 
-
-ALTER TABLE attributions
-ADD CONSTRAINT FK_attributions_provider_id
-FOREIGN KEY  (provider_id) REFERENCES provider(provider_id) ON DELETE CASCADE; 
-
-
-ALTER TABLE routes
-ADD CONSTRAINT FK_routes_agency_id
-FOREIGN KEY  (agency_id) REFERENCES agency(agency_id) ON DELETE CASCADE; 
-
-ALTER TABLE trips
-ADD CONSTRAINT FK_trips_route_id
-FOREIGN KEY  (route_id) REFERENCES routes(route_id) ON DELETE CASCADE; 
-
-ALTER TABLE stop_times
-ADD CONSTRAINT FK_stop_times_trip_id
-FOREIGN KEY  (trip_id) REFERENCES trips(trip_id) ON DELETE CASCADE; 
-ALTER TABLE stop_times
-ADD CONSTRAINT FK_stop_times_stop_id
-FOREIGN KEY  (stop_id) REFERENCES stops(stop_id) ON DELETE CASCADE; 
-
-ALTER TABLE frequencies
-ADD CONSTRAINT FK_frequencies_trip_id
-FOREIGN KEY  (trip_id) REFERENCES trips(trip_id) ON DELETE CASCADE; 
-
-ALTER TABLE transfers
-ADD CONSTRAINT FK_transfers_from_stop_id
-FOREIGN KEY  (from_stop_id) REFERENCES stops(stop_id) ON DELETE CASCADE; 
-ALTER TABLE transfers
-ADD CONSTRAINT FK_transfers_to_stop_id
-FOREIGN KEY  (to_stop_id) REFERENCES stops(stop_id) ON DELETE CASCADE; 
-
-ALTER TABLE pathways
-ADD CONSTRAINT FK_pathways_from_stop_id
-FOREIGN KEY  (from_stop_id) REFERENCES stops(stop_id) ON DELETE CASCADE; 
-ALTER TABLE pathways
-ADD CONSTRAINT FK_pathways_to_stop_id
-FOREIGN KEY  (to_stop_id) REFERENCES stops(stop_id) ON DELETE CASCADE; 
+-- ALTER TABLE agency
+-- ADD CONSTRAINT FK_agency_provider_id
+-- FOREIGN KEY  (provider_id) REFERENCES provider(provider_id) ON DELETE CASCADE; 
+-- 
+-- ALTER TABLE stops
+-- ADD CONSTRAINT FK_stops_provider_id
+-- FOREIGN KEY  (provider_id) REFERENCES provider(provider_id) ON DELETE CASCADE; 
+-- 
+-- ALTER TABLE routes
+-- ADD CONSTRAINT FK_routes_provider_id
+-- FOREIGN KEY  (provider_id) REFERENCES provider(provider_id) ON DELETE CASCADE; 
+-- 
+-- ALTER TABLE trips
+-- ADD CONSTRAINT FK_trips_provider_id
+-- FOREIGN KEY  (provider_id) REFERENCES provider(provider_id) ON DELETE CASCADE; 
+-- 
+-- ALTER TABLE stop_times
+-- ADD CONSTRAINT FK_stop_times_provider_id
+-- FOREIGN KEY  (provider_id) REFERENCES provider(provider_id) ON DELETE CASCADE; 
+-- 
+-- ALTER TABLE calendar
+-- ADD CONSTRAINT FK_calendar_provider_id
+-- FOREIGN KEY  (provider_id) REFERENCES provider(provider_id) ON DELETE CASCADE; 
+-- 
+-- ALTER TABLE calendar_dates
+-- ADD CONSTRAINT FK_calendar_dates_provider_id
+-- FOREIGN KEY  (provider_id) REFERENCES provider(provider_id) ON DELETE CASCADE; 
+-- 
+-- ALTER TABLE fare_attributes
+-- ADD CONSTRAINT FK_fare_attributes_provider_id
+-- FOREIGN KEY  (provider_id) REFERENCES provider(provider_id) ON DELETE CASCADE; 
+-- 
+-- ALTER TABLE fare_rules
+-- ADD CONSTRAINT FK_fare_rules_provider_id
+-- FOREIGN KEY  (provider_id) REFERENCES provider(provider_id) ON DELETE CASCADE; 
+-- 
+-- ALTER TABLE shapes
+-- ADD CONSTRAINT FK_shapes_provider_id
+-- FOREIGN KEY  (provider_id) REFERENCES provider(provider_id) ON DELETE CASCADE; 
+-- 
+-- ALTER TABLE frequencies
+-- ADD CONSTRAINT FK_frequencies_provider_id
+-- FOREIGN KEY  (provider_id) REFERENCES provider(provider_id) ON DELETE CASCADE; 
+-- 
+-- ALTER TABLE transfers
+-- ADD CONSTRAINT FK_transfers_provider_id
+-- FOREIGN KEY  (provider_id) REFERENCES provider(provider_id) ON DELETE CASCADE; 
+-- 
+-- ALTER TABLE pathways
+-- ADD CONSTRAINT FK_pathways_provider_id
+-- FOREIGN KEY  (provider_id) REFERENCES provider(provider_id) ON DELETE CASCADE; 
+-- 
+-- ALTER TABLE levels
+-- ADD CONSTRAINT FK_levels_provider_id
+-- FOREIGN KEY  (provider_id) REFERENCES provider(provider_id) ON DELETE CASCADE; 
+-- 
+-- ALTER TABLE feed_info
+-- ADD CONSTRAINT FK_feed_info_provider_id
+-- FOREIGN KEY  (provider_id) REFERENCES provider(provider_id) ON DELETE CASCADE; 
+-- 
+-- ALTER TABLE translations
+-- ADD CONSTRAINT FK_translations_provider_id
+-- FOREIGN KEY  (provider_id) REFERENCES provider(provider_id) ON DELETE CASCADE; 
+-- 
+-- ALTER TABLE attributions
+-- ADD CONSTRAINT FK_attributions_provider_id
+-- FOREIGN KEY  (provider_id) REFERENCES provider(provider_id) ON DELETE CASCADE; 
+-- 
+-- 
+-- ALTER TABLE routes
+-- ADD CONSTRAINT FK_routes_agency_id
+-- FOREIGN KEY  (agency_id) REFERENCES agency(agency_id) ON DELETE CASCADE; 
+-- 
+-- ALTER TABLE trips
+-- ADD CONSTRAINT FK_trips_route_id
+-- FOREIGN KEY  (route_id) REFERENCES routes(route_id) ON DELETE CASCADE; 
+-- 
+-- ALTER TABLE stop_times
+-- ADD CONSTRAINT FK_stop_times_trip_id
+-- FOREIGN KEY  (trip_id) REFERENCES trips(trip_id) ON DELETE CASCADE; 
+-- ALTER TABLE stop_times
+-- ADD CONSTRAINT FK_stop_times_stop_id
+-- FOREIGN KEY  (stop_id) REFERENCES stops(stop_id) ON DELETE CASCADE; 
+-- 
+-- ALTER TABLE frequencies
+-- ADD CONSTRAINT FK_frequencies_trip_id
+-- FOREIGN KEY  (trip_id) REFERENCES trips(trip_id) ON DELETE CASCADE; 
+-- 
+-- ALTER TABLE transfers
+-- ADD CONSTRAINT FK_transfers_from_stop_id
+-- FOREIGN KEY  (from_stop_id) REFERENCES stops(stop_id) ON DELETE CASCADE; 
+-- ALTER TABLE transfers
+-- ADD CONSTRAINT FK_transfers_to_stop_id
+-- FOREIGN KEY  (to_stop_id) REFERENCES stops(stop_id) ON DELETE CASCADE; 
+-- 
+-- ALTER TABLE pathways
+-- ADD CONSTRAINT FK_pathways_from_stop_id
+-- FOREIGN KEY  (from_stop_id) REFERENCES stops(stop_id) ON DELETE CASCADE; 
+-- ALTER TABLE pathways
+-- ADD CONSTRAINT FK_pathways_to_stop_id
+-- FOREIGN KEY  (to_stop_id) REFERENCES stops(stop_id) ON DELETE CASCADE; 
 -- 
 -- ALTER TABLE fare_rules
 -- ADD CONSTRAINT FK_fare_rules_fare_id
