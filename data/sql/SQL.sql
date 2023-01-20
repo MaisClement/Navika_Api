@@ -24,7 +24,7 @@ CREATE TABLE `agency` (
 
 DROP TABLE IF EXISTS stops;
 CREATE TABLE `stops` (
-  provider_id       VARCHAR(255) NOT NULL,
+  provider_id           VARCHAR(255) NOT NULL,
   stop_id               VARCHAR(255) PRIMARY KEY NOT NULL,
   stop_code             VARCHAR(255),
   stop_name             VARCHAR(255) NOT NULL,
@@ -49,11 +49,11 @@ CREATE TABLE `routes` (
   route_short_name      VARCHAR(255),
   route_long_name       VARCHAR(255),
   route_desc            VARCHAR(255),
-  route_type            ENUM('0', '1', '2', '3', '4', '5', '6', '7', '11', '12') NOT NULL,
+  route_type            VARCHAR(255), -- ENUM('0', '1', '2', '3', '4', '5', '6', '7', '11', '12') NOT NULL,
   route_url             VARCHAR(255),
   route_color           VARCHAR(8),
   route_text_color      VARCHAR(8),
-  route_sort_order      INT,
+  route_sort_order      VARCHAR(8),
   continuous_pickup     ENUM('0', '1', '2', '3'),
   continuous_drop_off   ENUM('0', '1', '2', '3')
 );
@@ -82,6 +82,7 @@ CREATE TABLE `stop_times` (
   stop_id               VARCHAR(255) NOT NULL,
   stop_sequence         INT NOT NULL,
   stop_headsign         VARCHAR(255),
+  local_zone_id         VARCHAR(255),
   pickup_type           ENUM('0', '1', '2', '3'),
   drop_off_type         ENUM('0', '1', '2', '3'),
   continuous_pickup     ENUM('0', '1', '2', '3'),
@@ -92,12 +93,12 @@ CREATE TABLE `stop_times` (
 
 DROP TABLE IF EXISTS calendar;
 CREATE TABLE `calendar` (
-  provider_id       VARCHAR(255) NOT NULL,
+    provider_id         VARCHAR(255) NOT NULL,
     service_id          VARCHAR(255) PRIMARY KEY NOT NULL,
     monday              ENUM('0', '1', '2') NOT NULL,
     tuesday             ENUM('0', '1', '2') NOT NULL,
     wednesday           ENUM('0', '1', '2') NOT NULL,
-    thrusday            ENUM('0', '1', '2') NOT NULL,
+    thursday            ENUM('0', '1', '2') NOT NULL,
     friday              ENUM('0', '1', '2') NOT NULL,
     saturday            ENUM('0', '1', '2') NOT NULL,
     sunday              ENUM('0', '1', '2') NOT NULL,
@@ -107,8 +108,8 @@ CREATE TABLE `calendar` (
 
 DROP TABLE IF EXISTS calendar_dates;
 CREATE TABLE `calendar_dates` (
-  provider_id       VARCHAR(255) NOT NULL,
-  service_id            VARCHAR(255) PRIMARY KEY NOT NULL,
+  provider_id           VARCHAR(255) NOT NULL,
+  service_id            VARCHAR(255) NOT NULL,
   `date`                DATE NOT NULL,
   exception_type        ENUM('0', '1') NOT NULL
 );
@@ -137,8 +138,8 @@ CREATE TABLE `fare_rules` (
 
 DROP TABLE IF EXISTS shapes;
 CREATE TABLE `shapes` (
-  provider_id       VARCHAR(255) NOT NULL,
-  shape_id              VARCHAR(255) PRIMARY KEY NOT NULL,
+  provider_id           VARCHAR(255) NOT NULL,
+  shape_id              VARCHAR(255) NOT NULL,
   shape_pt_lat          VARCHAR(255) NOT NULL,
   shape_pt_lon          VARCHAR(255) NOT NULL,
   shape_pt_sequence     INT NOT NULL,
@@ -173,10 +174,10 @@ CREATE TABLE `pathways` (
   pathway_mode            ENUM('0', '1', '2', '3', '4', '5', '6', '7') NOT NULL,
   is_bidirectional        ENUM('0', '1') NOT NULL,
   length                  DOUBLE,
-  traversal_time          INT,
-  stair_count             INT,
-  max_slope               DOUBLE,
-  min_width               DOUBLE,
+  traversal_time          VARCHAR(8),
+  stair_count             VARCHAR(8),
+  max_slope               VARCHAR(8),
+  min_width               VARCHAR(8),
   signposted_as           VARCHAR(255),
   reversed_signposted_as  VARCHAR(255)
 );
@@ -185,7 +186,7 @@ DROP TABLE IF EXISTS levels;
 CREATE TABLE `levels` (
   provider_id       VARCHAR(255) NOT NULL,
   level_id                VARCHAR(255) PRIMARY KEY NOT NULL,
-  level_index             DOUBLE NOT NULL,
+  level_index             VARCHAR(8) NOT NULL,
   level_name              VARCHAR(255)        
 );
 

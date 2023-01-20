@@ -1,0 +1,19 @@
+USE Navika;
+
+TRUNCATE agency;
+TRUNCATE stops;
+TRUNCATE routes;
+TRUNCATE trips;
+TRUNCATE stop_times;
+TRUNCATE calendar;
+TRUNCATE calendar_dates;
+TRUNCATE fare_attributes;
+TRUNCATE fare_rules;
+TRUNCATE shapes;
+TRUNCATE frequencies;
+TRUNCATE transfers;
+TRUNCATE pathways;
+TRUNCATE levels;
+TRUNCATE feed_info;
+TRUNCATE translations;
+TRUNCATE attributions;

@@ -394,10 +394,10 @@ function journeys_line_format($str) {
     return str_replace($search, $replace, $str);
 }
 
-function read_csv($csv){
+function read_csv($csv, $sep = ';'){
     $file = fopen($csv, 'r');
     while (!feof($file)) {
-        $line[] = fgetcsv($file, 0, ";");
+        $line[] = fgetcsv($file, 0, $sep);
     }
     fclose($file);
     return $line;
