@@ -1,5 +1,3 @@
-USE Navika;
-
 TRUNCATE agency;
 TRUNCATE stops;
 TRUNCATE routes;
@@ -17,3 +15,4 @@ TRUNCATE levels;
 TRUNCATE feed_info;
 TRUNCATE translations;
 TRUNCATE attributions;
+TRUNCATE stop_route;

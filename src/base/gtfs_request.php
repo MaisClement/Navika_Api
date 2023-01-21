@@ -67,7 +67,7 @@ function insertFile($type, $path, $header, $sep = ',', $provider = 'TEST') {
     $path = realpath($path);
 
     $req = $db->prepare("
-        LOAD DATA INFILE ?
+        LOAD DATA INFILE ? IGNORE
         INTO TABLE $table
         FIELDS
             TERMINATED BY ?
@@ -81,6 +81,51 @@ function insertFile($type, $path, $header, $sep = ',', $provider = 'TEST') {
         $sep,
         $provider,
     ));
+    return $req;
+}
+
+function generateStopRoute() {
+    $db = $GLOBALS["db"];
+
+    $req = $db->prepare("
+        INSERT INTO stop_route
+        (route_id, route_short_name, route_long_name, route_type, route_color, route_text_color, stop_id, stop_name, stop_query_name, stop_lat, stop_lon)
+        
+        SELECT DISTINCT 
+        R.route_id, R.route_short_name, R.route_long_name, R.route_type, R.route_color, R.route_text_color,
+        S2.stop_id, S2.stop_name, S2.stop_name, S2.stop_lat, S2.stop_lon
+        FROM routes R
+        
+        INNER JOIN trips T
+        ON R.route_id = T.route_id
+        
+        INNER JOIN stop_times ST
+        ON T.trip_id = ST.trip_id
+        
+        INNER JOIN stops S
+        ON ST.stop_id = S.stop_id
+        
+        INNER JOIN stops S2
+        ON S.parent_station = S2.stop_id;
+    ");
+    $req->execute(array( ));
+    return $req;
+}
+
+function generateQueryRoute() {
+    $db = $GLOBALS["db"];
+
+    $req = $db->prepare("
+        SET NAMES 'utf8' COLLATE 'utf8_unicode_ci';
+        UPDATE stop_route SET stop_query_name = REPLACE(stop_query_name, '-', '');
+        UPDATE stop_route SET stop_query_name = REPLACE(stop_query_name, ' ', '');
+        UPDATE stop_route SET stop_query_name = REPLACE(stop_query_name, '\'', '');
+        
+        UPDATE stop_route SET town_query_name = REPLACE(town_query_name, '-', '');
+        UPDATE stop_route SET town_query_name = REPLACE(town_query_name, ' ', '');
+        UPDATE stop_route SET town_query_name = REPLACE(town_query_name, '\'', '');
+    ");
+    $req->execute(array( ));
     return $req;
 }
 

@@ -1,8 +1,16 @@
 <?php
 
-include_once 'base/main.php';
-include_once 'base/function.php';
-include_once 'base/gtfs_request.php';
+include_once ('base/main.php');
+include_once ('base/function.php');
+include_once ('base/request.php');
+include_once ('base/gtfs_request.php');
+
+echo '  > Truncate GTFS'. PHP_EOL;
+
+$query = file_get_contents('../data/sql/reset.sql');
+SQLinit($query);
+
+echo '  > Import GTFS'. PHP_EOL;
 
 // use the curl function to get json data from https://transport.data.gouv.fr/api/datasets
 // then read json data and for each dataset, if there is an ressources with type is 'GTFS', display it
@@ -30,7 +38,10 @@ $err = 0;
 
 $directory = "../data/file/gtfs/";
 
-$types = ['agency.txt', 'stops.txt', 'routes.txt', 'trips.txt', 'stop_times.txt', 'calendar.txt', 'calendar_dates.txt', 'fare_attributes.txt', 'fare_rules.txt', 'shapes.txt', 'frequencies.txt', 'transfers.txt', 'pathways.txt', 'levels.txt', 'feed_info.txt', 'translations.txt', 'attributions.txt'];
+// $types = ['agency.txt', 'stops.txt', 'routes.txt', 'trips.txt', 'stop_times.txt', 'calendar.txt', 'calendar_dates.txt', 'fare_attributes.txt', 'fare_rules.txt', 'shapes.txt', 'frequencies.txt', 'transfers.txt', 'pathways.txt', 'levels.txt', 'feed_info.txt', 'translations.txt', 'attributions.txt'];
+$types = ['agency.txt', 'stops.txt', 'routes.txt', 'trips.txt', 'stop_times.txt', 'calendar.txt', 'calendar_dates.txt', 'fare_attributes.txt', 'fare_rules.txt', 'frequencies.txt', 'transfers.txt', 'pathways.txt', 'levels.txt', 'feed_info.txt', 'translations.txt', 'attributions.txt'];
+
+// $types = ['stop_times.txt'];
 
 $provider_dir = scandir($directory);
 foreach ($provider_dir as $provider_id) {
@@ -71,8 +82,14 @@ foreach ($provider_dir as $provider_id) {
                 // }
             }
         }
+        break;
     }
 }
+
+echo 'Generate stop_route table' . PHP_EOL;
+
+generateStopRoute();
+generateQueryRoute()
 
 // echo "Erreurs : " . $err . PHP_EOL;
 

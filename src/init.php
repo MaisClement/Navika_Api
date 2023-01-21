@@ -3,21 +3,43 @@
 include_once ('base/main.php');
 include_once ('base/function.php');
 include_once ('base/request.php');
-    
-mkdir('../data/cache/journeys', 0777, true);
-mkdir('../data/cache/places', 0777, true);
-mkdir('../data/cache/schedules', 0777, true);
-mkdir('../data/cache/schedules_line', 0777, true);
-mkdir('../data/cache/stop_area', 0777, true);
-mkdir('../data/cache/stop_point', 0777, true);
 
-mkdir('../data/file/gtfs', 0777, true);
-
-mkdir('../data/report', 0777, true);
-
+// INIT SQL 
 $query = file_get_contents('../data/sql/SQL.sql');
 SQLinit($query);
 
-include('update.php');
+// Import GeoJson
+
+echo '  > GeoJson'. PHP_EOL;
+clearTown();
+
+$geojson = file_get_contents('../data/file/communes.geojson');
+$geojson = json_decode($geojson);
+
+foreach($geojson->features as $feature){
+    $name = $feature->properties->nom;
+    $id = $feature->properties->code;
+    $coordinates = $feature->geometry->coordinates;
+
+    $polygon_text = 'POLYGON((';
+
+    $i = 0;
+    foreach($coordinates[0] as $coordinate){
+        $polygon_text .= $coordinate[1] . ' ' . $coordinate[0];
+        if ((count($coordinates[0]) -1 ) > ($i)){
+            $polygon_text .= ',';
+        }
+        $i++;
+    }
+    $polygon_text .= '))';
+
+    try {
+        addTown($id, $name, $polygon_text);
+    } catch (Exception $e) {
+        echo $e;
+    }
+}
+
+// include('update_gtfs.php');                      
 
 ?>

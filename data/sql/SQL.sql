@@ -46,11 +46,11 @@ CREATE TABLE `routes` (
   provider_id       VARCHAR(255) NOT NULL,
   route_id              VARCHAR(255) PRIMARY KEY NOT NULL,
   agency_id             VARCHAR(255) NOT NULL,
-  route_short_name      VARCHAR(255),
-  route_long_name       VARCHAR(255),
-  route_desc            VARCHAR(255),
+  route_short_name      TEXT,
+  route_long_name       TEXT,
+  route_desc            TEXT,
   route_type            VARCHAR(255), -- ENUM('0', '1', '2', '3', '4', '5', '6', '7', '11', '12') NOT NULL,
-  route_url             VARCHAR(255),
+  route_url             VARCHAR(10),
   route_color           VARCHAR(8),
   route_text_color      VARCHAR(8),
   route_sort_order      VARCHAR(8),
@@ -60,12 +60,12 @@ CREATE TABLE `routes` (
 
 DROP TABLE IF EXISTS trips;
 CREATE TABLE `trips` (
-  provider_id       VARCHAR(255) NOT NULL,
+  provider_id           VARCHAR(255) NOT NULL,
   route_id              VARCHAR(255) NOT NULL,
   service_id            VARCHAR(255) NOT NULL,
   trip_id               VARCHAR(255) PRIMARY KEY NOT NULL,
-  trip_headsign         VARCHAR(255),
-  trip_short_name       VARCHAR(255),
+  trip_headsign         TEXT,
+  trip_short_name       TEXT,
   direction_id          ENUM('0', '1'),
   block_id              VARCHAR(255),
   shape_id              VARCHAR(255),
@@ -75,7 +75,7 @@ CREATE TABLE `trips` (
 
 DROP TABLE IF EXISTS stop_times;
 CREATE TABLE `stop_times` (
-  provider_id       VARCHAR(255) NOT NULL,
+  provider_id           VARCHAR(255) NOT NULL,
   trip_id               VARCHAR(255) NOT NULL,
   arrival_time          TIME,
   departure_time        TIME,
@@ -231,6 +231,42 @@ CREATE TABLE `attributions` (
   attribution_email  VARCHAR(255),
   attribution_phone  VARCHAR(255)
 );
+
+DROP TABLE IF EXISTS town;
+CREATE TABLE `town` (
+  town_id VARCHAR(255) PRIMARY KEY NOT NULL,
+  town_name VARCHAR(255) NOT NULL,
+  town_polygon polygon NOT NULL
+);
+
+DROP TABLE IF EXISTS stop_route;
+CREATE TABLE `stop_route` (
+  route_id              VARCHAR(255) NOT NULL,
+  route_short_name      VARCHAR(255),
+  route_long_name       VARCHAR(255),
+  route_type            VARCHAR(255), -- ENUM('0', '1', '2', '3', '4', '5', '6', '7', '11', '12') NOT NULL,
+  route_color           VARCHAR(8),
+  route_text_color      VARCHAR(8),
+  
+  stop_id               VARCHAR(255) NOT NULL,
+  stop_name             VARCHAR(255) NOT NULL,
+  stop_query_name       VARCHAR(255) NOT NULL,
+  stop_lat              VARCHAR(255),
+  stop_lon              VARCHAR(255),
+
+  town_id               VARCHAR(255),
+  town_name             VARCHAR(255),
+  town_query_name       VARCHAR(255)
+);
+
+CREATE FULLTEXT INDEX stop_times ON stop_times(trip_id);
+
+CREATE FULLTEXT INDEX stop_route_stop_id ON stop_route(stop_id);
+CREATE FULLTEXT INDEX stop_route_query ON stop_route(stop_query_name);
+CREATE FULLTEXT INDEX stop_route_query_town ON stop_route(town_query_name);
+CREATE FULLTEXT INDEX stop_route_route_id ON stop_route(route_id);
+
+CREATE SPATIAL INDEX town_polygon ON town(town_polygon);
 
 -- ALTER TABLE agency
 -- ADD CONSTRAINT FK_agency_provider_id
