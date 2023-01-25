@@ -74,7 +74,7 @@ foreach($results->journeys as $result){
                 "distance"  =>  (int)       isset($section->from->distance) ? $section->from->distance : 0,
                 "zone"      =>  (int)       0,
                 "town"      =>  (String)    getTownByAdministrativeRegions( $section->from->{$section->from->embedded_type}->administrative_regions ),
-                "zip_code"  =>  (String)    getZipCodeByInsee( getZipByAdministrativeRegions( $section->from->{$section->from->embedded_type}->administrative_regions ) )->fetch()['zip_code'],
+                "zip_code"  =>  (String)    substr( getZipByAdministrativeRegions( $section->from->{$section->from->embedded_type}->administrative_regions ) , 0, 2),
                 "coord"     => array(
                     "lat"           =>  floatval( $section->from->{$section->from->embedded_type}->coord->lat ),
                     "lon"           =>  floatval( $section->from->{$section->from->embedded_type}->coord->lon ),
@@ -87,7 +87,7 @@ foreach($results->journeys as $result){
                 // "distance"  =>  (int)       isset($section->to->distance) ? $section->to->distance : 0,
                 "zone"      =>  (int)       0,
                 "town"      =>  (String)    getTownByAdministrativeRegions( $section->to->{$section->to->embedded_type}->administrative_regions ),
-                "zip_code"  =>  (String)    getZipCodeByInsee( getZipByAdministrativeRegions( $section->to->{$section->to->embedded_type}->administrative_regions ) )->fetch()['zip_code'],
+                "zip_code"  =>  (String)    substr( getZipByAdministrativeRegions( $section->to->{$section->to->embedded_type}->administrative_regions ) , 0, 2),
                 "coord"     => array(
                     "lat"       =>  floatval( $section->to->{$section->to->embedded_type}->coord->lat ),
                     "lon"       =>  floatval( $section->to->{$section->to->embedded_type}->coord->lon ),

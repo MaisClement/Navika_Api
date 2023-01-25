@@ -12,36 +12,12 @@ SQLinit($query);
 
 echo '  > Import GTFS'. PHP_EOL;
 
-// use the curl function to get json data from https://transport.data.gouv.fr/api/datasets
-// then read json data and for each dataset, if there is an ressources with type is 'GTFS', display it
-
-// $json = curl('https://transport.data.gouv.fr/api/datasets');
-// $json = json_decode($json);
-// 
-// $i = 0;
-// foreach ($json as $dataset) {
-//     foreach ($dataset->resources as $resources) {
-//         if ($resources->format == 'gtfs-rt' && $resources->is_available == true) {
-//             echo 'Dataset: ' . $dataset->title . PHP_EOL;
-//             echo 'Format: ' . $resources->format . PHP_EOL;
-//             echo 'URL: ' . $resources->url . PHP_EOL;
-//             echo PHP_EOL;
-// 
-//             $i++;
-//         }
-//     }
-// }
-// echo 'Total: ' . $i . PHP_EOL;
-
 // import GTFS
-$err = 0;
-
 $directory = "../data/file/gtfs/";
+$err = 0;
 
 // $types = ['agency.txt', 'stops.txt', 'routes.txt', 'trips.txt', 'stop_times.txt', 'calendar.txt', 'calendar_dates.txt', 'fare_attributes.txt', 'fare_rules.txt', 'shapes.txt', 'frequencies.txt', 'transfers.txt', 'pathways.txt', 'levels.txt', 'feed_info.txt', 'translations.txt', 'attributions.txt'];
 $types = ['agency.txt', 'stops.txt', 'routes.txt', 'trips.txt', 'stop_times.txt', 'calendar.txt', 'calendar_dates.txt', 'fare_attributes.txt', 'fare_rules.txt', 'frequencies.txt', 'transfers.txt', 'pathways.txt', 'levels.txt', 'feed_info.txt', 'translations.txt', 'attributions.txt'];
-
-// $types = ['stop_times.txt'];
 
 $provider_dir = scandir($directory);
 foreach ($provider_dir as $provider_id) {
@@ -56,9 +32,10 @@ foreach ($provider_dir as $provider_id) {
                 $header = getCSVHeader($file)[0][0];
 
                 try {
-                    insertFile($type, $file, $header, ',', 'TEST');
+                    insertFile($type, $file, $header, ',', $provider_id);
                 } catch (Exception $e) {
                     echo $e;
+                    $err++;
                 }
 
                 // $content = read_csv($file, ',');
@@ -82,15 +59,18 @@ foreach ($provider_dir as $provider_id) {
                 // }
             }
         }
-        break;
     }
 }
+
+echo $err . ' erreurs' . PHP_EOL;
 
 echo 'Generate stop_route table' . PHP_EOL;
 
 generateStopRoute();
-generateQueryRoute()
 
-// echo "Erreurs : " . $err . PHP_EOL;
+echo 'Ready !' . PHP_EOL;
+echo 'Preparing for query...' . PHP_EOL;
+
+generateQueryRoute();
 
 ?>

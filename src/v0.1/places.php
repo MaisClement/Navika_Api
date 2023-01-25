@@ -70,7 +70,7 @@ foreach($results as $result){
         "distance"  =>  (int)       isset($result->distance) ? $result->distance : 0,
         "zone"      =>  (int)       0,
         "town"      =>  (String)    getTownByAdministrativeRegions( $result->{$result->embedded_type}->administrative_regions ),
-        "zip_code"  =>  (String)    getZipCodeByInsee( getZipByAdministrativeRegions( $result->{$result->embedded_type}->administrative_regions ) )->fetch()['zip_code'],
+        "zip_code"  =>  (String)    getZipByAdministrativeRegions( $result->{$result->embedded_type}->administrative_regions ),
         "coord"     => array(
             "lat"       =>  floatval( $result->{$result->embedded_type}->coord->lat ),
             "lon"       =>  floatval( $result->{$result->embedded_type}->coord->lon ),

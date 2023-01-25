@@ -82,6 +82,29 @@ function ErrorMessage($http_code, $details = ''){
     exit;
 }
 
+function getTransportMode($l) {
+    $modes = array(
+        0 => 'tram',
+        1 => 'metro',
+        2 => 'rail',
+        3 => 'bus',
+        4 => 'boat',
+        5 => 'tram',
+        6 => 'cable',
+        7 => 'funicular',
+        11 => 'bus',
+        12 => 'monorail',
+
+        100 => 'rail',
+        400 => 'metro',
+        700 => 'bus',
+        900 => 'tram',
+        1400 => 'funicular',
+    );
+
+    return $modes[$l];
+}
+
 // --- Schedules ---
 function prepareTime($dt) {
     $datetime = date_create( $dt );
@@ -122,7 +145,7 @@ function getTownByAdministrativeRegions($administrative_regions) {
 function getZipByAdministrativeRegions($administrative_regions) {
     foreach($administrative_regions as $region){
         if ($region->level == 8){
-            return $region->insee;
+            return substr($region->insee, 0, 2);
         }
     }
     return "";
@@ -224,7 +247,8 @@ function getSeverity( $effect, $cause, $status ) {
 
 function clear_directory($dirPath){
     if (!is_dir($dirPath)) {
-        throw new InvalidArgumentException("$dirPath must be a directory");
+        echo ("$dirPath must be a directory");
+        return;
     }
     if (substr($dirPath, strlen($dirPath) - 1, 1) != '/') {
         $dirPath .= '/';
@@ -233,6 +257,25 @@ function clear_directory($dirPath){
     foreach ($files as $file) {
         if (is_dir($file)) {
             clear_directory($file);
+        } else {
+            unlink($file);
+        }
+    }
+}
+
+function remove_directory($dirPath){
+    if (!is_dir($dirPath)) {
+        echo ("$dirPath must be a directory");
+        return;
+    }
+    if (substr($dirPath, strlen($dirPath) - 1, 1) != '/') {
+        $dirPath .= '/';
+    }
+    $files = glob($dirPath . '*', GLOB_MARK);
+    foreach ($files as $file) {
+        if (is_dir($file)) {
+            remove_directory($file);
+            rmdir($file);
         } else {
             unlink($file);
         }

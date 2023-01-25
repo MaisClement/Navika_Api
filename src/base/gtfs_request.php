@@ -90,21 +90,21 @@ function generateStopRoute() {
     $req = $db->prepare("
         INSERT INTO stop_route
         (route_id, route_short_name, route_long_name, route_type, route_color, route_text_color, stop_id, stop_name, stop_query_name, stop_lat, stop_lon)
-        
+
         SELECT DISTINCT 
         R.route_id, R.route_short_name, R.route_long_name, R.route_type, R.route_color, R.route_text_color,
         S2.stop_id, S2.stop_name, S2.stop_name, S2.stop_lat, S2.stop_lon
         FROM routes R
-        
+
         INNER JOIN trips T
         ON R.route_id = T.route_id
-        
+
         INNER JOIN stop_times ST
         ON T.trip_id = ST.trip_id
-        
+
         INNER JOIN stops S
         ON ST.stop_id = S.stop_id
-        
+
         INNER JOIN stops S2
         ON S.parent_station = S2.stop_id;
     ");
@@ -124,6 +124,26 @@ function generateQueryRoute() {
         UPDATE stop_route SET town_query_name = REPLACE(town_query_name, '-', '');
         UPDATE stop_route SET town_query_name = REPLACE(town_query_name, ' ', '');
         UPDATE stop_route SET town_query_name = REPLACE(town_query_name, '\'', '');
+    ");
+    $req->execute(array( ));
+    return $req;
+}
+
+function generateTownInStopRoute() {
+    $db = $GLOBALS["db"];
+
+    $req = $db->prepare("
+        UPDATE stop_route SR 
+
+        INNER JOIN town T
+        ON ST_Contains(
+            T.town_polygon,
+            point(SR.stop_lat, SR.stop_lon)
+        )
+        
+        SET SR.town_id = T.town_id,
+            SR.town_name = T.town_name,
+            SR.town_query_name = T.town_name;
     ");
     $req->execute(array( ));
     return $req;

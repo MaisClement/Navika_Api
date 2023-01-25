@@ -1,6 +1,6 @@
 DROP TABLE IF EXISTS provider;
 CREATE TABLE `provider` (
-  provider_id   VARCHAR(255) PRIMARY KEY NOT NULL,
+  provider_id   VARCHAR(255) NOT NULL,
   slug          VARCHAR(255) NOT NULL,
   title         VARCHAR(255) NOT NULL,
   type          VARCHAR(255) NOT NULL,
@@ -242,15 +242,15 @@ CREATE TABLE `town` (
 DROP TABLE IF EXISTS stop_route;
 CREATE TABLE `stop_route` (
   route_id              VARCHAR(255) NOT NULL,
-  route_short_name      VARCHAR(255),
-  route_long_name       VARCHAR(255),
+  route_short_name      TEXT,
+  route_long_name       TEXT,
   route_type            VARCHAR(255), -- ENUM('0', '1', '2', '3', '4', '5', '6', '7', '11', '12') NOT NULL,
   route_color           VARCHAR(8),
   route_text_color      VARCHAR(8),
   
   stop_id               VARCHAR(255) NOT NULL,
-  stop_name             VARCHAR(255) NOT NULL,
-  stop_query_name       VARCHAR(255) NOT NULL,
+  stop_name             TEXT NOT NULL,
+  stop_query_name       TEXT NOT NULL,
   stop_lat              VARCHAR(255),
   stop_lon              VARCHAR(255),
 
@@ -259,7 +259,8 @@ CREATE TABLE `stop_route` (
   town_query_name       VARCHAR(255)
 );
 
-CREATE FULLTEXT INDEX stop_times ON stop_times(trip_id);
+CREATE FULLTEXT INDEX stop_times_trip_id ON stop_times(trip_id);
+CREATE FULLTEXT INDEX stop_times_stop_id ON stop_times(stop_id);
 
 CREATE FULLTEXT INDEX stop_route_stop_id ON stop_route(stop_id);
 CREATE FULLTEXT INDEX stop_route_query ON stop_route(stop_query_name);

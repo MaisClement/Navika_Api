@@ -40,6 +40,6 @@ foreach($geojson->features as $feature){
     }
 }
 
-// include('update_gtfs.php');                      
+include('update.php');                      
 
 ?>

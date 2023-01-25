@@ -76,6 +76,8 @@ function getStopByQueryAndGeoCoords($query, $lat, $lon){
     return $req;
 }
 
+// ------------------------------------------------
+
 function addTown($id, $name, $polygon){
     $db = $GLOBALS["db"];
     $id = trim( $id );
@@ -93,6 +95,95 @@ function clearTown(){
 
     $req = $db->prepare("TRUNCATE town");
     $req->execute( );
+    return $req;
+}
+
+// ------------------------------------------------
+function getLinesById ($id) {
+    $db = $GLOBALS["db"];
+    $id = trim( $id );
+
+    $req = $db->prepare("
+            SELECT * 
+            FROM lignes
+            WHERE id_line = ?;
+    ");
+    $req->execute( array($id) );
+    return $req;
+}
+
+function getAllLinesAtStop ($id) {
+    $db = $GLOBALS["db"];
+    $id = trim( $id );
+
+    $req = $db->prepare("
+        SELECT L.id_line, L.name_line, L.shortname_line, L.transportmode, L.colourweb_hexa, L.textcolourweb_hexa
+        FROM lignes L
+        
+        INNER JOIN arrets_lignes A
+        ON REPLACE(A.id, 'IDFM:', '') = L.id_line
+        
+        INNER JOIN stops S
+        ON S.stop_id = A.stop_id 
+        
+        WHERE S.parent_station = ?
+        GROUP BY L.id_line;
+    ");
+    $req->execute( array($id) );
+    return $req;
+}
+
+function getDirection ($id) {
+    $db = $GLOBALS["db"];
+    $id = idfm_format( $id );
+    $id = trim( $id );
+    $id = 'IDFM:' . $id;
+
+    $req = $db->prepare("
+            SELECT stop_name
+            FROM stops
+            WHERE stop_id = ? OR parent_station = ?;
+    ");
+    $req->execute( array($id, $id) );
+    return $req;
+}
+
+// ------------------------------------------------
+
+function insertProvider($opt) {
+    $db = $GLOBALS["db"];
+
+    $req = $db->prepare("
+        INSERT INTO provider
+        (provider_id, slug, title, type, url, updated, flag)
+        VALUES
+        (?, ?, ?, ?, ?, ?, ?)
+	  ");
+    $req->execute(array(
+        isset($opt['provider_id']) ? $opt['provider_id'] : '',
+        isset($opt['slug']) ? $opt['slug'] : '',
+        isset($opt['title']) ? $opt['title'] : '',
+        isset($opt['type']) ? $opt['type'] : '',
+        isset($opt['url']) ? $opt['url'] : '',
+        isset($opt['updated']) ? $opt['updated'] : '',
+        isset($opt['flag']) ? $opt['flag'] : '',
+    ));
+    return $req;
+}
+
+function getProvider($opt) {
+    $db = $GLOBALS["db"];
+
+    $req = $db->prepare("
+        SELECT *
+        FROM provider
+        WHERE provider_id = ?
+        OR url = ?
+	  ");
+    $req->execute(array(
+        isset($opt['provider_id']) ? $opt['provider_id'] : '',
+        isset($opt['url']) ? $opt['url'] : '',
+    ));
     return $req;
 }
 
