@@ -57,7 +57,7 @@ while($obj = $request->fetch()) {
             "code"       =>  (String)    $obj['shortname_line'],
             "name"       =>  (String)    $obj['name_line'],
             "mode"       =>  (String)    $obj['transportmode'],
-            "color"      =>  (String)    strlen($obj['colourweb_hexa']) < 6 ? "000000" : $obj['colourweb_hexa'],
+            "color"      =>  (String)    strlen($obj['colourweb_hexa']) < 6 ? "ffffff" : $obj['colourweb_hexa'],
             "text_color" =>  (String)    strlen($obj['textcolourweb_hexa']) < 6 ? "000000" : $obj['textcolourweb_hexa'],
         );
     }

@@ -72,6 +72,8 @@ function insertFile($type, $path, $header, $sep = ',', $provider = 'TEST') {
         FIELDS
             TERMINATED BY ?
             ENCLOSED BY '\"'
+        LINES
+            TERMINATED BY  '\r\n'
         IGNORE 1 ROWS
         ($header)
         SET provider_id = ?
@@ -81,6 +83,16 @@ function insertFile($type, $path, $header, $sep = ',', $provider = 'TEST') {
         $sep,
         $provider,
     ));
+    return $req;
+}
+
+function truncateStopRoute() {
+    $db = $GLOBALS["db"];
+
+    $req = $db->prepare("
+        TRUNCATE stop_route;
+    ");
+    $req->execute(array( ));
     return $req;
 }
 
@@ -149,6 +161,32 @@ function generateTownInStopRoute() {
     return $req;
 }
 
+function clearProviderData($provider_id){
+    $db = $GLOBALS["db"];
+
+    $req = $db->prepare("
+        DELETE FROM agency           WHERE provider_id = ?;
+        DELETE FROM stops            WHERE provider_id = ?;
+        DELETE FROM routes           WHERE provider_id = ?;
+        DELETE FROM trips            WHERE provider_id = ?;
+        DELETE FROM stop_times       WHERE provider_id = ?;
+        DELETE FROM calendar         WHERE provider_id = ?;
+        DELETE FROM calendar_dates   WHERE provider_id = ?;
+        DELETE FROM fare_attributes  WHERE provider_id = ?;
+        DELETE FROM fare_rules       WHERE provider_id = ?;
+        DELETE FROM frequencies      WHERE provider_id = ?;
+        DELETE FROM transfers        WHERE provider_id = ?;
+        DELETE FROM pathways         WHERE provider_id = ?;
+        DELETE FROM levels           WHERE provider_id = ?;
+        DELETE FROM feed_info        WHERE provider_id = ?;
+        DELETE FROM translations     WHERE provider_id = ?;
+        DELETE FROM attributions     WHERE provider_id = ?;
+        TRUNCATE stop_route;
+	");
+    $req->execute(array($provider_id, $provider_id, $provider_id, $provider_id, $provider_id, $provider_id, $provider_id, $provider_id, $provider_id, $provider_id, $provider_id, $provider_id, $provider_id, $provider_id, $provider_id, $provider_id));
+    return $req;
+}
+
 function insertAgency($opt, $provider){
     $db = $GLOBALS["db"];
 
@@ -173,8 +211,6 @@ function insertAgency($opt, $provider){
 }
 
 function insertStops($opt, $provider){
-    // echo '!' . $opt['stop_id'] . PHP_EOL;
-    // print_r($opt);
     $db = $GLOBALS["db"];
 
     $req = $db->prepare("

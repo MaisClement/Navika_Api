@@ -89,7 +89,7 @@ while ($obj = $request->fetch()) {
             "code"       =>  (String)    $obj['route_short_name'],
             "name"       =>  (String)    $obj['route_long_name'],
             "mode"       =>  (String)    getTransportMode( $obj['route_type'] ),
-            "color"      =>  (String)    strlen($obj['route_color']) < 6 ? "000000" : $obj['route_color'],
+            "color"      =>  (String)    strlen($obj['route_color']) < 6 ? "ffffff" : $obj['route_color'],
             "text_color" =>  (String)    strlen($obj['route_text_color']) < 6 ? "000000" : $obj['route_text_color'],
         );
     }

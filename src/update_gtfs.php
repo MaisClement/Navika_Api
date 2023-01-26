@@ -5,12 +5,7 @@ include_once ('base/function.php');
 include_once ('base/request.php');
 include_once ('base/gtfs_request.php');
 
-echo '  > Truncate GTFS'. PHP_EOL;
-
-$query = file_get_contents('../data/sql/reset.sql');
-SQLinit($query);
-
-echo '  > Import GTFS'. PHP_EOL;
+echo '> Import GTFS'. PHP_EOL;
 
 // import GTFS
 $directory = "../data/file/gtfs/";
@@ -37,35 +32,16 @@ foreach ($provider_dir as $provider_id) {
                     echo $e;
                     $err++;
                 }
-
-                // $content = read_csv($file, ',');
-                // $col = getGTFSHeader($content[0]);
-                // $content = array_slice($content, 1);
-                // 
-                // foreach ($content as $row) {
-                //     $y = 0;
-                //     $opt = [];
-                //     if (gettype($row) == 'array' || gettype($row) == 'object' ){
-                //         foreach($row as $el) {
-                //             $opt[$col[$y]] = $el;
-                //             $y++;
-                //         }
-                //         try {
-                //             insertGTFS($type, $opt, $provider_id);
-                //         } catch (Exception $e) {
-                //             $err++;
-                //         }
-                //     }
-                // }
             }
         }
     }
 }
 
-echo $err . ' erreurs' . PHP_EOL;
+echo $err . ' errors on import' . PHP_EOL;
 
 echo 'Generate stop_route table' . PHP_EOL;
 
+truncateStopRoute();
 generateStopRoute();
 
 echo 'Ready !' . PHP_EOL;

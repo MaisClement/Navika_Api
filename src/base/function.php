@@ -437,6 +437,8 @@ function journeys_line_format($str) {
     return str_replace($search, $replace, $str);
 }
 
+// -------------------------------------
+
 function read_csv($csv, $sep = ';'){
     $file = fopen($csv, 'r');
     while (!feof($file)) {
@@ -446,4 +448,26 @@ function read_csv($csv, $sep = ';'){
     return $line;
 }
 
+function getGTFSlistFromApi($url) {
+    $json = file_get_contents('https://transport.data.gouv.fr/api/datasets/' . $url);
+    $json = json_decode($json);
+
+    $list = [];
+
+    foreach($json->resources as $resource) {
+        if ($resource->type == 'main' && $resource->format == 'GTFS' && $resource->is_available == true) {
+            $list[] = array(
+                'provider_id'   => $json->aom->name,
+                'slug'          => $json->aom->name,
+                'title'         => $resource->title,
+                'type'          => $resource->type,
+                'url'           => $resource->url,
+                'original_url'  => $resource->original_url,
+                'updated'       => date('Y-m-d H:i:s', strtotime($resource->updated)),
+                'flag'          => 0,
+            );
+        }
+    }
+    return $list;
+}
 ?>

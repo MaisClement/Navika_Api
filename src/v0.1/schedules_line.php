@@ -46,7 +46,7 @@ $lines_data[$obj['id_line']] = array(
     "code"       =>  (String)    $obj['shortname_line'],
     "name"       =>  (String)    $obj['name_line'],
     "mode"       =>  (String)    $obj['transportmode'],
-    "color"      =>  (String)    strlen($obj['colourweb_hexa']) < 6 ? "000000" : $obj['colourweb_hexa'],
+    "color"      =>  (String)    strlen($obj['colourweb_hexa']) < 6 ? "ffffff" : $obj['colourweb_hexa'],
     "text_color" =>  (String)    strlen($obj['textcolourweb_hexa']) < 6 ? "000000" : $obj['textcolourweb_hexa'],
 );
 if ($lines_data[$obj['id_line']]['mode'] == "rail" || $lines_data[$obj['id_line']]['mode'] == "nationalrail"){

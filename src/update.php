@@ -3,6 +3,7 @@
 include_once('base/main.php');
 include_once('base/function.php');
 include_once('base/request.php');
+include_once ('base/gtfs_request.php');
 
 $dossier = '../data/file/gtfs/';
 
@@ -19,63 +20,78 @@ remove_directory($fichier);
 
 echo '> Looking for GTFS...' . PHP_EOL;
 
-$gtfs = curl_GTFS('https://data.iledefrance-mobilites.fr/explore/dataset/offre-horaires-tc-gtfs-idfm/download/?format=csv&timezone=Europe/Berlin&lang=fr&csv_separator=%3B');
-file_put_contents($dossier . 'gtfs.csv', $gtfs);
-$gtfs = read_csv($dossier . 'gtfs.csv');
-$provider = "idfm/";
+// -----------------------------------------------------
+// IDFM - https://transport.data.gouv.fr/api/datasets/60d2b1e50215101bf6f9ae1b
+// Bibus - https://transport.data.gouv.fr/api/datasets/55ffbe0888ee387348ccb97d
+// TIGNES - https://transport.data.gouv.fr/api/datasets/5f0588426c51abada608d7a7
+// Chambért - https://transport.data.gouv.fr/api/datasets/5bae8c2806e3e75b699dc606
+$l = [
+    '60d2b1e50215101bf6f9ae1b', // IDFM
+    '55ffbe0888ee387348ccb97d', // Bibus
+    '5f0588426c51abada608d7a7', // TIGNES
+    '5bae8c2806e3e75b699dc606'  // Chambéry
+];
 
-if (!is_dir($dossier . $provider)) {
-    mkdir($dossier . $provider);
-}
+foreach($l as $url) {
+    $ressources = getGTFSlistFromApi($url);
+    echo '  > ' . $url . PHP_EOL;
 
-foreach ($gtfs as $row) {
-    if ($row && $row[1] && $row[1] != 'url' && $row[1] != '' && $row[1] != false) {
-        echo '  > ' . $row[1] . PHP_EOL;
+    foreach ($ressources as $ressource){
+        $request = getProvider($ressource);
 
-        $request = getProvider([
-            'provider_id' => 'idfm',
-            'url' => $row[1],
-        ]);
+        $action = false;
+        if ($request->rowCount() == 0) $action = true;
 
         while ($obj = $request->fetch()) {
-            if ($obj['url'] == $row[1]) {
+            if ($obj['url'] == $ressource['url']) {
                 echo '    i Already existing file, not updated' . PHP_EOL;
             } else {
-                $zip = file_get_contents($row[1]);
-                file_put_contents($dossier . $provider . 'gtfs.zip', $zip);
-                echo '    > Downloaded' . PHP_EOL;
-
-                insertProvider([
-                    'provider_id' => 'idfm',
-                    'slug'        => 'IDFM',
-                    'title'       => 'IDFM',
-                    'type'        => 'GTFS',
-                    'url'         => $row[1],
-                    'updated'     => date('Y-m-d H:i:s'),
-                    'flag'        => 0,
-                ]);
+                $action = true;
             }
+        }
+
+        if ($action == true) {
+            $provider = $ressource['slug'] . '/';
+            $provider_id = $ressource['slug'];
+            if (!is_dir($dossier . $provider)) {
+                mkdir($dossier . $provider);
+            }
+            
+            $zip = file_get_contents($ressource['original_url']);
+            echo $ressource['original_url'];
+            file_put_contents($dossier . $provider . 'gtfs.zip', $zip);
+            echo '    > Downloaded' . PHP_EOL;
+
+            insertProvider($ressource);
         }
     }
 }
 
-// -----------------------------------------------------
-// Bibus - https://transport.data.gouv.fr/api/datasets/55ffbe0888ee387348ccb97d
 
+$provider_dir = scandir($dossier);
+foreach ($provider_dir as $provider_id) {
+    if (is_dir($dossier . $provider_id)) {
+        echo $provider_id . PHP_EOL;
 
+        if (is_file($dossier . $provider_id . '/gtfs.zip')) {
+            echo '> Unzip GTFS...' . PHP_EOL;
+        
+            $zip = new ZipArchive;
+            try {
+                $zip->open($dossier . $provider_id . '/gtfs.zip');
+                $zip->extractTo($dossier . $provider_id . '/');
+                $zip->close();
+                unlink($dossier . $provider_id . '/gtfs.zip');
+                clearProviderData($provider);
+            } catch (ValueError $e) {
+                echo '  ! Failed to unzip GTFS !' . PHP_EOL;
+            }
 
-if (is_file($dossier . $provider . 'gtfs.zip')) {
-    echo '    > Unzip GTFS...' . PHP_EOL;
-
-    $zip = new ZipArchive;
-    if ($zip->open($dossier . $provider . 'gtfs.zip')) {
-        $zip->extractTo($dossier . $provider);
-        $zip->close();
-    } else {
-        echo '  ! Failed to unzip GTFS !' . PHP_EOL;
+            unset($zip);
+        }
     }
-    
-    include('update_gtfs.php');
 }
+
+include('update_gtfs.php');
 
 ?>
