@@ -73,7 +73,7 @@ function insertFile($type, $path, $header, $sep = ',', $provider = 'TEST') {
             TERMINATED BY ?
             ENCLOSED BY '\"'
         LINES
-            TERMINATED BY  '\r\n'
+            TERMINATED BY  '\n'
         IGNORE 1 ROWS
         ($header)
         SET provider_id = ?
@@ -156,6 +156,20 @@ function generateTownInStopRoute() {
         SET SR.town_id = T.town_id,
             SR.town_name = T.town_name,
             SR.town_query_name = T.town_name;
+    ");
+    $req->execute(array( ));
+    return $req;
+}
+
+function getStopsNotInArea() {
+    $db = $GLOBALS["db"];
+
+    $req = $db->prepare("
+        SELECT *
+        FROM stops S
+        
+        WHERE S.location_type = '0'
+        AND S.parent_station = '';
     ");
     $req->execute(array( ));
     return $req;
@@ -578,8 +592,6 @@ function insertAttributions($opt, $provider){
     ));
     return $req;
 }
-
-// create a function to delete an element foreach table used
 
 function deleteTable($opt, $provider){
     $db = $GLOBALS["db"];

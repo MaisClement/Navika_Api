@@ -58,7 +58,7 @@ foreach($l as $url) {
             }
             
             $zip = file_get_contents($ressource['original_url']);
-            echo $ressource['original_url'];
+            echo '    i ' . $ressource['original_url'] . PHP_EOL;
             file_put_contents($dossier . $provider . 'gtfs.zip', $zip);
             echo '    > Downloaded' . PHP_EOL;
 
@@ -67,14 +67,13 @@ foreach($l as $url) {
     }
 }
 
+echo '> Unzip GTFS...' . PHP_EOL;
 
 $provider_dir = scandir($dossier);
 foreach ($provider_dir as $provider_id) {
     if (is_dir($dossier . $provider_id)) {
-        echo $provider_id . PHP_EOL;
-
         if (is_file($dossier . $provider_id . '/gtfs.zip')) {
-            echo '> Unzip GTFS...' . PHP_EOL;
+            echo '  ' . $provider_id . PHP_EOL;
         
             $zip = new ZipArchive;
             try {
@@ -88,6 +87,22 @@ foreach ($provider_dir as $provider_id) {
             }
 
             unset($zip);
+        }
+    }
+}
+
+echo '> Formatting file...' . PHP_EOL;
+
+$provider_dir = scandir($dossier);
+foreach ($provider_dir as $provider_id) {
+    if (is_dir($dossier . $provider_id)) {
+
+        $files = glob($dossier . $provider_id . '/*.{txt}', GLOB_BRACE);
+        foreach($files as $file) {
+            // echo $file;
+            $content = file_get_contents($file);
+            $content = str_replace('\r\n', '\n', $content);
+            file_put_contents($file, $content);
         }
     }
 }

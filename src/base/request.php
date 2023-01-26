@@ -187,6 +187,23 @@ function getProvider($opt) {
     return $req;
 }
 
+
+function setParentStation($opt) {
+    $db = $GLOBALS["db"];
+
+    $req = $db->prepare("
+        UPDATE stops
+        SET parent_station = ?
+        
+        WHERE stop_id = ?;
+    
+	  ");
+    $req->execute(array(
+        isset($opt['parent_station']) ? $opt['parent_station'] : '',
+        isset($opt['stop_id']) ? $opt['stop_id'] : '',
+    ));
+    return $req;
+}
 // ------------------------------------------------
 
 function SQLinit($query){

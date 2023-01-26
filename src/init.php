@@ -5,12 +5,13 @@ include_once ('base/function.php');
 include_once ('base/request.php');
 
 // INIT SQL 
+echo '> Init Database'. PHP_EOL;
 $query = file_get_contents('../data/sql/SQL.sql');
 SQLinit($query);
 
 // Import GeoJson
 
-echo '  > GeoJson'. PHP_EOL;
+echo '> GeoJson'. PHP_EOL;
 clearTown();
 
 $geojson = file_get_contents('../data/file/communes.geojson');
@@ -36,7 +37,7 @@ foreach($geojson->features as $feature){
     try {
         addTown($id, $name, $polygon_text);
     } catch (Exception $e) {
-        echo $e;
+        // echo $e;
     }
 }
 
