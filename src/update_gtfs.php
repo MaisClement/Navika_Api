@@ -37,7 +37,7 @@ foreach ($provider_dir as $provider_id) {
     }
 }
 echo PHP_EOL . '-----' . PHP_EOL;
-echo $err . ' errors' . PHP_EOL;
+echo $err . ' errors';
 echo PHP_EOL . '-----' . PHP_EOL;
 
 echo '> Generating Stop_Area...' . PHP_EOL;
@@ -80,7 +80,7 @@ generateStopRoute();
 
 
 echo PHP_EOL . '-----' . PHP_EOL;
-echo 'Ready ✅' . PHP_EOL;
+echo 'Ready ✅';
 echo PHP_EOL . '-----' . PHP_EOL;
 
 echo '> Preparing for query...' . PHP_EOL;

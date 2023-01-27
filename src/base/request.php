@@ -178,11 +178,9 @@ function getProvider($opt) {
         SELECT *
         FROM provider
         WHERE provider_id = ?
-        OR url = ?
 	  ");
     $req->execute(array(
-        isset($opt['provider_id']) ? $opt['provider_id'] : '',
-        isset($opt['url']) ? $opt['url'] : '',
+        isset($opt['provider_id']) ? $opt['provider_id'] : ''
     ));
     return $req;
 }

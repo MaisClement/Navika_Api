@@ -1,3 +1,4 @@
+TRUNCATE provider;
 TRUNCATE agency;
 TRUNCATE stops;
 TRUNCATE routes;

@@ -454,20 +454,19 @@ function getGTFSlistFromApi($url) {
 
     $list = [];
 
-    foreach($json->resources as $resource) {
-        if ($resource->type == 'main' && $resource->format == 'GTFS' && $resource->is_available == true) {
-            $list[] = array(
-                'provider_id'   => $json->aom->name,
+    foreach($json->history as $history) {
+        if ($history->payload->format == 'GTFS') {
+            return array(
+                'provider_id'   => $url,
                 'slug'          => $json->aom->name,
-                'title'         => $resource->title,
-                'type'          => $resource->type,
-                'url'           => $resource->url,
-                'original_url'  => $resource->original_url,
-                'updated'       => date('Y-m-d H:i:s', strtotime($resource->updated)),
+                'title'         => $history->payload->title,
+                'type'          => $history->payload->format,
+                'url'           => $history->payload->resource_url,
+                'original_url'  => $history->payload->resource_url,
+                'updated'       => date('Y-m-d H:i:s', strtotime($history->updated_at)),
                 'flag'          => 0,
             );
         }
     }
-    return $list;
 }
 ?>
