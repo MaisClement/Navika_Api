@@ -4,6 +4,7 @@ include_once('base/main.php');
 include_once('base/function.php');
 include_once('base/request.php');
 include_once ('base/gtfs_request.php');
+include_once ('base/gbfs_request.php');
 
 $dossier = '../data/file/gtfs/';
 
@@ -18,7 +19,6 @@ clear_directory($fichier);
 $fichier = '../data/file/gtfs/';
 remove_directory($fichier);
 
-echo '> Looking for GTFS...' . PHP_EOL;
 
 // -----------------------------------------------------
 // IDFM - https://transport.data.gouv.fr/api/datasets/60d2b1e50215101bf6f9ae1b
@@ -27,7 +27,7 @@ echo '> Looking for GTFS...' . PHP_EOL;
 // Chambéry - https://transport.data.gouv.fr/api/datasets/5bae8c2806e3e75b699dc606
 // Strasbourg - https://transport.data.gouv.fr/api/datasets/5ae1715488ee384c8ba0342b
 
-$l = [
+$gtfs = [
     '60d2b1e50215101bf6f9ae1b',  // IDFM
     '55ffbe0888ee387348ccb97d',  // Bibus
     // '5f0588426c51abada608d7a7',  // TIGNES
@@ -35,9 +35,41 @@ $l = [
     // '5ae1715488ee384c8ba0342b',  // Strasbourg
 ];
 
+$gbfs = [
+    'https://velib-metropole-opendata.smoove.pro/opendata/Velib_Metropole/gbfs.json', // Vélib'
+    'https://transport.data.gouv.fr/gbfs/lyon/gbfs.json', // Lyon
+];
+
+echo '> Looking for GBFS...' . PHP_EOL;
+
+clearGBFS();
+foreach($gbfs as $url) {
+    echo '  > ' . $url . PHP_EOL;
+
+    $content = file_get_contents($url);
+    $content = json_decode($content);
+
+    if (isset($content->data->fr)) {
+        $feeds = $content->data->fr->feeds;
+    } else if (isset($content->data->en)) {
+        $feeds = $content->data->en->feeds;
+    } else {
+        echo '🤔';
+        break;
+    }
+    
+    foreach($feeds as $feed) {
+        if ($feed->name == 'station_information') {
+            getGBFSstation($feed->url);
+        }
+    }
+}
+
+echo '> Looking for GTFS...' . PHP_EOL;
+
 $needupdate = false;
 
-foreach($l as $url) {
+foreach($gtfs as $url) {
     $ressource = getGTFSlistFromApi($url);
     echo '  > ' . $url . PHP_EOL;
 

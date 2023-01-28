@@ -269,6 +269,17 @@ CREATE FULLTEXT INDEX stop_route_route_id ON stop_route(route_id);
 
 CREATE SPATIAL INDEX town_polygon ON town(town_polygon);
 
+
+DROP TABLE IF EXISTS stations;
+CREATE TABLE `stations` (
+  provider_id        VARCHAR(255) NOT NULL,
+  station_id         VARCHAR(255) PRIMARY KEY NOT NULL,
+  station_name       VARCHAR(255),
+  station_lat        VARCHAR(255) NOT NULL,
+  station_lon        VARCHAR(255) NOT NULL,
+  station_capacity   VARCHAR(255)
+);
+
 -- ALTER TABLE agency
 -- ADD CONSTRAINT FK_agency_provider_id
 -- FOREIGN KEY  (provider_id) REFERENCES provider(provider_id) ON DELETE CASCADE; 

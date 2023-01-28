@@ -469,4 +469,25 @@ function getGTFSlistFromApi($url) {
         }
     }
 }
+
+// ---
+
+function getGBFSstation($url) {
+
+    $content = file_get_contents($url);
+    $content = json_decode($content);
+
+    foreach($content->data->stations as $station) {
+        insertStation([
+            'station_id'        =>  $station->station_id,
+            'station_name'      =>  $station->name,
+            'station_lat'       =>  $station->lat,
+            'station_lon'       =>  $station->lon,
+            'station_capacity'  =>  $station->capacity,
+        ],
+        'TEST');
+    }
+
+}
+
 ?>

@@ -1,32 +1,12 @@
 <?php
 
-$fichier = '../data/cache/stop_area_';
+$fichier = '../data/cache/near_';
 
-if ( isset($_GET['q']) && isset($_GET['lat']) && isset($_GET['lon']) ){
-    $query = $_GET['q'];
-    $query = urlencode( trim($query) );
-    $lat = $_GET['lat'];
-    $lon = $_GET['lon'];
-    
-    $fichier .= $query . '_' . $lat . '_' . $lon . '.json';
-
-    $search_type = 3;
-
-} else if ( isset($_GET['lat']) && isset($_GET['lon']) ) {
+if ( isset($_GET['lat']) && isset($_GET['lon']) ) {
     $lat = $_GET['lat'];
     $lon = $_GET['lon'];
     
     $fichier .= $lat . '_' . $lon . '.json';
-
-    $search_type = 2;
-
-} else if (isset($_GET['q'])){
-    $query = $_GET['q'];
-    $query = urlencode( trim($query) );
-
-    $fichier .= $query . '.json';
-
-    $search_type = 1;
 
 } else {
     ErrorMessage(
@@ -35,43 +15,23 @@ if ( isset($_GET['q']) && isset($_GET['lat']) && isset($_GET['lon']) ){
     );
 }
 
-// if (is_file($fichier) && filesize($fichier) > 5 && (time() - filemtime($fichier) < 60 * 60)) {
-//     echo file_get_contents($fichier);
-//     exit;
-// }
-
 // ------ Request
 //
-$type = 1; // Area
+$request = getStopByGeoCoords($lat, $lon, 5000);
 
-if ($search_type == 3){
-    $request = getStopByQueryAndGeoCoords($query, $lat, $lon);
-
-} else if ($search_type == 2){
-    $request = getStopByGeoCoords($lat, $lon, 5000);
-
-} else if ($search_type == 1){
-    $request = getStopByQuery($query);
-
-} else {
-    ErrorMessage(500);
-}
-
-// ------ Ville et code postal
+// ------ Arrets
 //
 
-$places = [];
+$stops = [];
 while ($obj = $request->fetch()) {
-
-    if (!isset( $places[$obj['stop_id']] )) {
-        $places[$obj['stop_id']] = array(
+    if (!isset( $stops[$obj['stop_id']] )) {
+        $stops[$obj['stop_id']] = array(
             'id'        =>  (String)    $obj['stop_id'],
             'name'      =>  (String)    $obj['stop_name'],
             'type'      =>  (String)    'stop_area',
             'distance'  =>  (int)       isset($obj['distance']) ? $obj['distance'] < 1000 ? round($obj['distance']) : 0 : 0,
-            // 'zone'      =>  (int)       $obj['zone_id'] ?? 0,
             'town'      =>  (String)    $obj['town_name'],
-            'zip_code'  =>  (String)    substr($obj['town_id'], 0, 2),
+            'zip_code'  =>  (String)    isset($obj['town_id']) ? substr($obj['town_id'], 0, 2) : '',
             'coord'     => array(
                 'lat'       =>      floatval( $obj['stop_lat'] ),
                 'lon'       =>      floatval( $obj['stop_lon'] ),
@@ -101,18 +61,37 @@ while ($obj = $request->fetch()) {
 }
 
 $json = [];
-foreach($places as $key => $place) {
+foreach($stops as $key => $place) {
     usort($lines[$key], "order_line");
     $place['lines'] = $lines[$key];
     $place['modes'] = $modes[$key];
     $json[] = $place;
 }
 
-if ($search_type != 2) {
-    usort($json, "order_places");
+$echo["stops"] = $json;
+
+// ------ Velo
+//
+
+$request = getStationByGeoCoords($lat, $lon, 5000);
+
+$stations = [];
+while ($obj = $request->fetch()) {
+
+    $stations[] = array(
+        'id'        =>  (String)    $obj['station_id'],
+        'name'      =>  (String)    $obj['station_name'],
+        'capacity'  =>  (String)    $obj['station_capacity'],
+        'coord'     => array(
+            'lat'       =>      floatval( $obj['station_lat'] ),
+            'lon'       =>      floatval( $obj['station_lon'] ),
+        ),
+    );
 }
 
-$echo["places"] = array_slice($json, 0, 15);
+//
+
+$echo["stations"] = $stations;
 
 if (isset($_GET['flag'])) {
     $echo["flag"] = (int) $_GET['flag'];

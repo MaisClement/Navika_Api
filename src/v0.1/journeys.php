@@ -1,6 +1,6 @@
 <?php
 
-$fichier = '../data/cache/journeys/';
+$fichier = '../data/cache/journeys_';
 
 if ( isset($_GET['from']) && isset($_GET['to']) ){
 

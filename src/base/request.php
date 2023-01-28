@@ -78,6 +78,33 @@ function getStopByQueryAndGeoCoords($query, $lat, $lon){
 
 // ------------------------------------------------
 
+function getStationByGeoCoords($lat, $lon, $distance = 1000){
+    $db = $GLOBALS["db"];
+    $lat = trim( $lat );
+    $lon = trim( $lon );
+
+    $req = $db->prepare("
+        SELECT station_id, station_name, station_lat, station_lon, station_capacity, 
+        ST_Distance_Sphere(
+                point(station_lat, station_lon),
+                point(?, ?)
+        ) AS distance
+        
+        FROM stations
+            
+        WHERE ST_Distance_Sphere(
+                point(station_lat, station_lon),
+                point(?, ?)
+        ) < ?
+        
+        ORDER BY distance;
+    ");
+    $req->execute( array($lat, $lon, $lat, $lon, $distance) );
+    return $req;
+}
+
+// ------------------------------------------------
+
 function addTown($id, $name, $polygon){
     $db = $GLOBALS["db"];
     $id = trim( $id );

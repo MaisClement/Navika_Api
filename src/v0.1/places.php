@@ -1,6 +1,6 @@
 <?php
 
-$fichier = '../data/cache/places/';
+$fichier = '../data/cache/places_';
 
 if ( isset($_GET['q']) && isset($_GET['lat']) && isset($_GET['lon']) ){
     $query = $_GET['q'];
@@ -9,7 +9,7 @@ if ( isset($_GET['q']) && isset($_GET['lat']) && isset($_GET['lon']) ){
     $lon = $_GET['lon'];
 
     $url = $BASE_URL . '/places?q=' . $query . '&from' . $lon .';' . $lat . '=&depth=2';
-    $fichier .= 'PRIM_' . $query . '_' . $lat . '_' . $lon . '.json';
+    $fichier .= $query . '_' . $lat . '_' . $lon . '.json';
 
     $search_type = 3;
 
@@ -18,7 +18,7 @@ if ( isset($_GET['q']) && isset($_GET['lat']) && isset($_GET['lon']) ){
     $lon = $_GET['lon'];
 
     $url = $BASE_URL . '/coord/' . $lon .';' . $lat . '/places_nearby?depth=2&distance=1000';
-    $fichier .= 'PRIM_' . $lat . '_' . $lon . '.json';
+    $fichier .= $lat . '_' . $lon . '.json';
 
     $search_type = 2;
 
@@ -27,7 +27,7 @@ if ( isset($_GET['q']) && isset($_GET['lat']) && isset($_GET['lon']) ){
     $query = urlencode( trim($query) );
 
     $url = $BASE_URL . '/places?q=' . $query . '&depth=2';
-    $fichier .= 'PRIM_' . $query . '.json';
+    $fichier .= $query . '.json';
 
     $search_type = 1;
 
