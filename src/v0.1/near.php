@@ -91,7 +91,7 @@ while ($obj = $request->fetch()) {
 
 //
 
-$echo["stations"] = $stations;
+$echo["bike"] = $stations;
 
 if (isset($_GET['flag'])) {
     $echo["flag"] = (int) $_GET['flag'];
