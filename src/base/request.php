@@ -139,6 +139,19 @@ function getLinesById ($id) {
     return $req;
 }
 
+function getStationById ($id) {
+    $db = $GLOBALS["db"];
+    $id = trim( $id );
+
+    $req = $db->prepare("
+            SELECT * 
+            FROM stations
+            WHERE station_id = ?;
+    ");
+    $req->execute( array($id) );
+    return $req;
+}
+
 function getAllLinesAtStop ($id) {
     $db = $GLOBALS["db"];
     $id = trim( $id );

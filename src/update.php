@@ -36,8 +36,8 @@ $gtfs = [
 ];
 
 $gbfs = [
-    'https://velib-metropole-opendata.smoove.pro/opendata/Velib_Metropole/gbfs.json', // Vélib'
-    'https://transport.data.gouv.fr/gbfs/lyon/gbfs.json', // Lyon
+    'https://velib-metropole-opendata.smoove.pro/opendata/Velib_Metropole/', // Vélib'
+    'https://transport.data.gouv.fr/gbfs/lyon/', // Lyon
 ];
 
 echo '> Looking for GBFS...' . PHP_EOL;
@@ -46,23 +46,7 @@ clearGBFS();
 foreach($gbfs as $url) {
     echo '  > ' . $url . PHP_EOL;
 
-    $content = file_get_contents($url);
-    $content = json_decode($content);
-
-    if (isset($content->data->fr)) {
-        $feeds = $content->data->fr->feeds;
-    } else if (isset($content->data->en)) {
-        $feeds = $content->data->en->feeds;
-    } else {
-        echo '🤔';
-        break;
-    }
-    
-    foreach($feeds as $feed) {
-        if ($feed->name == 'station_information') {
-            getGBFSstation($feed->url);
-        }
-    }
+    getGBFSstation($url . 'station_information.json', $url);
 }
 
 echo '> Looking for GTFS...' . PHP_EOL;

@@ -472,7 +472,7 @@ function getGTFSlistFromApi($url) {
 
 // ---
 
-function getGBFSstation($url) {
+function getGBFSstation($url, $provider_url) {
 
     $content = file_get_contents($url);
     $content = json_decode($content);
@@ -485,7 +485,7 @@ function getGBFSstation($url) {
             'station_lon'       =>  $station->lon,
             'station_capacity'  =>  $station->capacity,
         ],
-        'TEST');
+        $provider_url);
     }
 
 }
