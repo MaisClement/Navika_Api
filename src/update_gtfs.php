@@ -83,6 +83,9 @@ echo PHP_EOL . '-----' . PHP_EOL;
 echo 'Ready ✅';
 echo PHP_EOL . '-----' . PHP_EOL;
 
+// Monitoring
+file_get_contents('https://betteruptime.com/api/v1/heartbeat/SrRkcBMzc4AgsXXzzZa2qFDa');
+
 echo '> Preparing for query...' . PHP_EOL;
 
 generateQueryRoute();
