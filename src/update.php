@@ -68,8 +68,26 @@ clearGBFS();
 foreach($gbfs as $url) {
     echo '  > ' . $url . PHP_EOL;
 
-    getGBFSstation($url . 'station_information.json', $url);
+    $content = file_get_contents($url . 'gbfs.json');
+    $content = json_decode($content);
+
+    if (isset($content->data->fr)) {
+        $feeds = $content->data->fr->feeds;
+    } else if (isset($content->data->en)) {
+        $feeds = $content->data->en->feeds;
+    } else {
+        echo '🤔';
+        break;
+    }
+    
+    foreach($feeds as $feed) {
+        if ($feed->name == 'station_information') {
+            getGBFSstation($feed->url, $url);
+        }
+    }
 }
+
+exit;
 
 echo '> Looking for GTFS...' . PHP_EOL;
 
