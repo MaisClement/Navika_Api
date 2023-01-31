@@ -28,6 +28,7 @@ foreach ($provider_dir as $provider_id) {
 
                 try {
                     insertFile($type, $file, $header, ',', $provider_id);
+                    unlink($file);
                 } catch (Exception $e) {
                     echo $e;
                     $err++;
@@ -78,11 +79,13 @@ echo '> Generating Stop_Route table...' . PHP_EOL;
 truncateStopRoute();
 generateStopRoute();
 
+include('update_sncf.php');
 
 echo PHP_EOL . '-----' . PHP_EOL;
 echo 'Ready ✅';
 echo PHP_EOL . '-----' . PHP_EOL;
 
+echo '> Monitoring' . PHP_EOL;
 // Monitoring
 file_get_contents('https://betteruptime.com/api/v1/heartbeat/SrRkcBMzc4AgsXXzzZa2qFDa');
 

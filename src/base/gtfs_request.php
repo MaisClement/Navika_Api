@@ -593,6 +593,36 @@ function insertAttributions($opt, $provider){
     return $req;
 }
 
+function insertStopRoute($opt) {
+    $db = $GLOBALS["db"];
+
+    $req = $db->prepare("
+        INSERT INTO stop_route
+        (route_id, route_short_name, route_long_name, route_type, route_color, route_text_color, stop_id, stop_name, stop_query_name, stop_lat, stop_lon, town_id, town_name, town_query_name)
+
+        VALUES
+        (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+    ");
+    $req->execute(array(
+        isset($opt['route_id'])         ? $opt['route_id'] : '',
+        isset($opt['route_short_name']) ? $opt['route_short_name'] : '',
+        isset($opt['route_long_name'])  ? $opt['route_long_name'] : '',
+        isset($opt['route_type'])       ? $opt['route_type'] : '',
+        isset($opt['route_color'])      ? $opt['route_color'] : '',
+        isset($opt['route_text_color']) ? $opt['route_text_color'] : '',
+        isset($opt['stop_id'])          ? $opt['stop_id'] : '',
+        isset($opt['stop_name'])        ? $opt['stop_name'] : '',
+        isset($opt['stop_query_name'])  ? $opt['stop_query_name'] : '',
+        isset($opt['stop_lat'])         ? $opt['stop_lat'] : '',
+        isset($opt['stop_lon'])         ? $opt['stop_lon'] : '',
+        
+        isset($opt['town_id'])          ? $opt['town_id'] : '',
+        isset($opt['town_name'])        ? $opt['town_name'] : '',
+        isset($opt['town_query_name'])  ? $opt['town_query_name'] : '',
+    ));
+    return $req;
+}
+
 function deleteTable($opt, $provider){
     $db = $GLOBALS["db"];
 

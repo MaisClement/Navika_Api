@@ -40,22 +40,22 @@ $gbfs = [
     'https://transport.data.gouv.fr/gbfs/lyon/', // Lyon
     'https://clermontferrand.publicbikesystem.net/customer/gbfs/v2/', // Clermont Ferrand
     'https://montpellier-fr-smoove.klervi.net/gbfs/', // Montpellier 
-    'https://transport.data.gouv.fr/gbfs/besancon/', // Besançon 
-    'https://transport.data.gouv.fr/gbfs/vlille/', // Lille V'lille
-    'https://transport.data.gouv.fr/gbfs/creteil/', // Créteil Cristolib 
-    'https://transport.data.gouv.fr/gbfs/rouen/', // Rouen Cy'clic
-    'https://transport.data.gouv.fr/gbfs/amiens/', // Amiens Vélam
-    'https://transport.data.gouv.fr/gbfs/nancy/', // Nancy vélOstan’lib 
-    'https://transport.data.gouv.fr/gbfs/mulhouse/', // Mulhouse Vélocité
-    'https://eu.ftp.opendatasoft.com/star/gbfs/', // Rennes STAR !!!!
-    'https://saint-etienne-fr-smoove.klervi.net/gbfs/', // St Etienne VéliVert
-    'https://transport.data.gouv.fr/gbfs/toulouse/', // Toulouse VélÔToulouse
-    'https://transport.data.gouv.fr/gbfs/vcub/', // Bordeaux VCub
-    'https://avignon-gbfs.klervi.net/gbfs/en/', // Avignon Velopop’ 
-    'https://transport.data.gouv.fr/gbfs/cergy-pontoise/', // Cergy Vélo² 
-    'https://transport.data.gouv.fr/gbfs/nantes/', // Nantes Bicloo
-    'https://vannes-gbfs.klervi.net/gbfs/', // Vannes Vélocéo
-    'https://belfort-gbfs.klervi.net/gbfs/en/', // Belfort Belfort
+    // 'https://transport.data.gouv.fr/gbfs/besancon/', // Besançon 
+    // 'https://transport.data.gouv.fr/gbfs/vlille/', // Lille V'lille
+    // 'https://transport.data.gouv.fr/gbfs/creteil/', // Créteil Cristolib 
+    // 'https://transport.data.gouv.fr/gbfs/rouen/', // Rouen Cy'clic
+    // 'https://transport.data.gouv.fr/gbfs/amiens/', // Amiens Vélam
+    // 'https://transport.data.gouv.fr/gbfs/nancy/', // Nancy vélOstan’lib 
+    // 'https://transport.data.gouv.fr/gbfs/mulhouse/', // Mulhouse Vélocité
+    // 'https://eu.ftp.opendatasoft.com/star/gbfs/', // Rennes STAR !!!!
+    // 'https://saint-etienne-fr-smoove.klervi.net/gbfs/', // St Etienne VéliVert
+    // 'https://transport.data.gouv.fr/gbfs/toulouse/', // Toulouse VélÔToulouse
+    // 'https://transport.data.gouv.fr/gbfs/vcub/', // Bordeaux VCub
+    // 'https://avignon-gbfs.klervi.net/gbfs/en/', // Avignon Velopop’ 
+    // 'https://transport.data.gouv.fr/gbfs/cergy-pontoise/', // Cergy Vélo² 
+    // 'https://transport.data.gouv.fr/gbfs/nantes/', // Nantes Bicloo
+    // 'https://vannes-gbfs.klervi.net/gbfs/', // Vannes Vélocéo
+    // 'https://belfort-gbfs.klervi.net/gbfs/en/', // Belfort Belfort
 
     // https://gateway.prod.partners-fs37hd8.zoov.site/gbfs/2.2/saintbrieuc/en/gbfs.json?key=YmE1ZDVlNDYtMGIwNy00MGEyLWIxZWYtNGEwOGQ4NTYxNTYz
     // ST BRIEUC
@@ -86,8 +86,6 @@ foreach($gbfs as $url) {
         }
     }
 }
-
-exit;
 
 echo '> Looking for GTFS...' . PHP_EOL;
 
