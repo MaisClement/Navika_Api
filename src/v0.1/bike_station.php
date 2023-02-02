@@ -1,6 +1,6 @@
 <?php
 
-$dossier = '../data/cache/schedules/';
+$dossier = '../data/cache/bike_';
 
 if (!isset($_GET['s']) || $_GET['s'] == null){
     ErrorMessage( 400, 'Required parameter "s" is missing or null.' );
@@ -33,14 +33,21 @@ $json = array(
 $content = file_get_contents( $obj['provider_id'] . 'station_status.json' );
 $content = json_decode( $content );
 
+$sid = substr($id, strpos($id, ':')+1);
+
 foreach($content->data->stations as $station) {
-    if ($station->station_id == $id) {
-        
-        foreach($station->num_bikes_available_types as $types) {
-            foreach ($types as $key => $nb) {
-                $json[$key] = $nb;
+    if ($station->station_id == $sid) {
+
+        if (isset($station->num_bikes_available_types)) {
+            foreach($station->num_bikes_available_types as $types) {
+                foreach ($types as $key => $nb) {
+                    $json[$key] = $nb;
+                }
             }
+        } else if (isset($station->num_bikes_available)) {
+            $json['bike'] = $station->num_bikes_available;
         }
+        
         break;
     }
 }

@@ -24,6 +24,12 @@ $severity_i = array(
 
 $messages = [];
 foreach($results as $result) {
+
+    $url = $result->link;
+    if (strpos($url, 'iledefrance-mobilites.fr') == false) {
+        $url = 'https://me-deplacer.iledefrance-mobilites.fr' . $url;
+    }
+
     $messages[] = array(
         "id"            =>  (String)    $result->id,
         "status"        =>  (String)    "active",
@@ -36,7 +42,7 @@ foreach($results as $result) {
             "title"     =>      $result->title,
             "text"      =>      $result->description,
             "button"      =>    $result->buttonText,
-            "link"      =>      $result->link,
+            "link"      =>      $url,
         ),
     );
 }

@@ -24,7 +24,7 @@ echo '   > https://ressources.data.sncf.com/explore/dataset/referentiel-gares-vo
                 'route_id'          => 'SNCF',  
                 'route_short_name'  => 'SNCF',  
                 'route_long_name'   => 'Trains SNCF',  
-                'route_type'        => '100',  
+                'route_type'        => '99',  
                 'route_color'       => 'aaaaaa',  
                 'route_text_color'  => '000000',  
                 'stop_id'           => 'SNCF:' . substr($row[2], 2),   // CODE UIC

@@ -95,6 +95,7 @@ function getTransportMode($l) {
         11 => 'bus',
         12 => 'monorail',
 
+        99 => 'nationalrail',
         100 => 'rail',
         400 => 'metro',
         700 => 'bus',
@@ -472,14 +473,14 @@ function getGTFSlistFromApi($url) {
 
 // ---
 
-function getGBFSstation($url, $provider_url) {
+function getGBFSstation($url, $provider_url, $id) {
 
     $content = file_get_contents($url);
     $content = json_decode($content);
 
     foreach($content->data->stations as $station) {
         insertStation([
-            'station_id'        =>  $station->station_id,
+            'station_id'        =>  $id . ':' . $station->station_id,
             'station_name'      =>  $station->name,
             'station_lat'       =>  $station->lat,
             'station_lon'       =>  $station->lon,
