@@ -1,0 +1,396 @@
+<!DOCTYPE html>
+<html class="has-navbar-fixed-top">
+
+<head>
+  <title>EDWIN</title>
+
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  <meta http-equiv="X-UA-Compatible" content="IE=Edge">
+  <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+  <meta name="google" content="notranslate">
+
+  <link rel="icon" href="/images/logo-s.png?v=1" type="image/png">
+  <link rel="shortcut icon" href="/images/logo-s.png?v=1" type="image/png">
+
+  <link rel="stylesheet" href="/css/bulma.css?t=1672735414348">
+  <link rel="stylesheet"
+    href="https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css?t=1675435617872">
+
+  <link rel="stylesheet" type="text/css" href="/css/react-datepicker.min.css?t=1675435617872">
+  <link rel="stylesheet" type="text/css" href="/css/bulma-divider.min.css?t=1675435617872">
+  <link rel="stylesheet" type="text/css" href="/css/style.css?t=1675435617872">
+  <link rel="stylesheet" type="text/css" href="/css/modif.css?t=1675435617872">
+
+</head>
+
+<body class="is-preedwin">
+
+
+  <div id="navbar" class="newnavbar">
+    <div data-reactroot="">
+      <div class="navbar is-fixed-top is-transparent" role="navigation">
+        <div class="container is-fluid">
+          <div class="scrollbar-button"><span></span><span></span><span></span></div>
+          <div class="navbar-brand"><a class="navbar-item logo" href="/society/pre-edwin/"><img
+                src="/images/svg/logo_edwin_navbar.svg" alt="Lowa Corp." width="25" height="25" /></a><a
+              class="navbar-item" href="/society/pre-edwin/"><strong>Lowa Corp.</strong></a><button type="button"
+              class="button navbar-burger "><img src="/images//svg/logo_edwin_navbar.svg" alt="Edwin" width="25"
+                height="25" /></button></div>
+          <div class="navbar-menu ">
+            <div class="navbar-end"><a class="navbar-item" href="/society/logout">Déconnexion</a></div>
+          </div>
+        </div>
+      </div>
+      <div class="scrollbar">
+        <div class="head">
+          <h5 class="title is-5 has-text-white m-2">Bon après-midi<!-- -->, <!-- -->Annie</h5>
+        </div>
+        <aside class="menu">
+          <div>
+            <p class="menu-label"><img src="/images/svg/picto_habilitation_W.svg" />Opérateurs et habilitations</p>
+            <ul class="menu-list marged">
+              <li class="action"><a href="/society/pre-edwin/operator/?hasLeaved=false">Gestion des opérateurs</a></li>
+              <li class="action"><a
+                  href="/society/pre-edwin/operator/habilitation/list?notState=EXPIRED&amp;notState=DELETED">Consultation
+                  / modification habilitations</a></li>
+              <li class="action"><a href="/society/pre-edwin/operator/?hasLeaved=true">Archive des opérateurs</a></li>
+              <li class="action"><a
+                  href="/society/pre-edwin/operator/habilitation/list?notState=COUNTERSIGNED&amp;notState=CREATED&amp;notState=PREFILL&amp;notState=PRESIGNED&amp;notState=SIGNED">Archive
+                  habilitations</a></li>
+            </ul>
+          </div>
+          <div>
+            <p class="menu-label"><img src="/images/picto-quiz.png" />Quiz</p>
+            <ul class="menu-list marged">
+              <li class="action"><a href="/society/pre-edwin/quizz/set-up">Paramétrage des questions</a></li>
+              <li class="action"><a href="/society/pre-edwin/quizz/list">Historique des quiz</a></li>
+              <li class="action"><a href="/society/pre-edwin/quizz/dashboard">Tableau de bord</a></li>
+              <li class="action"><a href="/society/pre-edwin/quizz/archive">Archive</a></li>
+            </ul>
+          </div>
+        </aside>
+        <div class="bottom">
+          <div class="menu">
+            <ul class="menu-list"><a href="/documents/normes_et_documents_courante.pdf"><img
+                  src="/images/svg/home_normes_documents.svg" /><span>Normes et documents</span></a><a
+                href="/documents/edwin_en_pratique_courante.pdf"><img
+                  src="/images/svg/home_edwin_pratique.svg" /><span>Edwin en pratique</span></a></ul>
+          </div>
+          <div class="menu">
+            <figure class="has-text-centered"><img class="logo" src="/images/logo_pre_edwin.png" /></figure>
+            <p>Copyright <a href="https://comstedition.com/">Comst Edition</a> - © Edwin <!-- -->2023</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="body-content" id="reactRoot">
+    <div class="container is-fluid" data-reactroot="">
+      <div class="head"><img src="/images/svg/picto_habilitation_W.svg" />
+        <h2>Habilitation</h2>
+      </div>
+      <div class="block">
+        <h4 class="title is-4 mb-2">Manageur</h4>
+        <div class="is-flex">
+          <div class="mr-3">
+            <div class="block">
+              <div class="mb-2"><b>Employeur / Délégataire<!-- --> <!-- --> *<!-- --> : </b><span>Non défini</span>
+              </div><button class="button  is-themed" type="submit"><span>Définir</span></button><input type="hidden"
+                name="lastName" value="" /><input type="hidden" name="firstName" value="" />
+              <div class="modal">
+                <div class="modal-background"></div>
+                <div class="modal-card ">
+                  <div class="modal-card-body"><button type="button" class="delete is-large"></button>
+                    <div class="content has-text-centered">
+                      <div class="modal-p">
+                        <div>
+                          <h4 class="title is-4">Sélection de l&#x27;opérateur</h4>
+                          <div class="columns has-text-left">
+                            <div class="column is-one-third">
+                              <div class="field "><label class="label">Code</label>
+                                <div class="control"><input value="" class="input" /></div>
+                              </div>
+                            </div>
+                            <div class="column is-one-third">
+                              <div class="field "><label class="label">Nom</label>
+                                <div class="control"><input value="" class="input" /></div>
+                              </div>
+                            </div>
+                            <div class="column is-one-third">
+                              <div class="field "><label class="label">Prénom</label>
+                                <div class="control"><input value="" class="input" /></div>
+                              </div>
+                            </div>
+                          </div>
+                          <div class="has-text-left"><b>Aucun résultat</b></div>
+                        </div>
+                      </div>
+                      <div><button type="button" class="button is-info">Annuler</button><button type="button"
+                          class="button is-info ">Effacer</button></div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <h4 class="title is-4 mb-2">Habilitation</h4>
+      <div class="columns ">
+        <div class="column is-one-quarter">
+          <div>
+            <div class="box mb-2 is-clickable panel-select selected">
+              <h6 class="title is-6">Électricité</h6>
+            </div>
+          </div>
+          <div>
+            <div class="box mb-2 is-clickable panel-select ">
+              <h6 class="title is-6">Gaz</h6>
+            </div>
+          </div>
+          <div>
+            <div class="box mb-2 is-clickable panel-select ">
+              <h6 class="title is-6">AIPR</h6>
+            </div>
+          </div>
+        </div>
+        <div class="column">
+          <div class="box slide-in">
+            <div class="mb-3">
+              <div>
+                <h4 class="title is-4 mb-2">Électricité</h4>
+                <form>
+                  <div class="columns ">
+                    <div class="column">
+                      <div class="field  "><label class="label">Aptitude physique : Reconnu apte le<!-- --> *</label>
+                        <div class="control">
+                          <div class="react-datepicker-wrapper">
+                            <div class="react-datepicker__input-container"><input type="text" value=""
+                                name="physicalAptitudeDate" class="input" required="" /></div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                    <div class="column">
+                      <div class="field  "><label class="label">Dernière date de formation<!-- --> *</label>
+                        <div class="control">
+                          <div class="react-datepicker-wrapper">
+                            <div class="react-datepicker__input-container"><input type="text" value="" name="examDate"
+                                class="input" required="" /></div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="columns ">
+                    <div class="column">
+                      <div class="field  "><label class="label">Date de reçu du CPP</label>
+                        <div class="control">
+                          <div class="react-datepicker-wrapper">
+                            <div class="react-datepicker__input-container"><input type="text" value="" name="cppDate"
+                                class="input" required="" /></div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                    <div class="column">
+                      <div class="field  "><label class="label">Modules</label>
+                        <div class="control"><input type="text" name="modules" value="" class="input " /></div>
+                      </div>
+                    </div>
+                  </div>
+                </form>
+              </div>
+            </div>
+            <table class="table is-fullwidth is-bordered">
+              <thead>
+                <tr>
+                  <th></th>
+                  <th>Domaine de tension</th>
+                  <th>Fonction</th>
+                  <th>Niveau(x) d&#x27;habilitation</th>
+                  <th>Ouvrage / installation</th>
+                  <th>Indication complémentaire</th>
+                  <th>Validité</th>
+                  <th></th>
+                </tr>
+              </thead>
+              <tbody data-rbd-droppable-id="draggable" data-rbd-droppable-context-id="0"></tbody>
+            </table><button class="button " type="submit" title="Ajouter un niveau d&#x27;habilitation"><span
+                class="icon is-big"><i class="fa fa-plus fa-lg"></i></span></button>
+          </div>
+        </div>
+      </div>
+      <div class="media habilitation-control">
+        <div class="media-right">
+          <div class="field is-grouped "><label class="label">&nbsp;</label>
+            <div class="control"><button class="button  is-info" type="submit" disabled=""
+                title="Enregistrer la saisie actuelle pour pouvoir la reprendre plus tard"><span>Enregistrer</span></button>
+            </div>
+            <div class="control"><button class="button  is-themed" type="submit"
+                title="Vérifier les informations avant envoi"><span>Vérifier</span></button></div>
+            <div class="control"><button class="button  is-themed" type="submit"
+                disabled=""><span>Valider</span></button></div>
+          </div>
+        </div>
+      </div>
+      <div class="modal">
+        <div class="modal-background"></div>
+        <div class="modal-card ">
+          <div class="modal-card-body"><button type="button" class="delete is-large"></button>
+            <div class="content has-text-centered">
+              <figure><span class="icon is-large has-text-info"><i class="fa fa-3x fa-info-circle"></i></span></figure>
+              <div class="modal-p">
+                <div style="text-align:initial">
+                  <h4 class="title is-4 has-text-centered">Ajouter un niveau d&#x27;habilitation</h4>
+                  <div class="columns is-multiline">
+                    <div class="column is-half">
+                      <div class="field  "><label class="label">Fonction<!-- --> *</label>
+                        <div class="control">
+                          <div class="select select is-fullwidth"><select name="cfId" required="">
+                              <option selected="" value="37">Employeur / délégataire</option>
+                            </select></div>
+                        </div>
+                      </div>
+                      <div class="field  ">
+                        <div class="control"><label class="checkbox"><input type="checkbox" value="checked" checked=""
+                              name="opFuncs" /> Uniquement les fonctions de l&#x27;opérateur</label></div>
+                      </div>
+                    </div>
+                    <div class="column is-half">
+                      <div class="field  "><label class="label">Niveau<!-- --> *</label>
+                        <div class="control">
+                          <div class="select select is-fullwidth"><select name="level" required="">
+                              <option selected="" value="N/A">N/A</option>
+                            </select></div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="field  "><label class="label">Valide *</label>
+                    <div class="control">
+                      <div class="field has-addons "><label class="label">&nbsp;</label>
+                        <div class="control"><a class="button  is-static"><span>Du</span></a></div>
+                        <div class="control is-expanded">
+                          <div class="react-datepicker-wrapper">
+                            <div class="react-datepicker__input-container"><input type="text" value="" name="validSince"
+                                class="input" required="" /></div>
+                          </div>
+                        </div>
+                        <div class="control"><a class="button  is-static"><span>Au</span></a></div>
+                        <div class="control is-expanded">
+                          <div class="react-datepicker-wrapper">
+                            <div class="react-datepicker__input-container"><input type="text" value="" name="validUntil"
+                                class="input" required="" /></div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div><button type="button" class="button is-info">Annuler</button><button type="button"
+                  class="button is-info " disabled="">Ajouter</button></div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="modal">
+        <div class="modal-background"></div>
+        <div class="modal-card ">
+          <div class="modal-card-body"><button type="button" class="delete is-large"></button>
+            <div class="content has-text-centered">
+              <figure><span class="icon is-large has-text-info"><i class="fa fa-3x fa-question-circle"></i></span>
+              </figure>
+              <div class="modal-p">
+                <p>Confirmez-vous la création d&#x27;un nouveau document d&#x27;habilitation ?</p>
+                <p>Une fois signé par le titulaire, ce document remplacera le document actuellement en cours de
+                  validité.</p>
+              </div>
+              <div><button type="button" class="button is-info">Annuler</button><button type="button"
+                  class="button is-info ">Nouvelle version</button></div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="modal">
+        <div class="modal-background"></div>
+        <div class="modal-card ">
+          <div class="modal-card-body"><button type="button" class="delete is-large"></button>
+            <div class="content has-text-centered">
+              <figure><span class="icon is-large has-text-info"><i class="fa fa-3x fa-info-circle"></i></span></figure>
+              <div class="modal-p">
+                <div style="text-align:initial">
+                  <h4 class="title is-4 has-text-centered">Email du titulaire</h4>
+                  <p>Veuillez saisir l&#x27;email du titulaire pour que nous puissions lui envoyer la demande de
+                    signature de son titre d&#x27;habilitation.</p>
+                  <p>Cette adresse email ne sera pas conservé, elle peut donc être une adresse email personnelle et non
+                    profressionnelle.</p>
+                  <div class="field  "><label class="label">Email titulaire</label>
+                    <div class="control"><input type="text" name="email" value="" class="input " /></div>
+                  </div>
+                </div>
+              </div>
+              <div><button type="button" class="button is-info">Annuler</button><button type="button"
+                  class="button is-info " disabled="">Ajouter</button></div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="notifications-container"></div>
+      <div class="modal">
+        <div class="modal-background"></div>
+        <div class="modal-card ">
+          <div class="modal-card-body">
+            <div class="content has-text-centered">
+              <figure><span class="icon is-large has-text-danger"><i
+                    class="fa fa-3x fa-exclamation-triangle"></i></span></figure>
+              <div class="modal-p">
+                <div style="text-align:initial">
+                  <h4 class="title is-4 has-text-centered">Donnée(s) invalide(s)</h4>
+                  <ul></ul>
+                </div>
+              </div>
+              <div><button type="button" class="button is-info">Fermer</button></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+
+
+
+
+  <script crossorigin="anonymous"
+    src="https://cdnjs.cloudflare.com/ajax/libs/react/17.0.2/umd/react.development.js?t=1675435617872"></script>
+  <script crossorigin="anonymous"
+    src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/17.0.2/umd/react-dom.development.js?t=1675435617872"></script>
+  <script crossorigin="anonymous"
+    src="https://cdnjs.cloudflare.com/ajax/libs/prop-types/15.8.1/prop-types.js?t=1675435617872"></script>
+  <script crossorigin="anonymous"
+    src="https://cdnjs.cloudflare.com/ajax/libs/axios/0.22.0/axios.min.js?t=1675435617872"></script>
+  <script type="text/javascript" nonce="">
+    axios.defaults.headers.common["X-Requested-With"] = "XMLHttpRequest";
+  </script>
+
+  <script type="text/javascript" nonce="">
+    window.edwinData = {
+      society: { "id": 7, "subscriptionId": 7, "parentId": null, "code": "3", "employer": "Lowa Corp.", "siret": "1", "address": "8 Rue du vide", "zipcode": "04520", "city": "Saint Patellin sur Rien", "extra": "", "responsive": "Alphonse", "emailSociety": "", "signatures": 2, "logo": null, "lastUserCode": 9, "multiple": false, "status": "ENABLED", "subscription": { "consumption": 3, "id": 7, "societyId": 7, "planType": "COURANTE", "expirationDate": "2023-09-25T22:00:00.000Z", "operation": 2000, "negative": false, "state": "ACTIVE", "creationDate": "2022-09-26T12:00:56.000Z" }, "options": ["DEMO", "CONTRIBUTOR_CODE_INCREMENT", "QUIZZ", "HABILITATION", "ONLY_PRE_EDWIN"], "parent": null },
+      user: { "id": 31, "societyId": 7, "transferedToSocietyId": null, "contributorHabilitationId": 5, "code": "2", "personalIdNumber": "", "civility": "MONSIEUR", "firstName": "Annie", "lastName": "Lepoutre", "service": "Manager", "level": "B2", "entity": "Lowa Corp.", "email": "clement.fr.dev+travaux@gmail.com", "phone": "01 23 45 67 89", "state": "ACTIVE", "publicKey": "1BQW7ZmwbaFn7xP3ADLZr4uAnMBoUYSoqF", "invisible": false, "sameSociety": true, "leaveSocietyDate": null, "subordinate": true, "creationDate": "2022-10-24T15:01:55.000Z", "society": { "id": 7, "subscriptionId": 7, "parentId": null, "code": "3", "employer": "Lowa Corp.", "siret": "1", "address": "8 Rue du vide", "zipcode": "04520", "city": "Saint Patellin sur Rien", "extra": "", "responsive": "Alphonse", "emailSociety": "", "signatures": 2, "logo": null, "lastUserCode": 9, "multiple": false, "status": "ENABLED", "subscription": { "consumption": 3, "id": 7, "societyId": 7, "planType": "COURANTE", "expirationDate": "2023-09-25T22:00:00.000Z", "operation": 2000, "negative": false, "state": "ACTIVE", "creationDate": "2022-09-26T12:00:56.000Z" }, "options": ["DEMO", "CONTRIBUTOR_CODE_INCREMENT", "QUIZZ", "HABILITATION", "ONLY_PRE_EDWIN"], "parent": null }, "roles": [{ "id": 177, "type": "ASSISTANT_OPERATOR" }, { "id": 178, "type": "CONTROLLER_OPERATOR" }, { "id": 164, "type": "ASSISTANT_QUIZZ" }, { "id": 179, "type": "CONTROLLER_QUIZZ" }], "habilitationDoc": { "data": { "ELECTRICITY": { "physicalAptitudeDate": "2023-01-24T23:00:00.000Z", "modules": "", "examDate": "2022-10-12T22:00:00.000Z", "cppDate": null }, "employerSignDate": "2022-10-25T09:16:52.221Z", "contributorSignDate": "2022-10-25T09:19:13.261Z" }, "id": 5, "contributorId": 31, "serviceManagerId": null, "employerId": 32, "expirationDate": "2025-10-23T22:00:00.000Z", "state": "COUNTERSIGNED", "path": "lowa_corp./pre-docs/habilitation/31/1666689553261_habilitation-2022.pdf", "creationDate": "2022-10-24T15:06:04.000Z", "updateDate": "2023-01-25T13:33:35.000Z" }, "name": "Annie Lepoutre" }
+    };
+  </script>
+  <script type="text/javascript" nonce="">
+    window.data = { "contributor": { "id": 32, "societyId": 7, "transferedToSocietyId": null, "contributorHabilitationId": null, "code": "3", "personalIdNumber": "", "civility": "MONSIEUR", "firstName": "Hervé", "lastName": "Dumont", "service": "Délégataire", "level": "N/A", "entity": "Lowa Corp.", "email": "clement.fr.dev+delegataire@gmail.com", "phone": "01 23 45 78 90", "state": "ACTIVE", "publicKey": "1P6r9xXxqqWoBhWhjxFsXn38BcrMmmnwLo", "invisible": false, "sameSociety": true, "leaveSocietyDate": null, "subordinate": true, "creationDate": "2022-10-24T15:03:33.000Z", "cf": [{ "id": 37, "contributorId": 32, "state": "ACTIVE", "name": "EMPLOYER" }], "name": "Hervé Dumont" }, "sendEmail": false };
+  </script>
+
+  <script type="text/javascript" src="/js/newprenavbar.js?t=1675435617872"></script>
+  <script type="text/javascript" src="/js/newcontributorHabilitation.js?t=1675435617872"></script>
+
+</body>
+
+</html>
