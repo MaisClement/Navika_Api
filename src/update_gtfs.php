@@ -89,6 +89,13 @@ echo '> Monitoring' . PHP_EOL;
 // Monitoring
 file_get_contents('https://betteruptime.com/api/v1/heartbeat/SrRkcBMzc4AgsXXzzZa2qFDa');
 
+$subject = 'Navika AutoUpdate';
+$message = file_get_contents('../data/output.txt');
+
+if (!mail('clementf78@gmail.com', $subject, $message, $headers)) {
+    echo '! failed to send mail !' . PHP_EOL;
+}
+
 echo '> Preparing for query...' . PHP_EOL;
 
 generateQueryRoute();

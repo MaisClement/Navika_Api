@@ -2,6 +2,8 @@ data/cache
 data/file
 data/report
 
+*output.txt
+
 *.config
 credential.php
 

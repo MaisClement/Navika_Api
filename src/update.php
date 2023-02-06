@@ -51,11 +51,11 @@ $gbfs = [
     'VELIVERT'  => 'https://saint-etienne-fr-smoove.klervi.net/gbfs/', // St Etienne VéliVert
     'VELOTOUS'  => 'https://transport.data.gouv.fr/gbfs/toulouse/', // Toulouse VélÔToulouse
     'VCUB'      => 'https://transport.data.gouv.fr/gbfs/vcub/', // Bordeaux VCub
-    'VELOPOP'   => 'https://avignon-gbfs.klervi.net/gbfs/en/', // Avignon Velopop’ 
+    'VELOPOP'   => 'https://avignon-gbfs.klervi.net/gbfs/', // Avignon Velopop’ 
     'VELO2'     => 'https://transport.data.gouv.fr/gbfs/cergy-pontoise/', // Cergy Vélo² 
     'BICLOO'    => 'https://transport.data.gouv.fr/gbfs/nantes/', // Nantes Bicloo
     'VELOCEO'   => 'https://vannes-gbfs.klervi.net/gbfs/', // Vannes Vélocéo
-    'OPTYMO'    => 'https://belfort-gbfs.klervi.net/gbfs/en/', // Belfort Belfort
+    'OPTYMO'    => 'https://belfort-gbfs.klervi.net/gbfs/', // Belfort Belfort
 
     // https://gateway.prod.partners-fs37hd8.zoov.site/gbfs/2.2/saintbrieuc/en/gbfs.json?key=YmE1ZDVlNDYtMGIwNy00MGEyLWIxZWYtNGEwOGQ4NTYxNTYz
     // ST BRIEUC
@@ -141,6 +141,9 @@ if ($needupdate == false) {
     echo PHP_EOL . '-----' . PHP_EOL;
     echo 'Nothing to do ✅';
     echo PHP_EOL . '-----' . PHP_EOL;
+
+    // Monitoring
+    file_get_contents('https://betteruptime.com/api/v1/heartbeat/SrRkcBMzc4AgsXXzzZa2qFDa');
     exit;
 }
 
