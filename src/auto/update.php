@@ -1,5 +1,7 @@
 <?php
 
+chdir('/var/www/navika/src');
+
 include_once('base/main.php');
 include_once('base/function.php');
 include_once('base/request.php');
@@ -29,7 +31,8 @@ remove_directory($fichier);
 
 $gtfs = [
     '60d2b1e50215101bf6f9ae1b',  // IDFM
-    '55ffbe0888ee387348ccb97d',  // Bibus
+    // '55ffbe0888ee387348ccb97d',  // Bibus
+    // '5b873d7206e3e76e5b2ffd32',  // Nantes Métropole
     // '5f0588426c51abada608d7a7',  // TIGNES
     // '5bae8c2806e3e75b699dc606',  // Chambéry
     // '5ae1715488ee384c8ba0342b',  // Strasbourg
@@ -111,8 +114,8 @@ foreach($gtfs as $url) {
 
     while ($obj = $request->fetch()) {
         if (strtotime($ressource['updated']) > strtotime($obj['updated'])) {
-            print_r($ressource['updated']);
-            print_r($obj['updated']);
+            print_r($ressource['updated'] . PHP_EOL);
+            print_r($obj['updated'] . PHP_EOL);
             $action = true;
             $needupdate = true;
         }

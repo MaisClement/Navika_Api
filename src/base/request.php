@@ -182,7 +182,7 @@ function getDirection ($id) {
     $req = $db->prepare("
             SELECT stop_name
             FROM stops
-            WHERE stop_id = ? OR parent_station = ?;
+            WHERE (stop_id = ? OR parent_station = ?) AND location_type = 1;
     ");
     $req->execute( array($id, $id) );
     return $req;
@@ -198,6 +198,8 @@ function insertProvider($opt) {
         (provider_id, slug, title, type, url, updated, flag)
         VALUES
         (?, ?, ?, ?, ?, ?, ?)
+        ON DUPLICATE KEY UPDATE
+        updated = updated;
 	  ");
     $req->execute(array(
         isset($opt['provider_id']) ? $opt['provider_id'] : '',

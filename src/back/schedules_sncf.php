@@ -1,45 +1,78 @@
 <?php
 
-$results = curl_SNCF($sncf_url);
+function getApiDetails($api_results, $name) {
+    $departures = [];
+
+    foreach($api_results->departures as $api_result){
+        if ($api_result->display_informations->headsign == $name){
+            $stop_date_time = $api_result->stop_date_time;
+            $direction = $api_result->display_informations->direction;
+        
+            $links = $api_result->display_informations->links;
+            $disruptions = [];
+        
+            foreach($links as $link) {
+                if ($link->type == "disruption") {
+                    $disruptions[] = getDisruption($link->id, $api_results->disruptions);
+                }
+            }
+            
+            $departures = array(
+                "id"                =>  (String)    getSNCFid( $api_result->links ),
+                "name"              =>  (String)    $api_result->display_informations->headsign,
+                "network"           =>  (String)    $api_result->display_informations->network,
+                "disruptions"       => $disruptions,
+            );
+        }
+    }
+    return $departures;
+}
+
+$results = curl_GARE($sncf_url);
 $results = json_decode($results);
+
+$api_results = curl_SNCF($sncf_url_api);
+$api_results = json_decode($api_results);
 
 file_put_contents($dossier . 'SNCF_departure_' . $id . '.json', json_encode($results));
 
 $departures = [];
 
-foreach($results->departures as $result){
-    
-    $stop_date_time = $result->stop_date_time;
-    $direction = $result->display_informations->direction;
+foreach($results as $result){
 
+    $details = getApiDetails($api_results, $result->trainNumber);
+    
     $departures[] = array(
         "informations" => array(
             "direction" => array(
                 "id"         =>  (String)    "",
-                "name"       =>  (String)    trim(substr($direction, 0, strpos($direction, '(')))
+                "name"       =>  (String)    $result->traffic->destination,
             ),
-            "id"            =>  (String)    getSNCFid( $result->links ),
-            "name"          =>  (String)    $result->display_informations->headsign,
+            "origin" => array(
+                "id"         =>  (String)    "",
+                "name"       =>  (String)    $result->traffic->origin,
+            ),
+            "id"            =>  (String)    $details['id'],
+            "name"          =>  (String)    $result->trainType . ' ' . $result->trainNumber,
             "mode"          =>  (String)    "nationalrail",
-            "trip_name"     =>  (String)    $result->display_informations->headsign,
-            "headsign"      =>  (String)    $result->display_informations->network,
+            "trip_name"     =>  (String)    $result->trainNumber,
+            "headsign"      =>  (String)    str_ireplace('train ', '', $result->trainType),
             "description"   =>  (String)    "",
             "message"       =>  (String)    "",
-        ),
+        ), 
         "stop_date_time" => array(
                                                       // Si l'horaire est present          On affiche l'horaire est             Sinon, si l'autre est present            On affiche l'autre            Ou rien  
-            "base_departure_date_time"  =>  (String)  isset($stop_date_time->base_departure_date_time)  ? prepareTime($stop_date_time->base_departure_date_time) : (isset($stop_date_time->departure_date_time)         ? prepareTime($call->departure_date_time)       : ""),
-            "departure_date_time"       =>  (String)  isset($stop_date_time->departure_date_time)       ? prepareTime($stop_date_time->departure_date_time)      : (isset($stop_date_time->base_departure_date_time)    ? prepareTime($call->base_departure_date_time)  : ""),
-            "base_arrival_date_time"    =>  (String)  isset($stop_date_time->base_arrival_date_time)    ? prepareTime($stop_date_time->base_arrival_date_time)   : (isset($stop_date_time->arrival_date_time)           ? prepareTime($call->arrival_date_time)         : ""),
-            "arrival_date_time"         =>  (String)  isset($stop_date_time->arrival_date_time)         ? prepareTime($stop_date_time->arrival_date_time)        : (isset($stop_date_time->base_arrival_date_time)      ? prepareTime($call->base_arrival_date_time)    : ""),
-            "state"                     =>  (String)  "ontime",
-            "atStop"                    =>  (String)  "false",
-            "platform"                  =>  (String)  "-"
-        )
+            "base_departure_date_time"  =>  (String)  $result->scheduledTime,
+            "departure_date_time"       =>  (String)  $result->actualTime,
+            "base_arrival_date_time"    =>  (String)  "",
+            "arrival_date_time"         =>  (String)  "",
+            "state"                     =>  (String)  getSNCFState($result->traffic->eventStatus, $result->traffic->eventLevel, $result->traffic),
+            "atStop"                    =>  (String)  $result->platform->isTrackactive,
+            "platform"                  =>  (String)  $result->platform->track != null ? $result->platform->track : ($result->trainMode == "CAR" ? "GR" : "-"),
+        ),
+        "disruptions"       => $details['disruptions'],
     );
 }
-
-usort($departures, "timeSortSNCF");
 
 $json = [];
 
@@ -52,58 +85,5 @@ $json['departures'][] = array(
     "text_color" =>  (String)    "000000",
     "departures" =>  $departures
 );
-
-// -------------------
-// 
-// $results = curl_SNCF($sncfarrivals_url);
-// $results = json_decode($results);
-// 
-// file_put_contents($dossier . 'SNCF_arrival_' . $id . '.json', json_encode($results));
-// 
-// $arrivals = [];
-// 
-// foreach($results->arrivals as $result){
-//     
-//     $stop_date_time = $result->stop_date_time;
-//     $direction = $result->display_informations->direction;
-// 
-//     $arrivals[] = array(
-//         "informations" => array(
-//             "direction" => array(
-//                 "id"         =>  (String)    "",
-//                 "name"       =>  (String)    trim(substr($direction, 0, strpos($direction, '(')))
-//             ),
-//             "id"            =>  (String)    getSNCFid( $result->links ),
-//             "name"          =>  (String)    $result->display_informations->headsign,
-//             "mode"          =>  (String)    "nationalrail",
-//             "trip_name"     =>  (String)    $result->display_informations->headsign,
-//             "headsign"      =>  (String)    $result->display_informations->network,
-//             "description"   =>  (String)    "",
-//             "message"       =>  (String)    "",
-//         ),
-//         "stop_date_time" => array(
-//                                                       // Si l'horaire est present          On affiche l'horaire est             Sinon, si l'autre est present            On affiche l'autre            Ou rien  
-//             "base_departure_date_time"  =>  (String)  isset($stop_date_time->base_departure_date_time)  ? prepareTime($stop_date_time->base_departure_date_time) : (isset($stop_date_time->departure_date_time)         ? prepareTime($call->departure_date_time)       : ""),
-//             "departure_date_time"       =>  (String)  isset($stop_date_time->departure_date_time)       ? prepareTime($stop_date_time->departure_date_time)      : (isset($stop_date_time->base_departure_date_time)    ? prepareTime($call->base_departure_date_time)  : ""),
-//             "base_arrival_date_time"    =>  (String)  isset($stop_date_time->base_arrival_date_time)    ? prepareTime($stop_date_time->base_arrival_date_time)   : (isset($stop_date_time->arrival_date_time)           ? prepareTime($call->arrival_date_time)         : ""),
-//             "arrival_date_time"         =>  (String)  isset($stop_date_time->arrival_date_time)         ? prepareTime($stop_date_time->arrival_date_time)        : (isset($stop_date_time->base_arrival_date_time)      ? prepareTime($call->base_arrival_date_time)    : ""),
-//             "state"                     =>  (String)  "ontime",
-//             "atStop"                    =>  (String)  "false",
-//             "platform"                  =>  (String)  "-"
-//         )
-//     );
-// }
-// 
-// usort($arrivals, "timeSortSNCF");
-// 
-// $json['departures'][] = array(
-//     "id"         =>  (String)    "SNCFa",
-//     "code"       =>  (String)    "SNCF",
-//     "name"       =>  (String)    "Arrivées SNCF",
-//     "mode"       =>  (String)    "nationalrail",
-//     "color"      =>  (String)    "aaaaaa",
-//     "text_color" =>  (String)    "000000",
-//     "departures" =>  $arrivals
-// );
 
 ?>

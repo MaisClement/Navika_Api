@@ -4,6 +4,8 @@ include_once ('base/main.php');
 include_once ('base/function.php');
 include_once ('base/request.php');
 
+chdir('/var/www/navika/src');
+
 // INIT SQL 
 echo '> Init Database'. PHP_EOL;
 $query = file_get_contents('../data/sql/SQL.sql');

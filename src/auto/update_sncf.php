@@ -5,9 +5,12 @@ include_once ('base/function.php');
 include_once ('base/request.php');
 include_once ('base/gtfs_request.php');
 
-include_once ('data/sncf_forbidden_dept.php');
-
 $dossier = '../data/file/gtfs/';
+
+$SNCF_FORBIDDEN_DEPT = array("75", "92", "93", "94", "77", "78", "91", "95");
+$SNCF_FORCE = array("Bréval" ,"Gazeran" ,"Angerville" ,"Monnerville" ,"Guillerval");
+$SNCF_FORBIDDEN = array("Crépy-en-Valois", "Château-Thierry", "Montargis", "Malesherbes", "Dreux", "Gisors", "Creil", "Le Plessis-Belleville", "Nanteuil-le-Haudouin ", "Ormoy-Villers", "Mareuil-sur-Ourcq", "La Ferté-Milon", "Nogent-l'Artaud - Charly", "Dordives", "Ferrières - Fontenay", "Marchezais - Broué", "Vernon - Giverny", "Trie-Château", "Chaumont-en-Vexin", "Liancourt-Saint-Pierre", "Lavilletertre", "Boran-sur-Oise", "Précy-sur-Oise", "Saint-Leu-d'Esserent", "Chantilly - Gouvieux", "Orry-la-Ville - Coye", "La Borne Blanche");
+
 
 echo '> Import SNCF...'. PHP_EOL;
 
@@ -41,11 +44,9 @@ echo '   > https://ressources.data.sncf.com/explore/dataset/referentiel-gares-vo
             $allowed = true;
             if (in_array($stop['departement'], $SNCF_FORBIDDEN_DEPT)) {
                 $allowed = false;
-                // echo $stop_id . ' - ' . $stop['stop_name'] . ' - Departement non autorisé' . PHP_EOL;
             } 
             if (in_array($stop['stop_name'], $SNCF_FORBIDDEN)) {
                 $allowed = false;
-                // echo $stop_id . ' - ' . $stop['stop_name'] . ' - Nom non autorisé' . PHP_EOL;
             } 
             if (in_array($stop['stop_name'], $SNCF_FORCE))
                 $allowed = true;

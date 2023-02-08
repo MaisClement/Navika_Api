@@ -1,6 +1,6 @@
 DROP TABLE IF EXISTS provider;
 CREATE TABLE `provider` (
-  provider_id   VARCHAR(255) NOT NULL,
+  provider_id   VARCHAR(255) PRIMARY KEY NOT NULL,
   slug          VARCHAR(255) NOT NULL,
   title         VARCHAR(255) NOT NULL,
   type          VARCHAR(255) NOT NULL,
@@ -259,8 +259,8 @@ CREATE TABLE `stop_route` (
   town_query_name       VARCHAR(255)
 );
 
-CREATE FULLTEXT INDEX stop_times_trip_id ON stop_times(trip_id);
-CREATE FULLTEXT INDEX stop_times_stop_id ON stop_times(stop_id);
+CREATE INDEX stop_times_trip_id ON stop_times(trip_id);
+CREATE INDEX stop_times_stop_id ON stop_times(stop_id);
 
 CREATE FULLTEXT INDEX stop_route_stop_id ON stop_route(stop_id);
 CREATE FULLTEXT INDEX stop_route_query ON stop_route(stop_query_name);

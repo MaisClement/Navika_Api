@@ -5,7 +5,6 @@
 include('credential.php');
 include('src/data/http_code.php');
 include('src/data/lines.php');
-include('src/data/sncf_forbidden_dept.php');
 
 $db = new pdo($dsn, $usr, $psw);
 

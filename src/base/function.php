@@ -108,6 +108,7 @@ function getTransportMode($l) {
 
 // --- Schedules ---
 function prepareTime($dt) {
+    if ($dt == '') return '';
     $datetime = date_create( $dt );
     return date_format($datetime, DATE_ISO8601);
 }
@@ -124,8 +125,8 @@ function timeSort($a, $b){
 }
 function timeSortSNCF($a, $b){
 
-	$ad = new DateTime($a['stop_date_time']->base_departure_date_time);
-	$bd = new DateTime($b['stop_date_time']->base_departure_date_time);
+	$ad = new DateTime($a['stop_date_time']['base_departure_date_time']);
+	$bd = new DateTime($b['stop_date_time']['base_departure_date_time']);
 
 	if ($ad == $bd) {
 		return 0;
@@ -186,7 +187,7 @@ function getReportsMesageTitle( $messages ) {
     return '';
 }
 function getReportsMesageText( $messages ) {
-    $search = ['<br>', '</p>', "Plus d'informations sur le site ratp.fr", "  "];
+    $search = ['<br>', '</p>', "Plus d'informations sur le site ratp.fr", "Plus d’informations sur le site ratp.fr", "  "];
     $replace = [PHP_EOL, PHP_EOL, '', ' '];
 
     foreach($messages as $message) {
@@ -283,6 +284,38 @@ function remove_directory($dirPath){
     }
 }
 
+function getDisruption($id, $disruptions) {
+    foreach($disruptions as $disruption) {
+        if ($disruption->id == $id) {
+            return array(
+                "id"	        => (String) $disruption->id,
+                "status"	    => (String) $disruption->status,
+                "cause"	        => (String) $disruption->cause,
+                "category"	    => "Incidents",
+                "severity"	    => getSeverity( $disruption->severity->effect, '', '' ), // status non fourni pour eviter les réductions de severity
+                "effect"	    => (String) $disruption->severity->effect,
+                "updated_at"    => (String) $disruption->updated_at,
+                "message"	=> array(
+                    "title"	    => isset($disruption->messages[0]->text) ? $disruption->messages[0]->text : "", // getReportsMesageTitle( $disruption->messages ),
+                    "text"	    => isset($disruption->messages[0]->text) ? $disruption->messages[0]->text : "", // getReportsMesageText( $disruption->messages ),
+                ),
+            );
+        }
+    }
+}
+
+function getSNCFState($status, $level, $traffic)  {
+    if ($level == "Normal") {
+        return "ontime";
+    }
+    if ($status == 'SUPPRESSION')
+        return "cancelled";
+    if ($status == 'MODIFICATION_LIMITATION'){
+        return "modified";
+    }
+ 
+    return "theorical";
+}
 
 function getMessage($call) {
     // terminus - origin
@@ -425,6 +458,7 @@ function idfm_format($str) {
         'line', 
         'Line',
         ':Q:',
+        ':BP:',
         '::',
         ':'
     ];

@@ -34,7 +34,7 @@ foreach($results as $result){
                 $direction[$destination_ref] = gare_format($call->DestinationDisplay[0]->value);
             }   
         }
-        if (($lines_data[$line_id]['mode'] == "rail" || $lines_data[$line_id]['mode'] == "nationalrail") && date_create(isset($call->ExpectedDepartureTime) ? $call->ExpectedDepartureTime : "") >= date_create()){
+        if (($lines_data[$line_id]['mode'] == "rail" || $lines_data[$line_id]['mode'] == "nationalrail") && (date_create(isset($call->AimedDepartureTime) ? $call->AimedDepartureTime : "") >= date_create() || date_create(isset($call->AimedArrivalTime) ? $call->AimedArrivalTime : "") >= date_create())){
             // Si c'est du ferré, l'affichage est different
     
             if (!in_array($line_id, $departures_lines)){
