@@ -41,6 +41,7 @@ $departures = [];
 foreach($results as $result){
 
     $details = getApiDetails($api_results, $result->trainNumber);
+    // print_r($details);
     
     $departures[] = array(
         "informations" => array(
@@ -59,7 +60,8 @@ foreach($results as $result){
             "headsign"      =>  (String)    str_ireplace('train ', '', $result->trainType),
             "description"   =>  (String)    "",
             "message"       =>  (String)    "",
-        ), 
+        ),
+        "disruptions"       => $details['disruptions'],
         "stop_date_time" => array(
                                                       // Si l'horaire est present          On affiche l'horaire est             Sinon, si l'autre est present            On affiche l'autre            Ou rien  
             "base_departure_date_time"  =>  (String)  $result->scheduledTime,
@@ -69,8 +71,7 @@ foreach($results as $result){
             "state"                     =>  (String)  getSNCFState($result->traffic->eventStatus, $result->traffic->eventLevel, $result->traffic),
             "atStop"                    =>  (String)  $result->platform->isTrackactive,
             "platform"                  =>  (String)  $result->platform->track != null ? $result->platform->track : ($result->trainMode == "CAR" ? "GR" : "-"),
-        ),
-        "disruptions"       => $details['disruptions'],
+        )
     );
 }
 

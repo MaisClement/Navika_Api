@@ -1,13 +1,46 @@
 <?php
 
+function getApiDetails($api_results, $name) {
+    $departures = [];
+
+    foreach($api_results->departures as $api_result){
+        if ($api_result->display_informations->headsign == $name){
+            $stop_date_time = $api_result->stop_date_time;
+            $direction = $api_result->display_informations->direction;
+        
+            $links = $api_result->display_informations->links;
+            $disruptions = [];
+        
+            foreach($links as $link) {
+                if ($link->type == "disruption") {
+                    $disruptions[] = getDisruption($link->id, $api_results->disruptions);
+                }
+            }
+            
+            $departures = array(
+                "id"                =>  (String)    getSNCFid( $api_result->links ),
+                "name"              =>  (String)    $api_result->display_informations->headsign,
+                "network"           =>  (String)    $api_result->display_informations->network,
+                "disruptions"       => $disruptions,
+            );
+        }
+    }
+    return $departures;
+}
+
 $results = curl_GARE($sncf_url);
 $results = json_decode($results);
+
+$api_results = curl_SNCF($sncf_url_api);
+$api_results = json_decode($api_results);
 
 file_put_contents($dossier . 'SNCF_departure_' . $id . '.json', json_encode($results));
 
 $departures = [];
 
 foreach($results as $result){
+
+    $details = getApiDetails($api_results, $result->trainNumber);
     
     $departures[] = array(
         "informations" => array(
@@ -19,7 +52,7 @@ foreach($results as $result){
                 "id"         =>  (String)    "",
                 "name"       =>  (String)    $result->traffic->origin,
             ),
-            "id"            =>  (String)    $result->trainNumber,
+            "id"            =>  (String)    $details['id'],
             "name"          =>  (String)    $result->trainType . ' ' . $result->trainNumber,
             "mode"          =>  (String)    "nationalrail",
             "trip_name"     =>  (String)    $result->trainNumber,
@@ -36,7 +69,8 @@ foreach($results as $result){
             "state"                     =>  (String)  getSNCFState($result->traffic->eventStatus, $result->traffic->eventLevel, $result->traffic),
             "atStop"                    =>  (String)  $result->platform->isTrackactive,
             "platform"                  =>  (String)  $result->platform->track != null ? $result->platform->track : ($result->trainMode == "CAR" ? "GR" : "-"),
-        )
+        ),
+        "disruptions"       => $details['disruptions'],
     );
 }
 

@@ -292,15 +292,53 @@ function getDisruption($id, $disruptions) {
                 "status"	    => (String) $disruption->status,
                 "cause"	        => (String) $disruption->cause,
                 "category"	    => "Incidents",
-                "severity"	    => getSeverity( $disruption->severity->effect, '', '' ), // status non fourni pour eviter les réductions de severity
+                "severity"	    => getSeverityByEffect( $disruption->severity->effect), // status non fourni pour eviter les réductions de severity
                 "effect"	    => (String) $disruption->severity->effect,
                 "updated_at"    => (String) $disruption->updated_at,
+                "impacted_stops" => $disruption->impacted_objects[0]->impacted_stops,
                 "message"	=> array(
-                    "title"	    => isset($disruption->messages[0]->text) ? $disruption->messages[0]->text : "", // getReportsMesageTitle( $disruption->messages ),
+                    "title"	    => getTitleByEffect($disruption->severity->effect), // getReportsMesageTitle( $disruption->messages ),
                     "text"	    => isset($disruption->messages[0]->text) ? $disruption->messages[0]->text : "", // getReportsMesageText( $disruption->messages ),
                 ),
             );
         }
+    }
+}
+
+function getTitleByEffect($effect) {
+    switch ($effect) {
+        case 'SIGNIFICANT_DELAYS':
+            return 'Retardé';
+        case 'REDUCED_SERVICE':
+            return 'Trajet modifié';
+        case 'NO_SERVICE':
+            return 'Supprimé';
+        case 'MODIFIED_SERVICE':
+            return 'Trajet modifié';
+        case 'ADDITIONAL_SERVICE':
+            return 'Train supplémentaire';
+        case 'DETOUR':
+            return 'Trajet modifié';
+        default: // UNKNOWN_EFFECT et OTHER_EFFECT
+            return "Trajet Perturbé";
+    }
+}
+function getSeverityByEffect($effect) {
+    switch ($effect) {
+        case 'SIGNIFICANT_DELAYS':
+            return 4;
+        case 'REDUCED_SERVICE':
+            return 4;
+        case 'NO_SERVICE':
+            return 5;
+        case 'MODIFIED_SERVICE':
+            return 1;
+        case 'ADDITIONAL_SERVICE':
+            return 1;
+        case 'DETOUR':
+            return 4;
+        default: // UNKNOWN_EFFECT et OTHER_EFFECT
+            return 4;
     }
 }
 
