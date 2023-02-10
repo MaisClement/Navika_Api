@@ -24,7 +24,7 @@ if (!isset($_GET['s']) || $_GET['s'] == null || !isset($_GET['l']) || $_GET['l']
 
     $prim_url = 'https://prim.iledefrance-mobilites.fr/marketplace/stop-monitoring?MonitoringRef=STIF:' . $type . ':Q:' . $id . ':';
     $sncf_url = 'https://garesetconnexions-online.azure-api.net/API/PIV/Departures/00' . $id;
-    $sncf_url_api = 'https://api.sncf.com/v1/coverage/sncf/stop_areas/stop_area:SNCF:' . $id . '/departures?data_freshness=base_schedule';
+    $sncf_url_api = 'https://api.sncf.com/v1/coverage/sncf/stop_areas/stop_area:SNCF:' . $id . '/departures?count=30&data_freshness=realtime';
     $fichier = $dossier . $id . '.json';
 }
 

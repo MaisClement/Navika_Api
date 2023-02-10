@@ -285,9 +285,10 @@ function remove_directory($dirPath){
 }
 
 function getDisruption($id, $disruptions) {
+    $echo = [];
     foreach($disruptions as $disruption) {
         if ($disruption->id == $id) {
-            return array(
+            $echo[] = array(
                 "id"	        => (String) $disruption->id,
                 "status"	    => (String) $disruption->status,
                 "cause"	        => (String) $disruption->cause,
@@ -303,6 +304,28 @@ function getDisruption($id, $disruptions) {
             );
         }
     }
+    return $echo;
+}
+
+function listDisruption($disruptions) {
+    $echo = [];
+    foreach($disruptions as $disruption) {
+        $echo[] = array(
+            "id"	        => (String) $disruption->id,
+            "status"	    => (String) $disruption->status,
+            "cause"	        => (String) $disruption->cause,
+            "category"	    => "Incidents",
+            "severity"	    => getSeverityByEffect( $disruption->severity->effect), // status non fourni pour eviter les réductions de severity
+            "effect"	    => (String) $disruption->severity->effect,
+            "updated_at"    => (String) $disruption->updated_at,
+            "impacted_stops" => $disruption->impacted_objects[0]->impacted_stops,
+            "message"	=> array(
+                "title"	    => getTitleByEffect($disruption->severity->effect), // getReportsMesageTitle( $disruption->messages ),
+                "text"	    => isset($disruption->messages[0]->text) ? $disruption->messages[0]->text : "", // getReportsMesageText( $disruption->messages ),
+            ),
+        );
+    }
+    return $echo;
 }
 
 function getTitleByEffect($effect) {

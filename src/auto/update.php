@@ -8,6 +8,9 @@ include_once('base/request.php');
 include_once ('base/gtfs_request.php');
 include_once ('base/gbfs_request.php');
 
+//TODO
+exit;
+
 $dossier = '../data/file/gtfs/';
 
 echo '> Clearing file' . PHP_EOL;

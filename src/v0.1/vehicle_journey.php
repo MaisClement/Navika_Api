@@ -17,6 +17,10 @@ if (!isset($_GET['v']) || $_GET['v'] == null){
         ErrorMessage( 400, 'Invalid data, provider not recognized' );
     }
 
+    if (strpos($vehicle_id, ':RealTime')) {
+        $vehicle_id = substr($vehicle_id, 0, strpos($vehicle_id, ':RealTime'));
+    }
+
     // ------------
 
     // $prim_url = 'https://prim.iledefrance-mobilites.fr/marketplace/stop-monitoring?MonitoringRef=STIF:' . $type . ':Q:' . $vehicle_id . ':';

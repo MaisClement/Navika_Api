@@ -25,6 +25,11 @@ foreach($el->stop_times as $result){
     $order++;
 }
 
+$disruptions = [];
+if (isset($results->disruptions)){
+    $disruptions = listDisruption($results->disruptions);
+}
+
 $vehicle_journey = array(
     "informations" => array(
         "id"            =>  $vehicle_id,
@@ -38,6 +43,7 @@ $vehicle_journey = array(
             "name"      =>  $el->stop_times[ count($el->stop_times)-1 ]->stop_point->name,
         ),   
     ),
+    "disruptions" => $disruptions,
     "stop_times" => $stops,
 );
 
