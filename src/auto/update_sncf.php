@@ -54,7 +54,7 @@ echo '   > https://ressources.data.sncf.com/explore/dataset/referentiel-gares-vo
                 try {
                     insertTempStopRoute($stop);
                 } catch (Exception $e) {
-                    echo $e;
+                    // echo $e;
                 }
             }
         } 
