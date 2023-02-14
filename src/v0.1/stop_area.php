@@ -62,41 +62,53 @@ if ($search_type == 3){
 
 $places = [];
 while ($obj = $request->fetch()) {
-
-    if (!isset( $places[$obj['stop_id']] )) {
-        $places[$obj['stop_id']] = array(
-            'id'        =>  (String)    $obj['stop_id'],
-            'name'      =>  (String)    $obj['stop_name'],
-            'type'      =>  (String)    'stop_area',
-            'distance'  =>  (int)       isset($obj['distance']) ? $obj['distance'] < 1000 ? round($obj['distance']) : 0 : 0,
-            // 'zone'      =>  (int)       $obj['zone_id'] ?? 0,
-            'town'      =>  (String)    $obj['town_name'],
-            'zip_code'  =>  (String)    substr($obj['town_id'], 0, 2),
-            'coord'     => array(
-                'lat'       =>      floatval( $obj['stop_lat'] ),
-                'lon'       =>      floatval( $obj['stop_lon'] ),
-            ),
-            'lines'     => array(),
-            'modes'     => array(),
-        );
-        $lines[$obj['stop_id']] = [];
-        $modes[$obj['stop_id']] = [];
-    }
-
-    if (!in_array(getTransportMode( $obj['route_type'] ), $lines[$obj['stop_id']] )) {
-        $lines[$obj['stop_id']][] = array(
-            "id"         =>  (String)    idfm_format( $obj['route_id'] ),
-            "code"       =>  (String)    $obj['route_short_name'],
-            "name"       =>  (String)    $obj['route_long_name'],
-            "mode"       =>  (String)    getTransportMode( $obj['route_type'] ),
-            "color"      =>  (String)    strlen($obj['route_color']) < 6 ? "ffffff" : $obj['route_color'],
-            "text_color" =>  (String)    strlen($obj['route_text_color']) < 6 ? "000000" : $obj['route_text_color'],
-        );
-    }
     
-    if (!in_array(getTransportMode( $obj['route_type'] ), $modes[$obj['stop_id']] )) {
-        $modes[$obj['stop_id']][] = getTransportMode( $obj['route_type'] );
-    }    
+    // mode filter
+    $filter = true;
+    if (isset($_GET['mode'])) {
+        $filter = false;
+        if (is_array($_GET['mode']) && in_array(getTransportMode( $obj['route_type'] ), $_GET['mode']))
+            $filter = true;
+        if (getTransportMode( $obj['route_type'] ) == $_GET['mode'])
+            $filter = true;
+    }
+
+    if ($filter) {
+        if (!isset( $places[$obj['stop_id']] )) {
+            $places[$obj['stop_id']] = array(
+                'id'        =>  (String)    $obj['stop_id'],
+                'name'      =>  (String)    $obj['stop_name'],
+                'type'      =>  (String)    'stop_area',
+                'distance'  =>  (int)       isset($obj['distance']) ? $obj['distance'] < 1000 ? round($obj['distance']) : 0 : 0,
+                // 'zone'      =>  (int)       $obj['zone_id'] ?? 0,
+                'town'      =>  (String)    $obj['town_name'],
+                'zip_code'  =>  (String)    substr($obj['town_id'], 0, 2),
+                'coord'     => array(
+                    'lat'       =>      floatval( $obj['stop_lat'] ),
+                    'lon'       =>      floatval( $obj['stop_lon'] ),
+                ),
+                'lines'     => array(),
+                'modes'     => array(),
+            );
+            $lines[$obj['stop_id']] = [];
+            $modes[$obj['stop_id']] = [];
+        }
+    
+        if (!in_array(getTransportMode( $obj['route_type'] ), $lines[$obj['stop_id']] )) {
+            $lines[$obj['stop_id']][] = array(
+                "id"         =>  (String)    idfm_format( $obj['route_id'] ),
+                "code"       =>  (String)    $obj['route_short_name'],
+                "name"       =>  (String)    $obj['route_long_name'],
+                "mode"       =>  (String)    getTransportMode( $obj['route_type'] ),
+                "color"      =>  (String)    strlen($obj['route_color']) < 6 ? "ffffff" : $obj['route_color'],
+                "text_color" =>  (String)    strlen($obj['route_text_color']) < 6 ? "000000" : $obj['route_text_color'],
+            );
+        }
+        
+        if (!in_array(getTransportMode( $obj['route_type'] ), $modes[$obj['stop_id']] )) {
+            $modes[$obj['stop_id']][] = getTransportMode( $obj['route_type'] );
+        } 
+    }   
     
 }
 

@@ -58,8 +58,6 @@ $file_php = $file . '.php';
 //------------
 
 include('src/base/main.php');
-include('src/base/function.php');
-include('src/base/request.php');
 
 //------------
 try {

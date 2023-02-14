@@ -198,8 +198,6 @@ function insertProvider($opt) {
         (provider_id, slug, title, type, url, updated, flag)
         VALUES
         (?, ?, ?, ?, ?, ?, ?)
-        ON DUPLICATE KEY UPDATE
-        updated = updated;
 	  ");
     $req->execute(array(
         isset($opt['provider_id']) ? $opt['provider_id'] : '',
@@ -210,6 +208,17 @@ function insertProvider($opt) {
         isset($opt['updated']) ? $opt['updated'] : '',
         isset($opt['flag']) ? $opt['flag'] : '',
     ));
+    return $req;
+}
+
+function deleteProvider($provider_id) {
+    $db = $GLOBALS["db"];
+
+    $req = $db->prepare("
+        DELETE FROM provider
+        WHERE provider_id = ?
+	  ");
+    $req->execute(array( $provider_id ));
     return $req;
 }
 

@@ -1,9 +1,8 @@
 <?php
 
+chdir('/var/www/navika/src');
+
 include_once ('base/main.php');
-include_once ('base/function.php');
-include_once ('base/request.php');
-include_once ('base/gtfs_request.php');
 
 echo '> Import GTFS...'. PHP_EOL;
 
@@ -74,12 +73,28 @@ foreach($stops as $key => $stop) {
     }
 }
 
-echo '> Generating Stop_Route table...' . PHP_EOL;
+echo '> Generating Temp Stop_Route table...' . PHP_EOL;
 
-truncateStopRoute();
-generateStopRoute();
+truncateTempStopRoute();
+generateTempStopRoute();
 
 include('update_sncf.php');
+
+echo '> Updating Stop_Route table...' . PHP_EOL;
+
+autoDeleteStopRoute();
+autoInsertStopRoute();
+
+$request = isNeedToGenerateHistory();
+$obj = $request->fetch();
+if ($obj['result'] == 0 && date('H') >= 17) {
+    echo '> Generating history...' . PHP_EOL;
+    generateHistory();
+    echo '> Remove old history...' . PHP_EOL;
+    removeOldHistory();
+} else {
+    echo 'i History is already generated' . PHP_EOL;
+}
 
 echo PHP_EOL . '-----' . PHP_EOL;
 echo 'Ready ✅';
@@ -91,17 +106,22 @@ file_get_contents('https://betteruptime.com/api/v1/heartbeat/SrRkcBMzc4AgsXXzzZa
 
 $subject = 'Navika AutoUpdate';
 $message = file_get_contents('../data/output.txt');
+$headers = array(
+    'MIME-Version' => '1.0',
+    'From' => 'Navika Auto Update Monitoring <do-not-reply@hackernwar.com>',
+    'Return-Path' => 'Navika Auto Update Monitoring <do-not-reply@hackernwar.com>',
+    'Reply-To' => 'Navika Auto Update Monitoring <do-not-reply@hackernwar.com>',
+    'Content-Transfer-Encoding' => 'quoted-printable',
+    'Content-type' => 'text/html; charset="utf-8"',
+);
 
 if (!mail('clementf78@gmail.com', $subject, $message, $headers)) {
     echo '! failed to send mail !' . PHP_EOL;
 }
 
-echo '> Preparing for query...' . PHP_EOL;
-
-generateQueryRoute();
-
 echo '> Updating Stop_Route for Town...' . PHP_EOL;
-
 generateTownInStopRoute();
 
+echo '> Preparing for query...' . PHP_EOL;
+generateQueryRoute();
 ?>

@@ -1,9 +1,8 @@
 <?php
 
+chdir('/var/www/navika/src');
+
 include_once ('base/main.php');
-include_once ('base/function.php');
-include_once ('base/request.php');
-include_once ('base/gtfs_request.php');
 
 $dossier = '../data/file/gtfs/';
 
@@ -53,7 +52,7 @@ echo '   > https://ressources.data.sncf.com/explore/dataset/referentiel-gares-vo
 
             if ($allowed == true) {
                 try {
-                    insertStopRoute($stop);
+                    insertTempStopRoute($stop);
                 } catch (Exception $e) {
                     echo $e;
                 }

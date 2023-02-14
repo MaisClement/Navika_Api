@@ -86,25 +86,25 @@ function insertFile($type, $path, $header, $sep = ',', $provider = 'TEST') {
     return $req;
 }
 
-function truncateStopRoute() {
+function truncateTempStopRoute() {
     $db = $GLOBALS["db"];
 
     $req = $db->prepare("
-        TRUNCATE stop_route;
+        TRUNCATE temp_stop_route;
     ");
     $req->execute(array( ));
     return $req;
 }
 
-function generateStopRoute() {
+function generateTempStopRoute() {
     $db = $GLOBALS["db"];
 
     $req = $db->prepare("
-        INSERT INTO stop_route
-        (route_id, route_short_name, route_long_name, route_type, route_color, route_text_color, stop_id, stop_name, stop_query_name, stop_lat, stop_lon)
+        INSERT INTO temp_stop_route
+        (route_key, route_id, route_short_name, route_long_name, route_type, route_color, route_text_color, stop_id, stop_name, stop_query_name, stop_lat, stop_lon)
 
         SELECT DISTINCT 
-        R.route_id, R.route_short_name, R.route_long_name, R.route_type, R.route_color, R.route_text_color,
+        CONCAT(R.route_id, '-', S2.stop_id) as route_key, R.route_id, R.route_short_name, R.route_long_name, R.route_type, R.route_color, R.route_text_color,
         S2.stop_id, S2.stop_name, S2.stop_name, S2.stop_lat, S2.stop_lon
         FROM routes R
 
@@ -119,6 +119,29 @@ function generateStopRoute() {
 
         INNER JOIN stops S2
         ON S.parent_station = S2.stop_id;
+    ");
+    $req->execute(array( ));
+    return $req;
+}
+
+function autoDeleteStopRoute() {
+    $db = $GLOBALS["db"];
+
+    $req = $db->prepare("
+        DELETE FROM stop_route 
+        WHERE route_key NOT IN (SELECT route_key FROM temp_stop_route);
+    ");
+    $req->execute(array( ));
+    return $req;
+}
+
+function autoInsertStopRoute() {
+    $db = $GLOBALS["db"];
+
+    $req = $db->prepare("
+        INSERT INTO stop_route
+        SELECT * FROM temp_stop_route
+        WHERE route_key NOT IN (SELECT route_key FROM stop_route);
     ");
     $req->execute(array( ));
     return $req;
@@ -155,7 +178,71 @@ function generateTownInStopRoute() {
         
         SET SR.town_id = T.town_id,
             SR.town_name = T.town_name,
-            SR.town_query_name = T.town_name;
+            SR.town_query_name = T.town_name
+            
+        WHERE SR.town_id IS NULL;
+        
+    ");
+    $req->execute(array( ));
+    return $req;
+}
+
+function isNeedToGenerateHistory() {
+    $db = $GLOBALS["db"];
+
+    $req = $db->prepare("
+        SELECT CASE
+            WHEN (SELECT COUNT(*) FROM history_trips WHERE date = DATE(NOW() + INTERVAL 7 DAY)) > 0 
+            THEN 1
+            ELSE 0
+        END as result;
+    ");
+    $req->execute(array( ));
+    return $req;
+}
+
+function generateHistory() {
+    $db = $GLOBALS["db"];
+
+    $req = $db->prepare("
+        INSERT INTO history_trips (provider_id, date, generated, route_id, service_id, trip_id, trip_headsign, trip_short_name, monday, tuesday, wednesday, thursday, friday, saturday, sunday, exception_type)
+
+        SELECT T.provider_id, NOW() + INTERVAL 7 DAY as date, NOW() as generated, T.route_id, T.service_id, T.trip_id, T.trip_headsign, T.trip_short_name, C.monday, C.tuesday, C.wednesday, C.thursday, C.friday, C.saturday, C.sunday, CD.exception_type
+        FROM trips T
+        
+        INNER JOIN calendar C
+        ON T.service_id = C.service_id
+        
+        LEFT JOIN calendar_dates CD
+        ON 
+            T.service_id = CD.service_id 
+            AND NOW() + INTERVAL 7 DAY = CD.date
+        
+        WHERE 
+            NOW() + INTERVAL 7 DAY BETWEEN C.start_date AND C.end_date
+            AND (CD.exception_type = 1
+                OR CD.exception_type IS NULL
+            )
+            AND (
+                DATE_FORMAT(NOW() + INTERVAL 7 DAY, '%w') = '1' AND C.monday = 1
+                OR DATE_FORMAT(NOW() + INTERVAL 7 DAY, '%w') = '2' AND C.tuesday = 1
+                OR DATE_FORMAT(NOW() + INTERVAL 7 DAY, '%w') = '3' AND C.wednesday = 1
+                OR DATE_FORMAT(NOW() + INTERVAL 7 DAY, '%w') = '4' AND C.thursday = 1
+                OR DATE_FORMAT(NOW() + INTERVAL 7 DAY, '%w') = '5' AND C.friday = 1
+                OR DATE_FORMAT(NOW() + INTERVAL 7 DAY, '%w') = '6' AND C.saturday = 1
+                OR DATE_FORMAT(NOW() + INTERVAL 7 DAY, '%w') = '0' AND C.sunday = 1
+            );
+    ");
+    $req->execute(array( ));
+    return $req;
+}
+
+function removeOldHistory() {
+    $db = $GLOBALS["db"];
+
+    $req = $db->prepare("
+        DELETE FROM history_trips
+        WHERE date < DATE(NOW());
     ");
     $req->execute(array( ));
     return $req;
@@ -195,7 +282,6 @@ function clearProviderData($provider_id){
         DELETE FROM feed_info        WHERE provider_id = ?;
         DELETE FROM translations     WHERE provider_id = ?;
         DELETE FROM attributions     WHERE provider_id = ?;
-        TRUNCATE stop_route;
 	");
     $req->execute(array($provider_id, $provider_id, $provider_id, $provider_id, $provider_id, $provider_id, $provider_id, $provider_id, $provider_id, $provider_id, $provider_id, $provider_id, $provider_id, $provider_id, $provider_id, $provider_id));
     return $req;
@@ -598,12 +684,44 @@ function insertStopRoute($opt) {
 
     $req = $db->prepare("
         INSERT INTO stop_route
-        (route_id, route_short_name, route_long_name, route_type, route_color, route_text_color, stop_id, stop_name, stop_query_name, stop_lat, stop_lon, town_id, town_name, town_query_name)
+        (route_key, route_id, route_short_name, route_long_name, route_type, route_color, route_text_color, stop_id, stop_name, stop_query_name, stop_lat, stop_lon, town_id, town_name, town_query_name)
 
         VALUES
-        (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
     ");
     $req->execute(array(
+        $opt['route_id'] . '-' . $opt['stop_id'],
+        isset($opt['route_id'])         ? $opt['route_id'] : '',
+        isset($opt['route_short_name']) ? $opt['route_short_name'] : '',
+        isset($opt['route_long_name'])  ? $opt['route_long_name'] : '',
+        isset($opt['route_type'])       ? $opt['route_type'] : '',
+        isset($opt['route_color'])      ? $opt['route_color'] : '',
+        isset($opt['route_text_color']) ? $opt['route_text_color'] : '',
+        isset($opt['stop_id'])          ? $opt['stop_id'] : '',
+        isset($opt['stop_name'])        ? $opt['stop_name'] : '',
+        isset($opt['stop_query_name'])  ? $opt['stop_query_name'] : '',
+        isset($opt['stop_lat'])         ? $opt['stop_lat'] : '',
+        isset($opt['stop_lon'])         ? $opt['stop_lon'] : '',
+        
+        isset($opt['town_id'])          ? $opt['town_id'] : '',
+        isset($opt['town_name'])        ? $opt['town_name'] : '',
+        isset($opt['town_query_name'])  ? $opt['town_query_name'] : '',
+    ));
+    return $req;
+}
+
+function insertTempStopRoute($opt) {
+    $db = $GLOBALS["db"];
+
+    $req = $db->prepare("
+        INSERT INTO temp_stop_route
+        (route_key, route_id, route_short_name, route_long_name, route_type, route_color, route_text_color, stop_id, stop_name, stop_query_name, stop_lat, stop_lon, town_id, town_name, town_query_name)
+
+        VALUES
+        (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+    ");
+    $req->execute(array(
+        $opt['route_id'] . '-' . $opt['stop_id'],
         isset($opt['route_id'])         ? $opt['route_id'] : '',
         isset($opt['route_short_name']) ? $opt['route_short_name'] : '',
         isset($opt['route_long_name'])  ? $opt['route_long_name'] : '',

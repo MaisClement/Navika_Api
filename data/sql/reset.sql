@@ -17,3 +17,4 @@ TRUNCATE feed_info;
 TRUNCATE translations;
 TRUNCATE attributions;
 TRUNCATE stop_route;
+TRUNCATE temp_stop_route;

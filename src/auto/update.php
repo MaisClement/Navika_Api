@@ -2,14 +2,7 @@
 
 chdir('/var/www/navika/src');
 
-include_once('base/main.php');
-include_once('base/function.php');
-include_once('base/request.php');
-include_once ('base/gtfs_request.php');
-include_once ('base/gbfs_request.php');
-
-//TODO
-exit;
+include_once ('base/main.php');
 
 $dossier = '../data/file/gtfs/';
 
@@ -23,7 +16,6 @@ clear_directory($fichier);
 
 $fichier = '../data/file/gtfs/';
 remove_directory($fichier);
-
 
 // -----------------------------------------------------
 // IDFM - https://transport.data.gouv.fr/api/datasets/60d2b1e50215101bf6f9ae1b
@@ -68,37 +60,6 @@ $gbfs = [
     // KEY obligatoire
 ];
 
-echo '> Looking for GBFS...' . PHP_EOL;
-
-clearGBFS();
-
-foreach($gbfs as $id => $url) {
-    echo '  > ' . $id . PHP_EOL;
-
-    $content = file_get_contents($url . 'gbfs.json');
-    $content = json_decode($content);
-
-    if (isset($feeds)) {
-        unset($feeds);
-    }
-
-    if (isset($content->data->fr)) {
-        $feeds = $content->data->fr->feeds;
-    } else if (isset($content->data->en)) {
-        $feeds = $content->data->en->feeds;
-    } else {
-        echo '🤔';
-    }
-
-    if (isset($feeds)) {
-        foreach($feeds as $feed) {
-            if ($feed->name == 'station_information') {
-                getGBFSstation($feed->url, $url, $id);
-            }
-        }
-    }
-}
-
 echo '> Looking for GTFS...' . PHP_EOL;
 
 $needupdate = false;
@@ -136,8 +97,10 @@ foreach($gtfs as $url) {
         file_put_contents($dossier . $provider . 'gtfs.zip', $zip);
         echo '    > Downloaded' . PHP_EOL;
 
+        deleteProvider($ressource['provider_id']);
         insertProvider($ressource);
     } else {
+        print_r($ressource['updated'] . PHP_EOL);
         echo '    i Already existing file, not updated' . PHP_EOL;
     }
 }
@@ -151,6 +114,37 @@ if ($needupdate == false) {
     // Monitoring
     file_get_contents('https://betteruptime.com/api/v1/heartbeat/SrRkcBMzc4AgsXXzzZa2qFDa');
     exit;
+}
+
+echo '> Looking for GBFS...' . PHP_EOL;
+
+clearGBFS();
+
+foreach($gbfs as $id => $url) {
+    echo '  > ' . $id . PHP_EOL;
+
+    $content = file_get_contents($url . 'gbfs.json');
+    $content = json_decode($content);
+
+    if (isset($feeds)) {
+        unset($feeds);
+    }
+
+    if (isset($content->data->fr)) {
+        $feeds = $content->data->fr->feeds;
+    } else if (isset($content->data->en)) {
+        $feeds = $content->data->en->feeds;
+    } else {
+        echo '🤔';
+    }
+
+    if (isset($feeds)) {
+        foreach($feeds as $feed) {
+            if ($feed->name == 'station_information') {
+                getGBFSstation($feed->url, $url, $id);
+            }
+        }
+    }
 }
 
 echo '> Unzip GTFS...' . PHP_EOL;

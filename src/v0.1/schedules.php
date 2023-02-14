@@ -36,9 +36,9 @@ if (is_file($fichier) && filesize($fichier) > 5 && (time() - filemtime($fichier)
 // On récupère toutes les lignes a l'arrets
 
 $request = getAllLinesAtStop ($provider . ':' . $id);
+$departures_lines = [];
 
 while($obj = $request->fetch()) {
-
     $line_id = $obj['id_line'];
 
     if ($obj['shortname_line'] == 'TER') {
@@ -65,7 +65,9 @@ while($obj = $request->fetch()) {
     if ($lines_data[$line_id]['mode'] == "rail" || $lines_data[$line_id]['mode'] == "nationalrail"){
         // Si c'est du ferré, l'affichage est different
         $lines_data[$line_id]['departures'] = [];
-        $departures_lines[] = $line_id;
+        if (!in_array($line_id, $departures_lines)) {
+            $departures_lines[] = $line_id;
+        }
 
     } else {
         // Affichage normal

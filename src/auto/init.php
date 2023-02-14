@@ -1,10 +1,8 @@
 <?php
 
-include_once ('base/main.php');
-include_once ('base/function.php');
-include_once ('base/request.php');
-
 chdir('/var/www/navika/src');
+
+include_once ('base/main.php');
 
 // INIT SQL 
 echo '> Init Database'. PHP_EOL;
@@ -41,8 +39,6 @@ foreach($geojson->features as $feature){
     } catch (Exception $e) {
         // echo $e;
     }
-}
-
-include('update.php');                      
+}                  
 
 ?>
