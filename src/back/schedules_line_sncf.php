@@ -1,7 +1,6 @@
 <?php
 
-function getApiDetails($api_results, $name)
-{
+function getApiDetails($api_results, $name){
     $departures = [];
 
     foreach ($api_results->departures as $api_result) {

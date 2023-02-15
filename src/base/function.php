@@ -1,8 +1,7 @@
 <?php
 
 // --- CURL ---
-function curl_GTFS($url)
-{
+function curl_GTFS($url){
     $ch = curl_init();
     curl_setopt($ch, CURLOPT_HEADER, false);
     curl_setopt(
@@ -18,8 +17,7 @@ function curl_GTFS($url)
     curl_close($ch);
     return $data;
 }
-function curl_SNCF($url)
-{
+function curl_SNCF($url){
     $password = '';
     $user = $GLOBALS['SNCFKEY'];
     $ch = curl_init();
@@ -33,8 +31,7 @@ function curl_SNCF($url)
     curl_close($ch);
     return $data;
 }
-function curl_GARE($url)
-{
+function curl_GARE($url){
     $ch = curl_init();
     curl_setopt($ch, CURLOPT_HEADER, false);
     curl_setopt(
@@ -50,8 +47,7 @@ function curl_GARE($url)
     curl_close($ch);
     return $data;
 }
-function curl_PRIM($url)
-{
+function curl_PRIM($url){
     $ch = curl_init();
     curl_setopt($ch, CURLOPT_HEADER, false);
     curl_setopt(
@@ -67,8 +63,7 @@ function curl_PRIM($url)
     curl_close($ch);
     return $data;
 }
-function curl($url)
-{
+function curl($url){
     $ch = curl_init();
     curl_setopt($ch, CURLOPT_HEADER, false);
     curl_setopt($ch, CURLOPT_HTTPHEADER, []);
@@ -80,8 +75,7 @@ function curl($url)
 }
 
 // --- ERROR ---
-function ErrorMessage($http_code, $details = '')
-{
+function ErrorMessage($http_code, $details = ''){
     http_response_code($http_code);
     $json = array(
         'error' => array(
@@ -94,8 +88,7 @@ function ErrorMessage($http_code, $details = '')
     exit;
 }
 
-function getTransportMode($l)
-{
+function getTransportMode($l){
     $modes = array(
         0 => 'tram',
         1 => 'metro',
@@ -120,14 +113,12 @@ function getTransportMode($l)
 }
 
 // --- Schedules ---
-function prepareTime($dt)
-{
+function prepareTime($dt){
     if ($dt == '') return '';
     $datetime = date_create($dt);
     return date_format($datetime, DATE_ISO8601);
 }
-function timeSort($a, $b)
-{
+function timeSort($a, $b){
 
     $ad = new DateTime($a['stop_date_time']->departure_date_time);
     $bd = new DateTime($b['stop_date_time']->departure_date_time);
@@ -138,8 +129,7 @@ function timeSort($a, $b)
 
     return $ad < $bd ? -1 : 1;
 }
-function timeSortSNCF($a, $b)
-{
+function timeSortSNCF($a, $b){
 
     $ad = new DateTime($a['stop_date_time']['base_departure_date_time']);
     $bd = new DateTime($b['stop_date_time']['base_departure_date_time']);
@@ -152,8 +142,7 @@ function timeSortSNCF($a, $b)
 }
 
 // --- GetInfo ---
-function getTownByAdministrativeRegions($administrative_regions)
-{
+function getTownByAdministrativeRegions($administrative_regions){
     foreach ($administrative_regions as $region) {
         if ($region->level == 8) {
             return $region->name;
@@ -161,8 +150,7 @@ function getTownByAdministrativeRegions($administrative_regions)
     }
     return "";
 }
-function getZipByAdministrativeRegions($administrative_regions)
-{
+function getZipByAdministrativeRegions($administrative_regions){
     foreach ($administrative_regions as $region) {
         if ($region->level == 8) {
             return substr($region->insee, 0, 2);
@@ -170,16 +158,14 @@ function getZipByAdministrativeRegions($administrative_regions)
     }
     return "";
 }
-function getPhysicalModes($physical_modes)
-{
+function getPhysicalModes($physical_modes){
     $list = [];
     foreach ($physical_modes as $modes) {
         $list[] = $modes->id;
     }
     return $list;
 }
-function getAllLines($lines)
-{
+function getAllLines($lines){
     $list = [];
 
     foreach ($lines as $line) {
@@ -198,8 +184,7 @@ function getAllLines($lines)
 
 
 // --- Trafic message ---
-function getReportsMesageTitle($messages)
-{
+function getReportsMesageTitle($messages){
     foreach ($messages as $message) {
         if ($message->channel->name == 'titre') {
             return $message->text;
@@ -207,8 +192,7 @@ function getReportsMesageTitle($messages)
     }
     return '';
 }
-function getReportsMesageText($messages)
-{
+function getReportsMesageText($messages){
     $search = ['<br>', '</p>', "Plus d'informations sur le site ratp.fr", "Plus d’informations sur le site ratp.fr", "  "];
     $replace = [PHP_EOL, PHP_EOL, '', ' '];
 
@@ -237,8 +221,7 @@ function getReportsMesageText($messages)
         }
     }
 }
-function getSeverity($effect, $cause, $status)
-{
+function getSeverity($effect, $cause, $status){
     if ($status == 'past') {
         return 0;
     } else if ($cause == 'information') {
@@ -260,8 +243,7 @@ function getSeverity($effect, $cause, $status)
     }
 }
 
-function clear_directory($dirPath)
-{
+function clear_directory($dirPath){
     if (!is_dir($dirPath)) {
         echo ("$dirPath must be a directory");
         return;
@@ -279,8 +261,7 @@ function clear_directory($dirPath)
     }
 }
 
-function remove_directory($dirPath)
-{
+function remove_directory($dirPath){
     if (!is_dir($dirPath)) {
         echo ("$dirPath must be a directory");
         return;
@@ -299,8 +280,7 @@ function remove_directory($dirPath)
     }
 }
 
-function getDisruption($id, $disruptions)
-{
+function getDisruption($id, $disruptions){
     $echo = [];
     foreach ($disruptions as $disruption) {
         if ($disruption->id == $id) {
@@ -323,8 +303,7 @@ function getDisruption($id, $disruptions)
     return $echo;
 }
 
-function listDisruption($disruptions)
-{
+function listDisruption($disruptions){
     $echo = [];
     foreach ($disruptions as $disruption) {
         $echo[] = array(
@@ -345,8 +324,7 @@ function listDisruption($disruptions)
     return $echo;
 }
 
-function getTitleByEffect($effect)
-{
+function getTitleByEffect($effect){
     switch ($effect) {
         case 'SIGNIFICANT_DELAYS':
             return 'Retardé';
@@ -364,8 +342,7 @@ function getTitleByEffect($effect)
             return "Trajet Perturbé";
     }
 }
-function getSeverityByEffect($effect)
-{
+function getSeverityByEffect($effect){
     switch ($effect) {
         case 'SIGNIFICANT_DELAYS':
             return 4;
@@ -384,8 +361,7 @@ function getSeverityByEffect($effect)
     }
 }
 
-function getSNCFState($status, $level, $traffic)
-{
+function getSNCFState($status, $level, $traffic){
     if ($level == "Normal") {
         return "ontime";
     }
@@ -398,8 +374,7 @@ function getSNCFState($status, $level, $traffic)
     return "theorical";
 }
 
-function getMessage($call)
-{
+function getMessage($call){
     // terminus - origin
     if (!isset($call->ExpectedDepartureTime) && !isset($call->AimedDepartureTime))
         return "terminus";
@@ -410,16 +385,14 @@ function getMessage($call)
     else
         return "";
 }
-function getSNCFid($links)
-{
+function getSNCFid($links){
     foreach ($links as $link) {
         if ($link->type == 'vehicle_journey') {
             return $link->id;
         }
     }
 }
-function getState($call)
-{
+function getState($call){
     // theorical - ontime - delayed - cancelled - modified
     if (isset($call->DepartureStatus) && ($call->DepartureStatus == "cancelled" || $call->DepartureStatus == "delayed"))
         return $call->DepartureStatus;
@@ -434,8 +407,7 @@ function getState($call)
 }
 
 // --- ORDER ---
-function order_line($a, $b)
-{
+function order_line($a, $b){
     $type_list = [
         'nationalrail',
         'commercial_mode:Train',
@@ -476,8 +448,7 @@ function order_line($a, $b)
 
     return ($a < $b) ? -1 : 1;
 }
-function order_departure($a, $b)
-{
+function order_departure($a, $b){
     $a = new DateTime($a['stop_date_time']['departure_date_time']);
     $b = new DateTime($b['stop_date_time']['departure_date_time']);
 
@@ -486,8 +457,7 @@ function order_departure($a, $b)
     }
     return ($a < $b) ? -1 : 1;
 }
-function order_reports($a, $b)
-{
+function order_reports($a, $b){
     $a = $a['severity'];
     $b = $b['severity'];
 
@@ -496,8 +466,7 @@ function order_reports($a, $b)
     }
     return ($a > $b) ? -1 : 1;
 }
-function order_places($a, $b)
-{
+function order_places($a, $b){
     $a_modes = count($a["modes"]);
     $b_modes = count($b["modes"]);
 
@@ -521,8 +490,7 @@ function order_places($a, $b)
 }
 
 // --- FORMAT ---
-function gare_format($id)
-{
+function gare_format($id){
     $allowed_name = [
         "Gare de l'Est"
     ];
@@ -534,8 +502,7 @@ function gare_format($id)
     $id = ucfirst($id);
     return $id;
 }
-function idfm_format($str)
-{
+function idfm_format($str){
     $search = [
         'stop_area',
         'stop_point',
@@ -554,8 +521,7 @@ function idfm_format($str)
     $replace = '';
     return str_replace($search, $replace, $str);
 }
-function journeys_line_format($str)
-{
+function journeys_line_format($str){
     $search = ['Train Transilien'];
     $replace = ['Transilien'];
 
@@ -564,8 +530,7 @@ function journeys_line_format($str)
 
 // -------------------------------------
 
-function read_csv($csv, $sep = ';')
-{
+function read_csv($csv, $sep = ';'){
     $file = fopen($csv, 'r');
     while (!feof($file)) {
         $line[] = fgetcsv($file, 0, $sep);
@@ -574,8 +539,7 @@ function read_csv($csv, $sep = ';')
     return $line;
 }
 
-function getGTFSlistFromApi($url)
-{
+function getGTFSlistFromApi($url){
     $json = file_get_contents('https://transport.data.gouv.fr/api/datasets/' . $url);
     $json = json_decode($json);
 
@@ -599,8 +563,7 @@ function getGTFSlistFromApi($url)
 
 // ---
 
-function getGBFSstation($url, $provider_url, $id)
-{
+function getGBFSstation($url, $provider_url, $id){
 
     $content = file_get_contents($url);
     $content = json_decode($content);

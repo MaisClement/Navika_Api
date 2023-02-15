@@ -3,8 +3,7 @@
 $search = [" ", "-", "'", "À", "Á", "Â", "Ã", "Ä", "Å", "Ç", "È", "É", "Ê", "Ë", "Ì", "Í", "Î", "Ï", "Ñ", "Ò", "Ó", "Ô", "Õ", "Ö", "Ù", "Ú", "Û", "Ü", "Ý", "ß", "à", "á", "â", "ã", "ä", "å", "ç", "è", "é", "ê", "ë", "ì", "í", "î", "ï", "ñ", "ò", "ó", "ô", "õ", "ö", "ù", "ú", "û", "ü", "ý", "ÿ", "Ā", "ā", "Ă", "ă", "Ą", "ą", "Ć", "ć", "Ĉ", "ĉ", "Ċ", "ċ", "Č", "č", "Ď", "ď", "Đ", "đ", "Ē", "ē", "Ĕ", "ĕ", "Ė", "ė", "Ę", "ę", "Ě", "ě", "Ĝ", "ĝ", "Ğ", "ğ", "Ġ", "ġ", "Ģ", "ģ", "Ĥ", "ĥ", "Ħ", "ħ", "Ĩ", "ĩ", "Ī", "ī", "Ĭ", "ĭ", "Į", "į", "İ", "ı", "Ĵ", "ĵ", "Ķ", "ķ", "ĸ", "Ĺ", "ĺ", "Ļ", "ļ", "Ľ", "ľ", "Ŀ", "ŀ", "Ł", "ł", "Ń", "ń", "Ņ", "ņ", "Ň", "ň", "ŉ", "Ŋ", "ŋ", "Ō", "ō", "Ŏ", "ŏ", "Ő", "ő", "Œ", "œ", "Ŕ", "ŕ", "Ŗ", "ŗ", "Ř", "ř", "Ś", "ś", "Ŝ", "ŝ", "Ş", "ş", "Š", "š", "Ţ", "ţ", "Ť", "ť", "Ŧ", "ŧ", "Ũ", "ũ", "Ū", "ū", "Ŭ", "ŭ", "Ů", "ů", "Ű", "ű", "Ų", "ų", "Ŵ", "ŵ", "Ŷ", "ŷ", "Ÿ", "Ź", "ź", "Ż", "ż", "Ž", "ž", "ſ"];
 $replace = ["", "",  "",  "A", "A", "A", "A", "A", "A", "C", "E", "E", "E", "E", "I", "I", "I", "I", "N", "O", "O", "O", "O", "O", "U", "U", "U", "U", "Y", "s", "a", "a", "a", "a", "a", "a", "c", "e", "e", "e", "e", "i", "i", "i", "i", "n", "o", "o", "o", "o", "o", "u", "u", "u", "u", "y", "y", "A", "a", "A", "a", "A", "a", "C", "c", "C", "c", "C", "c", "C", "c", "D", "d", "D", "d", "E", "e", "E", "e", "E", "e", "E", "e", "E", "e", "G", "g", "G", "g", "G", "g", "G", "g", "H", "h", "H", "h", "I", "i", "I", "i", "I", "i", "I", "i", "I", "i", "J", "j", "K", "k", "k", "L", "l", "L", "l", "L", "l", "L", "l", "L", "l", "N", "n", "N", "n", "N", "n", "N", "n", "N", "O", "o", "O", "o", "O", "o", "OE", "oe", "R", "r", "R", "r", "R", "r", "S", "s", "S", "s", "S", "s", "S", "s", "T", "t", "T", "t", "T", "t", "U", "u", "U", "u", "U", "u", "U", "u", "U", "u", "U", "u", "W", "w", "Y", "y", "Y", "Z", "z", "Z", "z", "Z", "z", "s"];
 
-function getStopByQuery($query)
-{
+function getStopByQuery($query){
     $db = $GLOBALS["db"];
     $query = urldecode(strtolower(trim($query)));
     $query = str_replace($GLOBALS['search'], $GLOBALS['replace'], $query);
@@ -23,8 +22,7 @@ function getStopByQuery($query)
     $req->execute(array('%' . $query . '%', '%' . $query . '%'));
     return $req;
 }
-function getStopByGeoCoords($lat, $lon, $distance = 1000)
-{
+function getStopByGeoCoords($lat, $lon, $distance = 1000){
     $db = $GLOBALS["db"];
     $lat = trim($lat);
     $lon = trim($lon);
@@ -48,8 +46,7 @@ function getStopByGeoCoords($lat, $lon, $distance = 1000)
     $req->execute(array($lat, $lon, $lat, $lon, $distance));
     return $req;
 }
-function getStopByQueryAndGeoCoords($query, $lat, $lon)
-{
+function getStopByQueryAndGeoCoords($query, $lat, $lon){
     $db = $GLOBALS["db"];
     $query = urldecode(strtolower(trim($query)));
     $query = str_replace($GLOBALS['search'], $GLOBALS['replace'], $query);
@@ -81,8 +78,7 @@ function getStopByQueryAndGeoCoords($query, $lat, $lon)
 
 // ------------------------------------------------
 
-function getStationByGeoCoords($lat, $lon, $distance = 1000)
-{
+function getStationByGeoCoords($lat, $lon, $distance = 1000){
     $db = $GLOBALS["db"];
     $lat = trim($lat);
     $lon = trim($lon);
@@ -109,8 +105,7 @@ function getStationByGeoCoords($lat, $lon, $distance = 1000)
 
 // ------------------------------------------------
 
-function addTown($id, $name, $polygon)
-{
+function addTown($id, $name, $polygon){
     $db = $GLOBALS["db"];
     $id = trim($id);
     $name = trim($name);
@@ -122,8 +117,7 @@ function addTown($id, $name, $polygon)
     $req->execute(array($id, $name, $polygon));
     return $req;
 }
-function clearTown()
-{
+function clearTown(){
     $db = $GLOBALS["db"];
 
     $req = $db->prepare("TRUNCATE town");
@@ -132,8 +126,7 @@ function clearTown()
 }
 
 // ------------------------------------------------
-function getLinesById($id)
-{
+function getLinesById($id){
     $db = $GLOBALS["db"];
     $id = trim($id);
 
@@ -146,8 +139,7 @@ function getLinesById($id)
     return $req;
 }
 
-function getStationById($id)
-{
+function getStationById($id){
     $db = $GLOBALS["db"];
     $id = trim($id);
 
@@ -160,8 +152,7 @@ function getStationById($id)
     return $req;
 }
 
-function getAllLinesAtStop($id)
-{
+function getAllLinesAtStop($id){
     $db = $GLOBALS["db"];
     $id = trim($id);
 
@@ -182,8 +173,7 @@ function getAllLinesAtStop($id)
     return $req;
 }
 
-function getDirection($id)
-{
+function getDirection($id){
     $db = $GLOBALS["db"];
     $id = idfm_format($id);
     $id = trim($id);
@@ -200,8 +190,7 @@ function getDirection($id)
 
 // ------------------------------------------------
 
-function insertProvider($opt)
-{
+function insertProvider($opt){
     $db = $GLOBALS["db"];
 
     $req = $db->prepare("
@@ -222,8 +211,7 @@ function insertProvider($opt)
     return $req;
 }
 
-function deleteProvider($provider_id)
-{
+function deleteProvider($provider_id){
     $db = $GLOBALS["db"];
 
     $req = $db->prepare("
@@ -234,8 +222,7 @@ function deleteProvider($provider_id)
     return $req;
 }
 
-function getProvider($opt)
-{
+function getProvider($opt){
     $db = $GLOBALS["db"];
 
     $req = $db->prepare("
@@ -250,8 +237,7 @@ function getProvider($opt)
 }
 
 
-function setParentStation($opt)
-{
+function setParentStation($opt){
     $db = $GLOBALS["db"];
 
     $req = $db->prepare("
@@ -269,8 +255,7 @@ function setParentStation($opt)
 }
 // ------------------------------------------------
 
-function SQLinit($query)
-{
+function SQLinit($query){
     $db = $GLOBALS["db"];
 
     $req = $db->prepare($query);
