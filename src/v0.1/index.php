@@ -6,7 +6,6 @@ $url = 'https://api-iv.iledefrance-mobilites.fr/banners';
 
 if (is_file($fichier) && filesize($fichier) > 5 && (time() - filemtime($fichier) < 60)) {
     $results = file_get_contents($fichier);
-
 } else {
     $results = curl($url);
     file_put_contents($fichier, $results);
@@ -23,7 +22,7 @@ $severity_i = array(
 );
 
 $messages = [];
-foreach($results as $result) {
+foreach ($results as $result) {
 
     $url = $result->link;
     if (strpos($url, 'iledefrance-mobilites.fr') == false) {
@@ -31,13 +30,13 @@ foreach($results as $result) {
     }
 
     $messages[] = array(
-        "id"            =>  (String)    $result->id,
-        "status"        =>  (String)    "active",
-        "cause"         =>  (String)    "",
-        "category"      =>  (String)    "",
+        "id"            =>  (string)    $result->id,
+        "status"        =>  (string)    "active",
+        "cause"         =>  (string)    "",
+        "category"      =>  (string)    "",
         "severity"      =>  (int)       $severity_i[$result->type],
-        "effect"        =>  (String)    "OTHER",
-        "updated_at"    =>  (String)    $result->updatedDate,
+        "effect"        =>  (string)    "OTHER",
+        "updated_at"    =>  (string)    $result->updatedDate,
         "message"       =>  array(
             "title"     =>      $result->title,
             "text"      =>      $result->description,
@@ -47,22 +46,21 @@ foreach($results as $result) {
     );
 }
 
-$json = array("api"         => array(
-        "current_version"      =>  (float)       0.1 ,
-        "lastest_version"      =>  (float)       0.1 ,
-        "oldest_version"       =>  (float)       0.1 ,
-        "support"              =>  (String)       "active",
+$json = array(
+    "api"         => array(
+        "current_version"      =>  (float)       0.1,
+        "lastest_version"      =>  (float)       0.1,
+        "oldest_version"       =>  (float)       0.1,
+        "support"              =>  (string)       "active",
     ),
     "app"         => array(
-        "current_version"      =>  (float)       0.1 ,
-        "lastest_version"      =>  (float)       0.1 ,
-        "oldest_version"       =>  (float)       0.1 ,
-        "support"              =>  (String)       "active",
+        "current_version"      =>  (float)       0.1,
+        "lastest_version"      =>  (float)       0.1,
+        "oldest_version"       =>  (float)       0.1,
+        "support"              =>  (string)       "active",
     ),
     "message"     => $messages,
-    
+
 );
 
 echo json_encode($json);
-
-?>

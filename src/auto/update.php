@@ -2,7 +2,7 @@
 
 chdir('/var/www/navika/src');
 
-include_once ('base/main.php');
+include_once('base/main.php');
 
 $dossier = '../data/file/gtfs/';
 
@@ -64,7 +64,7 @@ echo '> Looking for GTFS...' . PHP_EOL;
 
 $needupdate = false;
 
-foreach($gtfs as $url) {
+foreach ($gtfs as $url) {
     $ressource = getGTFSlistFromApi($url);
     echo '  > ' . $url . PHP_EOL;
 
@@ -91,7 +91,7 @@ foreach($gtfs as $url) {
         if (!is_dir($dossier . $provider)) {
             mkdir($dossier . $provider);
         }
-        
+
         $zip = file_get_contents($ressource['url']);
         echo '    i ' . $ressource['url'] . PHP_EOL;
         file_put_contents($dossier . $provider . 'gtfs.zip', $zip);
@@ -120,7 +120,7 @@ echo '> Looking for GBFS...' . PHP_EOL;
 
 clearGBFS();
 
-foreach($gbfs as $id => $url) {
+foreach ($gbfs as $id => $url) {
     echo '  > ' . $id . PHP_EOL;
 
     $content = file_get_contents($url . 'gbfs.json');
@@ -139,7 +139,7 @@ foreach($gbfs as $id => $url) {
     }
 
     if (isset($feeds)) {
-        foreach($feeds as $feed) {
+        foreach ($feeds as $feed) {
             if ($feed->name == 'station_information') {
                 getGBFSstation($feed->url, $url, $id);
             }
@@ -154,7 +154,7 @@ foreach ($provider_dir as $provider_id) {
     if (is_dir($dossier . $provider_id)) {
         if (is_file($dossier . $provider_id . '/gtfs.zip')) {
             echo '  ' . $provider_id . PHP_EOL;
-        
+
             $zip = new ZipArchive;
             try {
                 $zip->open($dossier . $provider_id . '/gtfs.zip');
@@ -178,7 +178,7 @@ foreach ($provider_dir as $provider_id) {
     if (is_dir($dossier . $provider_id)) {
 
         $files = glob($dossier . $provider_id . '/*.{txt}', GLOB_BRACE);
-        foreach($files as $file) {
+        foreach ($files as $file) {
             // echo $file;
             $content = file_get_contents($file);
             $content = str_replace('\r\n', '\n', $content);
@@ -188,5 +188,3 @@ foreach ($provider_dir as $provider_id) {
 }
 
 include('update_gtfs.php');
-
-?>

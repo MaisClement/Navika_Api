@@ -40,4 +40,3 @@ $HTTP_CODE = array(
     505 => 'HTTP Version not supported',
     520 => 'Unknown Error'
 );
-?>

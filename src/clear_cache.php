@@ -8,5 +8,3 @@ $fichier = '../data/report/';
 clear_directory($fichier);
 
 exit;
-
-?>

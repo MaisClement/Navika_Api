@@ -15,11 +15,7 @@ $db = new pdo($dsn, $usr, $psw);
 try {
     $conn = new PDO($dsn, $usr, $psw);
     $conn->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
-}
-catch (PDOException $e) {
+} catch (PDOException $e) {
     print("Error connecting to SQL");
     die(print_r($e));
 }
-
-?>
-

@@ -1,10 +1,13 @@
 <?php
 
 // --- CURL ---
-function curl_GTFS( $url ) {
+function curl_GTFS($url)
+{
     $ch = curl_init();
     curl_setopt($ch, CURLOPT_HEADER, false);
-    curl_setopt($ch, CURLOPT_HTTPHEADER, 
+    curl_setopt(
+        $ch,
+        CURLOPT_HTTPHEADER,
         array(
             'Authorization: ' . $GLOBALS['GTFSKEY']
         )
@@ -15,24 +18,28 @@ function curl_GTFS( $url ) {
     curl_close($ch);
     return $data;
 }
-function curl_SNCF( $url ) {
+function curl_SNCF($url)
+{
     $password = '';
     $user = $GLOBALS['SNCFKEY'];
     $ch = curl_init();
     curl_setopt($ch, CURLOPT_HEADER, false);
     curl_setopt($ch, CURLOPT_HTTPHEADER, []);
-	curl_setopt($ch, CURLOPT_HTTPAUTH, CURLAUTH_BASIC);
-	curl_setopt($ch, CURLOPT_USERPWD, "$user:$password");
-	curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
+    curl_setopt($ch, CURLOPT_HTTPAUTH, CURLAUTH_BASIC);
+    curl_setopt($ch, CURLOPT_USERPWD, "$user:$password");
+    curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
     curl_setopt($ch, CURLOPT_URL, $url);
     $data = curl_exec($ch);
     curl_close($ch);
     return $data;
 }
-function curl_GARE( $url ) {
+function curl_GARE($url)
+{
     $ch = curl_init();
     curl_setopt($ch, CURLOPT_HEADER, false);
-    curl_setopt($ch, CURLOPT_HTTPHEADER, 
+    curl_setopt(
+        $ch,
+        CURLOPT_HTTPHEADER,
         array(
             'ocp-apim-subscription-key: ' . $GLOBALS['SNCFGC']
         )
@@ -43,10 +50,13 @@ function curl_GARE( $url ) {
     curl_close($ch);
     return $data;
 }
-function curl_PRIM( $url ) {
+function curl_PRIM($url)
+{
     $ch = curl_init();
     curl_setopt($ch, CURLOPT_HEADER, false);
-    curl_setopt($ch, CURLOPT_HTTPHEADER, 
+    curl_setopt(
+        $ch,
+        CURLOPT_HTTPHEADER,
         array(
             'apiKey: ' . $GLOBALS['PRIMKEY']
         )
@@ -57,7 +67,8 @@ function curl_PRIM( $url ) {
     curl_close($ch);
     return $data;
 }
-function curl( $url ) {
+function curl($url)
+{
     $ch = curl_init();
     curl_setopt($ch, CURLOPT_HEADER, false);
     curl_setopt($ch, CURLOPT_HTTPHEADER, []);
@@ -69,20 +80,22 @@ function curl( $url ) {
 }
 
 // --- ERROR ---
-function ErrorMessage($http_code, $details = ''){
+function ErrorMessage($http_code, $details = '')
+{
     http_response_code($http_code);
     $json = array(
         'error' => array(
             'code'      =>  (int)       $http_code,
-            'message'   =>  (String)    isset($GLOBALS['HTTP_CODE'][$http_code]) ? $GLOBALS['HTTP_CODE'][$http_code] : "",
-            'details'   =>  (String)    $details == ''               ? "" : $details,
+            'message'   =>  (string)    isset($GLOBALS['HTTP_CODE'][$http_code]) ? $GLOBALS['HTTP_CODE'][$http_code] : "",
+            'details'   =>  (string)    $details == ''               ? "" : $details,
         )
     );
     echo json_encode($json);
     exit;
 }
 
-function getTransportMode($l) {
+function getTransportMode($l)
+{
     $modes = array(
         0 => 'tram',
         1 => 'metro',
@@ -107,69 +120,76 @@ function getTransportMode($l) {
 }
 
 // --- Schedules ---
-function prepareTime($dt) {
+function prepareTime($dt)
+{
     if ($dt == '') return '';
-    $datetime = date_create( $dt );
+    $datetime = date_create($dt);
     return date_format($datetime, DATE_ISO8601);
 }
-function timeSort($a, $b){
+function timeSort($a, $b)
+{
 
-	$ad = new DateTime($a['stop_date_time']->departure_date_time);
-	$bd = new DateTime($b['stop_date_time']->departure_date_time);
+    $ad = new DateTime($a['stop_date_time']->departure_date_time);
+    $bd = new DateTime($b['stop_date_time']->departure_date_time);
 
-	if ($ad == $bd) {
-		return 0;
-	}
+    if ($ad == $bd) {
+        return 0;
+    }
 
-	return $ad < $bd ? -1 : 1;
+    return $ad < $bd ? -1 : 1;
 }
-function timeSortSNCF($a, $b){
+function timeSortSNCF($a, $b)
+{
 
-	$ad = new DateTime($a['stop_date_time']['base_departure_date_time']);
-	$bd = new DateTime($b['stop_date_time']['base_departure_date_time']);
+    $ad = new DateTime($a['stop_date_time']['base_departure_date_time']);
+    $bd = new DateTime($b['stop_date_time']['base_departure_date_time']);
 
-	if ($ad == $bd) {
-		return 0;
-	}
+    if ($ad == $bd) {
+        return 0;
+    }
 
-	return $ad < $bd ? -1 : 1;
+    return $ad < $bd ? -1 : 1;
 }
 
 // --- GetInfo ---
-function getTownByAdministrativeRegions($administrative_regions) {
-    foreach($administrative_regions as $region){
-        if ($region->level == 8){
+function getTownByAdministrativeRegions($administrative_regions)
+{
+    foreach ($administrative_regions as $region) {
+        if ($region->level == 8) {
             return $region->name;
         }
     }
     return "";
 }
-function getZipByAdministrativeRegions($administrative_regions) {
-    foreach($administrative_regions as $region){
-        if ($region->level == 8){
+function getZipByAdministrativeRegions($administrative_regions)
+{
+    foreach ($administrative_regions as $region) {
+        if ($region->level == 8) {
             return substr($region->insee, 0, 2);
         }
     }
     return "";
 }
-function getPhysicalModes($physical_modes) {
+function getPhysicalModes($physical_modes)
+{
     $list = [];
-    foreach($physical_modes as $modes){
+    foreach ($physical_modes as $modes) {
         $list[] = $modes->id;
     }
     return $list;
 }
-function getAllLines ($lines){
+function getAllLines($lines)
+{
     $list = [];
 
-    foreach($lines as $line){
+    foreach ($lines as $line) {
         $list[] = array(
-            "id"         =>  (String)    idfm_format( $line->id ),
-            "code"       =>  (String)    $line->code,
-            "name"       =>  (String)    $line->name,
-            "mode"       =>  (String)    $line->commercial_mode->id,
-            "color"      =>  (String)    $line->color,
-            "text_color" =>  (String)    $line->text_color,
+            "id"         =>  (string)    idfm_format($line->id),
+            "code"       =>  (string)    $line->code,
+            "name"       =>  (string)    $line->name,
+            "mode"       =>  (string)    $line->commercial_mode->id,
+            "color"      =>  (string)    $line->color,
+            "text_color" =>  (string)    $line->text_color,
         );
     }
     usort($list, "order_line");
@@ -178,19 +198,21 @@ function getAllLines ($lines){
 
 
 // --- Trafic message ---
-function getReportsMesageTitle( $messages ) {
-    foreach($messages as $message) {
+function getReportsMesageTitle($messages)
+{
+    foreach ($messages as $message) {
         if ($message->channel->name == 'titre') {
             return $message->text;
         }
     }
     return '';
 }
-function getReportsMesageText( $messages ) {
+function getReportsMesageText($messages)
+{
     $search = ['<br>', '</p>', "Plus d'informations sur le site ratp.fr", "Plus d’informations sur le site ratp.fr", "  "];
     $replace = [PHP_EOL, PHP_EOL, '', ' '];
 
-    foreach($messages as $message) {
+    foreach ($messages as $message) {
         if ($message->channel->name == 'moteur') {
             $msg = str_replace($search, $replace, $message->text);
             $msg = strip_tags($msg);
@@ -198,16 +220,15 @@ function getReportsMesageText( $messages ) {
             return $msg;
         }
     }
-    foreach($messages as $message) {
+    foreach ($messages as $message) {
         if ($message->channel->name == 'email') {
             $msg = str_replace($search, $replace, $message->text);
             $msg = strip_tags($msg);
             $msg = html_entity_decode($msg);
             return $msg;
-            
         }
     }
-    foreach($messages as $message) {
+    foreach ($messages as $message) {
         if ($message->channel->name != 'titre') {
             $msg = str_replace($search, $replace, $message->text);
             $msg = strip_tags($msg);
@@ -216,38 +237,31 @@ function getReportsMesageText( $messages ) {
         }
     }
 }
-function getSeverity( $effect, $cause, $status ) {
-    if ($status == 'past'){
+function getSeverity($effect, $cause, $status)
+{
+    if ($status == 'past') {
         return 0;
-
     } else if ($cause == 'information') {
         return 1;
-
-    } else if ($status == 'future' && $cause == 'travaux'){
+    } else if ($status == 'future' && $cause == 'travaux') {
         return 2;
-
     } else if ($cause == 'travaux') {
         return 3;
-
-    } else if ($status == 'future'){
+    } else if ($status == 'future') {
         return 4;
-
     } else if (in_array($effect, array('REDUCED_SERVICE', 'SIGNIFICANT_DELAYS', 'DETOUR', 'ADDITIONAL_SERVICE', 'MODIFIED_SERVICE'))) {
         return 4;
-
     } else if (in_array($effect, array('NO_SERVICE', 'STOP_MOVED'))) {
         return 5;
-
     } else if (in_array($effect, array('UNKNOWN_EFFECT', 'OTHER_EFFECT', 'NO_EFFECT', 'ACCESSIBILITY_ISSUE'))) {
         return 1;
-
     } else {
         return 0;
-
-    } 
+    }
 }
 
-function clear_directory($dirPath){
+function clear_directory($dirPath)
+{
     if (!is_dir($dirPath)) {
         echo ("$dirPath must be a directory");
         return;
@@ -265,7 +279,8 @@ function clear_directory($dirPath){
     }
 }
 
-function remove_directory($dirPath){
+function remove_directory($dirPath)
+{
     if (!is_dir($dirPath)) {
         echo ("$dirPath must be a directory");
         return;
@@ -284,22 +299,23 @@ function remove_directory($dirPath){
     }
 }
 
-function getDisruption($id, $disruptions) {
+function getDisruption($id, $disruptions)
+{
     $echo = [];
-    foreach($disruptions as $disruption) {
+    foreach ($disruptions as $disruption) {
         if ($disruption->id == $id) {
             $echo[] = array(
-                "id"	        => (String) $disruption->id,
-                "status"	    => (String) $disruption->status,
-                "cause"	        => (String) $disruption->cause,
-                "category"	    => "Incidents",
-                "severity"	    => getSeverityByEffect( $disruption->severity->effect), // status non fourni pour eviter les réductions de severity
-                "effect"	    => (String) $disruption->severity->effect,
-                "updated_at"    => (String) $disruption->updated_at,
+                "id"            => (string) $disruption->id,
+                "status"        => (string) $disruption->status,
+                "cause"            => (string) $disruption->cause,
+                "category"        => "Incidents",
+                "severity"        => getSeverityByEffect($disruption->severity->effect), // status non fourni pour eviter les réductions de severity
+                "effect"        => (string) $disruption->severity->effect,
+                "updated_at"    => (string) $disruption->updated_at,
                 "impacted_stops" => $disruption->impacted_objects[0]->impacted_stops,
-                "message"	=> array(
-                    "title"	    => getTitleByEffect($disruption->severity->effect), // getReportsMesageTitle( $disruption->messages ),
-                    "text"	    => isset($disruption->messages[0]->text) ? $disruption->messages[0]->text : "", // getReportsMesageText( $disruption->messages ),
+                "message"    => array(
+                    "title"        => getTitleByEffect($disruption->severity->effect), // getReportsMesageTitle( $disruption->messages ),
+                    "text"        => isset($disruption->messages[0]->text) ? $disruption->messages[0]->text : "", // getReportsMesageText( $disruption->messages ),
                 ),
             );
         }
@@ -307,28 +323,30 @@ function getDisruption($id, $disruptions) {
     return $echo;
 }
 
-function listDisruption($disruptions) {
+function listDisruption($disruptions)
+{
     $echo = [];
-    foreach($disruptions as $disruption) {
+    foreach ($disruptions as $disruption) {
         $echo[] = array(
-            "id"	        => (String) $disruption->id,
-            "status"	    => (String) $disruption->status,
-            "cause"	        => (String) $disruption->cause,
-            "category"	    => "Incidents",
-            "severity"	    => getSeverityByEffect( $disruption->severity->effect), // status non fourni pour eviter les réductions de severity
-            "effect"	    => (String) $disruption->severity->effect,
-            "updated_at"    => (String) $disruption->updated_at,
+            "id"            => (string) $disruption->id,
+            "status"        => (string) $disruption->status,
+            "cause"            => (string) $disruption->cause,
+            "category"        => "Incidents",
+            "severity"        => getSeverityByEffect($disruption->severity->effect), // status non fourni pour eviter les réductions de severity
+            "effect"        => (string) $disruption->severity->effect,
+            "updated_at"    => (string) $disruption->updated_at,
             "impacted_stops" => $disruption->impacted_objects[0]->impacted_stops,
-            "message"	=> array(
-                "title"	    => getTitleByEffect($disruption->severity->effect), // getReportsMesageTitle( $disruption->messages ),
-                "text"	    => isset($disruption->messages[0]->text) ? $disruption->messages[0]->text : "", // getReportsMesageText( $disruption->messages ),
+            "message"    => array(
+                "title"        => getTitleByEffect($disruption->severity->effect), // getReportsMesageTitle( $disruption->messages ),
+                "text"        => isset($disruption->messages[0]->text) ? $disruption->messages[0]->text : "", // getReportsMesageText( $disruption->messages ),
             ),
         );
     }
     return $echo;
 }
 
-function getTitleByEffect($effect) {
+function getTitleByEffect($effect)
+{
     switch ($effect) {
         case 'SIGNIFICANT_DELAYS':
             return 'Retardé';
@@ -346,7 +364,8 @@ function getTitleByEffect($effect) {
             return "Trajet Perturbé";
     }
 }
-function getSeverityByEffect($effect) {
+function getSeverityByEffect($effect)
+{
     switch ($effect) {
         case 'SIGNIFICANT_DELAYS':
             return 4;
@@ -365,20 +384,22 @@ function getSeverityByEffect($effect) {
     }
 }
 
-function getSNCFState($status, $level, $traffic)  {
+function getSNCFState($status, $level, $traffic)
+{
     if ($level == "Normal") {
         return "ontime";
     }
     if ($status == 'SUPPRESSION')
         return "cancelled";
-    if ($status == 'MODIFICATION_LIMITATION'){
+    if ($status == 'MODIFICATION_LIMITATION') {
         return "modified";
     }
- 
+
     return "theorical";
 }
 
-function getMessage($call) {
+function getMessage($call)
+{
     // terminus - origin
     if (!isset($call->ExpectedDepartureTime) && !isset($call->AimedDepartureTime))
         return "terminus";
@@ -389,14 +410,16 @@ function getMessage($call) {
     else
         return "";
 }
-function getSNCFid( $links ) {
-    foreach($links as $link) {
+function getSNCFid($links)
+{
+    foreach ($links as $link) {
         if ($link->type == 'vehicle_journey') {
             return $link->id;
         }
     }
 }
-function getState($call) {
+function getState($call)
+{
     // theorical - ontime - delayed - cancelled - modified
     if (isset($call->DepartureStatus) && ($call->DepartureStatus == "cancelled" || $call->DepartureStatus == "delayed"))
         return $call->DepartureStatus;
@@ -406,28 +429,29 @@ function getState($call) {
 
     if ((isset($call->DepartureStatus) && $call->DepartureStatus == "onTime") || (isset($call->ArrivalStatus) && $call->ArrivalStatus == "onTime"))
         return "ontime";
-    
+
     return "theorical";
 }
 
 // --- ORDER ---
-function order_line($a, $b) {
+function order_line($a, $b)
+{
     $type_list = [
-        'nationalrail' ,
-        'commercial_mode:Train' ,
-        'rail' ,
-        'commercial_mode:RapidTransit' ,
-        'commercial_mode:RailShuttle' ,
-        'funicular' ,
-        'commercial_mode:LocalTrain' ,
-        'commercial_mode:LongDistanceTrain' ,
-        'commercial_mode:Metro' ,
-        'metro' ,
-        'commercial_mode:RailShuttle' ,
-        'commercial_mode:Tramway' ,
-        'tram' ,
-        'commercial_mode:Bus' ,
-        'bus' ,
+        'nationalrail',
+        'commercial_mode:Train',
+        'rail',
+        'commercial_mode:RapidTransit',
+        'commercial_mode:RailShuttle',
+        'funicular',
+        'commercial_mode:LocalTrain',
+        'commercial_mode:LongDistanceTrain',
+        'commercial_mode:Metro',
+        'metro',
+        'commercial_mode:RailShuttle',
+        'commercial_mode:Tramway',
+        'tram',
+        'commercial_mode:Bus',
+        'bus',
     ];
 
     $ta = array_search($a['mode'], $type_list);
@@ -439,20 +463,21 @@ function order_line($a, $b) {
     if ($ta != $tb) {
         return ($ta < $tb) ? -1 : 1;
     }
-    
+
     $a = $a['code'];
     $b = $b['code'];
 
     if ($a == $b) {
         return 0;
     }
-    
+
     if ($a == 'TER') return +1;
     else if ($b == 'TER') return -1;
 
     return ($a < $b) ? -1 : 1;
 }
-function order_departure($a, $b) {
+function order_departure($a, $b)
+{
     $a = new DateTime($a['stop_date_time']['departure_date_time']);
     $b = new DateTime($b['stop_date_time']['departure_date_time']);
 
@@ -461,7 +486,8 @@ function order_departure($a, $b) {
     }
     return ($a < $b) ? -1 : 1;
 }
-function order_reports($a, $b) {
+function order_reports($a, $b)
+{
     $a = $a['severity'];
     $b = $b['severity'];
 
@@ -470,7 +496,8 @@ function order_reports($a, $b) {
     }
     return ($a > $b) ? -1 : 1;
 }
-function order_places($a, $b) {
+function order_places($a, $b)
+{
     $a_modes = count($a["modes"]);
     $b_modes = count($b["modes"]);
 
@@ -491,11 +518,11 @@ function order_places($a, $b) {
         return ($a_lines < $b_lines) ? 1 : -1;
     }
     return ($a_modes < $b_modes) ? 1 : -1;
-    
 }
 
 // --- FORMAT ---
-function gare_format($id) {
+function gare_format($id)
+{
     $allowed_name = [
         "Gare de l'Est"
     ];
@@ -507,16 +534,17 @@ function gare_format($id) {
     $id = ucfirst($id);
     return $id;
 }
-function idfm_format($str) {
+function idfm_format($str)
+{
     $search = [
-        'stop_area', 
-        'stop_point', 
-        'stopArea', 
-        'StopPoint', 
-        'IDFM:', 
-        'STIF:', 
-        'SNCF:', 
-        'line', 
+        'stop_area',
+        'stop_point',
+        'stopArea',
+        'StopPoint',
+        'IDFM:',
+        'STIF:',
+        'SNCF:',
+        'line',
         'Line',
         ':Q:',
         ':BP:',
@@ -526,16 +554,18 @@ function idfm_format($str) {
     $replace = '';
     return str_replace($search, $replace, $str);
 }
-function journeys_line_format($str) {
+function journeys_line_format($str)
+{
     $search = ['Train Transilien'];
     $replace = ['Transilien'];
-    
+
     return str_replace($search, $replace, $str);
 }
 
 // -------------------------------------
 
-function read_csv($csv, $sep = ';'){
+function read_csv($csv, $sep = ';')
+{
     $file = fopen($csv, 'r');
     while (!feof($file)) {
         $line[] = fgetcsv($file, 0, $sep);
@@ -544,13 +574,14 @@ function read_csv($csv, $sep = ';'){
     return $line;
 }
 
-function getGTFSlistFromApi($url) {
+function getGTFSlistFromApi($url)
+{
     $json = file_get_contents('https://transport.data.gouv.fr/api/datasets/' . $url);
     $json = json_decode($json);
 
     $list = [];
 
-    foreach($json->history as $history) {
+    foreach ($json->history as $history) {
         if ($history->payload->format == 'GTFS') {
             return array(
                 'provider_id'   => $url,
@@ -568,22 +599,22 @@ function getGTFSlistFromApi($url) {
 
 // ---
 
-function getGBFSstation($url, $provider_url, $id) {
+function getGBFSstation($url, $provider_url, $id)
+{
 
     $content = file_get_contents($url);
     $content = json_decode($content);
 
-    foreach($content->data->stations as $station) {
-        insertStation([
-            'station_id'        =>  $id . ':' . $station->station_id,
-            'station_name'      =>  $station->name,
-            'station_lat'       =>  $station->lat,
-            'station_lon'       =>  $station->lon,
-            'station_capacity'  =>  $station->capacity,
-        ],
-        $provider_url);
+    foreach ($content->data->stations as $station) {
+        insertStation(
+            [
+                'station_id'        =>  $id . ':' . $station->station_id,
+                'station_name'      =>  $station->name,
+                'station_lat'       =>  $station->lat,
+                'station_lon'       =>  $station->lon,
+                'station_capacity'  =>  $station->capacity,
+            ],
+            $provider_url
+        );
     }
-
 }
-
-?>

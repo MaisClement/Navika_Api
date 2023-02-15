@@ -2,8 +2,8 @@
 
 $dossier = '../data/cache/schedules_line/';
 
-if (!isset($_GET['s']) || $_GET['s'] == null || !isset($_GET['l']) || $_GET['l'] == null){
-    ErrorMessage( 400, 'Required parameter "s" or "l" is missing or null.' );
+if (!isset($_GET['s']) || $_GET['s'] == null || !isset($_GET['l']) || $_GET['l'] == null) {
+    ErrorMessage(400, 'Required parameter "s" or "l" is missing or null.');
 } else {
     $stop_id = $_GET['s'];
 
@@ -13,7 +13,7 @@ if (!isset($_GET['s']) || $_GET['s'] == null || !isset($_GET['l']) || $_GET['l']
     } else if (str_contains($stop_id, 'IDFM:')) {
         $provider = 'IDFM';
     } else {
-        ErrorMessage( 400, 'Invalid data, provider not recognized' );
+        ErrorMessage(400, 'Invalid data, provider not recognized');
     }
 
     $type = 'StopPoint';
@@ -37,43 +37,37 @@ if (is_file($fichier) && filesize($fichier) > 5 && (time() - filemtime($fichier)
 // On récupère toutes les lignes a l'arrets
 
 
-$request = getLinesById ($id_line);
+$request = getLinesById($id_line);
 
-if ($request->rowCount() <= 0) ErrorMessage( 202, 'Nothing found.');
+if ($request->rowCount() <= 0) ErrorMessage(202, 'Nothing found.');
 
 $obj = $request->fetch();
 $lines_data[$obj['id_line']] = array(
-    "id"         =>  (String)    idfm_format( $obj['id_line'] ),
-    "code"       =>  (String)    $obj['shortname_line'],
-    "name"       =>  (String)    $obj['name_line'],
-    "mode"       =>  (String)    $obj['transportmode'],
-    "color"      =>  (String)    strlen($obj['colourweb_hexa']) < 6 ? "ffffff" : $obj['colourweb_hexa'],
-    "text_color" =>  (String)    strlen($obj['textcolourweb_hexa']) < 6 ? "000000" : $obj['textcolourweb_hexa'],
+    "id"         =>  (string)    idfm_format($obj['id_line']),
+    "code"       =>  (string)    $obj['shortname_line'],
+    "name"       =>  (string)    $obj['name_line'],
+    "mode"       =>  (string)    $obj['transportmode'],
+    "color"      =>  (string)    strlen($obj['colourweb_hexa']) < 6 ? "ffffff" : $obj['colourweb_hexa'],
+    "text_color" =>  (string)    strlen($obj['textcolourweb_hexa']) < 6 ? "000000" : $obj['textcolourweb_hexa'],
 );
-if ($lines_data[$obj['id_line']]['mode'] == "rail" || $lines_data[$obj['id_line']]['mode'] == "nationalrail"){
+if ($lines_data[$obj['id_line']]['mode'] == "rail" || $lines_data[$obj['id_line']]['mode'] == "nationalrail") {
     // Si c'est du ferré, l'affichage est different
     $lines_data[$obj['id_line']]['departures'] = [];
     $departures_lines[] = $obj['id_line'];
-
 } else {
     // Affichage normal
     $lines_data[$obj['id_line']]['terminus_schedules'] = [];
-
 }
 
 // ------------
 
 if ($provider == 'SNCF') {
     include('back/schedules_line_sncf.php');
-
 } else if ($provider == 'IDFM') {
     include('back/schedules_line_idfm.php');
-
-} 
+}
 
 $echo = json_encode($json);
 file_put_contents($fichier, $echo);
 echo $echo;
 exit;
-
-?>

@@ -2,9 +2,9 @@
 
 chdir('/var/www/navika/src');
 
-include_once ('base/main.php');
+include_once('base/main.php');
 
-echo '> Import GTFS...'. PHP_EOL;
+echo '> Import GTFS...' . PHP_EOL;
 
 // import GTFS
 $directory = "../data/file/gtfs/";
@@ -62,10 +62,10 @@ while ($obj = $request->fetch()) {
     $stops[$id]['stops'][] = $obj['stop_id'];
 }
 
-foreach($stops as $key => $stop) {
+foreach ($stops as $key => $stop) {
     insertStops($stop, $stop['provider_id']);
 
-    foreach($stop['stops'] as $child_stop) {
+    foreach ($stop['stops'] as $child_stop) {
         setParentStation([
             'parent_station' => $stop['stop_id'],
             'stop_id' => $child_stop,
@@ -124,4 +124,3 @@ generateTownInStopRoute();
 
 echo '> Preparing for query...' . PHP_EOL;
 generateQueryRoute();
-?>

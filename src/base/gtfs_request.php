@@ -3,14 +3,16 @@
 $search = [" ", "-", "À", "Á", "Â", "Ã", "Ä", "Å", "Ç", "È", "É", "Ê", "Ë", "Ì", "Í", "Î", "Ï", "Ñ", "Ò", "Ó", "Ô", "Õ", "Ö", "Ù", "Ú", "Û", "Ü", "Ý", "ß", "à", "á", "â", "ã", "ä", "å", "ç", "è", "é", "ê", "ë", "ì", "í", "î", "ï", "ñ", "ò", "ó", "ô", "õ", "ö", "ù", "ú", "û", "ü", "ý", "ÿ", "Ā", "ā", "Ă", "ă", "Ą", "ą", "Ć", "ć", "Ĉ", "ĉ", "Ċ", "ċ", "Č", "č", "Ď", "ď", "Đ", "đ", "Ē", "ē", "Ĕ", "ĕ", "Ė", "ė", "Ę", "ę", "Ě", "ě", "Ĝ", "ĝ", "Ğ", "ğ", "Ġ", "ġ", "Ģ", "ģ", "Ĥ", "ĥ", "Ħ", "ħ", "Ĩ", "ĩ", "Ī", "ī", "Ĭ", "ĭ", "Į", "į", "İ", "ı", "Ĵ", "ĵ", "Ķ", "ķ", "ĸ", "Ĺ", "ĺ", "Ļ", "ļ", "Ľ", "ľ", "Ŀ", "ŀ", "Ł", "ł", "Ń", "ń", "Ņ", "ņ", "Ň", "ň", "ŉ", "Ŋ", "ŋ", "Ō", "ō", "Ŏ", "ŏ", "Ő", "ő", "Œ", "œ", "Ŕ", "ŕ", "Ŗ", "ŗ", "Ř", "ř", "Ś", "ś", "Ŝ", "ŝ", "Ş", "ş", "Š", "š", "Ţ", "ţ", "Ť", "ť", "Ŧ", "ŧ", "Ũ", "ũ", "Ū", "ū", "Ŭ", "ŭ", "Ů", "ů", "Ű", "ű", "Ų", "ų", "Ŵ", "ŵ", "Ŷ", "ŷ", "Ÿ", "Ź", "ź", "Ż", "ż", "Ž", "ž", "ſ"];
 $replace = ['', '', "A", "A", "A", "A", "A", "A", "C", "E", "E", "E", "E", "I", "I", "I", "I", "N", "O", "O", "O", "O", "O", "U", "U", "U", "U", "Y", "s", "a", "a", "a", "a", "a", "a", "c", "e", "e", "e", "e", "i", "i", "i", "i", "n", "o", "o", "o", "o", "o", "u", "u", "u", "u", "y", "y", "A", "a", "A", "a", "A", "a", "C", "c", "C", "c", "C", "c", "C", "c", "D", "d", "D", "d", "E", "e", "E", "e", "E", "e", "E", "e", "E", "e", "G", "g", "G", "g", "G", "g", "G", "g", "H", "h", "H", "h", "I", "i", "I", "i", "I", "i", "I", "i", "I", "i", "J", "j", "K", "k", "k", "L", "l", "L", "l", "L", "l", "L", "l", "L", "l", "N", "n", "N", "n", "N", "n", "N", "n", "N", "O", "o", "O", "o", "O", "o", "OE", "oe", "R", "r", "R", "r", "R", "r", "S", "s", "S", "s", "S", "s", "S", "s", "T", "t", "T", "t", "T", "t", "U", "u", "U", "u", "U", "u", "U", "u", "U", "u", "U", "u", "W", "w", "Y", "y", "Y", "Z", "z", "Z", "z", "Z", "z", "s"];
 
-function getGTFSHeader($row) {
-    foreach($row as $tag){
+function getGTFSHeader($row)
+{
+    foreach ($row as $tag) {
         $col[] = trim($tag);
     }
     return $col;
 }
 
-function getCSVHeader($csv, $sep = ';'){
+function getCSVHeader($csv, $sep = ';')
+{
     $file = fopen($csv, 'r');
     while (!feof($file)) {
         $line[] = fgetcsv($file, 0, $sep);
@@ -20,7 +22,8 @@ function getCSVHeader($csv, $sep = ';'){
     return $line;
 }
 
-function insertGTFS ($type, $opt, $provider) {
+function insertGTFS($type, $opt, $provider)
+{
     if ($type == 'agency.txt') {
         insertAgency($opt, $provider);
     } else if ($type == 'stops.txt') {
@@ -60,7 +63,8 @@ function insertGTFS ($type, $opt, $provider) {
     }
 }
 
-function insertFile($type, $path, $header, $sep = ',', $provider = 'TEST') {
+function insertFile($type, $path, $header, $sep = ',', $provider = 'TEST')
+{
     $db = $GLOBALS["db"];
 
     $table = str_replace('.txt', '', $type);
@@ -86,17 +90,19 @@ function insertFile($type, $path, $header, $sep = ',', $provider = 'TEST') {
     return $req;
 }
 
-function truncateTempStopRoute() {
+function truncateTempStopRoute()
+{
     $db = $GLOBALS["db"];
 
     $req = $db->prepare("
         TRUNCATE temp_stop_route;
     ");
-    $req->execute(array( ));
+    $req->execute(array());
     return $req;
 }
 
-function generateTempStopRoute() {
+function generateTempStopRoute()
+{
     $db = $GLOBALS["db"];
 
     $req = $db->prepare("
@@ -120,22 +126,24 @@ function generateTempStopRoute() {
         INNER JOIN stops S2
         ON S.parent_station = S2.stop_id;
     ");
-    $req->execute(array( ));
+    $req->execute(array());
     return $req;
 }
 
-function autoDeleteStopRoute() {
+function autoDeleteStopRoute()
+{
     $db = $GLOBALS["db"];
 
     $req = $db->prepare("
         DELETE FROM stop_route 
         WHERE route_key NOT IN (SELECT route_key FROM temp_stop_route);
     ");
-    $req->execute(array( ));
+    $req->execute(array());
     return $req;
 }
 
-function autoInsertStopRoute() {
+function autoInsertStopRoute()
+{
     $db = $GLOBALS["db"];
 
     $req = $db->prepare("
@@ -143,11 +151,12 @@ function autoInsertStopRoute() {
         SELECT * FROM temp_stop_route
         WHERE route_key NOT IN (SELECT route_key FROM stop_route);
     ");
-    $req->execute(array( ));
+    $req->execute(array());
     return $req;
 }
 
-function generateQueryRoute() {
+function generateQueryRoute()
+{
     $db = $GLOBALS["db"];
 
     $req = $db->prepare("
@@ -160,11 +169,12 @@ function generateQueryRoute() {
         UPDATE stop_route SET town_query_name = REPLACE(town_query_name, ' ', '');
         UPDATE stop_route SET town_query_name = REPLACE(town_query_name, '\'', '');
     ");
-    $req->execute(array( ));
+    $req->execute(array());
     return $req;
 }
 
-function generateTownInStopRoute() {
+function generateTownInStopRoute()
+{
     $db = $GLOBALS["db"];
 
     $req = $db->prepare("
@@ -183,11 +193,12 @@ function generateTownInStopRoute() {
         WHERE SR.town_id IS NULL;
         
     ");
-    $req->execute(array( ));
+    $req->execute(array());
     return $req;
 }
 
-function isNeedToGenerateHistory() {
+function isNeedToGenerateHistory()
+{
     $db = $GLOBALS["db"];
 
     $req = $db->prepare("
@@ -197,11 +208,12 @@ function isNeedToGenerateHistory() {
             ELSE 0
         END as result;
     ");
-    $req->execute(array( ));
+    $req->execute(array());
     return $req;
 }
 
-function generateHistory() {
+function generateHistory()
+{
     $db = $GLOBALS["db"];
 
     $req = $db->prepare("
@@ -233,22 +245,24 @@ function generateHistory() {
                 OR DATE_FORMAT(NOW() + INTERVAL 7 DAY, '%w') = '0' AND C.sunday = 1
             );
     ");
-    $req->execute(array( ));
+    $req->execute(array());
     return $req;
 }
 
-function removeOldHistory() {
+function removeOldHistory()
+{
     $db = $GLOBALS["db"];
 
     $req = $db->prepare("
         DELETE FROM history_trips
         WHERE date < DATE(NOW());
     ");
-    $req->execute(array( ));
+    $req->execute(array());
     return $req;
 }
 
-function getStopsNotInArea() {
+function getStopsNotInArea()
+{
     $db = $GLOBALS["db"];
 
     $req = $db->prepare("
@@ -258,11 +272,12 @@ function getStopsNotInArea() {
         WHERE S.location_type = '0'
         AND S.parent_station = '';
     ");
-    $req->execute(array( ));
+    $req->execute(array());
     return $req;
 }
 
-function clearProviderData($provider_id){
+function clearProviderData($provider_id)
+{
     $db = $GLOBALS["db"];
 
     $req = $db->prepare("
@@ -287,7 +302,8 @@ function clearProviderData($provider_id){
     return $req;
 }
 
-function insertAgency($opt, $provider){
+function insertAgency($opt, $provider)
+{
     $db = $GLOBALS["db"];
 
     $req = $db->prepare("
@@ -310,7 +326,8 @@ function insertAgency($opt, $provider){
     return $req;
 }
 
-function insertStops($opt, $provider){
+function insertStops($opt, $provider)
+{
     $db = $GLOBALS["db"];
 
     $req = $db->prepare("
@@ -339,7 +356,8 @@ function insertStops($opt, $provider){
     return $req;
 }
 
-function insertRoutes($opt, $provider){
+function insertRoutes($opt, $provider)
+{
     $db = $GLOBALS["db"];
 
     $req = $db->prepare("
@@ -366,7 +384,8 @@ function insertRoutes($opt, $provider){
     return $req;
 }
 
-function insertTrips($opt, $provider){
+function insertTrips($opt, $provider)
+{
     $db = $GLOBALS["db"];
 
     $req = $db->prepare("
@@ -391,7 +410,8 @@ function insertTrips($opt, $provider){
     return $req;
 }
 
-function insertStopTimes($opt, $provider){
+function insertStopTimes($opt, $provider)
+{
     $db = $GLOBALS["db"];
 
     $req = $db->prepare("
@@ -418,7 +438,8 @@ function insertStopTimes($opt, $provider){
     return $req;
 }
 
-function insertCalendar($opt, $provider){
+function insertCalendar($opt, $provider)
+{
     $db = $GLOBALS["db"];
 
     $req = $db->prepare("
@@ -443,7 +464,8 @@ function insertCalendar($opt, $provider){
     return $req;
 }
 
-function insertCalendarDates($opt, $provider){
+function insertCalendarDates($opt, $provider)
+{
     $db = $GLOBALS["db"];
 
     $req = $db->prepare("
@@ -461,7 +483,8 @@ function insertCalendarDates($opt, $provider){
     return $req;
 }
 
-function insertFareAttributes($opt, $provider){
+function insertFareAttributes($opt, $provider)
+{
     $db = $GLOBALS["db"];
 
     $req = $db->prepare("
@@ -483,7 +506,8 @@ function insertFareAttributes($opt, $provider){
     return $req;
 }
 
-function insertFareRules($opt, $provider){
+function insertFareRules($opt, $provider)
+{
     $db = $GLOBALS["db"];
 
     $req = $db->prepare("
@@ -503,7 +527,8 @@ function insertFareRules($opt, $provider){
     return $req;
 }
 
-function insertShapes($opt, $provider){
+function insertShapes($opt, $provider)
+{
     $db = $GLOBALS["db"];
 
     $req = $db->prepare("
@@ -523,7 +548,8 @@ function insertShapes($opt, $provider){
     return $req;
 }
 
-function insertFrequencies($opt, $provider){
+function insertFrequencies($opt, $provider)
+{
     $db = $GLOBALS["db"];
 
     $req = $db->prepare("
@@ -543,7 +569,8 @@ function insertFrequencies($opt, $provider){
     return $req;
 }
 
-function insertTransfers($opt, $provider){
+function insertTransfers($opt, $provider)
+{
     $db = $GLOBALS["db"];
 
     $req = $db->prepare("
@@ -562,7 +589,8 @@ function insertTransfers($opt, $provider){
     return $req;
 }
 
-function insertPathways($opt, $provider){
+function insertPathways($opt, $provider)
+{
     $db = $GLOBALS["db"];
 
     $req = $db->prepare("
@@ -589,7 +617,8 @@ function insertPathways($opt, $provider){
     return $req;
 }
 
-function insertLevels($opt, $provider){
+function insertLevels($opt, $provider)
+{
     $db = $GLOBALS["db"];
 
     $req = $db->prepare("
@@ -607,7 +636,8 @@ function insertLevels($opt, $provider){
     return $req;
 }
 
-function insertFeedInfo($opt, $provider){
+function insertFeedInfo($opt, $provider)
+{
     $db = $GLOBALS["db"];
 
     $req = $db->prepare("
@@ -631,7 +661,8 @@ function insertFeedInfo($opt, $provider){
     return $req;
 }
 
-function insertTranslations($opt, $provider){
+function insertTranslations($opt, $provider)
+{
     $db = $GLOBALS["db"];
 
     $req = $db->prepare("
@@ -653,7 +684,8 @@ function insertTranslations($opt, $provider){
     return $req;
 }
 
-function insertAttributions($opt, $provider){
+function insertAttributions($opt, $provider)
+{
     $db = $GLOBALS["db"];
 
     $req = $db->prepare("
@@ -679,7 +711,8 @@ function insertAttributions($opt, $provider){
     return $req;
 }
 
-function insertStopRoute($opt) {
+function insertStopRoute($opt)
+{
     $db = $GLOBALS["db"];
 
     $req = $db->prepare("
@@ -702,7 +735,7 @@ function insertStopRoute($opt) {
         isset($opt['stop_query_name'])  ? $opt['stop_query_name'] : '',
         isset($opt['stop_lat'])         ? $opt['stop_lat'] : '',
         isset($opt['stop_lon'])         ? $opt['stop_lon'] : '',
-        
+
         isset($opt['town_id'])          ? $opt['town_id'] : '',
         isset($opt['town_name'])        ? $opt['town_name'] : '',
         isset($opt['town_query_name'])  ? $opt['town_query_name'] : '',
@@ -710,7 +743,8 @@ function insertStopRoute($opt) {
     return $req;
 }
 
-function insertTempStopRoute($opt) {
+function insertTempStopRoute($opt)
+{
     $db = $GLOBALS["db"];
 
     $req = $db->prepare("
@@ -733,7 +767,7 @@ function insertTempStopRoute($opt) {
         isset($opt['stop_query_name'])  ? $opt['stop_query_name'] : '',
         isset($opt['stop_lat'])         ? $opt['stop_lat'] : '',
         isset($opt['stop_lon'])         ? $opt['stop_lon'] : '',
-        
+
         isset($opt['town_id'])          ? $opt['town_id'] : '',
         isset($opt['town_name'])        ? $opt['town_name'] : '',
         isset($opt['town_query_name'])  ? $opt['town_query_name'] : '',
@@ -741,7 +775,8 @@ function insertTempStopRoute($opt) {
     return $req;
 }
 
-function deleteTable($opt, $provider){
+function deleteTable($opt, $provider)
+{
     $db = $GLOBALS["db"];
 
     $req = $db->prepare("DELETE FROM $opt");
