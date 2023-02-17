@@ -11,7 +11,7 @@ if (isset($_GET['lat']) && isset($_GET['lon']) && isset($_GET['z'])) {
 } else {
     ErrorMessage(
         400,
-        'Required parameter "q" or "lat" and "lon" is missing or null.'
+        'Required parameter "z" or "lat" and "lon" is missing or null.'
     );
 }
 
