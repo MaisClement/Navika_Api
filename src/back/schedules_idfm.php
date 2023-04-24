@@ -10,6 +10,7 @@ $results = $results->Siri->ServiceDelivery->StopMonitoringDelivery[0]->Monitored
 
 $schedules = [];
 $departures = [];
+$ungrouped_departures = [];
 $direction = [];
 
 foreach ($results as $result) {
@@ -58,12 +59,12 @@ foreach ($results as $result) {
         }
     }
     if (($lines_data[$line_id]['mode'] == "rail" || $lines_data[$line_id]['mode'] == "nationalrail") && (date_create(isset($call->AimedDepartureTime) ? $call->AimedDepartureTime : "") >= date_create() || date_create(isset($call->AimedArrivalTime) ? $call->AimedArrivalTime : "") >= date_create())) {
-        // Si c'est du ferré, l'affichage est different          
+        // Si c'est du ferré, l'affichage est different
 
         if (!in_array($line_id, $departures_lines)) {
             $departures_lines[] = $line_id;
         }
-        $departures[$line_id][] = array(
+        $dep = array(
             "informations" => array(
                 "direction" => array(
                     "id"         =>  (string)   $destination_ref,
@@ -88,6 +89,10 @@ foreach ($results as $result) {
                 "platform"                  =>  (string)  isset($call->ArrivalPlatformName->value)  ? $call->ArrivalPlatformName->value : "-"
             )
         );
+        $departures[$line_id][] = $dep;
+
+        $dep['informations']['line'] = $lines_data[$line_id];
+        $ungrouped_departures[] = $dep;
     } else {
         // Affichage normal
 
@@ -121,20 +126,26 @@ foreach ($departures_lines as $line) {
     $l[] = $lines_data[$line];
 }
 
-usort($l, "order_line");
-$departures_l = [];
+// Train non regroupé
+if (isset($_GET['ungroupDepartures']) && $_GET['ungroupDepartures'] == 'true') {
+    $json['departures'] = $ungrouped_departures;
 
-foreach ($l as $line) {
-    if (isset($departures[$line['id']])) {
-        foreach ($departures[$line['id']] as $departure) {
-            $line['departures'][] = $departure;
+} else { // Train regroupé
+    usort($l, "order_line");
+    $departures_l = [];
+    
+    foreach ($l as $line) {
+        if (isset($departures[$line['id']])) {
+            foreach ($departures[$line['id']] as $departure) {
+                $line['departures'][] = $departure;
+            }
         }
+        $json['departures'][] = $line;
     }
-    $json['departures'][] = $line;
 }
 
 usort($lines_data, "order_line");
-
+    
 foreach ($lines_data as $line) {
     if ($line['mode'] != 'rail' && $line['mode'] != 'nationalrail') {
 

@@ -37,13 +37,14 @@ $api_results = json_decode($api_results);
 file_put_contents($dossier . 'SNCF_departure_' . $id . '.json', json_encode($results));
 
 $departures = [];
+$ungrouped_departures = [];
 
 foreach ($results as $result) {
 
     $details = getApiDetails($api_results, $result->trainNumber);
     // print_r($details);
 
-    $departures[] = array(
+    $dep = array(
         "informations" => array(
             "direction" => array(
                 "id"         =>  (string)    "",
@@ -73,16 +74,28 @@ foreach ($results as $result) {
             "platform"                  =>  (string)  $result->platform->track != null ? $result->platform->track : ($result->trainMode == "CAR" ? "GR" : "-"),
         )
     );
+
+    $departures[] = $dep;
+
+    $dep['informations']['line'] = $lines_data[$line_id];
+    $ungrouped_departures[] = $dep;
 }
 
 $json = [];
 
-$json['departures'][] = array(
-    "id"         =>  (string)    "SNCF",
-    "code"       =>  (string)    "SNCF",
-    "name"       =>  (string)    "Trains SNCF",
-    "mode"       =>  (string)    "nationalrail",
-    "color"      =>  (string)    "aaaaaa",
-    "text_color" =>  (string)    "000000",
-    "departures" =>  $departures
-);
+// Train non regroupé
+if (isset($_GET['ungroupDepartures']) && $_GET['ungroupDepartures'] == 'true') {
+    $json['departures'] = $ungrouped_departures;
+
+} else { // Train regroupé
+
+    $json['departures'][] = array(
+        "id"         =>  (string)    "SNCF",
+        "code"       =>  (string)    "SNCF",
+        "name"       =>  (string)    "Trains SNCF",
+        "mode"       =>  (string)    "nationalrail",
+        "color"      =>  (string)    "aaaaaa",
+        "text_color" =>  (string)    "000000",
+        "departures" =>  $departures
+    );
+}
