@@ -77,7 +77,15 @@ foreach ($results as $result) {
 
     $departures[] = $dep;
 
-    $dep['informations']['line'] = $lines_data[$line_id];
+    $dep['informations']['line'] = array(
+        "id"         =>  (string)    "SNCF",
+        "code"       =>  (string)    "SNCF",
+        "name"       =>  (string)    "Trains SNCF",
+        "mode"       =>  (string)    "nationalrail",
+        "color"      =>  (string)    "aaaaaa",
+        "text_color" =>  (string)    "000000",
+        "departures" =>  $departures
+    );
     $ungrouped_departures[] = $dep;
 }
 
