@@ -93,7 +93,7 @@ foreach ($results as $result) {
 
         $dep['informations']['line'] = $lines_data[$line_id];
         $ungrouped_departures[] = $dep;
-    } else {
+    } else if (date_create(isset($call->AimedDepartureTime) ? $call->AimedDepartureTime : "") >= date_create() || date_create(isset($call->AimedArrivalTime) ? $call->AimedArrivalTime : "") >= date_create()){
         // Affichage normal
 
         if (!isset($terminus_data[$line_id][$destination_ref])) {
