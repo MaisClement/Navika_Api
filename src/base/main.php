@@ -7,8 +7,7 @@ include_once('function.php');
 include_once('gbfs_request.php');
 include_once('gtfs_request.php');
 include_once('request.php');
-include_once('src/data/http_code.php');
-include_once('src/data/lines.php');
+include_once('src/dase/data/http_code.php');
 
 $db = new pdo($dsn, $usr, $psw);
 

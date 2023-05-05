@@ -6,7 +6,8 @@ header("Content-type:application/json");
 
 session_start();
 
-function error_handle($errno, $errstr, $errfile, $errline){
+function error_handle($errno, $errstr, $errfile, $errline)
+{
     $report = '### Error ###' . PHP_EOL;
     $report .= "[$errno] $errstr" . PHP_EOL;
     $report .= "Error on line $errline in $errfile";
