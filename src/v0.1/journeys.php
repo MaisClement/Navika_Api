@@ -9,7 +9,12 @@ if (isset($_GET['from']) && isset($_GET['to'])) {
     $to = $_GET['to'];
     $to = urlencode(trim($to));
 
-    $url = $BASE_URL . '/journeys?from=' . $from . '&to=' . $to . '&depth=3&data_freshness=realtime';
+    $datetime = $_GET['datetime'] ?? date("c");
+    $datetime = urlencode(trim($datetime));
+
+    // echo $datetime; exit;
+
+    $url = $BASE_URL . '/journeys?from=' . $from . '&to=' . $to . '&datetime=' . $datetime . '&depth=3&data_freshness=realtime';
     $fichier .= $from . '_' . $to . '.json';
 } else {
     ErrorMessage(
@@ -47,7 +52,7 @@ foreach ($results->journeys as $result) {
                 "description"   =>  (string)    $section->display_informations->description,
                 "message"       =>  (string)    "",
                 "line"     => array(
-                    "id"         =>  (string)   $LINES[journeys_line_format($section->display_informations->physical_mode) . ' ' . $section->display_informations->code],
+                    "id"         =>  (string)   idfm_format( getLineId($section->links) ), // $LINES[journeys_line_format($section->display_informations->physical_mode) . ' ' . $section->display_informations->code],
                     "code"       =>  (string)   $section->display_informations->code,
                     "name"       =>  (string)   $section->display_informations->network . ' ' . $section->display_informations->name,
                     "mode"       =>  (string)   journeys_line_format($section->display_informations->physical_mode),
@@ -89,7 +94,8 @@ foreach ($results->journeys as $result) {
                     "lon"       =>  floatval($section->to->{$section->to->embedded_type}->coord->lon),
                 ),
             ),
-            "geojson"       => isset($section->geojson) ? $section->geojson : null,
+            "stop_date_times"   => isset($section->stop_date_times) ? $section->stop_date_times : null,
+            "geojson"           => isset($section->geojson)         ? $section->geojson         : null,
         );
     }
 
@@ -103,6 +109,7 @@ foreach ($results->journeys as $result) {
 
         "nb_transfers"          =>  (int)    floatval($result->type),
         "co2_emission"          => $result->co2_emission,
+        "fare"                  => $result->fare,
         "distances"             => $result->distances,
         "sections"              => $sections
     );

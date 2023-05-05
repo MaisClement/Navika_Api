@@ -392,6 +392,13 @@ function getSNCFid($links){
         }
     }
 }
+function getLineId($links){
+    foreach ($links as $link) {
+        if ($link->type == 'line') {
+            return $link->id;
+        }
+    }
+}
 function getState($call){
     // theorical - ontime - delayed - cancelled - modified
     if (isset($call->DepartureStatus) && ($call->DepartureStatus == "cancelled" || $call->DepartureStatus == "delayed"))
