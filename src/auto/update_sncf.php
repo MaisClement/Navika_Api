@@ -53,7 +53,7 @@ foreach ($sncf as $row) {
             try {
                 insertTempStopRoute($stop);
             } catch (Exception $e) {
-                // echo $e;
+                echo $e;
             }
         }
     }

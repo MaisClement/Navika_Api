@@ -10,7 +10,6 @@ echo '> Import GTFS...' . PHP_EOL;
 $directory = "../data/file/gtfs/";
 $err = 0;
 
-// $types = ['agency.txt', 'stops.txt', 'routes.txt', 'trips.txt', 'stop_times.txt', 'calendar.txt', 'calendar_dates.txt', 'fare_attributes.txt', 'fare_rules.txt', 'shapes.txt', 'frequencies.txt', 'transfers.txt', 'pathways.txt', 'levels.txt', 'feed_info.txt', 'translations.txt', 'attributions.txt'];
 $types = ['agency.txt', 'stops.txt', 'routes.txt', 'trips.txt', 'stop_times.txt', 'calendar.txt', 'calendar_dates.txt', 'fare_attributes.txt', 'fare_rules.txt', 'frequencies.txt', 'transfers.txt', 'pathways.txt', 'levels.txt', 'feed_info.txt', 'translations.txt', 'attributions.txt'];
 
 $provider_dir = scandir($directory);
@@ -85,24 +84,11 @@ echo '> Updating Stop_Route table...' . PHP_EOL;
 autoDeleteStopRoute();
 autoInsertStopRoute();
 
-$request = isNeedToGenerateHistory();
-$obj = $request->fetch();
-if ($obj['result'] == 0 && date('H') >= 17) {
-    echo '> Generating history...' . PHP_EOL;
-    generateHistory();
-    echo '> Remove old history...' . PHP_EOL;
-    removeOldHistory();
-} else {
-    echo 'i History is already generated' . PHP_EOL;
-}
+file_get_contents('https://betteruptime.com/api/v1/heartbeat/SrRkcBMzc4AgsXXzzZa2qFDa');
 
 echo PHP_EOL . '-----' . PHP_EOL;
 echo 'Ready ✅';
 echo PHP_EOL . '-----' . PHP_EOL;
-
-echo '> Monitoring' . PHP_EOL;
-// Monitoring
-file_get_contents('https://betteruptime.com/api/v1/heartbeat/SrRkcBMzc4AgsXXzzZa2qFDa');
 
 $subject = 'Navika AutoUpdate';
 $message = file_get_contents('../data/output.txt');

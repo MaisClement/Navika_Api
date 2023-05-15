@@ -748,3 +748,36 @@ function deleteTable($opt, $provider){
     $req->execute();
     return $req;
 }
+
+
+// ----- GBFS -----
+
+function insertStation($opt, $provider){
+    $db = $GLOBALS["db"];
+
+    $req = $db->prepare("
+	  INSERT INTO stations
+	  (provider_id, station_id, station_name, station_lat, station_lon, station_capacity)
+	  VALUES
+	  (?, ?, ?, ?, ?, ?)
+	  ");
+    $req->execute(array(
+        $provider,
+        isset($opt['station_id'])       ? $opt['station_id']        : '',
+        isset($opt['station_name'])     ? $opt['station_name']      : '',
+        isset($opt['station_lat'])      ? $opt['station_lat']       : '',
+        isset($opt['station_lon'])      ? $opt['station_lon']       : '',
+        isset($opt['station_capacity']) ? $opt['station_capacity']  : '',
+    ));
+    return $req;
+}
+
+function clearGBFS(){
+    $db = $GLOBALS["db"];
+
+    $req = $db->prepare("
+        TRUNCATE stations;
+	");
+    $req->execute(array());
+    return $req;
+}

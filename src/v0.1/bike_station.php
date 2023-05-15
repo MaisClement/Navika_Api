@@ -4,10 +4,10 @@ $dossier = '../data/cache/bike_';
 
 if (!isset($_GET['s']) || $_GET['s'] == null) {
     ErrorMessage(400, 'Required parameter "s" is missing or null.');
-} else {
-    $id = $_GET['s'];
-    $fichier = $dossier . $id . '.json';
 }
+
+$id = $_GET['s'];
+$fichier = $dossier . $id . '.json';
 
 if (is_file($fichier) && filesize($fichier) > 5 && (time() - filemtime($fichier) < 20)) {
     echo file_get_contents($fichier);

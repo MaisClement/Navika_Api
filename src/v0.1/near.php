@@ -2,18 +2,15 @@
 
 $fichier = '../data/cache/near_';
 
-if (isset($_GET['lat']) && isset($_GET['lon']) && isset($_GET['z'])) {
-    $lat = $_GET['lat'];
-    $lon = $_GET['lon'];
-    $zoom = $_GET['z'];
-
-    $fichier .= $lat . '_' . $lon . '.json';
-} else {
-    ErrorMessage(
-        400,
-        'Required parameter "z" or "lat" and "lon" is missing or null.'
-    );
+if (!isset($_GET['lat']) || !isset($_GET['lon']) || !isset($_GET['z'])) {
+    ErrorMessage( 400, 'Required parameter "z" or "lat" and "lon" is missing or null.');
 }
+
+$lat = $_GET['lat'];
+$lon = $_GET['lon'];
+$zoom = $_GET['z'];
+
+$fichier .= $lat . '_' . $lon . '.json';
 
 // ------ Request
 //

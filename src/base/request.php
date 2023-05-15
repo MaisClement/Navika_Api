@@ -126,6 +126,7 @@ function clearTown(){
 }
 
 // ------------------------------------------------
+
 function getLinesById($id){
     $db = $GLOBALS["db"];
     $id = trim($id);
@@ -187,6 +188,118 @@ function getDirection($id){
     $req->execute(array($id, $id));
     return $req;
 }
+
+// ------------------------------------------------
+function getSubstop($id){
+    $db = $GLOBALS["db"];
+    $id = trim($id);
+
+    $req = $db->prepare("
+        SELECT *
+        FROM stops S
+        
+        WHERE 
+            S.parent_station = ?
+            AND S.location_type = '0'
+    ");
+    $req->execute(array($id));
+    return $req;
+}
+
+function getSchedulesBySubstop($id, $dt = '2023-05-09'){
+    $db = $GLOBALS["db"];
+    $id = trim($id);
+    $dt = trim($dt);
+
+    $req = $db->prepare("
+            SELECT DISTINCT S.trip_id, S.departure_time, T.*
+
+            FROM stop_times S
+            
+            INNER JOIN trips T 
+            ON S.trip_id = T.trip_id
+            
+            INNER JOIN calendar 
+            ON T.service_id = calendar.service_id
+            
+            INNER JOIN calendar_dates 
+            ON T.service_id = calendar_dates.service_id
+            
+            WHERE S.stop_id = ?
+                AND calendar.start_date <= ?
+                AND calendar.end_date >= ?
+                AND (
+                    calendar.monday = 1 
+                    OR calendar.tuesday = 1 
+                    OR calendar.wednesday = 1 
+                    OR calendar.thursday = 1 
+                    OR calendar.friday = 1 
+                    OR calendar.saturday = 1 
+                    OR calendar.sunday = 1
+                ) 
+                AND (
+                    calendar_dates.date = ?
+                    AND calendar_dates.exception_type = 1 
+                    OR calendar_dates.date <> ?
+                    AND calendar_dates.exception_type = 2
+                )
+            
+            ORDER BY S.departure_time
+    ");
+    $req->execute(array($id, $dt, $dt, $dt, $dt));
+    return $req;
+}
+
+function getScheduleByStop($id, $line, $dt, $time){
+    $db = $GLOBALS["db"];
+    $id = trim($id);
+    $line = trim($line);
+    $dt = trim($dt);
+
+    $req = $db->prepare("
+        SELECT DISTINCT ST.trip_id, ST.departure_time, ST.arrival_time, T.*
+
+        FROM stops S
+        
+        INNER JOIN stop_times ST 
+        ON S.stop_id = ST.stop_id
+        
+        INNER JOIN trips T 
+        ON ST.trip_id = T.trip_id
+        
+        INNER JOIN calendar 
+        ON T.service_id = calendar.service_id
+        
+        INNER JOIN calendar_dates 
+        ON T.service_id = calendar_dates.service_id
+        
+        WHERE S.parent_station = ?
+            AND T.route_id = ?
+            AND departure_time >= ?
+            AND calendar.start_date <= ?
+            AND calendar.end_date >= ?
+            AND (
+                calendar.monday = 1 
+                OR calendar.tuesday = 1 
+                OR calendar.wednesday = 1 
+                OR calendar.thursday = 1 
+                OR calendar.friday = 1 
+                OR calendar.saturday = 1 
+                OR calendar.sunday = 1
+            ) 
+            AND (
+                calendar_dates.date = ?
+                AND calendar_dates.exception_type = 1 
+                OR calendar_dates.date <> ?
+                AND calendar_dates.exception_type = 2
+            )
+        
+        ORDER BY ST.departure_time
+    ");
+    $req->execute(array($id, $line, $time, $dt, $dt, $dt, $dt));
+    return $req;
+}
+
 
 // ------------------------------------------------
 

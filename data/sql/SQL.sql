@@ -41,6 +41,8 @@ CREATE TABLE `stops` (
   platform_code         VARCHAR(255)
 );
 
+CREATE INDEX stops_parent_station ON stops(parent_station);
+
 DROP TABLE IF EXISTS routes;
 CREATE TABLE `routes` (
   provider_id       VARCHAR(255) NOT NULL,

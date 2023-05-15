@@ -45,12 +45,18 @@ foreach ($results->line_reports as $line) {
         $id = $link->id;
         if ($link->type == "disruption") {
             if (isset($reports[$id])) {
-                if ($reports[$id]["severity"] == 2) {
+                if ($reports[$id]["disruptions"] == 'future') {
                     $severity = $severity > $reports[$id]["severity"] ? $severity : $reports[$id]["severity"];
                     $future_work[] = $reports[$id];
+
+                } else if ($reports[$id]["severity"] == 2) {
+                    $severity = $severity > $reports[$id]["severity"] ? $severity : $reports[$id]["severity"];
+                    $future_work[] = $reports[$id];
+
                 } else if ($reports[$id]["severity"] == 3) {
                     $severity = $severity > $reports[$id]["severity"] ? $severity : $reports[$id]["severity"];
                     $current_work[] = $reports[$id];
+                    
                 } else {
                     $severity = $severity > $reports[$id]["severity"] ? $severity : $reports[$id]["severity"];
                     $current_trafic[] = $reports[$id];

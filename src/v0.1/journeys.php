@@ -2,24 +2,22 @@
 
 $fichier = '../data/cache/journeys_';
 
-if (isset($_GET['from']) && isset($_GET['to'])) {
-    $from = $_GET['from'];
-    $from = urlencode(trim($from));
-
-    $to = $_GET['to'];
-    $to = urlencode(trim($to));
-
-    $datetime = $_GET['datetime'] ?? date("c");
-    $datetime = urlencode(trim($datetime));
-
-    $url = $BASE_URL . '/journeys?from=' . $from . '&to=' . $to . '&datetime=' . $datetime . '&depth=3&data_freshness=realtime';
-    $fichier .= $from . '_' . $to . '_' . $datetime . '.json';
-} else {
-    ErrorMessage(
-        400,
-        'Required parameter "from" and "to" is missing or null.'
-    );
+if (!isset($_GET['from']) || !isset($_GET['to'])) {
+    ErrorMessage(400,'Required parameter "from" and "to" is missing or null.');
 }
+
+$from = $_GET['from'];
+$from = urlencode(trim($from));
+
+$to = $_GET['to'];
+$to = urlencode(trim($to));
+
+$datetime = $_GET['datetime'] ?? date("c");
+$datetime = urlencode(trim($datetime));
+
+$url = $BASE_URL . '/journeys?from=' . $from . '&to=' . $to . '&datetime=' . $datetime . '&depth=3&data_freshness=realtime';
+$fichier .= $from . '_' . $to . '_' . $datetime . '.json';
+
 
 if (is_file($fichier) && filesize($fichier) > 5 && (time() - filemtime($fichier) < 60)) {
     echo file_get_contents($fichier);

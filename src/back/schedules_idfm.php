@@ -15,10 +15,7 @@ $direction = [];
 
 foreach ($results as $result) {
     if (!isset($result->MonitoredVehicleJourney->MonitoredCall)) {
-        ErrorMessage(
-            520,
-            'Invalid fecthed data'
-        );
+        ErrorMessage(520, 'Invalid fecthed data');
     }
     $call = $result->MonitoredVehicleJourney->MonitoredCall;
 
@@ -53,13 +50,13 @@ foreach ($results as $result) {
                 "code"       =>  (string)    $obj['shortname_line'],
                 "name"       =>  (string)    $obj['name_line'],
                 "mode"       =>  (string)    $obj['transportmode'],
-                "color"      =>  (string)    strlen($obj['colourweb_hexa']) < 6 ? "ffffff" : $obj['colourweb_hexa'],
-                "text_color" =>  (string)    strlen($obj['textcolourweb_hexa']) < 6 ? "000000" : $obj['textcolourweb_hexa'],
+                "color"      =>  (string)    strlen($obj['colourweb_hexa']) != 6 ? "ffffff" : $obj['colourweb_hexa'],
+                "text_color" =>  (string)    strlen($obj['textcolourweb_hexa']) != 6 ? "000000" : $obj['textcolourweb_hexa'],
             );
         }
     }
-    if (($lines_data[$line_id]['mode'] == "rail" || $lines_data[$line_id]['mode'] == "nationalrail") && (date_create(isset($call->AimedDepartureTime) ? $call->AimedDepartureTime : "") >= date_create() || date_create(isset($call->AimedArrivalTime) ? $call->AimedArrivalTime : "") >= date_create())) {
-        // Si c'est du ferré, l'affichage est different
+    if (($lines_data[$line_id]['mode'] == "rail" || $lines_data[$line_id]['mode'] == "nationalrail") && (date_create(isset($call->AimedDepartureTime) ? $call->AimedDepartureTime : "") >= date_create() || date_create(isset($call->AimedArrivalTime) ? $call->AimedArrivalTime : "") >= date_create() || date_create(isset($call->ExpectedDepartureTime) ? $call->ExpectedDepartureTime : "") >= date_create() || date_create(isset($call->ExpectedArrivalTime) ? $call->ExpectedArrivalTime : "") >= date_create())) {
+            // Si c'est du ferré, l'affichage est different
 
         if (!in_array($line_id, $departures_lines)) {
             $departures_lines[] = $line_id;
@@ -68,7 +65,7 @@ foreach ($results as $result) {
             "informations" => array(
                 "direction" => array(
                     "id"         =>  (string)   $destination_ref,
-                    "name"       =>  (string)   $direction[$destination_ref], // gare_format( $call->DestinationDisplay[0]->value),
+                    "name"       =>  (string)   $direction[$destination_ref],
                 ),
                 "id"            =>  (string)  $result->ItemIdentifier,
                 "name"          =>  (string)  isset($result->MonitoredVehicleJourney->TrainNumbers->TrainNumberRef[0]->value) ? $result->MonitoredVehicleJourney->TrainNumbers->TrainNumberRef[0]->value : "",
@@ -93,13 +90,13 @@ foreach ($results as $result) {
 
         $dep['informations']['line'] = $lines_data[$line_id];
         $ungrouped_departures[] = $dep;
-    } else if (date_create(isset($call->AimedDepartureTime) ? $call->AimedDepartureTime : "") >= date_create() || date_create(isset($call->AimedArrivalTime) ? $call->AimedArrivalTime : "") >= date_create()){
+    } else if (date_create(isset($call->AimedDepartureTime) ? $call->AimedDepartureTime : "") >= date_create() || date_create(isset($call->AimedArrivalTime) ? $call->AimedArrivalTime : "") >= date_create() || date_create(isset($call->ExpectedDepartureTime) ? $call->ExpectedDepartureTime : "") >= date_create() || date_create(isset($call->ExpectedArrivalTime) ? $call->ExpectedArrivalTime : "") >= date_create()){
         // Affichage normal
 
         if (!isset($terminus_data[$line_id][$destination_ref])) {
             $terminus_data[$line_id][$destination_ref] = array(
                 "id"         =>  (string)    $destination_ref,
-                "name"       =>  (string)    $direction[$destination_ref], // $call->DestinationDisplay[0]->value,
+                "name"       =>  (string)    $direction[$destination_ref],
                 "schedules"  =>  array()
             );
         }
@@ -130,7 +127,8 @@ foreach ($departures_lines as $line) {
 if (isset($_GET['ungroupDepartures']) && $_GET['ungroupDepartures'] == 'true') {
     $json['departures'] = $ungrouped_departures;
 
-} else { // Train regroupé
+} else { 
+    // Train regroupé
     usort($l, "order_line");
     $departures_l = [];
     
