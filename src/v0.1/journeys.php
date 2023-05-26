@@ -1,6 +1,6 @@
 <?php
 
-$fichier = '../data/cache/journeys_';
+$file = '../data/cache/journeys_';
 
 if (!isset($_GET['from']) || !isset($_GET['to'])) {
     ErrorMessage(400,'Required parameter "from" and "to" is missing or null.');
@@ -15,12 +15,12 @@ $to = urlencode(trim($to));
 $datetime = $_GET['datetime'] ?? date("c");
 $datetime = urlencode(trim($datetime));
 
-$url = $BASE_URL . '/journeys?from=' . $from . '&to=' . $to . '&datetime=' . $datetime . '&depth=3&data_freshness=realtime';
-$fichier .= $from . '_' . $to . '_' . $datetime . '.json';
+$url = $CONFIG->prim_url . '/journeys?from=' . $from . '&to=' . $to . '&datetime=' . $datetime . '&depth=3&data_freshness=realtime';
+$file .= $from . '_' . $to . '_' . $datetime . '.json';
 
 
-if (is_file($fichier) && filesize($fichier) > 5 && (time() - filemtime($fichier) < 60)) {
-    echo file_get_contents($fichier);
+if (is_file($file) && filesize($file) > 5 && (time() - filemtime($file) < 60)) {
+    echo file_get_contents($file);
     exit;
 }
 
@@ -114,6 +114,6 @@ foreach ($results->journeys as $result) {
 $json = [];
 $json['journeys'] = $journeys;
 $echo = json_encode($json);
-file_put_contents($fichier, $echo);
+file_put_contents($file, $echo);
 echo $echo;
 exit;

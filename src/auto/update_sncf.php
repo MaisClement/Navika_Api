@@ -4,7 +4,7 @@ chdir('/var/www/navika/src');
 
 include_once('base/main.php');
 
-$dossier = '../data/file/gtfs/';
+$dir = '../data/file/gtfs/';
 
 $SNCF_FORBIDDEN_DEPT = array("75", "92", "93", "94", "77", "78", "91", "95");
 $SNCF_FORCE = array("Bréval", "Gazeran", "Angerville", "Monnerville", "Guillerval");
@@ -14,9 +14,9 @@ echo '> Import SNCF...' . PHP_EOL;
 
 echo '   > https://ressources.data.sncf.com/explore/dataset/referentiel-gares-voyageurs/download/?format=csv&timezone=Europe/Berlin&lang=fr' . PHP_EOL;
 $sncf = file_get_contents('https://ressources.data.sncf.com/explore/dataset/referentiel-gares-voyageurs/download/?format=csv&timezone=Europe/Berlin&lang=fr');
-file_put_contents($dossier . 'sncf.csv', $sncf);
+file_put_contents($dir . 'sncf.csv', $sncf);
 
-$sncf = read_csv($dossier . 'sncf.csv');
+$sncf = read_csv($dir . 'sncf.csv');
 
 foreach ($sncf as $row) {
     if ($row[0] != 'code' && $row[1] != '' && $row[1] != false) {

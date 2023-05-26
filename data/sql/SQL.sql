@@ -35,6 +35,7 @@ CREATE TABLE `stops` (
   stop_url              VARCHAR(255),
   location_type         ENUM('0', '1', '2', '3', '4'),
   parent_station        VARCHAR(255),
+  vehicle_type          VARCHAR(255),
   stop_timezone         VARCHAR(255),
   wheelchair_boarding   ENUM('0', '1', '2'),
   level_id              VARCHAR(255),
@@ -118,6 +119,8 @@ CREATE TABLE `calendar_dates` (
   `date`                DATE NOT NULL,
   exception_type        ENUM('0', '1', '2') NOT NULL
 );
+
+CREATE INDEX calendar_dates_service_id ON calendar_dates(service_id);
 
 DROP TABLE IF EXISTS fare_attributes;
 CREATE TABLE `fare_attributes` (
@@ -308,26 +311,6 @@ CREATE TABLE `stations` (
   station_lat        VARCHAR(255) NOT NULL,
   station_lon        VARCHAR(255) NOT NULL,
   station_capacity   VARCHAR(255)
-);
-
-DROP TABLE IF EXISTS history_trips;
-CREATE TABLE `history_trips` (
-  provider_id           VARCHAR(255) NOT NULL,
-  date                  DATE NOT NULL,
-  generated             DATE DEFAULT NOW(),
-  route_id              VARCHAR(255) NOT NULL,
-  service_id            VARCHAR(255) NOT NULL,
-  trip_id               VARCHAR(255) NOT NULL,
-  trip_headsign         TEXT,
-  trip_short_name       TEXT,
-  monday                ENUM('0', '1', '2') NOT NULL,
-  tuesday               ENUM('0', '1', '2') NOT NULL,
-  wednesday             ENUM('0', '1', '2') NOT NULL,
-  thursday              ENUM('0', '1', '2') NOT NULL,
-  friday                ENUM('0', '1', '2') NOT NULL,
-  saturday              ENUM('0', '1', '2') NOT NULL,
-  sunday                ENUM('0', '1', '2') NOT NULL,
-  exception_type        VARCHAR(255) 
 );
 
 -- ALTER TABLE agency

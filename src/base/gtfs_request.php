@@ -3,13 +3,6 @@
 $search = [" ", "-", "À", "Á", "Â", "Ã", "Ä", "Å", "Ç", "È", "É", "Ê", "Ë", "Ì", "Í", "Î", "Ï", "Ñ", "Ò", "Ó", "Ô", "Õ", "Ö", "Ù", "Ú", "Û", "Ü", "Ý", "ß", "à", "á", "â", "ã", "ä", "å", "ç", "è", "é", "ê", "ë", "ì", "í", "î", "ï", "ñ", "ò", "ó", "ô", "õ", "ö", "ù", "ú", "û", "ü", "ý", "ÿ", "Ā", "ā", "Ă", "ă", "Ą", "ą", "Ć", "ć", "Ĉ", "ĉ", "Ċ", "ċ", "Č", "č", "Ď", "ď", "Đ", "đ", "Ē", "ē", "Ĕ", "ĕ", "Ė", "ė", "Ę", "ę", "Ě", "ě", "Ĝ", "ĝ", "Ğ", "ğ", "Ġ", "ġ", "Ģ", "ģ", "Ĥ", "ĥ", "Ħ", "ħ", "Ĩ", "ĩ", "Ī", "ī", "Ĭ", "ĭ", "Į", "į", "İ", "ı", "Ĵ", "ĵ", "Ķ", "ķ", "ĸ", "Ĺ", "ĺ", "Ļ", "ļ", "Ľ", "ľ", "Ŀ", "ŀ", "Ł", "ł", "Ń", "ń", "Ņ", "ņ", "Ň", "ň", "ŉ", "Ŋ", "ŋ", "Ō", "ō", "Ŏ", "ŏ", "Ő", "ő", "Œ", "œ", "Ŕ", "ŕ", "Ŗ", "ŗ", "Ř", "ř", "Ś", "ś", "Ŝ", "ŝ", "Ş", "ş", "Š", "š", "Ţ", "ţ", "Ť", "ť", "Ŧ", "ŧ", "Ũ", "ũ", "Ū", "ū", "Ŭ", "ŭ", "Ů", "ů", "Ű", "ű", "Ų", "ų", "Ŵ", "ŵ", "Ŷ", "ŷ", "Ÿ", "Ź", "ź", "Ż", "ż", "Ž", "ž", "ſ"];
 $replace = ['', '', "A", "A", "A", "A", "A", "A", "C", "E", "E", "E", "E", "I", "I", "I", "I", "N", "O", "O", "O", "O", "O", "U", "U", "U", "U", "Y", "s", "a", "a", "a", "a", "a", "a", "c", "e", "e", "e", "e", "i", "i", "i", "i", "n", "o", "o", "o", "o", "o", "u", "u", "u", "u", "y", "y", "A", "a", "A", "a", "A", "a", "C", "c", "C", "c", "C", "c", "C", "c", "D", "d", "D", "d", "E", "e", "E", "e", "E", "e", "E", "e", "E", "e", "G", "g", "G", "g", "G", "g", "G", "g", "H", "h", "H", "h", "I", "i", "I", "i", "I", "i", "I", "i", "I", "i", "J", "j", "K", "k", "k", "L", "l", "L", "l", "L", "l", "L", "l", "L", "l", "N", "n", "N", "n", "N", "n", "N", "n", "N", "O", "o", "O", "o", "O", "o", "OE", "oe", "R", "r", "R", "r", "R", "r", "S", "s", "S", "s", "S", "s", "S", "s", "T", "t", "T", "t", "T", "t", "U", "u", "U", "u", "U", "u", "U", "u", "U", "u", "U", "u", "W", "w", "Y", "y", "Y", "Z", "z", "Z", "z", "Z", "z", "s"];
 
-function getGTFSHeader($row){
-    foreach ($row as $tag) {
-        $col[] = trim($tag);
-    }
-    return $col;
-}
-
 function getCSVHeader($csv, $sep = ';'){
     $file = fopen($csv, 'r');
     while (!feof($file)) {
@@ -20,50 +13,89 @@ function getCSVHeader($csv, $sep = ';'){
     return $line;
 }
 
-function insertGTFS($type, $opt, $provider){
-    if ($type == 'agency.txt') {
-        insertAgency($opt, $provider);
-    } else if ($type == 'stops.txt') {
-        insertStops($opt, $provider);
-    } else if ($type == 'routes.txt') {
-        insertRoutes($opt, $provider);
-    } else if ($type == 'trips.txt') {
-        insertTrips($opt, $provider);
-    } else if ($type == 'stop_times.txt') {
-        insertStopTimes($opt, $provider);
-    } else if ($type == 'calendar.txt') {
-        insertCalendar($opt, $provider);
-    } else if ($type == 'calendar_dates.txt') {
-        insertCalendarDates($opt, $provider);
-    } else if ($type == 'fare_attributes.txt') {
-        insertFareAttributes($opt, $provider);
-    } else if ($type == 'fare_rules.txt') {
-        insertFareRules($opt, $provider);
-    } else if ($type == 'shapes.txt') {
-        insertShapes($opt, $provider);
-    } else if ($type == 'frequencies.txt') {
-        insertFrequencies($opt, $provider);
-    } else if ($type == 'transfers.txt') {
-        insertTransfers($opt, $provider);
-    } else if ($type == 'pathways.txt') {
-        insertPathways($opt, $provider);
-    } else if ($type == 'levels.txt') {
-        insertLevels($opt, $provider);
-    } else if ($type == 'feed_info.txt') {
-        insertFeedInfo($opt, $provider);
-    } else if ($type == 'translations.txt') {
-        insertTranslations($opt, $provider);
-    } else if ($type == 'attributions.txt') {
-        insertAttributions($opt, $provider);
-    } else {
-        echo 'Unknow';
-    }
+//DEPRECATED function insertGTFS($type, $opt, $provider){
+//DEPRECATED     if ($type == 'agency.txt') {
+//DEPRECATED         insertAgency($opt, $provider);
+//DEPRECATED     } else if ($type == 'stops.txt') {
+//DEPRECATED         insertStops($opt, $provider);
+//DEPRECATED     } else if ($type == 'routes.txt') {
+//DEPRECATED         insertRoutes($opt, $provider);
+//DEPRECATED     } else if ($type == 'trips.txt') {
+//DEPRECATED         insertTrips($opt, $provider);
+//DEPRECATED     } else if ($type == 'stop_times.txt') {
+//DEPRECATED         insertStopTimes($opt, $provider);
+//DEPRECATED     } else if ($type == 'calendar.txt') {
+//DEPRECATED         insertCalendar($opt, $provider);
+//DEPRECATED     } else if ($type == 'calendar_dates.txt') {
+//DEPRECATED         insertCalendarDates($opt, $provider);
+//DEPRECATED     } else if ($type == 'fare_attributes.txt') {
+//DEPRECATED         insertFareAttributes($opt, $provider);
+//DEPRECATED     } else if ($type == 'fare_rules.txt') {
+//DEPRECATED         insertFareRules($opt, $provider);
+//DEPRECATED     } else if ($type == 'shapes.txt') {
+//DEPRECATED         insertShapes($opt, $provider);
+//DEPRECATED     } else if ($type == 'frequencies.txt') {
+//DEPRECATED         insertFrequencies($opt, $provider);
+//DEPRECATED     } else if ($type == 'transfers.txt') {
+//DEPRECATED         insertTransfers($opt, $provider);
+//DEPRECATED     } else if ($type == 'pathways.txt') {
+//DEPRECATED         insertPathways($opt, $provider);
+//DEPRECATED     } else if ($type == 'levels.txt') {
+//DEPRECATED         insertLevels($opt, $provider);
+//DEPRECATED     } else if ($type == 'feed_info.txt') {
+//DEPRECATED         insertFeedInfo($opt, $provider);
+//DEPRECATED     } else if ($type == 'translations.txt') {
+//DEPRECATED         insertTranslations($opt, $provider);
+//DEPRECATED     } else if ($type == 'attributions.txt') {
+//DEPRECATED         insertAttributions($opt, $provider);
+//DEPRECATED     } else {
+//DEPRECATED         echo 'Unknow';
+//DEPRECATED     }
+//DEPRECATED }
+
+function perpareTempTable($table, $temp_table){
+    $db = $GLOBALS["db"];
+
+    $req = $db->prepare("
+        DROP TABLE IF EXISTS $temp_table;
+        CREATE TEMPORARY TABLE $temp_table LIKE $table;
+    ");
+    $req->execute( [] );
+    return $req;
+}
+
+function prefixTable($table, $column, $prefix){
+    $db = $GLOBALS["db"];
+
+    $prefix_ch = $prefix . '%';
+
+    $req = $db->prepare("
+        UPDATE $table
+        SET $column = CASE
+            WHEN $column IS NOT NULL AND $column != '' AND $column NOT LIKE ? THEN CONCAT(?, $column)
+            ELSE $column
+            END;
+    ");
+    $req->execute( [$prefix_ch, $prefix] );
+    return $req;
+}
+
+function copyTable($from, $to){
+    $db = $GLOBALS["db"];
+
+    $req = $db->prepare("
+        INSERT INTO $to SELECT * FROM $from;
+
+        DROP TABLE $from;
+    ");
+    $req->execute( [] );
+    return $req;
 }
 
 function insertFile($type, $path, $header, $sep = ',', $provider = 'TEST'){
     $db = $GLOBALS["db"];
 
-    $table = str_replace('.txt', '', $type);
+    $table = $type;
     $path = realpath($path);
 
     $req = $db->prepare("
@@ -78,11 +110,7 @@ function insertFile($type, $path, $header, $sep = ',', $provider = 'TEST'){
         ($header)
         SET provider_id = ?
     ");
-    $req->execute(array(
-        $path,
-        $sep,
-        $provider,
-    ));
+    $req->execute( [$path, $sep, $provider] );
     return $req;
 }
 
@@ -92,7 +120,7 @@ function truncateTempStopRoute(){
     $req = $db->prepare("
         TRUNCATE temp_stop_route;
     ");
-    $req->execute(array());
+    $req->execute( [] );
     return $req;
 }
 

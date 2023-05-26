@@ -34,7 +34,7 @@ $results = json_decode($results);
 $api_results = curl_SNCF($sncf_url_api);
 $api_results = json_decode($api_results);
 
-file_put_contents($dossier . 'SNCF_departure_' . $id . '.json', json_encode($results));
+file_put_contents($dir . 'SNCF_departure_' . $id . '.json', json_encode($results));
 
 $departures = [];
 $ungrouped_departures = [];
@@ -42,7 +42,6 @@ $ungrouped_departures = [];
 foreach ($results as $result) {
 
     $details = getApiDetails($api_results, $result->trainNumber);
-    // print_r($details);
 
     $dep = array(
         "informations" => array(
@@ -75,8 +74,10 @@ foreach ($results as $result) {
         )
     );
 
+    // Si groupé
     $departures[] = $dep;
 
+    // Si dégroupé
     $dep['informations']['line'] = array(
         "id"         =>  (string)    "SNCF",
         "code"       =>  (string)    "SNCF",

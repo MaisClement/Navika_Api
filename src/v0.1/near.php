@@ -1,6 +1,6 @@
 <?php
 
-$fichier = '../data/cache/near_';
+$file = '../data/cache/near_';
 
 if (!isset($_GET['lat']) || !isset($_GET['lon']) || !isset($_GET['z'])) {
     ErrorMessage( 400, 'Required parameter "z" or "lat" and "lon" is missing or null.');
@@ -10,7 +10,7 @@ $lat = $_GET['lat'];
 $lon = $_GET['lon'];
 $zoom = $_GET['z'];
 
-$fichier .= $lat . '_' . $lon . '.json';
+$file .= $lat . '_' . $lon . '.json';
 
 // ------ Request
 //
@@ -18,11 +18,10 @@ $request = getStopByGeoCoords($lat, $lon, $zoom);
 
 // ------ Arrets
 //
-
 $stops = [];
 while ($obj = $request->fetch()) {
 
-    if (($zoom >= 15000 && getTransportMode($obj['route_type']) == 'rail') || $zoom < 15000) {
+    if (($zoom >= 15000 && (getTransportMode($obj['route_type']) == 'rail' || getTransportMode($obj['route_type']) == 'nationalrail')) || $zoom < 15000) {
 
         if (!isset($stops[$obj['stop_id']])) {
             $stops[$obj['stop_id']] = array(
@@ -99,6 +98,6 @@ if (isset($_GET['flag'])) {
 
 
 $echo = json_encode($echo);
-// file_put_contents($fichier, $echo);
+// file_put_contents($file, $echo);
 echo $echo;
 exit;

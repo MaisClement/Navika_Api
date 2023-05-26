@@ -1,15 +1,15 @@
 <?php
 
-$fichier = '../data/cache/trafic.json';
+$file = '../data/cache/trafic.json';
 
-if (is_file($fichier) && filesize($fichier) > 5 && (time() - filemtime($fichier) < 30)) {
-    echo file_get_contents($fichier);
+if (is_file($file) && filesize($file) > 5 && (time() - filemtime($file) < 30)) {
+    echo file_get_contents($file);
     exit;
 }
 
 // ------------
 
-$url = 'https://prim.iledefrance-mobilites.fr/marketplace/navitia/coverage/fr-idf/line_reports?count=100&forbidden_uris[]=commercial_mode:Bus';
+$url = $CONFIG->prim_url . '/line_reports?count=100&forbidden_uris[]=commercial_mode:Bus';
 $results = curl_PRIM($url);
 $results = json_decode($results);
 
@@ -88,6 +88,6 @@ foreach ($results->line_reports as $line) {
 $echo["trafic"] = $lines;
 
 $echo = json_encode($echo);
-file_put_contents($fichier, $echo);
+file_put_contents($file, $echo);
 echo $echo;
 exit;

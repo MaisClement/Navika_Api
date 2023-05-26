@@ -1,10 +1,10 @@
 <?php
 
-$fichier = '../data/cache/';
-clear_directory($fichier);
+$file = '../data/cache/';
+clear_directory($file);
 
 
-$fichier = '../data/report/';
-clear_directory($fichier);
+$file = '../data/report/';
+clear_directory($file);
 
 exit;

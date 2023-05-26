@@ -117,6 +117,7 @@ function addTown($id, $name, $polygon){
     $req->execute(array($id, $name, $polygon));
     return $req;
 }
+
 function clearTown(){
     $db = $GLOBALS["db"];
 
@@ -132,9 +133,9 @@ function getLinesById($id){
     $id = trim($id);
 
     $req = $db->prepare("
-            SELECT * 
-            FROM lignes
-            WHERE id_line = ?;
+        SELECT route_id, route_long_name, route_short_name, route_type, route_color, route_text_color
+        FROM stop_route
+        WHERE route_id = ?
     ");
     $req->execute(array($id));
     return $req;
@@ -158,17 +159,9 @@ function getAllLinesAtStop($id){
     $id = trim($id);
 
     $req = $db->prepare("
-        SELECT L.id_line, L.name_line, L.shortname_line, L.transportmode, L.colourweb_hexa, L.textcolourweb_hexa
-        FROM lignes L
-        
-        INNER JOIN arrets_lignes A
-        ON REPLACE(A.id, 'IDFM:', '') = L.id_line
-        
-        INNER JOIN stops S
-        ON S.stop_id = A.stop_id 
-        
-        WHERE S.parent_station = ?
-        GROUP BY L.id_line;
+        SELECT route_key, route_id, route_long_name, route_short_name, route_type, route_color, route_text_color
+        FROM stop_route
+        WHERE stop_id = ?
     ");
     $req->execute(array($id));
     return $req;
@@ -206,50 +199,6 @@ function getSubstop($id){
     return $req;
 }
 
-function getSchedulesBySubstop($id, $dt = '2023-05-09'){
-    $db = $GLOBALS["db"];
-    $id = trim($id);
-    $dt = trim($dt);
-
-    $req = $db->prepare("
-            SELECT DISTINCT S.trip_id, S.departure_time, T.*
-
-            FROM stop_times S
-            
-            INNER JOIN trips T 
-            ON S.trip_id = T.trip_id
-            
-            INNER JOIN calendar 
-            ON T.service_id = calendar.service_id
-            
-            INNER JOIN calendar_dates 
-            ON T.service_id = calendar_dates.service_id
-            
-            WHERE S.stop_id = ?
-                AND calendar.start_date <= ?
-                AND calendar.end_date >= ?
-                AND (
-                    calendar.monday = 1 
-                    OR calendar.tuesday = 1 
-                    OR calendar.wednesday = 1 
-                    OR calendar.thursday = 1 
-                    OR calendar.friday = 1 
-                    OR calendar.saturday = 1 
-                    OR calendar.sunday = 1
-                ) 
-                AND (
-                    calendar_dates.date = ?
-                    AND calendar_dates.exception_type = 1 
-                    OR calendar_dates.date <> ?
-                    AND calendar_dates.exception_type = 2
-                )
-            
-            ORDER BY S.departure_time
-    ");
-    $req->execute(array($id, $dt, $dt, $dt, $dt));
-    return $req;
-}
-
 function getScheduleByStop($id, $line, $dt, $time){
     $db = $GLOBALS["db"];
     $id = trim($id);
@@ -267,36 +216,34 @@ function getScheduleByStop($id, $line, $dt, $time){
         INNER JOIN trips T 
         ON ST.trip_id = T.trip_id
         
-        INNER JOIN calendar 
-        ON T.service_id = calendar.service_id
+        INNER JOIN calendar C 
+        ON T.service_id = C.service_id
         
-        INNER JOIN calendar_dates 
-        ON T.service_id = calendar_dates.service_id
+        LEFT JOIN calendar_dates CD 
+        ON (T.service_id = CD.service_id AND CD.date = ?)
         
         WHERE S.parent_station = ?
             AND T.route_id = ?
             AND departure_time >= ?
-            AND calendar.start_date <= ?
-            AND calendar.end_date >= ?
             AND (
-                calendar.monday = 1 
-                OR calendar.tuesday = 1 
-                OR calendar.wednesday = 1 
-                OR calendar.thursday = 1 
-                OR calendar.friday = 1 
-                OR calendar.saturday = 1 
-                OR calendar.sunday = 1
-            ) 
-            AND (
-                calendar_dates.date = ?
-                AND calendar_dates.exception_type = 1 
-                OR calendar_dates.date <> ?
-                AND calendar_dates.exception_type = 2
+                (C.start_date <= ?
+                    AND C.end_date >= ?
+                    AND (
+                        DATE_FORMAT(?, '%w') = '1' AND C.monday = '1'
+                        OR DATE_FORMAT(?, '%w') = '2' AND C.tuesday = '1'
+                        OR DATE_FORMAT(?, '%w') = '3' AND C.wednesday = '1'
+                        OR DATE_FORMAT(?, '%w') = '4' AND C.thursday = '1'
+                        OR DATE_FORMAT(?, '%w') = '5' AND C.friday = '1'
+                        OR DATE_FORMAT(?, '%w') = '6' AND C.saturday = '1'
+                        OR DATE_FORMAT(?, '%w') = '0' AND C.sunday = '1'
+                    ) 
+                    AND (CD.exception_type <> 2 OR CD.exception_type IS NULL)
+                )
+                OR CD.exception_type = 1 
             )
-        
         ORDER BY ST.departure_time
     ");
-    $req->execute(array($id, $line, $time, $dt, $dt, $dt, $dt));
+    $req->execute(array($dt, $id, $line, $time, $dt, $dt, $dt, $dt, $dt, $dt, $dt, $dt, $dt));
     return $req;
 }
 

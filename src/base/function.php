@@ -1,22 +1,6 @@
 <?php
 
 // --- CURL ---
-function curl_GTFS($url){
-    $ch = curl_init();
-    curl_setopt($ch, CURLOPT_HEADER, false);
-    curl_setopt(
-        $ch,
-        CURLOPT_HTTPHEADER,
-        array(
-            'Authorization: ' . $GLOBALS['GTFSKEY']
-        )
-    );
-    curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
-    curl_setopt($ch, CURLOPT_URL, $url);
-    $data = curl_exec($ch);
-    curl_close($ch);
-    return $data;
-}
 function curl_SNCF($url){
     $password = '';
     $user = $GLOBALS['SNCFKEY'];
@@ -76,11 +60,12 @@ function curl($url){
 
 // --- ERROR ---
 function ErrorMessage($http_code, $details = ''){
+    $config = $GLOBALS['CONFIG'];
     http_response_code($http_code);
     $json = array(
         'error' => array(
             'code'      =>  (int)       $http_code,
-            'message'   =>  (string)    isset($GLOBALS['HTTP_CODE'][$http_code]) ? $GLOBALS['HTTP_CODE'][$http_code] : "",
+            'message'   =>  (string)    isset($config->http_code->$http_code) ? $config->http_code->$http_code : "",
             'details'   =>  (string)    $details == ''               ? "" : $details,
         )
     );
@@ -116,6 +101,28 @@ function getTransportMode($l){
 function prepareTime($dt){
     if ($dt == '') return '';
     $datetime = date_create($dt);
+    
+    if (is_bool($datetime)) {
+        $timeArray = explode(':', $dt);
+
+        $hours = intval($timeArray[0]);
+        $minutes = intval($timeArray[1]);
+        $seconds = intval($timeArray[2]);
+
+        // 'cause GTFS time can be 25:00:00
+        $hours %= 24;
+        $minutes %= 60;
+        $seconds %= 60;
+
+        $datetime = new DateTime();
+        $datetime->setTime($hours, $minutes, $seconds);
+        $datetime->setTimezone(new DateTimeZone('Europe/Paris'));
+
+        if ($timeArray[0] >= 24) {
+            $datetime->modify('+1 day');
+        }
+    }
+
     return date_format($datetime, DATE_ISO8601);
 }
 function timeSort($a, $b){
@@ -515,6 +522,7 @@ function idfm_format($str){
         'stop_point',
         'stopArea',
         'StopPoint',
+        'ADMIN:',
         'IDFM:',
         'STIF:',
         'SNCF:',
@@ -546,8 +554,8 @@ function read_csv($csv, $sep = ';'){
     return $line;
 }
 
-function getGTFSlistFromApi($url){
-    $json = file_get_contents('https://transport.data.gouv.fr/api/datasets/' . $url);
+function getGTFSlistFromApi($gtfs){
+    $json = file_get_contents('https://transport.data.gouv.fr/api/datasets/' . $gtfs->url);
     $json = json_decode($json);
 
     $list = [];
@@ -555,12 +563,12 @@ function getGTFSlistFromApi($url){
     foreach ($json->history as $history) {
         if ($history->payload->format == 'GTFS') {
             return array(
-                'provider_id'   => $url,
+                'provider_id'   => $gtfs->id,
                 'slug'          => $json->aom->name,
-                'title'         => $history->payload->title,
+                'title'         => $gtfs->name,
                 'type'          => $history->payload->format,
                 'url'           => $history->payload->resource_url,
-                'original_url'  => $history->payload->resource_url,
+                'filenames'     => $history->payload->filenames,
                 'updated'       => date('Y-m-d H:i:s', strtotime($history->updated_at)),
                 'flag'          => 0,
             );
@@ -588,3 +596,49 @@ function getGBFSstation($url, $provider_url, $id){
         );
     }
 }
+
+// ---
+
+function unzip($zipname, $folder) {
+    if (!is_file($zipname)) {
+        throw new Exception('File not found');
+    }
+    if (!is_dir($folder)) {
+        mkdir($folder);
+    }
+
+    $zip = new ZipArchive;
+    try {
+        $zip->open($zipname);
+        $zip->extractTo($folder);
+        $zip->close();
+
+    } catch (ValueError $e) {
+        echo '  ! Failed to unzip' . PHP_EOL;
+    }
+}
+
+//DEPRECATED function importGTFS($directory, $provider) {
+//DEPRECATED     $err = 0;
+//DEPRECATED 
+//DEPRECATED     $types = ['agency.txt', 'stops.txt', 'routes.txt', 'trips.txt', 'stop_times.txt', 'calendar.txt', 'calendar_dates.txt', 'fare_attributes.txt', 'fare_rules.txt', 'frequencies.txt', 'transfers.txt', 'pathways.txt', 'levels.txt', 'feed_info.txt', 'translations.txt', 'attributions.txt'];
+//DEPRECATED 
+//DEPRECATED     foreach ($types as $type) {
+//DEPRECATED         $file = $directory . '/' . $type;
+//DEPRECATED         if (is_file($file)) {
+//DEPRECATED             echo '        ' . $type . PHP_EOL;
+//DEPRECATED 
+//DEPRECATED             $header = getCSVHeader($file)[0][0];
+//DEPRECATED 
+//DEPRECATED             try {
+//DEPRECATED                 insertFile($type, $file, $header, ',', $provider);
+//DEPRECATED                 // unlink($file);
+//DEPRECATED             } catch (Exception $e) {
+//DEPRECATED                 echo $e;
+//DEPRECATED                 $err++;
+//DEPRECATED             }
+//DEPRECATED         }
+//DEPRECATED     }
+//DEPRECATED     
+//DEPRECATED     echo '      ' . $err . ' errors' . PHP_EOL;
+//DEPRECATED }

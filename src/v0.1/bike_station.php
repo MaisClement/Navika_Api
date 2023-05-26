@@ -1,16 +1,16 @@
 <?php
 
-$dossier = '../data/cache/bike_';
+$dir = '../data/cache/bike_';
 
 if (!isset($_GET['s']) || $_GET['s'] == null) {
     ErrorMessage(400, 'Required parameter "s" is missing or null.');
 }
 
 $id = $_GET['s'];
-$fichier = $dossier . $id . '.json';
+$file = $dir . $id . '.json';
 
-if (is_file($fichier) && filesize($fichier) > 5 && (time() - filemtime($fichier) < 20)) {
-    echo file_get_contents($fichier);
+if (is_file($file) && filesize($file) > 5 && (time() - filemtime($file) < 20)) {
+    echo file_get_contents($file);
     exit;
 }
 
@@ -55,6 +55,6 @@ foreach ($content->data->stations as $station) {
 $echo['station'] = $json;
 
 $echo = json_encode($echo);
-file_put_contents($fichier, $echo);
+file_put_contents($file, $echo);
 echo $echo;
 exit;

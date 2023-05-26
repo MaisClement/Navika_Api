@@ -1,12 +1,12 @@
 <?php
 
-chdir('/var/www/navika/src');
+chdir('/var/www/navika');
 
-include_once('base/main.php');
+include_once('src/base/main.php');
 
 // INIT SQL 
 echo '> Init Database' . PHP_EOL;
-$query = file_get_contents('../data/sql/SQL.sql');
+$query = file_get_contents('data/sql/SQL.sql');
 SQLinit($query);
 
 // Import GeoJson
@@ -14,7 +14,7 @@ SQLinit($query);
 echo '> GeoJson' . PHP_EOL;
 clearTown();
 
-$geojson = file_get_contents('../data/file/communes.geojson');
+$geojson = file_get_contents('data/file/communes.geojson');
 $geojson = json_decode($geojson);
 
 foreach ($geojson->features as $feature) {

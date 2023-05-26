@@ -1,6 +1,6 @@
 <?php
 
-$fichier = '../data/cache/stop_area_';
+$file = '../data/cache/stop_area_';
 
 if (isset($_GET['q']) && isset($_GET['lat']) && isset($_GET['lon'])) {
     $query = $_GET['q'];
@@ -8,21 +8,21 @@ if (isset($_GET['q']) && isset($_GET['lat']) && isset($_GET['lon'])) {
     $lat = $_GET['lat'];
     $lon = $_GET['lon'];
 
-    $fichier .= $query . '_' . $lat . '_' . $lon . '.json';
+    $file .= $query . '_' . $lat . '_' . $lon . '.json';
 
     $search_type = 3;
 } else if (isset($_GET['lat']) && isset($_GET['lon'])) {
     $lat = $_GET['lat'];
     $lon = $_GET['lon'];
 
-    $fichier .= $lat . '_' . $lon . '.json';
+    $file .= $lat . '_' . $lon . '.json';
 
     $search_type = 2;
 } else if (isset($_GET['q'])) {
     $query = $_GET['q'];
     $query = urlencode(trim($query));
 
-    $fichier .= $query . '.json';
+    $file .= $query . '.json';
 
     $search_type = 1;
 } else {
@@ -32,10 +32,10 @@ if (isset($_GET['q']) && isset($_GET['lat']) && isset($_GET['lon'])) {
     );
 }
 
-// if (is_file($fichier) && filesize($fichier) > 5 && (time() - filemtime($fichier) < 60 * 60)) {
-//     echo file_get_contents($fichier);
-//     exit;
-// }
+if (is_file($file) && filesize($file) > 5 && (time() - filemtime($file) < 60 * 60)) {
+    echo file_get_contents($file);
+    exit;
+}
 
 // ------ Request
 //
@@ -74,7 +74,6 @@ while ($obj = $request->fetch()) {
                 'name'      =>  (string)    $obj['stop_name'],
                 'type'      =>  (string)    'stop_area',
                 'distance'  =>  (int)       isset($obj['distance']) ? $obj['distance'] < 1000 ? round($obj['distance']) : 0 : 0,
-                // 'zone'      =>  (int)       $obj['zone_id'] ?? 0,
                 'town'      =>  (string)    $obj['town_name'],
                 'zip_code'  =>  (string)    substr($obj['town_id'], 0, 2),
                 'coord'     => array(
@@ -90,7 +89,7 @@ while ($obj = $request->fetch()) {
 
         if (!in_array(getTransportMode($obj['route_type']), $lines[$obj['stop_id']])) {
             $lines[$obj['stop_id']][] = array(
-                "id"         =>  (string)    idfm_format($obj['route_id']),
+                "id"         =>  (string)    $obj['route_id'],
                 "code"       =>  (string)    $obj['route_short_name'],
                 "name"       =>  (string)    $obj['route_long_name'],
                 "mode"       =>  (string)    getTransportMode($obj['route_type']),
@@ -125,6 +124,6 @@ if (isset($_GET['flag'])) {
 
 
 $echo = json_encode($echo);
-// file_put_contents($fichier, $echo);
+file_put_contents($file, $echo);
 echo $echo;
 exit;

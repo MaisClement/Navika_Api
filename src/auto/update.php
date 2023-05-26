@@ -1,107 +1,153 @@
 <?php
 
-chdir('/var/www/navika/src');
+chdir('/var/www/navika');
 
-include_once('base/main.php');
+include_once('src/base/main.php');
 
-$dossier = '../data/file/gtfs/';
+$dir = 'data/file/gtfs/';
 
-echo '> Clearing file' . PHP_EOL;
+echo '> Clear cache...' . PHP_EOL;
 
-$fichier = '../data/cache/';
-clear_directory($fichier);
-
-$fichier = '../data/report/';
-clear_directory($fichier);
-
-$fichier = '../data/file/gtfs/';
-remove_directory($fichier);
+// clear_directory('data/cache/');
+// clear_directory('data/report/');
+// remove_directory('data/file/gtfs/');
 
 // -----------------------------------------------------
-// IDFM - https://transport.data.gouv.fr/api/datasets/60d2b1e50215101bf6f9ae1b
-// Bibus - https://transport.data.gouv.fr/api/datasets/55ffbe0888ee387348ccb97d
-// TIGNES - https://transport.data.gouv.fr/api/datasets/5f0588426c51abada608d7a7
-// Chambéry - https://transport.data.gouv.fr/api/datasets/5bae8c2806e3e75b699dc606
-// Strasbourg - https://transport.data.gouv.fr/api/datasets/5ae1715488ee384c8ba0342b
-
-$gtfs = [
-    '60d2b1e50215101bf6f9ae1b',  // IDFM
-    // '55ffbe0888ee387348ccb97d',  // Bibus
-    // '5b873d7206e3e76e5b2ffd32',  // Nantes Métropole
-    // '5f0588426c51abada608d7a7',  // TIGNES
-    // '5bae8c2806e3e75b699dc606',  // Chambéry
-    // '5ae1715488ee384c8ba0342b',  // Strasbourg
-];
-
-$gbfs = [
-    'VELIB'     => 'https://velib-metropole-opendata.smoove.pro/opendata/Velib_Metropole/', // Vélib'
-    'VELOV'     => 'https://transport.data.gouv.fr/gbfs/lyon/', // Lyon
-    'CVELO'     => 'https://clermontferrand.publicbikesystem.net/customer/gbfs/v2/', // Clermont Ferrand
-    'VELOMAGG'  => 'https://montpellier-fr-smoove.klervi.net/gbfs/', // Montpellier 
-    'BENSANC'   => 'https://transport.data.gouv.fr/gbfs/besancon/', // Besançon 
-    'VLILLE'    => 'https://transport.data.gouv.fr/gbfs/vlille/', // Lille V'lille
-    'CRISTOLIB' => 'https://transport.data.gouv.fr/gbfs/creteil/', // Créteil Cristolib 
-    'CYCLIC'    => 'https://transport.data.gouv.fr/gbfs/rouen/', // Rouen Cy'clic
-    'VELAM'     => 'https://transport.data.gouv.fr/gbfs/amiens/', // Amiens Vélam
-    'VELOSTAN'  => 'https://transport.data.gouv.fr/gbfs/nancy/', // Nancy vélOstan’lib 
-    'VELOCITE'  => 'https://transport.data.gouv.fr/gbfs/mulhouse/', // Mulhouse Vélocité
-    'STAR'      => 'https://eu.ftp.opendatasoft.com/star/gbfs/', // Rennes STAR !!!!
-    'VELIVERT'  => 'https://saint-etienne-fr-smoove.klervi.net/gbfs/', // St Etienne VéliVert
-    'VELOTOUS'  => 'https://transport.data.gouv.fr/gbfs/toulouse/', // Toulouse VélÔToulouse
-    'VCUB'      => 'https://transport.data.gouv.fr/gbfs/vcub/', // Bordeaux VCub
-    'VELOPOP'   => 'https://avignon-gbfs.klervi.net/gbfs/', // Avignon Velopop’ 
-    'VELO2'     => 'https://transport.data.gouv.fr/gbfs/cergy-pontoise/', // Cergy Vélo² 
-    'BICLOO'    => 'https://transport.data.gouv.fr/gbfs/nantes/', // Nantes Bicloo
-    'VELOCEO'   => 'https://vannes-gbfs.klervi.net/gbfs/', // Vannes Vélocéo
-    'OPTYMO'    => 'https://belfort-gbfs.klervi.net/gbfs/', // Belfort Belfort
-
-    // https://gateway.prod.partners-fs37hd8.zoov.site/gbfs/2.2/saintbrieuc/en/gbfs.json?key=YmE1ZDVlNDYtMGIwNy00MGEyLWIxZWYtNGEwOGQ4NTYxNTYz
-    // ST BRIEUC
-    // KEY obligatoire
-];
-
+// Check if there is GTFS update
 echo '> Looking for GTFS...' . PHP_EOL;
 
 $needupdate = false;
 
-foreach ($gtfs as $url) {
-    $ressource = getGTFSlistFromApi($url);
-    echo '  > ' . $url . PHP_EOL;
+foreach ($CONFIG->gtfs as $gtfs) {
+    echo '  > ' . $gtfs->name . PHP_EOL;
 
+    // get data from GTFS
+    $ressource = getGTFSlistFromApi($gtfs);
     $request = getProvider($ressource);
 
     $action = false;
+
     if ($request->rowCount() == 0) {
         $action = true;
-        $needupdate = true;
     }
-
     while ($obj = $request->fetch()) {
         if (strtotime($ressource['updated']) > strtotime($obj['updated'])) {
-            print_r($ressource['updated'] . PHP_EOL);
-            print_r($obj['updated'] . PHP_EOL);
+            echo '    i ' . $ressource['updated'] . ' - ' . $obj['updated'] . PHP_EOL;
             $action = true;
-            $needupdate = true;
+            break;
         }
     }
 
-    if ($action == true) {
-        $provider = $ressource['slug'] . '/';
-        $provider_id = $ressource['slug'];
-        if (!is_dir($dossier . $provider)) {
-            mkdir($dossier . $provider);
+    if (!$action) {
+        echo '    i Data already up-to-date, not updated' . PHP_EOL;
+
+    } else {
+        $needupdate = true;
+        $provider = $gtfs->id;
+
+        if (!is_dir($dir . $provider)) {
+            mkdir($dir . $provider);
         }
 
-        $zip = file_get_contents($ressource['url']);
         echo '    i ' . $ressource['url'] . PHP_EOL;
-        file_put_contents($dossier . $provider . 'gtfs.zip', $zip);
-        echo '    > Downloaded' . PHP_EOL;
 
-        deleteProvider($ressource['provider_id']);
-        insertProvider($ressource);
-    } else {
-        print_r($ressource['updated'] . PHP_EOL);
-        echo '    i Already existing file, not updated' . PHP_EOL;
+        try {
+            // download gtfs
+            $zip_name = $dir . $provider . '/gtfs.zip';
+
+            $zip = file_get_contents($ressource['url']);
+            file_put_contents($zip_name, $zip);
+            unset($zip);
+
+            echo '    > Downloaded' . PHP_EOL;
+
+            deleteProvider($ressource['provider_id']);
+            insertProvider($ressource);
+
+            // unzip gtfs
+            echo '    > Unzip gtfs...' . PHP_EOL;
+            unzip($zip_name, $dir . $provider);
+            
+            // format file + rename
+            echo '    > Format file...' . PHP_EOL;
+            foreach($ressource['filenames'] as $filename) {
+                // on deplace hors d'un potentiel fichier
+                $content = file_get_contents($dir . $provider . '/' . $filename);
+                $content = str_replace('\r\n', '\n', $content);
+                file_put_contents($dir . $provider . '/' . $filename, $content);
+                
+                if (strpos($filename, '/')) {
+                    $new = substr($filename, strpos($filename, '/') + 1);
+                    echo $dir . $provider . '/' . $filename;
+                    echo $dir . $provider . '/' . $new;
+                    rename($dir . $provider . '/' . $filename, $dir . $provider . '/' . $new);
+                }
+            }
+
+            // remove file and clear data
+            echo '    > Remove old data...' . PHP_EOL;
+            unlink($zip_name);
+            clearProviderData($provider);
+            
+            // import gtfs
+            echo '    > Import new GTFS...' . PHP_EOL;
+            $err = 0;
+            $types = [
+                'agency'            => ['agency_id'],
+                'stops'             => ['stop_id', 'level_id', 'parent_station'],
+                'routes'            => ['route_id', 'agency_id'],
+                'trips'             => ['route_id', 'service_id', 'trip_id'],
+                'stop_times'        => ['trip_id', 'stop_id'],
+                'calendar'          => ['service_id'],
+                'calendar_dates'    => ['service_id'],
+                'fare_attributes'   => ['fare_id', 'agency_id'],
+                'fare_rules'        => ['fare_id', 'route_id', 'origin_id', 'destination_i'],
+                'frequencies'       => ['trip_id'],
+                'transfers'         => ['from_stop_id', 'to_stop_id'],
+                'pathways'          => ['pathway_id', 'from_stop_id', 'to_stop_id'],
+                'levels'            => ['level_id', ''],
+                'feed_info'         => [], //
+                'translations'      => [], //
+                'attributions'      => []   //
+            ];
+            
+            foreach ($types as $type => $columns) {
+                $file = $dir . $provider . '/' . $type . '.txt';
+                if (is_file($file)) {
+                    echo '        ' . $type . '        ';
+                    $header = getCSVHeader($file)[0][0];
+                    echo '1/5 ';
+                    try {
+                        $table = 'temp_' . $type;
+                        
+                        perpareTempTable($type, $table);
+                        echo '2/5 ';
+                        
+                        insertFile($table, $file, $header, ',', $provider);
+                        echo '3/5 ';
+
+                        $prefix = $provider . ':';
+                        foreach($columns as $column) {
+                            prefixTable($table, $column, $prefix);
+                        }
+                        echo '4/5 ';
+
+                        copyTable($table, $type);
+                        echo '5/5 ' . PHP_EOL;
+
+                        // unlink($file);
+                    } catch (Exception $e) {
+                        echo $e;
+                        $err++;
+                    }
+                }
+            }
+            
+            echo '      ' . $err . ' errors' . PHP_EOL;
+
+        } catch (Exception $e) {
+            echo '    > Failed to download :' . $e . PHP_EOL;
+        }
     }
 }
 
@@ -116,75 +162,108 @@ if ($needupdate == false) {
     exit;
 }
 
-echo '> Looking for GBFS...' . PHP_EOL;
+echo '> Generate stop_area...' . PHP_EOL;
 
-clearGBFS();
-
-foreach ($gbfs as $id => $url) {
-    echo '  > ' . $id . PHP_EOL;
-
-    $content = file_get_contents($url . 'gbfs.json');
-    $content = json_decode($content);
-
-    if (isset($feeds)) {
-        unset($feeds);
+$stops = [];
+$request = getStopsNotInArea();
+while ($obj = $request->fetch()) {
+    $id = $obj['provider_id'] . $obj['stop_name'];
+    if (!isset($stops[$id])) {
+        $stops[$id] = array(
+            'provider_id'   => isset($obj['provider_id'])   ? $obj['provider_id']   : '',
+            'stop_id'       => 'ADMIN:' . $obj['stop_id'],
+            'stop_code'     => isset($obj['stop_code'])     ? $obj['stop_code']     : '',
+            'stop_name'     => isset($obj['stop_name'])     ? $obj['stop_name']     : '',
+            'stop_lat'      => isset($obj['stop_lat'])      ? $obj['stop_lat']      : '',
+            'stop_lon'      => isset($obj['stop_lon'])      ? $obj['stop_lon']      : '',
+            'location_type' => '1',
+            'stops' => array(),
+        );
     }
+    $stops[$id]['stops'][] = $obj['stop_id'];
+}
 
-    if (isset($content->data->fr)) {
-        $feeds = $content->data->fr->feeds;
-    } else if (isset($content->data->en)) {
-        $feeds = $content->data->en->feeds;
-    } else {
-        echo '🤔';
-    }
+foreach ($stops as $key => $stop) {
+    insertStops($stop, $stop['provider_id']);
 
-    if (isset($feeds)) {
-        foreach ($feeds as $feed) {
-            if ($feed->name == 'station_information') {
-                getGBFSstation($feed->url, $url, $id);
-            }
-        }
+    foreach ($stop['stops'] as $child_stop) {
+        setParentStation([
+            'parent_station' => $stop['stop_id'],
+            'stop_id' => $child_stop,
+        ]);
     }
 }
 
-echo '> Unzip GTFS...' . PHP_EOL;
+echo '> Generate temp stop_route...' . PHP_EOL;
 
-$provider_dir = scandir($dossier);
-foreach ($provider_dir as $provider_id) {
-    if (is_dir($dossier . $provider_id)) {
-        if (is_file($dossier . $provider_id . '/gtfs.zip')) {
-            echo '  ' . $provider_id . PHP_EOL;
+truncateTempStopRoute();
+generateTempStopRoute();
 
-            $zip = new ZipArchive;
-            try {
-                $zip->open($dossier . $provider_id . '/gtfs.zip');
-                $zip->extractTo($dossier . $provider_id . '/');
-                $zip->close();
-                unlink($dossier . $provider_id . '/gtfs.zip');
-                clearProviderData($provider_id);
-            } catch (ValueError $e) {
-                echo '  ! Failed to unzip GTFS !' . PHP_EOL;
-            }
+echo '  > Import SNCF stops...' . PHP_EOL;
 
-            unset($zip);
-        }
-    }
+include('update_sncf.php');
+
+echo '> Updating stop_route...' . PHP_EOL;
+
+autoDeleteStopRoute();
+autoInsertStopRoute();
+
+// echo '> Looking for GBFS...' . PHP_EOL;
+// 
+// clearGBFS();
+// foreach ($CONFIG->gbfs as $gbfs) {
+//     echo '  > ' . $id . PHP_EOL;
+// 
+//     $content = file_get_contents($gbfs->url . 'gbfs.json');
+//     $content = json_decode($content);
+// 
+//     if (isset($feeds)) {
+//         unset($feeds);
+//     }
+// 
+//     if (isset($content->data->fr)) {
+//         $feeds = $content->data->fr->feeds;
+//     } else if (isset($content->data->en)) {
+//         $feeds = $content->data->en->feeds;
+//     } else {
+//         echo '🤔';
+//     }
+// 
+//     if (isset($feeds)) {
+//         foreach ($feeds as $feed) {
+//             if ($feed->name == 'station_information') {
+//                 getGBFSstation($feed->url, $url, $id);
+//             }
+//         }
+//     }
+// }
+
+echo PHP_EOL . '-----' . PHP_EOL;
+echo 'Ready ✅';
+echo PHP_EOL . '-----' . PHP_EOL;
+
+echo '> Updating stop_toute for Town...' . PHP_EOL;
+generateTownInStopRoute();
+
+echo '> Preparing for query...' . PHP_EOL;
+generateQueryRoute();
+
+
+
+// Monitoring
+file_get_contents('https://betteruptime.com/api/v1/heartbeat/SrRkcBMzc4AgsXXzzZa2qFDa');
+
+$subject = 'Navika AutoUpdate';
+$message = file_get_contents('data/output.txt');
+$headers = array(
+    'MIME-Version' => '1.0',
+    'From' => 'Navika Auto Update Monitoring <do-not-reply@hackernwar.com>',
+    'Return-Path' => 'Navika Auto Update Monitoring <do-not-reply@hackernwar.com>',
+    'Reply-To' => 'Navika Auto Update Monitoring <do-not-reply@hackernwar.com>',
+    'Content-Transfer-Encoding' => 'quoted-printable',
+    'Content-type' => 'text/html; charset="utf-8"',
+);
+
+if (!mail('clementf78@gmail.com', $subject, str_replace(PHP_EOL, '<br>', $message), $headers)) {
+    echo '! failed to send mail !' . PHP_EOL;
 }
-
-echo '> Formatting file...' . PHP_EOL;
-
-$provider_dir = scandir($dossier);
-foreach ($provider_dir as $provider_id) {
-    if (is_dir($dossier . $provider_id)) {
-
-        $files = glob($dossier . $provider_id . '/*.{txt}', GLOB_BRACE);
-        foreach ($files as $file) {
-            // echo $file;
-            $content = file_get_contents($file);
-            $content = str_replace('\r\n', '\n', $content);
-            file_put_contents($file, $content);
-        }
-    }
-}
-
-include('update_gtfs.php');

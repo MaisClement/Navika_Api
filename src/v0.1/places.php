@@ -1,6 +1,6 @@
 <?php
 
-$fichier = '../data/cache/places_';
+$file = '../data/cache/places_';
 
 if (isset($_GET['q']) && isset($_GET['lat']) && isset($_GET['lon'])) {
     $query = $_GET['q'];
@@ -8,24 +8,24 @@ if (isset($_GET['q']) && isset($_GET['lat']) && isset($_GET['lon'])) {
     $lat = $_GET['lat'];
     $lon = $_GET['lon'];
 
-    $url = $BASE_URL . '/places?q=' . $query . '&from' . $lon . ';' . $lat . '=&depth=2';
-    $fichier .= $query . '_' . $lat . '_' . $lon . '.json';
+    $url = $CONFIG->prim_url . '/places?q=' . $query . '&from' . $lon . ';' . $lat . '=&depth=2';
+    $file .= $query . '_' . $lat . '_' . $lon . '.json';
 
     $search_type = 3;
 } else if (isset($_GET['lat']) && isset($_GET['lon'])) {
     $lat = $_GET['lat'];
     $lon = $_GET['lon'];
 
-    $url = $BASE_URL . '/coord/' . $lon . ';' . $lat . '/places_nearby?depth=2&distance=1000';
-    $fichier .= $lat . '_' . $lon . '.json';
+    $url = $CONFIG->prim_url . '/coord/' . $lon . ';' . $lat . '/places_nearby?depth=2&distance=1000';
+    $file .= $lat . '_' . $lon . '.json';
 
     $search_type = 2;
 } else if (isset($_GET['q'])) {
     $query = $_GET['q'];
     $query = urlencode(trim($query));
 
-    $url = $BASE_URL . '/places?q=' . $query . '&depth=2';
-    $fichier .= $query . '.json';
+    $url = $CONFIG->prim_url . '/places?q=' . $query . '&depth=2';
+    $file .= $query . '.json';
 
     $search_type = 1;
 } else {
@@ -35,8 +35,8 @@ if (isset($_GET['q']) && isset($_GET['lat']) && isset($_GET['lon'])) {
     );
 }
 
-if (is_file($fichier) && filesize($fichier) > 5 && (time() - filemtime($fichier) < 60 * 60)) {
-    echo file_get_contents($fichier);
+if (is_file($file) && filesize($file) > 5 && (time() - filemtime($file) < 60 * 60)) {
+    echo file_get_contents($file);
     exit;
 }
 
@@ -81,6 +81,6 @@ if (isset($_GET['flag'])) {
 }
 
 $echo = json_encode($echo);
-// file_put_contents($fichier, $echo);
+// file_put_contents($file, $echo);
 echo $echo;
 exit;

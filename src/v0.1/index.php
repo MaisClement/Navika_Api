@@ -1,14 +1,14 @@
 <?php
 
-$fichier = '../data/cache/actualites.json';
+$file = '../data/cache/actualites.json';
 
 $url = 'https://api-iv.iledefrance-mobilites.fr/banners';
 
-if (is_file($fichier) && filesize($fichier) > 5 && (time() - filemtime($fichier) < 60)) {
-    $results = file_get_contents($fichier);
+if (is_file($file) && filesize($file) > 5 && (time() - filemtime($file) < 60)) {
+    $results = file_get_contents($file);
 } else {
     $results = curl($url);
-    file_put_contents($fichier, $results);
+    file_put_contents($file, $results);
 }
 
 $results = json_decode($results);
@@ -45,6 +45,20 @@ foreach ($results as $result) {
         ),
     );
 }
+
+// $messages[] = array(
+//     "id"            =>  (string)    "ADMIN:3",
+//     "status"        =>  (string)    "active",
+//     "cause"         =>  (string)    "",
+//     "category"      =>  (string)    "",
+//     "severity"      =>  (int)       4,
+//     "effect"        =>  (string)    "OTHER",
+//     "updated_at"    =>  (string)    "20230412T181513",
+//     "message"       =>  array(
+//         "title"     =>      "Maintenance en cours",
+//         "text"      =>      "Une modification des horaires entre peut causer des difficultés.",
+//     ),
+// );
 
 $json = array(
     "api"         => array(

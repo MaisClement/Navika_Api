@@ -1,6 +1,6 @@
 <?php
 
-$dossier = '../data/cache/vehicle_';
+$dir = '../data/cache/vehicle_';
 
 if (!isset($_GET['v']) || $_GET['v'] == null) {
     ErrorMessage(400, 'Required parameter "v" is missing or null.');
@@ -23,11 +23,11 @@ if (!isset($_GET['v']) || $_GET['v'] == null) {
 
     // $prim_url = 'https://prim.iledefrance-mobilites.fr/marketplace/stop-monitoring?MonitoringRef=STIF:' . $type . ':Q:' . $vehicle_id . ':';
     $sncf_url = 'https://api.sncf.com/v1/coverage/sncf/vehicle_journeys/' . $vehicle_id;
-    $fichier = $dossier . $vehicle_id . '.json';
+    $file = $dir . $vehicle_id . '.json';
 }
 
-if (is_file($fichier) && filesize($fichier) > 5 && (time() - filemtime($fichier) < 20)) {
-    echo file_get_contents($fichier);
+if (is_file($file) && filesize($file) > 5 && (time() - filemtime($file) < 20)) {
+    echo file_get_contents($file);
     exit;
 }
 
@@ -40,6 +40,6 @@ if ($provider == 'SNCF') {
 }
 
 $echo = json_encode($json);
-file_put_contents($fichier, $echo);
+file_put_contents($file, $echo);
 echo $echo;
 exit;
