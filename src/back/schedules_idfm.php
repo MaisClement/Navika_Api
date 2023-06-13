@@ -68,7 +68,7 @@ foreach ($results as $result) {
                         "id"         =>  (string)   $destination_ref,
                         "name"       =>  (string)   $direction[$destination_ref],
                     ),
-                    "id"            =>  (string)  'IDFM:' . $result->MonitoredVehicleJourney->TrainNumbers->TrainNumberRef[0]->value ?? '',
+                    "id"            =>  (string)  $result->MonitoredVehicleJourney->TrainNumbers->TrainNumberRef[0]->value ?? '',
                     "name"          =>  (string)  $result->MonitoredVehicleJourney->TrainNumbers->TrainNumberRef[0]->value ?? '',
                     "mode"          =>  (string)  $lines_data[$line_id]['mode'],
                     "trip_name"     =>  (string)  $result->MonitoredVehicleJourney->TrainNumbers->TrainNumberRef[0]->value ?? '',

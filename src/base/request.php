@@ -231,6 +231,54 @@ function getScheduleByStop($id, $line, $dt, $time){
     return $req;
 }
 
+function getTripStopsByName($name, $dt){
+    $db = $GLOBALS["db"];
+    $name = trim($name);
+    $dt = trim($dt);
+
+    $req = $db->prepare("
+        SELECT *
+
+        FROM trips T
+        
+        JOIN stop_times ST 
+        ON T.trip_id = ST.trip_id
+
+        JOIN routes R 
+        ON T.route_id = R.route_id
+        
+        JOIN stops S
+        ON ST.stop_id = S.stop_id
+        
+        INNER JOIN calendar C 
+        ON T.service_id = C.service_id
+        
+        LEFT JOIN calendar_dates CD 
+        ON (T.service_id = CD.service_id AND CD.date = ?)
+        
+        WHERE T.trip_short_name = ?
+            AND (
+                (C.start_date <= ?
+                    AND C.end_date >= ?
+                    AND (
+                        DATE_FORMAT(?, '%w') = '1' AND C.monday = '1'
+                        OR DATE_FORMAT(?, '%w') = '2' AND C.tuesday = '1'
+                        OR DATE_FORMAT(?, '%w') = '3' AND C.wednesday = '1'
+                        OR DATE_FORMAT(?, '%w') = '4' AND C.thursday = '1'
+                        OR DATE_FORMAT(?, '%w') = '5' AND C.friday = '1'
+                        OR DATE_FORMAT(?, '%w') = '6' AND C.saturday = '1'
+                        OR DATE_FORMAT(?, '%w') = '0' AND C.sunday = '1'
+                    ) 
+                    AND (CD.exception_type <> 2 OR CD.exception_type IS NULL)
+                )
+                OR CD.exception_type = 1 
+            );
+    
+    ");
+    $req->execute(array($dt, $name, $dt, $dt, $dt, $dt, $dt, $dt, $dt, $dt, $dt));
+    return $req;
+}
+
 
 // ------------------------------------------------
 

@@ -35,7 +35,7 @@ $sncf_url_api = 'https://api.sncf.com/v1/coverage/sncf/stop_areas/stop_area:SNCF
 $request = getAllLinesAtStop($stop_id);
 
 if ($request->rowCount() == 0) {
-    ErrorMessage(200, "Nothing where found for this stop");
+    ErrorMessage(422, "Nothing where found for this stop");
 }
 
 $departures_lines = [];

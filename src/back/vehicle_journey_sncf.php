@@ -7,8 +7,6 @@ $el = $results->vehicle_journeys[0];
 
 $stops = [];
 $order = 0;
-
-
 foreach ($el->stop_times as $result) {
     $stops[] = array(
         "name"              => (string) $result->stop_point->name,
@@ -22,35 +20,37 @@ foreach ($el->stop_times as $result) {
         "stop_time" => array(
             "departure_time" =>  (string)  isset($result->departure_time) ? prepareTime($result->departure_time) : "",
             "arrival_time"  =>  (string)  isset($result->arrival_time)   ? prepareTime($result->arrival_time)   : "",
-        )
+        ),
+        "disruption" => null ?? null,
     );
     $order++;
 }
 
-$disruptions = [];
 if (isset($results->disruptions)) {
-    $disruptions = listDisruption($results->disruptions);
+    $stops = getDisruptionForStop( $results->disruptions );
+    $reports = getReports( $results->disruptions );
 }
 
 $vehicle_journey = array(
     "informations" => array(
         "id"            =>  $vehicle_id,
         "name"          =>  $el->name,
-        "mode"          =>  "",
+        "mode"          =>  "rail",
         "name"          =>  $el->name,
         "headsign"      =>  $el->stop_times[count($el->stop_times) - 1]->stop_point->name,
         "description"   =>  "",
         "message"       =>  "",
         "origin" => array(
-            "id"        =>  $el->stop_times[0]->stop_point->id,
-            "name"      =>  $el->stop_times[0]->stop_point->name,
+            "id"        =>  $stops[0]['id'],
+            "name"      =>  $stops[0]['name'],
         ),
         "direction" => array(
-            "id"        =>  $el->stop_times[count($el->stop_times) - 1]->stop_point->id,
-            "name"      =>  $el->stop_times[count($el->stop_times) - 1]->stop_point->name,
+            "id"        =>  $stops[count($stops) - 1]['id'],
+            "name"      =>  $stops[count($stops) - 1]['name'],
         ),
     ),
-    "disruptions" => $disruptions,
+    "reports" => $reports,
+    "disruptions" => $results->disruptions,
     "stop_times" => $stops,
 );
 

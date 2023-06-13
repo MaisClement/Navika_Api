@@ -118,6 +118,10 @@ function getTransportMode($l){
 }
 
 // --- Schedules ---
+function rPrepareTime($dt) {
+    $time = substr($dt, 0, 2) . ':' . substr($dt, 2, 2) . ':' .substr($dt, 4, 2);
+    return prepareTime($time);
+}
 function prepareTime($dt){
     if ($dt == '') return '';
     $datetime = date_create($dt);
@@ -142,7 +146,6 @@ function prepareTime($dt){
             $datetime->modify('+1 day');
         }
     }
-
     return date_format($datetime, DATE_ISO8601);
 }
 function timeSort($a, $b){
@@ -330,25 +333,67 @@ function getDisruption($id, $disruptions){
     return $echo;
 }
 
-function listDisruption($disruptions){
-    $echo = [];
-    foreach ($disruptions as $disruption) {
-        $echo[] = array(
-            "id"            => (string) $disruption->id,
-            "status"        => (string) $disruption->status,
-            "cause"            => (string) $disruption->cause,
-            "category"        => "Incidents",
-            "severity"        => getSeverityByEffect($disruption->severity->effect), // status non fourni pour eviter les réductions de severity
-            "effect"        => (string) $disruption->severity->effect,
-            "updated_at"    => (string) $disruption->updated_at,
-            "impacted_stops" => $disruption->impacted_objects[0]->impacted_stops,
-            "message"    => array(
-                "title"        => getTitleByEffect($disruption->severity->effect), // getReportsMesageTitle( $disruption->messages ),
-                "text"        => isset($disruption->messages[0]->text) ? $disruption->messages[0]->text : "", // getReportsMesageText( $disruption->messages ),
-            ),
-        );
+function getReports($disruptions){    
+    $echo = [];    
+    foreach ($disruptions as $disruption) {    
+        $causes = [];
+
+        foreach ($disruption->impacted_objects[0]->impacted_stops as $stop) {    
+            $cause = $stop->cause;
+            if ( $cause != '' && !in_array( $cause, $causes ) ) {
+                $causes[] = $cause;
+            }
+        }
+        foreach($causes as $cause) {
+            $echo[] = array(
+                "id"            => (string) $disruption->id,
+                "status"        => (string) $disruption->status,
+                "cause"         => (string) $disruption->cause,
+                "category"      => "Incidents",
+                "severity"      => getSeverityByEffect($disruption->severity->effect),
+                "effect"        => (string) $disruption->severity->effect,
+                "updated_at"    => (string) $disruption->updated_at,
+                "message"       => array(
+                    "title"         => getTitleByEffect($disruption->severity->effect),
+                    "text"          => $cause,
+                ),
+            );
+        }
     }
     return $echo;
+}
+
+function getDisruptionForStop($disruptions){    
+    $stops = [];
+    $order = 0;    
+    foreach ($disruptions[0]->impacted_objects[0]->impacted_stops as $stop) {            
+        $stops[] = array(
+            "name"              => (string) $stop->stop_point->name,
+            "id"                => (string) $stop->stop_point->id,
+            "order"             => (int)    $order,
+            "type"              => (int)    count($disruptions[0]->impacted_objects[0]->impacted_stops) - 1 == $order ? 'terminus' : ($order == 0 ? 'origin' : ''),
+            "coords" => array(
+                "lat"           => $stop->stop_point->coord->lat,
+                "lon"           => $stop->stop_point->coord->lon,
+            ),
+            "stop_time" => array(
+                "departure_time" =>  isset($stop->base_departure_time)    ? rPrepareTime($stop->base_departure_time)    : '',
+                "arrival_time"   =>  isset($stop->base_arrival_time)      ? rPrepareTime($stop->base_arrival_time)      : '',
+            ),
+            "disruption" => array(
+                "departure_state"       => (string) $stop->departure_status,
+                "arrival_state"         => (string) $stop->arrival_status,
+                "message"               => (string) "",
+                "base_departure_time"   => (string) isset($stop->base_departure_time)    ? rPrepareTime($stop->base_departure_time)    : '',
+                "departure_time"        => (string) isset($stop->amended_departure_time) ? rPrepareTime($stop->amended_departure_time) : '',
+                "base_arrival_time"     => (string) isset($stop->base_arrival_time)      ? rPrepareTime($stop->base_arrival_time)      : '',
+                "arrival_time"          => (string) isset($stop->amended_arrival_time)   ? rPrepareTime($stop->amended_arrival_time)   : '',
+                "is-detour"             => $stop->is_detour,
+            ),
+        );
+        $order++;
+    }
+    return $stops;
 }
 
 function getTitleByEffect($effect){
