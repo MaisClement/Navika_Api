@@ -4,10 +4,10 @@ chdir('/var/www/navika');
 
 include_once('src/base/main.php');
 
-// INIT SQL 
-echo '> Init Database' . PHP_EOL;
-$query = file_get_contents('data/sql/SQL.sql');
-SQLinit($query);
+// // INIT SQL 
+// echo '> Init Database' . PHP_EOL;
+// $query = file_get_contents('data/sql/SQL.sql');
+// SQLinit($query);
 
 // Import GeoJson
 

@@ -209,7 +209,6 @@ function generateTownInStopRoute(){
             SR.town_query_name = T.town_name
             
         WHERE SR.town_id IS NULL;
-        
     ");
     $req->execute(array());
     return $req;

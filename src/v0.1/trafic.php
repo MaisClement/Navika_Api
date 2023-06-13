@@ -70,7 +70,7 @@ foreach ($results->line_reports as $line) {
     usort($future_work, "order_reports");
 
     $lines[] = array(
-        "id"         =>  (string)    idfm_format($line->line->id),
+        "id"         =>  (string)    'IDFM:' . idfm_format($line->line->id),
         "code"       =>  (string)    $line->line->code,
         "name"       =>  (string)    $line->line->name,
         "mode"       =>  (string)    $line->line->commercial_mode->id,

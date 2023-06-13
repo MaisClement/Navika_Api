@@ -31,7 +31,7 @@ if (isset($_GET['q']) && isset($_GET['lat']) && isset($_GET['lon'])) {
 } else {
     ErrorMessage(
         400,
-        'Required parameter "q" or "lat" and "lon" is missing or null.'
+        'Required parameter `q` or `lat` and `lon` is missing or null.'
     );
 }
 
@@ -62,7 +62,6 @@ foreach ($results as $result) {
         "name"      =>  (string)    $result->{$result->embedded_type}->name,
         "type"      =>  (string)    $result->embedded_type,
         "distance"  =>  (int)       isset($result->distance) ? $result->distance : 0,
-        "zone"      =>  (int)       0,
         "town"      =>  (string)    getTownByAdministrativeRegions($result->{$result->embedded_type}->administrative_regions),
         "zip_code"  =>  (string)    getZipByAdministrativeRegions($result->{$result->embedded_type}->administrative_regions),
         "coord"     => array(

@@ -68,12 +68,12 @@ foreach ($results as $result) {
                         "id"         =>  (string)   $destination_ref,
                         "name"       =>  (string)   $direction[$destination_ref],
                     ),
-                    "id"            =>  (string)  $result->ItemIdentifier,
-                    "name"          =>  (string)  isset($result->MonitoredVehicleJourney->TrainNumbers->TrainNumberRef[0]->value) ? $result->MonitoredVehicleJourney->TrainNumbers->TrainNumberRef[0]->value : "",
+                    "id"            =>  (string)  'IDFM:' . $result->MonitoredVehicleJourney->TrainNumbers->TrainNumberRef[0]->value ?? '',
+                    "name"          =>  (string)  $result->MonitoredVehicleJourney->TrainNumbers->TrainNumberRef[0]->value ?? '',
                     "mode"          =>  (string)  $lines_data[$line_id]['mode'],
-                    "trip_name"     =>  (string)  isset($result->MonitoredVehicleJourney->TrainNumbers->TrainNumberRef[0]->value) ? $result->MonitoredVehicleJourney->TrainNumbers->TrainNumberRef[0]->value : "",
-                    "headsign"      =>  (string)  isset($result->MonitoredVehicleJourney->JourneyNote[0]->value) ? $result->MonitoredVehicleJourney->JourneyNote[0]->value : "",
-                    "description"   =>  (string)  "",
+                    "trip_name"     =>  (string)  $result->MonitoredVehicleJourney->TrainNumbers->TrainNumberRef[0]->value ?? '',
+                    "headsign"      =>  (string)  $result->MonitoredVehicleJourney->JourneyNote[0]->value ?? '',
+                    "description"   =>  (string)  '',
                     "message"       =>  (string)  getMessage($call),
                 ),
                 "stop_date_time" => array(
@@ -127,10 +127,11 @@ foreach ($departures_lines as $line) {
 
 // Train non regroupé
 if (isset($_GET['ungroupDepartures']) && $_GET['ungroupDepartures'] == 'true') {
+    usort($ungrouped_departures, "order_departure");
     $json['departures'] = $ungrouped_departures;
 
 } else { 
-    // Train regroupé
+    // Train groupé
     usort($l, "order_line");
     $departures_l = [];
     

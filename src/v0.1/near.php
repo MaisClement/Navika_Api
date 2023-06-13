@@ -2,9 +2,14 @@
 
 $file = '../data/cache/near_';
 
-if (!isset($_GET['lat']) || !isset($_GET['lon']) || !isset($_GET['z'])) {
-    ErrorMessage( 400, 'Required parameter "z" or "lat" and "lon" is missing or null.');
+// ---------------
+$parameters = ['lat', 'lon', 'z'];
+$message = checkRequiredParameter($parameters);
+
+if ($message) {
+    ErrorMessage(400, $message);
 }
+// ---------------
 
 $lat = $_GET['lat'];
 $lon = $_GET['lon'];
@@ -79,7 +84,7 @@ if ($zoom <= 3000) {
         $stations[] = array(
             'id'        =>  (string)    $obj['station_id'],
             'name'      =>  (string)    $obj['station_name'],
-            'capacity'  =>  (string)    $obj['station_capacity'],
+            'capacity'  =>  (int)       $obj['station_capacity'],
             'coord'     => array(
                 'lat'       =>      floatval($obj['station_lat']),
                 'lon'       =>      floatval($obj['station_lon']),

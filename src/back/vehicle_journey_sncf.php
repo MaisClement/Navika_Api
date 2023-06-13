@@ -7,6 +7,8 @@ $el = $results->vehicle_journeys[0];
 
 $stops = [];
 $order = 0;
+
+
 foreach ($el->stop_times as $result) {
     $stops[] = array(
         "name"              => (string) $result->stop_point->name,
@@ -34,6 +36,11 @@ $vehicle_journey = array(
     "informations" => array(
         "id"            =>  $vehicle_id,
         "name"          =>  $el->name,
+        "mode"          =>  "",
+        "name"          =>  $el->name,
+        "headsign"      =>  $el->stop_times[count($el->stop_times) - 1]->stop_point->name,
+        "description"   =>  "",
+        "message"       =>  "",
         "origin" => array(
             "id"        =>  $el->stop_times[0]->stop_point->id,
             "name"      =>  $el->stop_times[0]->stop_point->name,

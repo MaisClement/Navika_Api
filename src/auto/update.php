@@ -208,35 +208,35 @@ echo '> Updating stop_route...' . PHP_EOL;
 autoDeleteStopRoute();
 autoInsertStopRoute();
 
-// echo '> Looking for GBFS...' . PHP_EOL;
-// 
-// clearGBFS();
-// foreach ($CONFIG->gbfs as $gbfs) {
-//     echo '  > ' . $id . PHP_EOL;
-// 
-//     $content = file_get_contents($gbfs->url . 'gbfs.json');
-//     $content = json_decode($content);
-// 
-//     if (isset($feeds)) {
-//         unset($feeds);
-//     }
-// 
-//     if (isset($content->data->fr)) {
-//         $feeds = $content->data->fr->feeds;
-//     } else if (isset($content->data->en)) {
-//         $feeds = $content->data->en->feeds;
-//     } else {
-//         echo '🤔';
-//     }
-// 
-//     if (isset($feeds)) {
-//         foreach ($feeds as $feed) {
-//             if ($feed->name == 'station_information') {
-//                 getGBFSstation($feed->url, $url, $id);
-//             }
-//         }
-//     }
-// }
+echo '> Looking for GBFS...' . PHP_EOL;
+
+clearGBFS();
+foreach ($CONFIG->gbfs as $gbfs) {
+    echo '  > ' . $gbfs->id . PHP_EOL;
+
+    $content = file_get_contents($gbfs->url . 'gbfs.json');
+    $content = json_decode($content);
+
+    if (isset($feeds)) {
+        unset($feeds);
+    }
+
+    if (isset($content->data->fr)) {
+        $feeds = $content->data->fr->feeds;
+    } else if (isset($content->data->en)) {
+        $feeds = $content->data->en->feeds;
+    } else {
+        echo '🤔';
+    }
+
+    if (isset($feeds)) {
+        foreach ($feeds as $feed) {
+            if ($feed->name == 'station_information') {
+                getGBFSstation($feed->url, $gbfs->url, $gbfs->id);
+            }
+        }
+    }
+}
 
 echo PHP_EOL . '-----' . PHP_EOL;
 echo 'Ready ✅';

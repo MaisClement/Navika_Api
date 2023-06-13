@@ -73,6 +73,26 @@ function ErrorMessage($http_code, $details = ''){
     exit;
 }
 
+function checkRequiredParameter($parameters) {
+    $missing = [];
+
+    foreach ($parameters as $parametre) {
+        if (!isset($_GET[$parametre]) || empty($_GET[$parametre])) {
+            $missing[] = $parametre;
+        }
+    }
+
+    if (!empty($missing)) {
+        if(count($missing) > 1) {
+            $message = "At least one required parameters are missing: " . implode(", ", $missing);
+        } else {
+            $message = "One required parameter is missing: " . implode(", ", $missing);
+        }
+        return $message;
+    }
+    return null;
+}
+
 function getTransportMode($l){
     $modes = array(
         0 => 'tram',
@@ -177,7 +197,7 @@ function getAllLines($lines){
 
     foreach ($lines as $line) {
         $list[] = array(
-            "id"         =>  (string)    idfm_format($line->id),
+            "id"         =>  (string)    'IDFM:' . idfm_format($line->id),
             "code"       =>  (string)    $line->code,
             "name"       =>  (string)    $line->name,
             "mode"       =>  (string)    $line->commercial_mode->id,

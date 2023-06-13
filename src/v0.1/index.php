@@ -32,8 +32,6 @@ foreach ($results as $result) {
     $messages[] = array(
         "id"            =>  (string)    $result->id,
         "status"        =>  (string)    "active",
-        "cause"         =>  (string)    "",
-        "category"      =>  (string)    "",
         "severity"      =>  (int)       $severity_i[$result->type],
         "effect"        =>  (string)    "OTHER",
         "updated_at"    =>  (string)    $result->updatedDate,
@@ -49,8 +47,6 @@ foreach ($results as $result) {
 // $messages[] = array(
 //     "id"            =>  (string)    "ADMIN:3",
 //     "status"        =>  (string)    "active",
-//     "cause"         =>  (string)    "",
-//     "category"      =>  (string)    "",
 //     "severity"      =>  (int)       4,
 //     "effect"        =>  (string)    "OTHER",
 //     "updated_at"    =>  (string)    "20230412T181513",

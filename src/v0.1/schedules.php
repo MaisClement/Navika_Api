@@ -2,11 +2,16 @@
 
 $dir = '../data/cache/schedules/';
 
-if (!isset($_GET['s']) || $_GET['s'] == null) {
-    ErrorMessage(400, 'Required parameter "s" is missing or null.');
+// ---------------
+$parameters = ['id'];
+$message = checkRequiredParameter($parameters);
+
+if ($message) {
+    ErrorMessage(400, $message);
 }
+// ---------------
     
-$stop_id = $_GET['s'];
+$stop_id = $_GET['id'];
 
 // ------------
 if (str_contains($stop_id, 'SNCF:')) {
@@ -15,7 +20,6 @@ if (str_contains($stop_id, 'SNCF:')) {
     $provider = 'IDFM';
 } else {
     $provider = 'ADMIN';
-    // ErrorMessage(400, 'Invalid data, provider not recognized');
 }
 
 $id = idfm_format($stop_id);
@@ -142,17 +146,7 @@ if (isset($json['schedules'])){
     }
 }
 
-// // Si une seule ligne
-// if (isset($_GET['l'])) {
-//     if (isset($json['schedules'])){
-//         $json['schedules'] = $json['schedules'][0];
-//     }
-//     if (isset($json['departures'])){
-//         $json['departures'] = $json['departures'][0];
-//     }
-// }
-
 $echo = json_encode($json);
-file_put_contents($file, $echo);
+// file_put_contents($file, $echo);
 echo $echo;
 exit;

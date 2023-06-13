@@ -1,0 +1,456 @@
+
+Enum "provider_flag_enum" {
+  "0"
+  "1"
+  "2"
+}
+
+Enum "stops_location_type_enum" {
+  "0"
+  "1"
+  "2"
+  "3"
+  "4"
+}
+
+Enum "stops_wheelchair_boarding_enum" {
+  "0"
+  "1"
+  "2"
+}
+
+Enum "routes_continuous_pickup_enum" {
+  "0"
+  "1"
+  "2"
+  "3"
+}
+
+Enum "routes_continuous_drop_off_enum" {
+  "0"
+  "1"
+  "2"
+  "3"
+}
+
+Enum "trips_direction_id_enum" {
+  "0"
+  "1"
+}
+
+Enum "trips_wheelchair_accessible_enum" {
+  "0"
+  "1"
+  "2"
+}
+
+Enum "trips_bikes_allowed_enum" {
+  "0"
+  "1"
+  "2"
+}
+
+Enum "stop_times_pickup_type_enum" {
+  "0"
+  "1"
+  "2"
+  "3"
+}
+
+Enum "stop_times_drop_off_type_enum" {
+  "0"
+  "1"
+  "2"
+  "3"
+}
+
+Enum "stop_times_continuous_pickup_enum" {
+  "0"
+  "1"
+  "2"
+  "3"
+}
+
+Enum "stop_times_continuous_drop_off_enum" {
+  "0"
+  "1"
+  "2"
+  "3"
+}
+
+Enum "stop_times_timepoint_enum" {
+  "0"
+  "1"
+}
+
+Enum "calendar_monday_enum" {
+  "0"
+  "1"
+  "2"
+}
+
+Enum "calendar_tuesday_enum" {
+  "0"
+  "1"
+  "2"
+}
+
+Enum "calendar_wednesday_enum" {
+  "0"
+  "1"
+  "2"
+}
+
+Enum "calendar_thursday_enum" {
+  "0"
+  "1"
+  "2"
+}
+
+Enum "calendar_friday_enum" {
+  "0"
+  "1"
+  "2"
+}
+
+Enum "calendar_saturday_enum" {
+  "0"
+  "1"
+  "2"
+}
+
+Enum "calendar_sunday_enum" {
+  "0"
+  "1"
+  "2"
+}
+
+Enum "calendar_dates_exception_type_enum" {
+  "0"
+  "1"
+  "2"
+}
+
+Enum "fare_attributes_payment_method_enum" {
+  "0"
+  "1"
+}
+
+Enum "fare_attributes_transfers_enum" {
+  "0"
+  "1"
+  "2"
+}
+
+Enum "frequencies_exact_times_enum" {
+  "0"
+  "1"
+}
+
+Enum "transfers_transfer_type_enum" {
+  "0"
+  "1"
+  "2"
+  "3"
+  "4"
+  "5"
+}
+
+Enum "pathways_pathway_mode_enum" {
+  "0"
+  "1"
+  "2"
+  "3"
+  "4"
+  "5"
+  "6"
+  "7"
+}
+
+Enum "pathways_is_bidirectional_enum" {
+  "0"
+  "1"
+}
+
+Enum "translations_table_name_enum" {
+  "agency"
+  "stops"
+  "routes"
+  "trips"
+  "stop_times"
+  "feed_info"
+  "pathways"
+  "levels"
+  "attributions"
+}
+
+Enum "attributions_is_producer_enum" {
+  "0"
+  "1"
+}
+
+Enum "attributions_is_operator_enum" {
+  "0"
+  "1"
+}
+
+Enum "attributions_is_authority_enum" {
+  "0"
+  "1"
+}
+
+Table "provider" {
+  "provider_id" VARCHAR(255) [pk, not null]
+  "slug" VARCHAR(255) [not null]
+  "title" VARCHAR(255) [not null]
+  "type" VARCHAR(255) [not null]
+  "url" VARCHAR(255) [not null]
+  "updated" DATETIME [not null]
+  "flag" provider_flag_enum [not null]
+}
+
+Table "agency" {
+  "provider_id" VARCHAR(255) [not null]
+  "agency_id" VARCHAR(255) [pk, not null]
+  "agency_name" VARCHAR(255) [not null]
+  "agency_url" VARCHAR(255) [not null]
+  "agency_timezone" VARCHAR(255) [not null]
+  "agency_lang" VARCHAR(255)
+  "agency_phone" VARCHAR(255)
+  "agency_fare_url" VARCHAR(255)
+  "agency_email" VARCHAR(255)
+}
+
+Table "stops" {
+  "provider_id" VARCHAR(255) [not null]
+  "stop_id" VARCHAR(255) [pk, not null]
+  "stop_code" VARCHAR(255)
+  "stop_name" VARCHAR(255) [not null]
+  "stop_desc" VARCHAR(255)
+  "stop_lat" VARCHAR(255) [not null]
+  "stop_lon" VARCHAR(255) [not null]
+  "zone_id" VARCHAR(255)
+  "stop_url" VARCHAR(255)
+  "location_type" stops_location_type_enum
+  "parent_station" VARCHAR(255)
+  "vehicle_type" VARCHAR(255)
+  "stop_timezone" VARCHAR(255)
+  "wheelchair_boarding" stops_wheelchair_boarding_enum
+  "level_id" VARCHAR(255)
+  "platform_code" VARCHAR(255)
+
+Indexes {
+  parent_station [name: "stops_parent_station"]
+}
+}
+
+Table "routes" {
+  "provider_id" VARCHAR(255) [not null]
+  "route_id" VARCHAR(255) [pk, not null]
+  "agency_id" VARCHAR(255) [not null]
+  "route_short_name" TEXT
+  "route_long_name" TEXT
+  "route_desc" TEXT
+  "route_type" VARCHAR(255)
+  "route_url" VARCHAR(10)
+  "route_color" VARCHAR(8)
+  "route_text_color" VARCHAR(8)
+  "route_sort_order" VARCHAR(8)
+  "continuous_pickup" routes_continuous_pickup_enum
+  "continuous_drop_off" routes_continuous_drop_off_enum
+}
+
+Table "trips" {
+  "provider_id" VARCHAR(255) [not null]
+  "route_id" VARCHAR(255) [not null]
+  "service_id" VARCHAR(255) [not null]
+  "trip_id" VARCHAR(255) [pk, not null]
+  "trip_headsign" TEXT
+  "trip_short_name" TEXT
+  "direction_id" trips_direction_id_enum
+  "block_id" VARCHAR(255)
+  "shape_id" VARCHAR(255)
+  "wheelchair_accessible" trips_wheelchair_accessible_enum
+  "bikes_allowed" trips_bikes_allowed_enum
+}
+
+Table "stop_times" {
+  "provider_id" VARCHAR(255) [not null]
+  "trip_id" VARCHAR(255) [not null]
+  "arrival_time" TIME
+  "departure_time" TIME
+  "stop_id" VARCHAR(255) [not null]
+  "stop_sequence" INT [not null]
+  "stop_headsign" VARCHAR(255)
+  "local_zone_id" VARCHAR(255)
+  "pickup_type" stop_times_pickup_type_enum
+  "drop_off_type" stop_times_drop_off_type_enum
+  "continuous_pickup" stop_times_continuous_pickup_enum
+  "continuous_drop_off" stop_times_continuous_drop_off_enum
+  "shape_dist_traveled" DOUBLE
+  "timepoint" stop_times_timepoint_enum
+
+Indexes {
+  trip_id [name: "stop_times_trip_id"]
+  stop_id [name: "stop_times_stop_id"]
+}
+}
+
+Table "calendar" {
+  "provider_id" VARCHAR(255) [not null]
+  "service_id" VARCHAR(255) [pk, not null]
+  "monday" calendar_monday_enum [not null]
+  "tuesday" calendar_tuesday_enum [not null]
+  "wednesday" calendar_wednesday_enum [not null]
+  "thursday" calendar_thursday_enum [not null]
+  "friday" calendar_friday_enum [not null]
+  "saturday" calendar_saturday_enum [not null]
+  "sunday" calendar_sunday_enum [not null]
+  "start_date" DATE
+  "end_date" DATE
+}
+
+Table "calendar_dates" {
+  "provider_id" VARCHAR(255) [not null]
+  "service_id" VARCHAR(255) [not null]
+  "date" DATE [not null]
+  "exception_type" calendar_dates_exception_type_enum [not null]
+
+Indexes {
+  service_id [name: "calendar_dates_service_id"]
+}
+}
+
+Table "shapes" {
+  "provider_id" VARCHAR(255) [not null]
+  "shape_id" VARCHAR(255) [pk, not null]
+  "shape_pt_lat" VARCHAR(255) [not null]
+  "shape_pt_lon" VARCHAR(255) [not null]
+  "shape_pt_sequence" INT [not null]
+  "shape_dist_traveled" DOUBLE
+}
+
+Table "frequencies" {
+  "provider_id" VARCHAR(255) [not null]
+  "trip_id" VARCHAR(255) [not null]
+  "start_time" TIME [not null]
+  "end_time" TIME [not null]
+  "headway_secs" INT [not null]
+  "exact_times" frequencies_exact_times_enum [not null]
+}
+
+Table "transfers" {
+  "provider_id" VARCHAR(255) [not null]
+  "from_stop_id" VARCHAR(255) [not null]
+  "to_stop_id" VARCHAR(255) [not null]
+  "transfer_type" transfers_transfer_type_enum [not null]
+  "min_transfer_time" INT
+}
+
+Table "pathways" {
+  "provider_id" VARCHAR(255) [not null]
+  "pathway_id" VARCHAR(255) [pk, not null]
+  "from_stop_id" VARCHAR(255) [not null]
+  "to_stop_id" VARCHAR(255) [not null]
+  "pathway_mode" pathways_pathway_mode_enum [not null]
+  "is_bidirectional" pathways_is_bidirectional_enum [not null]
+  "length" DOUBLE
+  "traversal_time" VARCHAR(8)
+  "stair_count" VARCHAR(8)
+  "max_slope" VARCHAR(8)
+  "min_width" VARCHAR(8)
+  "signposted_as" VARCHAR(255)
+  "reversed_signposted_as" VARCHAR(255)
+}
+
+Table "levels" {
+  "provider_id" VARCHAR(255) [not null]
+  "level_id" VARCHAR(255) [pk, not null]
+  "level_index" VARCHAR(8) [not null]
+  "level_name" VARCHAR(255)
+}
+
+Table "town" {
+  "town_id" VARCHAR(255) [pk, not null]
+  "town_name" VARCHAR(255) [not null]
+  "town_polygon" polygon [not null]
+
+Indexes {
+  town_polygon [name: "town_polygon"]
+}
+}
+
+Table "zip_code" {
+  "zip_code" VARCHAR(255) [pk, not null]
+  "town_id" VARCHAR(255) [not null]
+}
+
+Table "stop_route" {
+  "stop_route_id" VARCHAR(255) [pk, not null]
+  "route_id" VARCHAR(255) [not null]
+  "route_short_name" TEXT
+  "route_long_name" TEXT
+  "route_type" VARCHAR(255)
+  "route_color" VARCHAR(8)
+  "route_text_color" VARCHAR(8)
+  "stop_id" VARCHAR(255) [not null]
+  "stop_name" TEXT [not null]
+  "stop_query_name" TEXT [not null]
+  "stop_lat" VARCHAR(255)
+  "stop_lon" VARCHAR(255)
+  "town_id" VARCHAR(255)
+  "town_name" VARCHAR(255)
+  "town_query_name" VARCHAR(255)
+
+Indexes {
+  stop_id [name: "stop_route_stop_id"]
+  stop_query_name [name: "stop_route_query"]
+  town_query_name [name: "stop_route_query_town"]
+  route_id [name: "stop_route_route_id"]
+}
+}
+
+Table "stations" {
+  "provider_id" VARCHAR(255) [not null]
+  "station_id" VARCHAR(255) [pk, not null]
+  "station_name" VARCHAR(255)
+  "station_lat" VARCHAR(255) [not null]
+  "station_lon" VARCHAR(255) [not null]
+  "station_capacity" VARCHAR(255)
+}
+
+Ref:"agency"."agency_id" < "routes"."agency_id"
+
+Ref:"routes"."route_id" < "trips"."route_id"
+
+Ref:"trips"."trip_id" < "stop_times"."trip_id"
+
+Ref:"stops"."stop_id" < "stop_times"."stop_id"
+
+Ref:"trips"."trip_id" < "frequencies"."trip_id"
+
+Ref:"stops"."stop_id" < "transfers"."from_stop_id"
+
+Ref:"stops"."stop_id" < "transfers"."to_stop_id"
+
+Ref:"stops"."stop_id" < "pathways"."from_stop_id"
+
+Ref:"stops"."stop_id" < "pathways"."to_stop_id"
+
+Ref: "stops"."parent_station" < "stops"."stop_id"
+
+Ref: "stops"."level_id" < "levels"."level_id"
+
+Ref: "trips"."shape_id" < "shapes"."shape_id"
+
+Ref: "trips"."service_id" < "calendar"."service_id"
+
+Ref: "trips"."service_id" < "calendar_dates"."service_id"
+
+Ref: "routes"."route_id" < "stop_route"."route_id"
+
+Ref: "stops"."stop_id" < "stop_route"."stop_id"
+
+Ref: "stop_route"."town_id" < "town"."town_id"
+
+Ref: "town"."town_id" - "zip_code"."town_id"

@@ -2,11 +2,16 @@
 
 $dir = '../data/cache/bike_';
 
-if (!isset($_GET['s']) || $_GET['s'] == null) {
-    ErrorMessage(400, 'Required parameter "s" is missing or null.');
-}
+// ---------------
+$parameters = ['id'];
+$message = checkRequiredParameter($parameters);
 
-$id = $_GET['s'];
+if ($message) {
+    ErrorMessage(400, $message);
+}
+// ---------------
+
+$id = $_GET['id'];
 $file = $dir . $id . '.json';
 
 if (is_file($file) && filesize($file) > 5 && (time() - filemtime($file) < 20)) {
@@ -18,16 +23,20 @@ if (is_file($file) && filesize($file) > 5 && (time() - filemtime($file) < 20)) {
 // On récupère toutes les lignes a l'arrets
 
 $request = getStationById($id);
+
+if ($request->rowCount() == 0) {
+    ErrorMessage(200, "Nothing where found for this stop");
+}
+
 $obj = $request->fetch();
 
 $json = array(
-    'id'       => $obj['station_id'],
     'name'     => $obj['station_name'],
-    'capacity' => $obj['station_capacity'],
     'coord' => array(
         'lat'      => $obj['station_lat'],
         'lon'      => $obj['station_lon'],
-    )
+    ),
+    'capacity' => (int) $obj['station_capacity'],
 );
 
 $content = file_get_contents($obj['provider_id'] . 'station_status.json');
