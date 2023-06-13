@@ -1,64 +1,53 @@
 <?php
 
-$file = '../data/cache/trafic.json';
-
-if (is_file($file) && filesize($file) > 5 && (time() - filemtime($file) < 30)) {
-    echo file_get_contents($file);
-    exit;
-}
-
-// ------------
-
 $url = $CONFIG->prim_url . '/line_reports?count=100&forbidden_uris[]=commercial_mode:Bus';
-$results = curl_PRIM($url);
-$results = json_decode($results);
+$results = curl_PRIM( $url );
+$results = json_decode( $results );
 
 $reports = [];
-foreach ($results->disruptions as $disruption) {
-    if ($disruption->status == 'past') {
-        // On en veut pas on est raciste :D
-    } else {
+foreach ( $results->disruptions as $disruption ) {
+    if ( $disruption->status != 'past' ) {
         $reports[$disruption->id] = array(
             "id"            =>  (string)    $disruption->id,
             "status"        =>  (string)    $disruption->status,
             "cause"         =>  (string)    $disruption->cause,
             "category"      =>  (string)    $disruption->category,
-            "severity"      =>  (int)       getSeverity($disruption->severity->effect, $disruption->cause, $disruption->status),
+            "severity"      =>  (int)       getSeverity( $disruption->severity->effect, $disruption->cause, $disruption->status ),
             "effect"        =>  (string)    $disruption->severity->effect,
             "updated_at"    =>  (string)    $disruption->updated_at,
             "message"       =>  array(
-                "title"     =>      getReportsMesageTitle($disruption->messages),
-                "text"      =>      trim(getReportsMesageText($disruption->messages)),
+                "title"     =>      getReportsMesageTitle( $disruption->messages ),
+                "text"      =>      trim( getReportsMesageText( $disruption->messages ) ),
             ),
         );
     }
 }
 
 $lines = [];
-foreach ($results->line_reports as $line) {
+foreach ( $results->line_reports as $line ) {
     $current_trafic = [];
     $current_work = [];
     $future_work = [];
     $severity = 0;
 
-    foreach ($line->line->links as $link) {
+    foreach ( $line->line->links as $link ) {
         $id = $link->id;
-        if ($link->type == "disruption") {
-            if (isset($reports[$id])) {
-                if ($reports[$id]["disruptions"] == 'future') {
-                    $severity = $severity > $reports[$id]["severity"] ? $severity : $reports[$id]["severity"];
+        if ( $link->type == "disruption" ) {
+
+            if ( isset( $reports[$id] ) ) {
+
+                $severity = $severity > $reports[$id]["severity"] ? $severity : $reports[$id]["severity"];
+
+                if ( $reports[$id]["disruptions"] == 'future' ) {
                     $future_work[] = $reports[$id];
 
-                } else if ($reports[$id]["severity"] == 2) {
-                    $severity = $severity > $reports[$id]["severity"] ? $severity : $reports[$id]["severity"];
+                } else if ( $reports[$id]["severity"] == 2 ) {
                     $future_work[] = $reports[$id];
 
-                } else if ($reports[$id]["severity"] == 3) {
-                    $severity = $severity > $reports[$id]["severity"] ? $severity : $reports[$id]["severity"];
+                } else if ( $reports[$id]["severity"] == 3 ) {
                     $current_work[] = $reports[$id];
                     
                 } else {
-                    $severity = $severity > $reports[$id]["severity"] ? $severity : $reports[$id]["severity"];
                     $current_trafic[] = $reports[$id];
                 }
             }
@@ -88,6 +77,4 @@ foreach ($results->line_reports as $line) {
 $echo["trafic"] = $lines;
 
 $echo = json_encode($echo);
-file_put_contents($file, $echo);
 echo $echo;
-exit;

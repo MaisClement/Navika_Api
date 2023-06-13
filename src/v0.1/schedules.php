@@ -29,15 +29,6 @@ $id = idfm_format($stop_id);
 $prim_url = 'https://prim.iledefrance-mobilites.fr/marketplace/stop-monitoring?MonitoringRef=STIF:StopPoint:Q:' . $id . ':';
 $sncf_url = 'https://garesetconnexions-online.azure-api.net/API/PIV/Departures/00' . $id;
 $sncf_url_api = 'https://api.sncf.com/v1/coverage/sncf/stop_areas/stop_area:SNCF:' . $id . '/departures?count=30&data_freshness=realtime';
-$file = $dir . $id . '.json';
-
-
-// ------------
-// Si un fichier cache existe
-if (is_file($file) && filesize($file) > 5 && (time() - filemtime($file) < 20)) {
-    echo file_get_contents($file);
-    exit;
-}
 
 // ------------
 // On récupère toutes les lignes a l'arrets
@@ -147,6 +138,4 @@ if (isset($json['schedules'])){
 }
 
 $echo = json_encode($json);
-// file_put_contents($file, $echo);
 echo $echo;
-exit;

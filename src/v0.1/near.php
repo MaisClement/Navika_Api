@@ -15,8 +15,6 @@ $lat = $_GET['lat'];
 $lon = $_GET['lon'];
 $zoom = $_GET['z'];
 
-$file .= $lat . '_' . $lon . '.json';
-
 // ------ Request
 //
 $request = getStopByGeoCoords($lat, $lon, $zoom);
@@ -103,6 +101,4 @@ if (isset($_GET['flag'])) {
 
 
 $echo = json_encode($echo);
-// file_put_contents($file, $echo);
 echo $echo;
-exit;

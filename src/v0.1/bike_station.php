@@ -12,12 +12,6 @@ if ($message) {
 // ---------------
 
 $id = $_GET['id'];
-$file = $dir . $id . '.json';
-
-if (is_file($file) && filesize($file) > 5 && (time() - filemtime($file) < 20)) {
-    echo file_get_contents($file);
-    exit;
-}
 
 // ------------
 // On récupère toutes les lignes a l'arrets
@@ -64,6 +58,4 @@ foreach ($content->data->stations as $station) {
 $echo['station'] = $json;
 
 $echo = json_encode($echo);
-file_put_contents($file, $echo);
 echo $echo;
-exit;

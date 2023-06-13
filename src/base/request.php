@@ -183,22 +183,6 @@ function getDirection($id){
 }
 
 // ------------------------------------------------
-function getSubstop($id){
-    $db = $GLOBALS["db"];
-    $id = trim($id);
-
-    $req = $db->prepare("
-        SELECT *
-        FROM stops S
-        
-        WHERE 
-            S.parent_station = ?
-            AND S.location_type = '0'
-    ");
-    $req->execute(array($id));
-    return $req;
-}
-
 function getScheduleByStop($id, $line, $dt, $time){
     $db = $GLOBALS["db"];
     $id = trim($id);
@@ -313,6 +297,7 @@ function setParentStation($opt){
     ));
     return $req;
 }
+
 // ------------------------------------------------
 
 function SQLinit($query){

@@ -22,7 +22,7 @@ function error_handle($errno, $errstr, $errfile, $errline)
     $report .= PHP_EOL . PHP_EOL . '### COOKIE ###' . PHP_EOL;
     $report .= print_r($_COOKIE, true);
 
-    $name = md5(print_r($ex, true));
+    $name = md5(print_r($errstr, true));
     file_put_contents('../data/report/' . $name . '_exception.json', $report);
 }
 

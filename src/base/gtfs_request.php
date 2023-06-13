@@ -13,46 +13,6 @@ function getCSVHeader($csv, $sep = ';'){
     return $line;
 }
 
-//DEPRECATED function insertGTFS($type, $opt, $provider){
-//DEPRECATED     if ($type == 'agency.txt') {
-//DEPRECATED         insertAgency($opt, $provider);
-//DEPRECATED     } else if ($type == 'stops.txt') {
-//DEPRECATED         insertStops($opt, $provider);
-//DEPRECATED     } else if ($type == 'routes.txt') {
-//DEPRECATED         insertRoutes($opt, $provider);
-//DEPRECATED     } else if ($type == 'trips.txt') {
-//DEPRECATED         insertTrips($opt, $provider);
-//DEPRECATED     } else if ($type == 'stop_times.txt') {
-//DEPRECATED         insertStopTimes($opt, $provider);
-//DEPRECATED     } else if ($type == 'calendar.txt') {
-//DEPRECATED         insertCalendar($opt, $provider);
-//DEPRECATED     } else if ($type == 'calendar_dates.txt') {
-//DEPRECATED         insertCalendarDates($opt, $provider);
-//DEPRECATED     } else if ($type == 'fare_attributes.txt') {
-//DEPRECATED         insertFareAttributes($opt, $provider);
-//DEPRECATED     } else if ($type == 'fare_rules.txt') {
-//DEPRECATED         insertFareRules($opt, $provider);
-//DEPRECATED     } else if ($type == 'shapes.txt') {
-//DEPRECATED         insertShapes($opt, $provider);
-//DEPRECATED     } else if ($type == 'frequencies.txt') {
-//DEPRECATED         insertFrequencies($opt, $provider);
-//DEPRECATED     } else if ($type == 'transfers.txt') {
-//DEPRECATED         insertTransfers($opt, $provider);
-//DEPRECATED     } else if ($type == 'pathways.txt') {
-//DEPRECATED         insertPathways($opt, $provider);
-//DEPRECATED     } else if ($type == 'levels.txt') {
-//DEPRECATED         insertLevels($opt, $provider);
-//DEPRECATED     } else if ($type == 'feed_info.txt') {
-//DEPRECATED         insertFeedInfo($opt, $provider);
-//DEPRECATED     } else if ($type == 'translations.txt') {
-//DEPRECATED         insertTranslations($opt, $provider);
-//DEPRECATED     } else if ($type == 'attributions.txt') {
-//DEPRECATED         insertAttributions($opt, $provider);
-//DEPRECATED     } else {
-//DEPRECATED         echo 'Unknow';
-//DEPRECATED     }
-//DEPRECATED }
-
 function perpareTempTable($table, $temp_table){
     $db = $GLOBALS["db"];
 
@@ -209,67 +169,6 @@ function generateTownInStopRoute(){
             SR.town_query_name = T.town_name
             
         WHERE SR.town_id IS NULL;
-    ");
-    $req->execute(array());
-    return $req;
-}
-
-function isNeedToGenerateHistory(){
-    $db = $GLOBALS["db"];
-
-    $req = $db->prepare("
-        SELECT CASE
-            WHEN (SELECT COUNT(*) FROM history_trips WHERE date = DATE(NOW() + INTERVAL 7 DAY)) > 0 
-            THEN 1
-            ELSE 0
-        END as result;
-    ");
-    $req->execute(array());
-    return $req;
-}
-
-function generateHistory(){
-    $db = $GLOBALS["db"];
-
-    $req = $db->prepare("
-        INSERT INTO history_trips (provider_id, date, generated, route_id, service_id, trip_id, trip_headsign, trip_short_name, monday, tuesday, wednesday, thursday, friday, saturday, sunday, exception_type)
-
-        SELECT T.provider_id, NOW() + INTERVAL 7 DAY as date, NOW() as generated, T.route_id, T.service_id, T.trip_id, T.trip_headsign, T.trip_short_name, C.monday, C.tuesday, C.wednesday, C.thursday, C.friday, C.saturday, C.sunday, CD.exception_type
-        FROM trips T
-        
-        INNER JOIN calendar C
-        ON T.service_id = C.service_id
-        
-        LEFT JOIN calendar_dates CD
-        ON 
-            T.service_id = CD.service_id 
-            AND NOW() + INTERVAL 7 DAY = CD.date
-        
-        WHERE 
-            NOW() + INTERVAL 7 DAY BETWEEN C.start_date AND C.end_date
-            AND (CD.exception_type = 1
-                OR CD.exception_type IS NULL
-            )
-            AND (
-                DATE_FORMAT(NOW() + INTERVAL 7 DAY, '%w') = '1' AND C.monday = 1
-                OR DATE_FORMAT(NOW() + INTERVAL 7 DAY, '%w') = '2' AND C.tuesday = 1
-                OR DATE_FORMAT(NOW() + INTERVAL 7 DAY, '%w') = '3' AND C.wednesday = 1
-                OR DATE_FORMAT(NOW() + INTERVAL 7 DAY, '%w') = '4' AND C.thursday = 1
-                OR DATE_FORMAT(NOW() + INTERVAL 7 DAY, '%w') = '5' AND C.friday = 1
-                OR DATE_FORMAT(NOW() + INTERVAL 7 DAY, '%w') = '6' AND C.saturday = 1
-                OR DATE_FORMAT(NOW() + INTERVAL 7 DAY, '%w') = '0' AND C.sunday = 1
-            );
-    ");
-    $req->execute(array());
-    return $req;
-}
-
-function removeOldHistory(){
-    $db = $GLOBALS["db"];
-
-    $req = $db->prepare("
-        DELETE FROM history_trips
-        WHERE date < DATE(NOW());
     ");
     $req->execute(array());
     return $req;
@@ -768,17 +667,8 @@ function insertTempStopRoute($opt){
     return $req;
 }
 
-function deleteTable($opt, $provider){
-    $db = $GLOBALS["db"];
-
-    $req = $db->prepare("DELETE FROM $opt");
-    $req->execute();
-    return $req;
-}
-
-
 // ----- GBFS -----
-
+//
 function insertStation($opt, $provider){
     $db = $GLOBALS["db"];
 

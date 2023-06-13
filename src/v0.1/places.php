@@ -9,7 +9,6 @@ if (isset($_GET['q']) && isset($_GET['lat']) && isset($_GET['lon'])) {
     $lon = $_GET['lon'];
 
     $url = $CONFIG->prim_url . '/places?q=' . $query . '&from' . $lon . ';' . $lat . '=&depth=2';
-    $file .= $query . '_' . $lat . '_' . $lon . '.json';
 
     $search_type = 3;
 } else if (isset($_GET['lat']) && isset($_GET['lon'])) {
@@ -17,7 +16,6 @@ if (isset($_GET['q']) && isset($_GET['lat']) && isset($_GET['lon'])) {
     $lon = $_GET['lon'];
 
     $url = $CONFIG->prim_url . '/coord/' . $lon . ';' . $lat . '/places_nearby?depth=2&distance=1000';
-    $file .= $lat . '_' . $lon . '.json';
 
     $search_type = 2;
 } else if (isset($_GET['q'])) {
@@ -25,7 +23,6 @@ if (isset($_GET['q']) && isset($_GET['lat']) && isset($_GET['lon'])) {
     $query = urlencode(trim($query));
 
     $url = $CONFIG->prim_url . '/places?q=' . $query . '&depth=2';
-    $file .= $query . '.json';
 
     $search_type = 1;
 } else {
@@ -33,11 +30,6 @@ if (isset($_GET['q']) && isset($_GET['lat']) && isset($_GET['lon'])) {
         400,
         'Required parameter `q` or `lat` and `lon` is missing or null.'
     );
-}
-
-if (is_file($file) && filesize($file) > 5 && (time() - filemtime($file) < 60 * 60)) {
-    echo file_get_contents($file);
-    exit;
 }
 
 // ------------
@@ -80,6 +72,4 @@ if (isset($_GET['flag'])) {
 }
 
 $echo = json_encode($echo);
-// file_put_contents($file, $echo);
 echo $echo;
-exit;

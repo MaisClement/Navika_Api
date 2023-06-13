@@ -1,7 +1,5 @@
 <?php
 
-$file = '../data/cache/stop_area_';
-
 if (isset($_GET['q']) && isset($_GET['lat']) && isset($_GET['lon'])) {
     $query = $_GET['q'];
     $query = urlencode(trim($query));
@@ -32,15 +30,8 @@ if (isset($_GET['q']) && isset($_GET['lat']) && isset($_GET['lon'])) {
     );
 }
 
-if (is_file($file) && filesize($file) > 5 && (time() - filemtime($file) < 60 * 60)) {
-    echo file_get_contents($file);
-    exit;
-}
-
 // ------ Request
 //
-$type = 1; // Area
-
 if ($search_type == 3) {
     $request = getStopByQueryAndGeoCoords($query, $lat, $lon);
 } else if ($search_type == 2) {
@@ -53,7 +44,6 @@ if ($search_type == 3) {
 
 // ------ Ville et code postal
 //
-
 $places = [];
 while ($obj = $request->fetch()) {
 
@@ -124,6 +114,4 @@ if (isset($_GET['flag'])) {
 
 
 $echo = json_encode($echo);
-file_put_contents($file, $echo);
 echo $echo;
-exit;

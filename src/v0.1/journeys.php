@@ -23,13 +23,6 @@ $datetime = urlencode(trim($datetime));
 $traveler_type = $_GET['traveler_type'] ?? 'standard';
 
 $url = $CONFIG->prim_url . '/journeys?from=' . $from . '&to=' . $to . '&datetime=' . $datetime . '&traveler_type=' . $traveler_type . '&depth=3&data_freshness=realtime';
-$file .= $from . '_' . $to . '_' . $datetime . '.json';
-
-
-if (is_file($file) && filesize($file) > 5 && (time() - filemtime($file) < 60)) {
-    echo file_get_contents($file);
-    exit;
-}
 
 // ------------
 
@@ -121,9 +114,7 @@ foreach ($results->journeys as $result) {
     );
 }
 
-$json = [];
-$json['journeys'] = $journeys;
-$echo = json_encode($json);
-file_put_contents($file, $echo);
+$echo = [];
+$echo['journeys'] = $journeys;
+$echo = json_encode($echo);
 echo $echo;
-exit;

@@ -637,28 +637,3 @@ function unzip($zipname, $folder) {
         echo '  ! Failed to unzip' . PHP_EOL;
     }
 }
-
-//DEPRECATED function importGTFS($directory, $provider) {
-//DEPRECATED     $err = 0;
-//DEPRECATED 
-//DEPRECATED     $types = ['agency.txt', 'stops.txt', 'routes.txt', 'trips.txt', 'stop_times.txt', 'calendar.txt', 'calendar_dates.txt', 'fare_attributes.txt', 'fare_rules.txt', 'frequencies.txt', 'transfers.txt', 'pathways.txt', 'levels.txt', 'feed_info.txt', 'translations.txt', 'attributions.txt'];
-//DEPRECATED 
-//DEPRECATED     foreach ($types as $type) {
-//DEPRECATED         $file = $directory . '/' . $type;
-//DEPRECATED         if (is_file($file)) {
-//DEPRECATED             echo '        ' . $type . PHP_EOL;
-//DEPRECATED 
-//DEPRECATED             $header = getCSVHeader($file)[0][0];
-//DEPRECATED 
-//DEPRECATED             try {
-//DEPRECATED                 insertFile($type, $file, $header, ',', $provider);
-//DEPRECATED                 // unlink($file);
-//DEPRECATED             } catch (Exception $e) {
-//DEPRECATED                 echo $e;
-//DEPRECATED                 $err++;
-//DEPRECATED             }
-//DEPRECATED         }
-//DEPRECATED     }
-//DEPRECATED     
-//DEPRECATED     echo '      ' . $err . ' errors' . PHP_EOL;
-//DEPRECATED }
