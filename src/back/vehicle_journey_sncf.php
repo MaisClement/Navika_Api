@@ -3,10 +3,13 @@
 
 $results = curl_SNCF($sncf_url);
 $results = json_decode($results);
+
 $el = $results->vehicle_journeys[0];
 
 $stops = [];
+$reports = [];
 $order = 0;
+
 foreach ($el->stop_times as $result) {
     $stops[] = array(
         "name"              => (string) $result->stop_point->name,
@@ -26,7 +29,7 @@ foreach ($el->stop_times as $result) {
     $order++;
 }
 
-if (isset($results->disruptions)) {
+if (isset($results->disruptions) && count($results->disruptions) > 0) {
     $stops = getDisruptionForStop( $results->disruptions );
     $reports = getReports( $results->disruptions );
 }

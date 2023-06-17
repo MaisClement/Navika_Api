@@ -248,8 +248,6 @@ generateTownInStopRoute();
 echo '> Preparing for query...' . PHP_EOL;
 generateQueryRoute();
 
-
-
 // Monitoring
 file_get_contents('https://betteruptime.com/api/v1/heartbeat/SrRkcBMzc4AgsXXzzZa2qFDa');
 
@@ -264,6 +262,6 @@ $headers = array(
     'Content-type' => 'text/html; charset="utf-8"',
 );
 
-if (!mail('clementf78@gmail.com', $subject, str_replace(PHP_EOL, '<br>', $message), $headers)) {
-    echo '! failed to send mail !' . PHP_EOL;
-}
+// if (!mail('clementf78@gmail.com', $subject, str_replace(PHP_EOL, '<br>', $message), $headers)) {
+//     echo '! failed to send mail !' . PHP_EOL;
+// }

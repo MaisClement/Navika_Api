@@ -9,19 +9,11 @@ function getApiDetails($api_results, $name){
             $direction = $api_result->display_informations->direction;
 
             $links = $api_result->display_informations->links;
-            $disruptions = [];
-
-            foreach ($links as $link) {
-                if ($link->type == "disruption") {
-                    $disruptions[] = getDisruption($link->id, $api_results->disruptions);
-                }
-            }
 
             $departures = array(
                 "id"                =>  (string)    getSNCFid($api_result->links),
                 "name"              =>  (string)    $api_result->display_informations->headsign,
                 "network"           =>  (string)    $api_result->display_informations->network,
-                "disruptions"       => $disruptions,
             );
         }
     }
@@ -68,7 +60,7 @@ foreach ($results as $result) {
             "departure_date_time"       =>  (string)  $result->actualTime,
             "base_arrival_date_time"    =>  (string)  "",
             "arrival_date_time"         =>  (string)  "",
-            "state"                     =>  (string)  getSNCFState($result->traffic->eventStatus, $result->traffic->eventLevel, $result->traffic),
+            "state"                     =>  (string)  getSNCFState($result->informationStatus->trainStatus, $result->traffic->eventLevel, $result->traffic),
             "atStop"                    =>  (string)  $result->platform->isTrackactive,
             "platform"                  =>  (string)  $result->platform->track != null ? $result->platform->track : ($result->trainMode == "CAR" ? "GR" : "-"),
         )

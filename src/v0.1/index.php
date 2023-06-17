@@ -50,9 +50,23 @@ foreach ($results as $result) {
 //     "severity"      =>  (int)       4,
 //     "effect"        =>  (string)    "OTHER",
 //     "updated_at"    =>  (string)    "20230412T181513",
-//     "message"       =>  array(
+//     "message"           =>  array(
 //         "title"     =>      "Maintenance en cours",
 //         "text"      =>      "Une modification des horaires entre peut causer des difficultés.",
+//     ),
+// );
+
+// $messages[] = array(
+//     "id"            =>  (string)    "ADMIN:1",
+//     "status"        =>  (string)    "active",
+//     "severity"      =>  (int)       5,
+//     "effect"        =>  (string)    "OTHER",
+//     "updated_at"    =>  (string)    "20230613T193000",
+//     "message"       =>  array(
+//         "title"     =>      "Incident",
+//         "text"      =>      "Navika rencontre actuellement des difficultés. ",
+//         "button"    =>      "En savoir plus",
+//         "link"      =>      "https://navika.betteruptime.com/"
 //     ),
 // );
 

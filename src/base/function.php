@@ -359,6 +359,21 @@ function getReports($disruptions){
                 ),
             );
         }
+        if ($causes == []) {
+            $echo[] = array(
+                "id"            => (string) $disruption->id,
+                "status"        => (string) $disruption->status,
+                "cause"         => (string) $disruption->cause,
+                "category"      => "Incidents",
+                "severity"      => getSeverityByEffect($disruption->severity->effect),
+                "effect"        => (string) $disruption->severity->effect,
+                "updated_at"    => (string) $disruption->updated_at,
+                "message"       => array(
+                    "title"         => getTitleByEffect($disruption->severity->effect),
+                    "text"          => '',
+                ),
+            );
+        }
     }
     return $echo;
 }
@@ -437,10 +452,30 @@ function getSNCFState($status, $level, $traffic){
     if ($level == "Normal") {
         return "ontime";
     }
-    if ($status == 'SUPPRESSION')
-        return "cancelled";
-    if ($status == 'MODIFICATION_LIMITATION') {
-        return "modified";
+
+    switch($status) {
+        case "RETARD": 
+        case "RETARD_OBSERVE": 
+            return 'delayed';
+
+        case "MODIFICATION": 
+        case "MODIFICATION_LIMITATION": 
+        case "MODIFICATION_DESSERTE_SUPPRIMEE": 
+        case "MODIFICATION_DETOURNEMENT": 
+        case "MODIFICATION_PROLONGATION":
+            return "modified";
+    
+        case "SUPPRESSION" :
+        case "SUPPRESSION_TOTALE": 
+        case "SUPPRESSION_PARTIELLE": 
+        case "SUPPRESSION_DETOURNEMENT":
+            return "cancelled";
+            
+        case "MODIFICATION_DESSERTE_AJOUTEE":
+            return "added";
+
+        case "OnTime":
+            return 'ontime';
     }
 
     return "theorical";
