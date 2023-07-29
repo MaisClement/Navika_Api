@@ -195,6 +195,7 @@ class UpdateGTFS extends Command
                                 // On enleve la vérification des clé quand on supprime (on supprime toutes les tables de toute façon)
                                 CommandFunctions::initDBUpdate($db);
 
+                                
                                 CommandFunctions::clearProviderDataInTable($db, $type, $provider);
                                 echo '1/5 ';
 
