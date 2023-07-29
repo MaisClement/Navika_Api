@@ -1,0 +1,66 @@
+controllers:
+    resource:
+        path: ../src/Controller/
+        namespace: App\Controller
+    type: attribute
+
+app.swagger_ui:
+    path: /doc
+    methods: GET
+    defaults: { _controller: nelmio_api_doc.controller.swagger_ui }
+
+## For backcompatibility
+OLD_get_index:
+    path: /v0.1/index
+    methods: GET
+    controller: App\Controller\Index::getIndex
+
+get_index:
+    path: /index
+    methods: GET
+    controller: App\Controller\Index::getIndex
+
+get_bikes:
+    path: /bikes/{id}
+    methods: GET
+    controller: App\Controller\Bikes::getBikes
+
+search_stops:
+    path: /stops
+    methods: GET
+    controller: App\Controller\Stops::searchStops
+
+search_lines:
+    path: /lines
+    methods: GET
+    controller: App\Controller\Lines::searchLines
+
+search_places:
+    path: /places
+    methods: GET
+    controller: App\Controller\Places::searchPlaces
+
+get_journeys:
+    path: /journeys
+    methods: GET
+    controller: App\Controller\Journeys::getJourneys
+
+get_vehicle_journeys:
+    path: vehicle_journey/{id}
+    methods: GET
+    controller: App\Controller\VehicleJourney::getVehicleJourneys
+
+get_near:
+    path: /near
+    methods: GET
+    controller: App\Controller\Near::getNear
+
+get_trafic:
+    path: /trafic
+    methods: GET
+    controller: App\Controller\Trafic::getTrafic
+
+get_schedules:
+    path: /schedules/{id}
+    methods: GET
+    controller: App\Controller\Schedules::getSchedules

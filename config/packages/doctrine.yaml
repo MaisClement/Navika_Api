@@ -1,0 +1,66 @@
+doctrine:
+    dbal:
+        url: '%env(resolve:DATABASE_URL)%'
+                
+        mapping_types:
+            enum: string
+        
+        types:
+            geometry:   CrEOF\Spatial\DBAL\Types\GeometryType
+            point: CrEOF\Spatial\DBAL\Types\Geometry\PointType
+            polygon:    CrEOF\Spatial\DBAL\Types\Geometry\PolygonType
+            linestring: CrEOF\Spatial\DBAL\Types\Geometry\LineStringType
+
+        # IMPORTANT: You MUST configure your server version,
+        # either here or in the DATABASE_URL env var (see .env file)
+        #server_version: '15'
+    orm:
+        auto_generate_proxy_classes: true
+        enable_lazy_ghost_objects: true
+        report_fields_where_declared: true
+        validate_xml_mapping: true
+        naming_strategy: doctrine.orm.naming_strategy.underscore_number_aware
+        auto_mapping: true
+        mappings:
+            App:
+                is_bundle: false
+                dir: '%kernel.project_dir%/src/Entity'
+                prefix: 'App\Entity'
+                alias: App
+
+        dql:
+            string_functions:
+                DATE_FORMAT: DoctrineExtensions\Query\Mysql\DateFormat
+                
+            numeric_functions:
+                stdistance: CrEOF\Spatial\ORM\Query\AST\Functions\MySql\STDistance
+                stdistancesphere: CrEOF\Spatial\ORM\Query\AST\Functions\MySql\STDistanceSphere
+                distance:               CrEOF\Spatial\ORM\Query\AST\Functions\MySql\Distance
+                geometrytype:           CrEOF\Spatial\ORM\Query\AST\Functions\MySql\GeometryType
+                point:                  CrEOF\Spatial\ORM\Query\AST\Functions\MySql\Point
+
+when@test:
+    doctrine:
+        dbal:
+            # "TEST_TOKEN" is typically set by ParaTest
+            dbname_suffix: '_test%env(default::TEST_TOKEN)%'
+
+when@prod:
+    doctrine:
+        orm:
+            auto_generate_proxy_classes: false
+            proxy_dir: '%kernel.build_dir%/doctrine/orm/Proxies'
+            query_cache_driver:
+                type: pool
+                pool: doctrine.system_cache_pool
+            result_cache_driver:
+                type: pool
+                pool: doctrine.result_cache_pool
+
+    framework:
+        cache:
+            pools:
+                doctrine.result_cache_pool:
+                    adapter: cache.app
+                doctrine.system_cache_pool:
+                    adapter: cache.system

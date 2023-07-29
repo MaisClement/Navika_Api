@@ -1,14 +1,14 @@
-data/cache
-data/file
-data/report
 
-*output.txt
+###> symfony/framework-bundle ###
+.env
+/.env.local
+/.env.local.php
+/.env.*.local
+/config/secrets/prod/prod.decrypt.private.php
+/public/bundles/
+/var/
+/vendor/
+###< symfony/framework-bundle ###
 
-*.config
-credential.php
 
-*TEST_*
-
-# OLD files
-*OLD_*
-*TEST_*
+config.yaml

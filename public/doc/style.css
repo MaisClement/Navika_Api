@@ -1,0 +1,16 @@
+header:before{
+    background-color: #025982;
+}
+
+
+header #logo img {
+    background-color: transparent;
+}
+
+#swagger-ui.api-platform .info .title {
+    color: #025982;
+}
+
+#swagger-ui.api-platform .opblock.opblock-get .opblock-summary-method{
+    background-color: #025982;
+}

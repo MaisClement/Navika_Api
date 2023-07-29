@@ -1,0 +1,11 @@
+--2023-07-03 14:31:26--  https://get.symfony.com/cli/installer
+Resolving get.symfony.com (get.symfony.com)... 13.32.110.95, 13.32.110.129, 13.32.110.60, ...
+Connecting to get.symfony.com (get.symfony.com)|13.32.110.95|:443... connected.
+HTTP request sent, awaiting response... 200 OK
+Length: 6100 (6.0K) [binary/octet-stream]
+Saving to: ‘STDOUT’
+
+-                                                0%[                                                                                                    ]       0  --.-KB/s               -                                              100%[===================================================================================================>]   5.96K  --.-KB/s    in 0s      
+
+2023-07-03 14:31:26 (2.61 GB/s) - written to stdout [6100/6100]
+

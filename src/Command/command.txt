@@ -1,0 +1,63 @@
+php bin/console cache:clear
+
+php bin/console doctrine:database:drop --force
+
+php bin/console doctrine:database:create
+
+php bin/console make:migration
+
+php bin/console doctrine:migrations:migrate
+
+
+php bin/console app:init:sncf
+php bin/console app:init:town /var/www/navika/data/file/communes.geojson /var/www/navika/data/file/zip_code.json
+
+php bin/console app:provider:add "tc" "IDFM"    "Île-de-France Mobilités" "Île-de-France"        "6449c52caeceb71273a42dd3" 
+php bin/console app:provider:add "tc" "BIBUS"   "Bibus - Brest Métropole" "Brest"                "55ffbe0888ee387348ccb97d" 
+php bin/console app:provider:add "tc" "TAN"     "TAN - Nantes Métropole"  "Nantes Métropole"     "5b873d7206e3e76e5b2ffd32" 
+php bin/console app:provider:add "tc" "OURA"    "OURA - Agrégat AURA"     "Auvergne Rhône-Alpes" "61f7b4f89e4131deaf48fe02" 
+php bin/console app:provider:add "tc" "SIBRA"   "Sibra - Annecy"          "Annecy"               "5bd9843e634f413220f7f04a" 
+php bin/console app:provider:add "tc" "SYNCHRO" "Synchro - Chambéry"      "Grand Chambéry"       "5bae8c2806e3e75b699dc606"
+
+php bin/console app:provider:add "bikes" "VELIB"     "Vélib‘"       "Paris"            "https://velib-metropole-opendata.smoove.pro/opendata/Velib_Metropole/" 
+php bin/console app:provider:add "bikes" "VELOV"     "Vélo‘v"       "Lyon"             "https://transport.data.gouv.fr/gbfs/lyon/" 
+php bin/console app:provider:add "bikes" "CVELO"     "C.Vélo"       "Clermont Ferrand" "https://clermontferrand.publicbikesystem.net/customer/gbfs/v2/" 
+php bin/console app:provider:add "bikes" "VELOMAGG"  "Vélomagg‘"    "Montpellier"      "https://montpellier-fr-smoove.klervi.net/gbfs/" 
+php bin/console app:provider:add "bikes" "BENSANC"   "Besançon"     "Besançon"         "https://transport.data.gouv.fr/gbfs/besancon/" 
+php bin/console app:provider:add "bikes" "VLILLE"    "V‘lille"      "Lille"            "https://transport.data.gouv.fr/gbfs/vlille/" 
+php bin/console app:provider:add "bikes" "CRISTOLIB" "Cristolib"    "Créteil"          "https://transport.data.gouv.fr/gbfs/creteil/" 
+php bin/console app:provider:add "bikes" "CYCLIC"    "Cy‘clic"      "Rouen"            "https://transport.data.gouv.fr/gbfs/rouen/" 
+php bin/console app:provider:add "bikes" "VELAM"     "Vélam"        "Amiens"           "https://transport.data.gouv.fr/gbfs/amiens/" 
+php bin/console app:provider:add "bikes" "VELOSTAN"  "vélOstan’lib" "Nancy"            "https://transport.data.gouv.fr/gbfs/nancy/" 
+php bin/console app:provider:add "bikes" "VELOCITE"  "Vélocité"     "Mulhouse"         "https://transport.data.gouv.fr/gbfs/mulhouse/" 
+php bin/console app:provider:add "bikes" "STAR"      "STAR"         "Rennes"           "https://eu.ftp.opendatasoft.com/star/gbfs/" 
+php bin/console app:provider:add "bikes" "VELIVERT"  "VéliVert"     "St Etienne"       "https://saint-etienne-fr-smoove.klervi.net/gbfs/" 
+php bin/console app:provider:add "bikes" "VELOTOUS"  "VélÔToulouse" "Toulouse"         "https://transport.data.gouv.fr/gbfs/toulouse/" 
+php bin/console app:provider:add "bikes" "VCUB"      "VCub"         "Bordeaux"         "https://transport.data.gouv.fr/gbfs/vcub/" 
+php bin/console app:provider:add "bikes" "VELOPOP"   "Velopop’"     "Avignon"          "https://avignon-gbfs.klervi.net/gbfs/" 
+php bin/console app:provider:add "bikes" "VELO2"     "Vélo²"        "Cergy"            "https://transport.data.gouv.fr/gbfs/cergy-pontoise/" 
+php bin/console app:provider:add "bikes" "BICLOO"    "Bicloo"       "Nantes"           "https://transport.data.gouv.fr/gbfs/nantes/" 
+php bin/console app:provider:add "bikes" "VELOCEO"   "Vélocéo"      "Vannes"           "https://vannes-gbfs.klervi.net/gbfs/" 
+php bin/console app:provider:add "bikes" "OPTYMO"    "Optymo"       "Belfort"          "https://belfort-gbfs.klervi.net/gbfs/"
+
+php bin/console app:gbfs:update
+
+php bin/console app:gtfs:update
+
+php bin/console app:trafic:update
+
+php bin/console app:timetable:update
+
+
+// ------
+php bin/console app:provider:remove OURA
+*/2 * * * * php /var/www/navika_api/bin/console app:trafic:update
+0 2 * * * php /var/www/navika_api/bin/console app:timetable:update
+0 2 * * * php /var/www/navika_api/bin/console app:gbfs:update
+0 */1 * * * php /var/www/navika_api/bin/console app:gtfs:update
+
+// Toutes les deux minutes  : app:trafic:update
+// A 2h                     : app:timetable:update
+// A 2h                     : app:gbfs:update
+//
+// Toutes les heures        : app:gtfs:update
