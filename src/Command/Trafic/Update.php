@@ -92,9 +92,11 @@ class Update extends Command
                     if ( isset( $reports[$id] ) ) {
                         $route = $this->routesRepository->findOneBy( ['route_id' => 'IDFM:' . Functions::idfmFormat($line->line->id)] );
 
-                        $r = $reports[$id];
-                        $r->setRouteId( $route );
-                        $this->entityManager->persist( $r );
+                        if ($route != null) {
+                            $r = $reports[$id];
+                            $r->setRouteId( $route );
+                            $this->entityManager->persist( $r );
+                        }
                     }
                 }
             }

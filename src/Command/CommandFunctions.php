@@ -89,7 +89,7 @@ class CommandFunctions
     public static function perpareTempTable($db, $table, $temp_table){
         $req = $db->prepare("
             DROP TABLE IF EXISTS $temp_table;
-            CREATE TABLE $temp_table LIKE $table;
+            CREATE TEMPORARY TABLE $temp_table LIKE $table;
 
             SELECT MAX(AUTO_INCREMENT + 1) INTO @AutoInc
             FROM INFORMATION_SCHEMA.TABLES
