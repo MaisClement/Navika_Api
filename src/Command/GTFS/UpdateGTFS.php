@@ -78,6 +78,10 @@ class UpdateGTFS extends Command
 
                 } else if (strtotime($ressource['updated']) > strtotime($tc_provider->getUpdatedAt()->format('Y-m-d H:i:s'))) {
                     $output->writeln('    i ' . $ressource['updated'] . ' - ' . $tc_provider->getUpdatedAt()->format('Y-m-d H:i:s'));
+
+                    $tc_provider->setFlag(3);
+                    $tc_provider->setUpdatedAt(new DateTime());
+                    $this->entityManager->flush();
                 }
 
                 // Let's update
@@ -161,6 +165,10 @@ class UpdateGTFS extends Command
                         'translations' => [],
                         'attributions' => []
                     ];
+
+                    $tc_provider->setFlag(1);
+                    $tc_provider->setUpdatedAt(new DateTime());
+                    $this->entityManager->flush();
 
                     foreach ($types as $type => $columns) {
                         $file = $dir . '/' . $provider . '/' . $type . '.txt';

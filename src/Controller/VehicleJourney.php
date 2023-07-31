@@ -50,7 +50,7 @@ class VehicleJourney
             return new JsonResponse(Functions::ErrorMessage(400, 'One or more parameters are missing or null, have you "id" ?'), 400);
         }
 
-        if (str_starts_with($id, 'SNCF:')) {
+        if (str_starts_with($id, 'SNCF:') || str_starts_with($id, 'vehicle_journey:SNCF')) {
             $provider = 'SNCF';
         } else {
             $provider = 'ADMIN';

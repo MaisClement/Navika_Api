@@ -8,9 +8,9 @@ php bin/console make:migration
 
 php bin/console doctrine:migrations:migrate
 
-
 php bin/console app:init:sncf
-php bin/console app:init:town /var/www/navika/data/file/communes.geojson /var/www/navika/data/file/zip_code.json
+php bin/console app:init:town /var/www/navika/data/file/communes.geojson /var/www/Navika/data/file/zip_code.json
+php bin/console app:init:town /home/walnutlebg/navika_data/communes.geojson /home/walnutlebg/navika_data/zip_code.json
 
 php bin/console app:provider:add "tc" "IDFM"    "Île-de-France Mobilités" "Île-de-France"        "6449c52caeceb71273a42dd3" 
 php bin/console app:provider:add "tc" "BIBUS"   "Bibus - Brest Métropole" "Brest"                "55ffbe0888ee387348ccb97d" 
@@ -51,10 +51,10 @@ php bin/console app:timetable:update
 
 // ------
 php bin/console app:provider:remove OURA
-*/2 * * * * php /var/www/navika_api/bin/console app:trafic:update
-0 2 * * * php /var/www/navika_api/bin/console app:timetable:update
-0 2 * * * php /var/www/navika_api/bin/console app:gbfs:update
-0 */1 * * * php /var/www/navika_api/bin/console app:gtfs:update
+*/2 * * * * php /var/www/Navika/bin/console app:trafic:update
+0 2 * * * php /var/www/Navika/bin/console app:timetable:update
+0 2 * * * php /var/www/Navika/bin/console app:gbfs:update
+0 */1 * * * php /var/www/Navika/bin/console app:gtfs:update
 
 // Toutes les deux minutes  : app:trafic:update
 // A 2h                     : app:timetable:update
