@@ -200,29 +200,28 @@ class UpdateGTFS extends Command
                             $set = implode(",", $set);
 
                             try {
-                                // On enleve la vérification des clé quand on supprime (on supprime toutes les tables de toute façon)
-                                CommandFunctions::initDBUpdate($db);
-                                
-                                CommandFunctions::clearProviderDataInTable($db, $type, $provider);
-                                echo '1/5 ';
-
-                                // On réactive la vérification
-                                CommandFunctions::endDBUpdate($db);
-                                
                                 $table = 'temp_' . $type;
                                 CommandFunctions::perpareTempTable($db, $type, $table);
-                                echo '2/5 ';
+                                echo '1/5 ';
 
                                 CommandFunctions::insertFile($db, $table, $file, $header, $set, ',');
-                                echo '3/5 ';
+                                echo '2/5 ';
 
                                 $prefix = $provider . ':';
                                 foreach ($columns as $column) {
                                     CommandFunctions::prefixTable($db, $table, $column, $prefix);
                                 }
 
-                                echo '4/5 ';
+                                echo '3/5 ';
 
+                                // On enleve la vérification des clé quand on supprime (on supprime toutes les tables de toute façon)
+                                CommandFunctions::initDBUpdate($db);
+                                
+                                CommandFunctions::clearProviderDataInTable($db, $type, $provider);
+                                echo '4/5 ';
+                                // On réactive la vérification
+                                CommandFunctions::endDBUpdate($db);
+                                
                                 CommandFunctions::copyTable($db, $table, $type);
                                 echo '5/5 ' . PHP_EOL;
 

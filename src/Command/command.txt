@@ -9,7 +9,7 @@ php bin/console make:migration
 php bin/console doctrine:migrations:migrate
 
 php bin/console app:init:sncf
-php bin/console app:init:town /var/www/navika/data/file/communes.geojson /var/www/Navika/data/file/zip_code.json
+php bin/console app:init:town /var/www/navika/data/file/communes.geojson /var/www/navika/data/file/zip_code.json
 php bin/console app:init:town /home/walnutlebg/navika_data/communes.geojson /home/walnutlebg/navika_data/zip_code.json
 
 php bin/console app:provider:add "tc" "IDFM"    "Île-de-France Mobilités" "Île-de-France"        "6449c52caeceb71273a42dd3" 
