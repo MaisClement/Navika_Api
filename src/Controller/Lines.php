@@ -188,10 +188,8 @@ class Lines
     /**
      * Get routes
      * 
-     * Get routes based on query parameters. 
+     * Get routes informations 
      *  
-     * 
-     * Result can be filtered using more filter parameters like "allowed_modes[]" or "forbidden_lines[]"
      */
     #[Route('/lines/{id}', name: 'get_line_details', methods: ['GET'])]
     #[OA\Tag(name: 'Lines')]

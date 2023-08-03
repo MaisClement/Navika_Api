@@ -64,7 +64,7 @@ class InitTown extends Command
                     $town->setTownId($id);
                     $town->setTownName($name);
                     $town->setTownPolygon($polygon);
-                    $town->setZipCode($zip_code);
+                    $town->setZipCode($zip_code ?? '');
         
                     $this->entityManager->persist($town);
                 }
