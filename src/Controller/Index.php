@@ -31,12 +31,18 @@ class Index
      */
     #[Route('/index', name: 'get_index', methods: ['GET'])]
     #[OA\Tag(name: 'Index')]
+    #[OA\Parameter(
+        name:"v",
+        in:"query",
+        description:"App version",
+        required: true,
+        schema: new OA\Schema(type: 'string', default: '0.5')
+    )]
 
     #[OA\Response(
         response: 200,
         description: ''
-    )]
- 
+    )] 
     
     public function getIndex(Request $request)
     {

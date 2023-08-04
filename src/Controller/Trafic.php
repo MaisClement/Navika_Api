@@ -35,7 +35,7 @@ class Trafic
         description:"An array of line_id",
         schema: new OA\Schema( 
             type: "array", 
-            items: new OA\Items(type: "String")
+            items: new OA\Items(type: "string")
         )
     )]
 
