@@ -126,12 +126,12 @@ class Stops
   
         $q = $request->get('q');
         $q = urldecode( trim( $q ) );
-        $q = str_replace($search, $replace, $q);
+        $query = str_replace($search, $replace, $q);
 
         $lat = $request->get('lat');
         $lon = $request->get('lon');
 
-        if ($q != null && $lat != null && $lon != null) {
+        if ($query != null && $lat != null && $lon != null) {
             $search_type = 3;
             $stops1 = $this->stopRouteRepository->findByQueryName( $query );
             $stops2 = $this->stopRouteRepository->findByTownName( $query );
@@ -142,7 +142,7 @@ class Stops
             $search_type = 2;
             $stops = $this->stopRouteRepository->findByNearbyLocation($lat, $lon, 5000);
 
-        } else if ( $q != null ) {
+        } else if ( $query != null ) {
             $search_type = 1;
             $stops1 = $this->stopRouteRepository->findByQueryName( $query );
             $stops2 = $this->stopRouteRepository->findByTownName( $query );
