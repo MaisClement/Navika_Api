@@ -131,42 +131,27 @@ class Stops
         $lat = $request->get('lat');
         $lon = $request->get('lon');
 
-        if (isset($q) && isset($lat) && isset($lon)) {
-            $query = $q;
-                
+        if ($q != null && $lat != null && $lon != null) {
             $search_type = 3;
+            $stops1 = $this->stopRouteRepository->findByQueryName( $query );
+            $stops2 = $this->stopRouteRepository->findByTownName( $query );
 
-        } else if (isset($lat) && isset($lon)) {
+            $stops = array_merge($stops1, $stops2);
+
+        } else if ( $lat != null && $lon != null ) {
             $search_type = 2;
+            $stops = $this->stopRouteRepository->findByNearbyLocation($lat, $lon, 5000);
 
-        } else if (isset($q)) {
-            $query = $q;           
-
+        } else if ( $q != null ) {
             $search_type = 1;
+            $stops1 = $this->stopRouteRepository->findByQueryName( $query );
+            $stops2 = $this->stopRouteRepository->findByTownName( $query );
+
+            $stops = array_merge($stops1, $stops2);
+            // $stops = array_slice( $stops, 500 );
             
         } else {
             return new JsonResponse(Functions::ErrorMessage(400, 'One or more parameters are missing or null, have you "q" or "lat" and "lon" ?'), 400);
-        }
-
-        // ------ Request
-        //
-        if ($search_type == 3) {
-            $stops1 = $this->stopRouteRepository->findByQueryName( $query );
-            $stops2 = $this->stopRouteRepository->findByTownName( $query );
-
-            $stops = array_merge($stops1, $stops2);
-
-        } else if ($search_type == 2) {
-            $stops = $this->stopRouteRepository->findByNearbyLocation($lat, $lon, 5000);
-
-        } else if ($search_type == 1) {
-            $stops1 = $this->stopRouteRepository->findByQueryName( $query );
-            $stops2 = $this->stopRouteRepository->findByTownName( $query );
-
-            $stops = array_merge($stops1, $stops2);
-
-        } else {
-            return new JsonResponse(Functions::ErrorMessage(500, 'Impossible value, something really strange happened, please report it.'), 500);
         }
 
         // ------ Places
