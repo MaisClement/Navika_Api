@@ -415,6 +415,11 @@ class Functions
         return date_format($datetime, DATE_ATOM);
     }
 
+    public static function rPrepareTime($dt) {
+        $time = substr($dt, 0, 2) . ':' . substr($dt, 2, 2) . ':' .substr($dt, 4, 2);
+        return Functions::prepareTime($time);
+    }
+
     public static function getState($call){
         // theorical - ontime - delayed - cancelled - modified
         if (isset($call->DepartureStatus) && ($call->DepartureStatus == "cancelled" || $call->DepartureStatus == "delayed"))
@@ -494,6 +499,89 @@ class Functions
         return $departures;
     }
 
+    public static function getReports($disruptions){    
+        $echo = [];    
+        foreach ($disruptions as $disruption) {    
+            $causes = [];
+    
+            foreach ($disruption->impacted_objects[0]->impacted_stops as $stop) {    
+                $cause = $stop->cause;
+                if ( $cause != '' && !in_array( $cause, $causes ) ) {
+                    $causes[] = $cause;
+                }
+            }
+            foreach($causes as $cause) {
+                $echo[] = array(
+                    "id"            => (string) $disruption->id,
+                    "status"        => (string) $disruption->status,
+                    "cause"         => (string) $disruption->cause,
+                    "category"      => "Incidents",
+                    "severity"      => Functions::getSeverityByEffect($disruption->severity->effect),
+                    "effect"        => (string) $disruption->severity->effect,
+                    "updated_at"    => (string) $disruption->updated_at,
+                    "message"       => array(
+                        "title"         => Functions::getTitleByEffect($disruption->severity->effect),
+                        "text"          => $cause,
+                    ),
+                );
+            }
+            if ($causes == []) {
+                $echo[] = array(
+                    "id"            => (string) $disruption->id,
+                    "status"        => (string) $disruption->status,
+                    "cause"         => (string) $disruption->cause,
+                    "category"      => "Incidents",
+                    "severity"      => Functions::getSeverityByEffect($disruption->severity->effect),
+                    "effect"        => (string) $disruption->severity->effect,
+                    "updated_at"    => (string) $disruption->updated_at,
+                    "message"       => array(
+                        "title"         => Functions::getTitleByEffect($disruption->severity->effect),
+                        "text"          => '',
+                    ),
+                );
+            }
+        }
+        return $echo;
+    }
+
+    public static function getTitleByEffect($effect){
+        switch ($effect) {
+            case 'SIGNIFICANT_DELAYS':
+                return 'Retardé';
+            case 'REDUCED_SERVICE':
+                return 'Trajet modifié';
+            case 'NO_SERVICE':
+                return 'Supprimé';
+            case 'MODIFIED_SERVICE':
+                return 'Trajet modifié';
+            case 'ADDITIONAL_SERVICE':
+                return 'Train supplémentaire';
+            case 'DETOUR':
+                return 'Trajet modifié';
+            default: // UNKNOWN_EFFECT et OTHER_EFFECT
+                return "Trajet Perturbé";
+        }
+    }
+
+    public static function getSeverityByEffect($effect){
+        switch ($effect) {
+            case 'SIGNIFICANT_DELAYS':
+                return 4;
+            case 'REDUCED_SERVICE':
+                return 4;
+            case 'NO_SERVICE':
+                return 5;
+            case 'MODIFIED_SERVICE':
+                return 1;
+            case 'ADDITIONAL_SERVICE':
+                return 1;
+            case 'DETOUR':
+                return 4;
+            default: // UNKNOWN_EFFECT et OTHER_EFFECT
+                return 4;
+        }
+    }
+
     public static function getSNCFState($status, $level, $traffic){
         if ($level == "Normal") {
             return "ontime";
@@ -538,6 +626,39 @@ class Functions
             "atStop"                    =>  (string)  isset($call->VehicleAtStop)               ? ($call->VehicleAtStop ? 'true' : 'false') : 'false',
             "platform"                  =>  (string)  isset($call->ArrivalPlatformName->value)  ? $call->ArrivalPlatformName->value : '-'
         );
+    }
+
+    public static function getDisruptionForStop($disruptions){    
+        $stops = [];
+        $order = 0;    
+        foreach ($disruptions[0]->impacted_objects[0]->impacted_stops as $stop) {            
+            $stops[] = array(
+                "name"              => (string) $stop->stop_point->name,
+                "id"                => (string) $stop->stop_point->id,
+                "order"             => (int)    $order,
+                "type"              => (int)    count($disruptions[0]->impacted_objects[0]->impacted_stops) - 1 == $order ? 'terminus' : ($order == 0 ? 'origin' : ''),
+                "coords" => array(
+                    "lat"           => $stop->stop_point->coord->lat,
+                    "lon"           => $stop->stop_point->coord->lon,
+                ),
+                "stop_time" => array(
+                    "departure_time" =>  isset($stop->base_departure_time)    ? Functions::rPrepareTime($stop->base_departure_time)    : '',
+                    "arrival_time"   =>  isset($stop->base_arrival_time)      ? Functions::rPrepareTime($stop->base_arrival_time)      : '',
+                ),
+                "disruption" => array(
+                    "departure_state"       => (string) $stop->departure_status,
+                    "arrival_state"         => (string) $stop->arrival_status,
+                    "message"               => (string) "",
+                    "base_departure_time"   => (string) isset($stop->base_departure_time)    ? Functions::rPrepareTime($stop->base_departure_time)    : '',
+                    "departure_time"        => (string) isset($stop->amended_departure_time) ? Functions::rPrepareTime($stop->amended_departure_time) : '',
+                    "base_arrival_time"     => (string) isset($stop->base_arrival_time)      ? Functions::rPrepareTime($stop->base_arrival_time)      : '',
+                    "arrival_time"          => (string) isset($stop->amended_arrival_time)   ? Functions::rPrepareTime($stop->amended_arrival_time)   : '',
+                    "is-detour"             => $stop->is_detour,
+                ),
+            );
+            $order++;
+        }
+        return $stops;
     }
 
     public static function callIsFuture($call){

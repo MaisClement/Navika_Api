@@ -106,8 +106,8 @@ class VehicleJourney
             }
 
             if (isset($results->disruptions) && count($results->disruptions) > 0) {
-                $stops = getDisruptionForStop( $results->disruptions );
-                $reports = getReports( $results->disruptions );
+                $stops = Functions::getDisruptionForStop( $results->disruptions );
+                $reports = Functions::getReports( $results->disruptions );
             }
 
             $vehicle_journey = array(
