@@ -270,16 +270,16 @@ class UpdateGTFS extends Command
         $output->writeln('> Generate Stop Area...');
 
         $s = [];
-        $stops = $this->stopsRepository->FindBy(['location_type' => '0', 'parent_station' => '']);
+        $stops = $this->stopsRepository->FindBy(['location_type' => '0', 'parent_station' => null]);
 
         foreach ($stops as $stop) {
-            $id = $stop->getProviderId() . $stop->getStopName();
+            $id = $stop->getProviderId()->getId() . $stop->getStopName();
 
-            if (!isset($stops[$id])) {
+            if ( !isset( $stops[$id] ) ) {
                 $s[$id] = array(
                     'provider_id' => $stop->getProviderId(),
                     'stop_id' => 'ADMIN:' . $stop->getStopId(),
-                    'stop_code' => $stop->getStopCode(),
+                    'stop_code' => $stop->getStopCode() ?? '',
                     'stop_name' => $stop->getStopName(),
                     'stop_lat' => $stop->getStopLat(),
                     'stop_lon' => $stop->getStopLon(),
