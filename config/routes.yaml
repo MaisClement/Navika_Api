@@ -9,6 +9,11 @@ app.swagger_ui:
     methods: GET
     defaults: { _controller: nelmio_api_doc.controller.swagger_ui }
 
+app.swagger:
+    path: /doc.json
+    methods: GET
+    defaults: { _controller: nelmio_api_doc.controller.swagger }
+
 ## For backcompatibility
 OLD_get_index:
     path: /v0.1/index
