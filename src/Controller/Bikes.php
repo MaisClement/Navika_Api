@@ -35,7 +35,7 @@ class Bikes
         in:"path",
         description:"Longitude for location-based search",
         required: true,
-        schema: new OA\Schema(type: 'string')
+        schema: new OA\Schema(type: 'string', default: 'VELIB:85123644')
     )]
 
     #[OA\Response(
@@ -56,7 +56,7 @@ class Bikes
         
         $json = array(
             'name'     => $station->getStationName(),
-            'url'      => $station->getProviderId(),
+            'url'      => $station->getProviderId()->getUrl(),
             'coord' => array(
                 'lat'      => $station->getStationLat(),
                 'lon'      => $station->getStationLon(),
@@ -64,7 +64,7 @@ class Bikes
             'capacity' => (int) $station->getStationCapacity(),
         );
 
-        $url = $station->getProviderId() . 'station_status.json';
+        $url = $station->getProviderId()->getUrl() . 'station_status.json';
 
         //--- Infos en temps réel
         $client = HttpClient::create();

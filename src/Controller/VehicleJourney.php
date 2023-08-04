@@ -34,7 +34,7 @@ class VehicleJourney
          name:"id",
          in:"path",
          description:"vehicle journey id",
-         schema: new OA\Schema(type: "String")
+         schema: new OA\Schema(type: "string")
      )]
  
      #[OA\Response(

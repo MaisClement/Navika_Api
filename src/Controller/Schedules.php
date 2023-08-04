@@ -51,20 +51,20 @@ class Schedules
         in:"path",
         description:"stop_id",
         required: true,
-        schema: new OA\Schema( type: "String" )
+        schema: new OA\Schema( type: "string" )
     )]
     #[OA\Parameter(
         name:"l",
         in:"query",
         description:"To get schedules for only one line",
-        schema: new OA\Schema( type: "String" )
+        schema: new OA\Schema( type: "string" )
     )]
     #[OA\Parameter(
         name:"ungroupDepartures",
         in:"query",
         description:"if not null, disposition of departures will change for better time-sorted display",
         required: true,
-        schema: new OA\Schema( type: "String" )
+        schema: new OA\Schema( type: "string" )
     )]
 
     #[OA\Response(

@@ -8,6 +8,7 @@ use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\HttpClient\HttpClient;
 use Symfony\Component\HttpFoundation\Request;
 use App\Controller\Functions;
+use OpenApi\Attributes as OA;
 
 class Journeys
 {
@@ -18,7 +19,81 @@ class Journeys
         $this->params = $params;
     }
  
-    #[Route('/journeys', name: 'get_journeys')]
+    /**
+     * Get journeys
+     * 
+     * Get journeys between two points
+     * 
+     * You can specify the traveler type with `traveler_type`
+     * 
+     * Note that you can only have `arrival` OR `departure`. If both parameters are set, `parture` will be taken into account.
+     * If neither is set, `departure` will automatically be set for the current time.
+     * 
+     * Result can be filtered using more filter parameters like "forbidden_id[]" or "forbidden_lines[]"
+     */
+    #[Route('/journeys', name: 'get_journeys', methods: ['GET'])]
+    #[OA\Tag(name: 'Journeys')]
+    #[OA\Parameter(
+        name:"from",
+        in:"query",
+        description:"From",
+        required: true,
+        schema: new OA\Schema(type: 'string', default: 'IDFM:71556')
+    )]
+    #[OA\Parameter(
+        name:"to",
+        in:"query",
+        description:"To",
+        required: true,
+        schema: new OA\Schema(type: 'string', default: '2.3099569;48.8958478')
+    )]
+    #[OA\Parameter(
+        name:"departure",
+        in:"query",
+        description:"Departure date time",
+        schema: new OA\Schema(type: 'date-time')
+    )]
+    #[OA\Parameter(
+        name:"arrival",
+        in:"query",
+        description:"Desired arrival date time",
+        schema: new OA\Schema(type: 'date-time')
+    )]
+
+    
+    #[OA\Parameter(
+        name:"traveler_type",
+        in:"query",
+        description:"Type of traveler ",
+        schema: new OA\Schema(type: 'string', enum: ['standard', 'luggage', 'wheelchair'])
+    )]
+    #[OA\Parameter(
+        name:"forbidden_id",
+        in:"query",
+        description:"Forbidden lines or stops id",
+        schema: new OA\Schema( 
+            type: "array", 
+            items: new OA\Items(type: "string")
+        )
+    )]
+    #[OA\Parameter(
+        name:"forbidden_mode",
+        in:"query",
+        description:"Forbidden transportation mode",
+        schema: new OA\Schema( 
+            type: "array", 
+            items: new OA\Items(type: "string", enum: ['rail', 'metro', 'tram', 'bus', 'cable', 'funicular'])
+        )
+    )]
+
+
+
+
+    #[OA\Response(
+        response: 200,
+        description: ''
+    )] 
+    
     public function getJourneys(Request $request)
     {
         $from   = $request->get('from');
@@ -30,10 +105,25 @@ class Journeys
 
         // ------------
         
-        $datetime = $request->get('datetime') ?? date("c");
+        $departure = $request->get('departure');
+        $arrival = $request->get('arrival');
+
+        if ( $arrival != null ) {
+            $datetime = $arrival;
+            $datetime_represents = 'arrival';
+            
+        } else if ( $departure != null ) {
+            $datetime = $departure;
+            $datetime_represents = 'departure';
+        
+        } else {
+            $datetime = date(DATE_ATOM);
+            $datetime_represents = 'departure';
+        }
+
         $traveler_type = $request->get('traveler_type') ?? 'standard';
 
-        $url = $this->params->get('prim_url') . '/journeys?from=' . $from . '&to=' . $to . '&datetime=' . $datetime . '&traveler_type=' . $traveler_type . '&depth=3&data_freshness=realtime';
+        $url = $this->params->get('prim_url') . '/journeys?from=' . $from . '&to=' . $to . '&datetime=' . $datetime . '&datetime_represents=' . $datetime_represents . '&traveler_type=' . $traveler_type . '&depth=3&data_freshness=realtime';
         // $url = urlencode(trim($url));
 
         $client = HttpClient::create();        

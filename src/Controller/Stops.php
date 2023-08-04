@@ -59,7 +59,7 @@ class Stops
         description:"Array of allowed transportation modes",
         schema: new OA\Schema( 
             type: "array", 
-            items: new OA\Items(type: "String")
+            items: new OA\Items(type: "string")
         )
     )]
     #[OA\Parameter(
@@ -68,7 +68,7 @@ class Stops
         description:"Array of forbidden transportation modes",
         schema: new OA\Schema( 
             type: "array", 
-            items: new OA\Items(type: "String")
+            items: new OA\Items(type: "string")
         )
     )]
 
@@ -78,7 +78,7 @@ class Stops
         description:"An array of allowed stops",
         schema: new OA\Schema( 
             type: "array", 
-            items: new OA\Items(type: "String")
+            items: new OA\Items(type: "string")
         )
     )]
     #[OA\Parameter(
@@ -87,7 +87,7 @@ class Stops
         description:"An array of forbidden stops",
         schema: new OA\Schema( 
             type: "array", 
-            items: new OA\Items(type: "String")
+            items: new OA\Items(type: "string")
         )
     )]
 
@@ -97,7 +97,7 @@ class Stops
         description:"An array of allowed lines",
         schema: new OA\Schema( 
             type: "array", 
-            items: new OA\Items(type: "String")
+            items: new OA\Items(type: "string")
         )
     )]
     #[OA\Parameter(
@@ -106,7 +106,7 @@ class Stops
         description:"An array of forbidden lines",
         schema: new OA\Schema( 
             type: "array", 
-            items: new OA\Items(type: "String")
+            items: new OA\Items(type: "string")
         )
     )]
 
