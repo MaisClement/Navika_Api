@@ -127,7 +127,7 @@ class Places
                 "id"        =>  (string)    $result->id,
                 "name"      =>  (string)    $result->{$result->embedded_type}->name,
                 "type"      =>  (string)    $result->embedded_type,
-                "distance"  =>  (int)       isset($result->distance) ? $result->distance : 0,
+                "distance"  =>              floatval( isset($result->distance) ? $result->distance : 0 ),
                 "town"      =>  (string)    Functions::getTownByAdministrativeRegions($result->{$result->embedded_type}->administrative_regions),
                 "zip_code"  =>  (string)    Functions::getZipByAdministrativeRegions($result->{$result->embedded_type}->administrative_regions),
                 "coord"     => array(

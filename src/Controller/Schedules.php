@@ -96,6 +96,10 @@ class Schedules
         //--- On regarde si l'arrêt existe bien et on recuppere toutes les lignes
         $routes = $this->stopRouteRepository->findBy( ['stop_id' => $id] );
 
+        if ( count( $routes ) < 1 ) {
+            return new JsonResponse(Functions::ErrorMessage(400, 'Nothing where found for this station'), 400);
+        }
+
         $json['place'] = array(
             'id'        =>              $routes[0]->getStopId()->getStopId(),
             'name'      =>  (string)    $routes[0]->getStopName(),
@@ -109,10 +113,6 @@ class Schedules
             ),
             'modes'     => array()
         );
-
-        if ( count( $routes ) < 1 ) {
-            return new JsonResponse(Functions::ErrorMessage(400, 'Nothing where found for this station'), 400);
-        }
 
         $departures_lines = [];
         $lines_data = [];

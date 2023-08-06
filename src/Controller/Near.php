@@ -71,7 +71,6 @@ class Near
         $lon = $request->get('lon');
   
         $stops = $this->stopRouteRepository->findByNearbyLocation($lat, $lon, $zoom);
-        echo count( $stops );
 
         $json = [];        
         $json["stops"] = [];
