@@ -2,11 +2,11 @@
 
 namespace App\Entity;
 
-use App\Repository\TimetableRepository;
+use App\Repository\TimetablesRepository;
 use Doctrine\ORM\Mapping as ORM;
 
-#[ORM\Entity(repositoryClass: TimetableRepository::class)]
-class Timetable
+#[ORM\Entity(repositoryClass: TimetablesRepository::class)]
+class Timetables
 {
     #[ORM\Id]
     #[ORM\GeneratedValue]
@@ -17,7 +17,7 @@ class Timetable
     #[ORM\JoinColumn(name: "route_id", referencedColumnName: "route_id", nullable: true, onDelete: "CASCADE")]
     private ?Routes $route_id = null;
 
-    #[ORM\Column(columnDefinition: "ENUM('timetable', 'map')")]
+    #[ORM\Column(columnDefinition: "ENUM('timetables', 'map')")]
     private ?string $type = null;
 
     #[ORM\Column(length: 255)]

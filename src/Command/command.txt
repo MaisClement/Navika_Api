@@ -46,18 +46,18 @@ php bin/console app:gtfs:update
 
 php bin/console app:trafic:update
 
-php bin/console app:timetable:update
+php bin/console app:timetables:update
 
 
 // ------
 php bin/console app:provider:remove OURA
 */2 * * * * php /var/www/Navika/bin/console app:trafic:update
-0 2 * * * php /var/www/Navika/bin/console app:timetable:update
+0 2 * * * php /var/www/Navika/bin/console app:timetables:update
 0 2 * * * php /var/www/Navika/bin/console app:gbfs:update
 0 */1 * * * php /var/www/Navika/bin/console app:gtfs:update
 
 // Toutes les deux minutes  : app:trafic:update
-// A 2h                     : app:timetable:update
+// A 2h                     : app:timetables:update
 // A 2h                     : app:gbfs:update
 //
 // Toutes les heures        : app:gtfs:update

@@ -2,26 +2,26 @@
 
 namespace App\Repository;
 
-use App\Entity\Timetable;
+use App\Entity\Timetables;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Persistence\ManagerRegistry;
 
 /**
- * @extends ServiceEntityRepository<Timetable>
+ * @extends ServiceEntityRepository<Timetables>
  *
- * @method Timetable|null find($id, $lockMode = null, $lockVersion = null)
- * @method Timetable|null findOneBy(array $criteria, array $orderBy = null)
- * @method Timetable[]    findAll()
- * @method Timetable[]    findBy(array $criteria, array $orderBy = null, $limit = null, $offset = null)
+ * @method Timetables|null find($id, $lockMode = null, $lockVersion = null)
+ * @method Timetables|null findOneBy(array $criteria, array $orderBy = null)
+ * @method Timetables[]    findAll()
+ * @method Timetables[]    findBy(array $criteria, array $orderBy = null, $limit = null, $offset = null)
  */
-class TimetableRepository extends ServiceEntityRepository
+class TimetablesRepository extends ServiceEntityRepository
 {
     public function __construct(ManagerRegistry $registry)
     {
-        parent::__construct($registry, Timetable::class);
+        parent::__construct($registry, Timetables::class);
     }
 
-    public function save(Timetable $entity, bool $flush = false): void
+    public function save(Timetables $entity, bool $flush = false): void
     {
         $this->getEntityManager()->persist($entity);
 
@@ -30,7 +30,7 @@ class TimetableRepository extends ServiceEntityRepository
         }
     }
 
-    public function remove(Timetable $entity, bool $flush = false): void
+    public function remove(Timetables $entity, bool $flush = false): void
     {
         $this->getEntityManager()->remove($entity);
 
@@ -40,7 +40,7 @@ class TimetableRepository extends ServiceEntityRepository
     }
 
 //    /**
-//     * @return Timetable[] Returns an array of Timetable objects
+//     * @return Timetables[] Returns an array of Timetables objects
 //     */
 //    public function findByExampleField($value): array
 //    {
@@ -54,7 +54,7 @@ class TimetableRepository extends ServiceEntityRepository
 //        ;
 //    }
 
-//    public function findOneBySomeField($value): ?Timetable
+//    public function findOneBySomeField($value): ?Timetables
 //    {
 //        return $this->createQueryBuilder('t')
 //            ->andWhere('t.exampleField = :val')

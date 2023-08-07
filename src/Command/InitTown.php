@@ -72,8 +72,7 @@ class InitTown extends Command
 
             } catch (Exception $e) {
                 echo $name;
-
-            }            
+            }      
         }
         
         $output->writeln('> Ecriture...');
