@@ -308,14 +308,14 @@ class Schedules
                     // Get lines details
                     if (!isset($lines_data[$line_id])) {
                         $route = $this->routesRepository->findOneBy( ['route_id' => $line_id] );
-                        $lines_data[$line_id] = $route->getRoute();
+                        if ( $route != null ) {
+                            $lines_data[$line_id] = $route->getRoute();
 
-                        //modes
-                        if ( !in_array( $route->getTransportMode(), $json['place']['modes'] ) ) {
-                            $json['place']['modes'][] = $route->getTransportMode();
+                            //modes
+                            if ( !in_array( $route->getTransportMode(), $json['place']['modes'] ) ) {
+                                $json['place']['modes'][] = $route->getTransportMode();
+                            }
                         }
-        
-                
                     }
 
                     if (($lines_data[$line_id]['mode'] == "rail" || $lines_data[$line_id]['mode'] == "nationalrail") && Functions::callIsFuture($call)) {
