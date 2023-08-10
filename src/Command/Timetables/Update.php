@@ -1,11 +1,11 @@
 <?php
 
-namespace App\Command\Timetable;
+namespace App\Command\Timetables;
 
 use App\Controller\Functions;
-use App\Entity\Timetable;
+use App\Entity\Timetables;
 use App\Repository\RoutesRepository;
-use App\Repository\TimetableRepository;
+use App\Repository\TimetablesRepository;
 use DateTime;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\Console\Command\Command;
@@ -22,15 +22,15 @@ class Update extends Command
     private $params;
     
     private RoutesRepository $routesRepository;
-    private TimetableRepository $timetableRepository;
+    private TimetablesRepository $timetablesRepository;
     
-    public function __construct(EntityManagerInterface $entityManager, ParameterBagInterface $params, TimetableRepository $timetableRepository, RoutesRepository $routesRepository)
+    public function __construct(EntityManagerInterface $entityManager, ParameterBagInterface $params, TimetablesRepository $timetablesRepository, RoutesRepository $routesRepository)
     {
         $this->entityManager = $entityManager;
         $this->params = $params;
         
         $this->routesRepository = $routesRepository;
-        $this->timetableRepository = $timetableRepository;
+        $this->timetablesRepository = $timetablesRepository;
         
         parent::__construct();
     }
@@ -38,14 +38,14 @@ class Update extends Command
     protected function configure(): void
     {
         $this
-            ->setName('app:timetable:update')
-            ->setDescription('Update timetable data');
+            ->setName('app:timetables:update')
+            ->setDescription('Update timetables data');
     }
     
     function execute(InputInterface $input, OutputInterface $output): int
     {
         $dir = sys_get_temp_dir();
-        $file = $dir . '/timetable.csv';
+        $file = $dir . '/timetables.csv';
 
         // Récupération du trafic
         $output->writeln('> Geting timetables...');
@@ -69,18 +69,18 @@ class Update extends Command
             if ( !is_bool($row) && $row[0] != 'ID_Line') {
                 
                 $route_id = 'IDFM:' . $row[0];
-                $type = $row[3] == 'HORAIRE' ? 'timetable' : 'map';
+                $type = $row[3] == 'HORAIRE' ? 'timetables' : 'map';
 
                 $route = $this->routesRepository->findOneBy( ['route_id' => $route_id] );
 
                 if ($route != null) {
-                    $timetable = new Timetable();
-                    $timetable->setRouteId( $route );
-                    $timetable->setType( $type );
-                    $timetable->setName( $row[1] );
-                    $timetable->setUrl( $row[2] );
+                    $timetables = new Timetables();
+                    $timetables->setRouteId( $route );
+                    $timetables->setType( $type );
+                    $timetables->setName( $row[1] );
+                    $timetables->setUrl( $row[2] );
     
-                    $this->entityManager->persist( $timetable );
+                    $this->entityManager->persist( $timetables );
                 }
             }
         }      
@@ -88,10 +88,10 @@ class Update extends Command
         // On efface les messages existant
         $output->writeln('> Remove old...');
         
-        $old_timetables = $this->timetableRepository->findAll();
+        $old_timetables = $this->timetablesRepository->findAll();
 
-        foreach ($old_timetables as $old_timetable) {
-            $this->entityManager->remove($old_timetable);
+        foreach ($old_timetables as $old_timetables) {
+            $this->entityManager->remove($old_timetables);
         }
         
         // On sauvegarde

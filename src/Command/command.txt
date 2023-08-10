@@ -6,7 +6,7 @@ php bin/console doctrine:database:create
 
 php bin/console make:migration
 
-php bin/console doctrine:migrations:migrate
+php bin/console doctrine:migrations:migrate --no-interaction
 
 php bin/console app:init:sncf
 php bin/console app:init:town /var/www/navika/data/file/communes.geojson /var/www/navika/data/file/zip_code.json
@@ -46,18 +46,18 @@ php bin/console app:gtfs:update
 
 php bin/console app:trafic:update
 
-php bin/console app:timetable:update
+php bin/console app:timetables:update
 
 
 // ------
 php bin/console app:provider:remove OURA
 */2 * * * * php /var/www/Navika/bin/console app:trafic:update
-0 2 * * * php /var/www/Navika/bin/console app:timetable:update
+0 2 * * * php /var/www/Navika/bin/console app:timetables:update
 0 2 * * * php /var/www/Navika/bin/console app:gbfs:update
 0 */1 * * * php /var/www/Navika/bin/console app:gtfs:update
 
 // Toutes les deux minutes  : app:trafic:update
-// A 2h                     : app:timetable:update
+// A 2h                     : app:timetables:update
 // A 2h                     : app:gbfs:update
 //
 // Toutes les heures        : app:gtfs:update

@@ -66,8 +66,11 @@ class Routes
     #[ORM\OneToMany(mappedBy: 'route_id', targetEntity: FareRules::class)]
     private Collection $fareRules;
 
-    #[ORM\OneToMany(mappedBy: 'route_id', targetEntity: Timetable::class)]
+    #[ORM\OneToMany(mappedBy: 'route_id', targetEntity: Timetables::class)]
     private Collection $timetables;
+
+    #[ORM\OneToMany(mappedBy: 'route_id', targetEntity: RouteSub::class)]
+    private Collection $routeSubs;
 
     public function __construct()
     {
@@ -76,6 +79,7 @@ class Routes
         $this->trafics = new ArrayCollection();
         $this->fareRules = new ArrayCollection();
         $this->timetables = new ArrayCollection();
+        $this->routeSubs = new ArrayCollection();
     }
 
     public function getProviderId(): ?Provider 
@@ -460,29 +464,59 @@ class Routes
     }
 
     /**
-     * @return Collection<int, Timetable>
+     * @return Collection<int, Timetables>
      */
     public function getTimetables(): Collection
     {
         return $this->timetables;
     }
 
-    public function addTimetable(Timetable $timetable): static
+    public function addTimetables(Timetables $timetables): static
     {
-        if (!$this->timetables->contains($timetable)) {
-            $this->timetables->add($timetable);
-            $timetable->setRouteId($this);
+        if (!$this->timetables->contains($timetables)) {
+            $this->timetables->add($timetables);
+            $timetables->setRouteId($this);
         }
 
         return $this;
     }
 
-    public function removeTimetable(Timetable $timetable): static
+    public function removeTimetables(Timetables $timetables): static
     {
-        if ($this->timetables->removeElement($timetable)) {
+        if ($this->timetables->removeElement($timetables)) {
             // set the owning side to null (unless already changed)
-            if ($timetable->getRouteId() === $this) {
-                $timetable->setRouteId(null);
+            if ($timetables->getRouteId() === $this) {
+                $timetables->setRouteId(null);
+            }
+        }
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, RouteSub>
+     */
+    public function getRouteSubs(): Collection
+    {
+        return $this->routeSubs;
+    }
+
+    public function addRouteSub(RouteSub $routeSub): static
+    {
+        if (!$this->routeSubs->contains($routeSub)) {
+            $this->routeSubs->add($routeSub);
+            $routeSub->setRouteId($this);
+        }
+
+        return $this;
+    }
+
+    public function removeRouteSub(RouteSub $routeSub): static
+    {
+        if ($this->routeSubs->removeElement($routeSub)) {
+            // set the owning side to null (unless already changed)
+            if ($routeSub->getRouteId() === $this) {
+                $routeSub->setRouteId(null);
             }
         }
 

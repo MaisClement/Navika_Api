@@ -2,26 +2,26 @@
 
 namespace App\Repository;
 
-use App\Entity\ReportsSubscriber;
+use App\Entity\RouteSub;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Persistence\ManagerRegistry;
 
 /**
- * @extends ServiceEntityRepository<ReportsSubscriber>
+ * @extends ServiceEntityRepository<RouteSub>
  *
- * @method ReportsSubscriber|null find($id, $lockMode = null, $lockVersion = null)
- * @method ReportsSubscriber|null findOneBy(array $criteria, array $orderBy = null)
- * @method ReportsSubscriber[]    findAll()
- * @method ReportsSubscriber[]    findBy(array $criteria, array $orderBy = null, $limit = null, $offset = null)
+ * @method RouteSub|null find($id, $lockMode = null, $lockVersion = null)
+ * @method RouteSub|null findOneBy(array $criteria, array $orderBy = null)
+ * @method RouteSub[]    findAll()
+ * @method RouteSub[]    findBy(array $criteria, array $orderBy = null, $limit = null, $offset = null)
  */
-class ReportsSubscriberRepository extends ServiceEntityRepository
+class RouteSubRepository extends ServiceEntityRepository
 {
     public function __construct(ManagerRegistry $registry)
     {
-        parent::__construct($registry, ReportsSubscriber::class);
+        parent::__construct($registry, RouteSub::class);
     }
 
-    public function save(ReportsSubscriber $entity, bool $flush = false): void
+    public function save(RouteSub $entity, bool $flush = false): void
     {
         $this->getEntityManager()->persist($entity);
 
@@ -30,7 +30,7 @@ class ReportsSubscriberRepository extends ServiceEntityRepository
         }
     }
 
-    public function remove(ReportsSubscriber $entity, bool $flush = false): void
+    public function remove(RouteSub $entity, bool $flush = false): void
     {
         $this->getEntityManager()->remove($entity);
 
@@ -40,7 +40,7 @@ class ReportsSubscriberRepository extends ServiceEntityRepository
     }
 
 //    /**
-//     * @return ReportsSubscriber[] Returns an array of ReportsSubscriber objects
+//     * @return RouteSub[] Returns an array of RouteSub objects
 //     */
 //    public function findByExampleField($value): array
 //    {
@@ -54,7 +54,7 @@ class ReportsSubscriberRepository extends ServiceEntityRepository
 //        ;
 //    }
 
-//    public function findOneBySomeField($value): ?ReportsSubscriber
+//    public function findOneBySomeField($value): ?RouteSub
 //    {
 //        return $this->createQueryBuilder('r')
 //            ->andWhere('r.exampleField = :val')

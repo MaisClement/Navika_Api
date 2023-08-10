@@ -275,7 +275,7 @@ class UpdateGTFS extends Command
         foreach ($stops as $stop) {
             $id = $stop->getProviderId()->getId() . $stop->getStopName();
 
-            if ( !isset( $stops[$id] ) ) {
+            if ( !isset( $s[$id] ) ) {
                 $s[$id] = array(
                     'provider_id' => $stop->getProviderId(),
                     'stop_id' => 'ADMIN:' . $stop->getStopId(),
@@ -294,7 +294,7 @@ class UpdateGTFS extends Command
             $stp->setProviderId($stop['provider_id']);
             $stp->setStopId($stop['stop_id']);
             $stp->setStopCode($stop['stop_code']);
-            $stp->setStopName($stop['stop_code']);
+            $stp->setStopName($stop['stop_name']);
             $stp->setStopLat($stop['stop_lat']);
             $stp->setStopLon($stop['stop_lon']);
             $stp->setLocationType('1');
