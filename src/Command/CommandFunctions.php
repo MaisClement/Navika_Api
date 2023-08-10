@@ -241,7 +241,7 @@ class CommandFunctions
             INNER JOIN town T
             ON ST_Contains(
                 T.town_polygon,
-                point(SR.stop_lat, SR.stop_lon)
+                point(SR.stop_lon, SR.stop_lat)
             )
             
             SET SR.town_id = T.town_id,
