@@ -430,7 +430,7 @@ class UpdateGTFS extends Command
             $stop_id = $stop->getStopId()->getStopId();
 
             if ( !in_array($stop_id, $_stops) ) {
-                echo $stop->getStopName();
+                // echo $stop->getStopName();
 
                 $_stops[] = $stop_id;
 
