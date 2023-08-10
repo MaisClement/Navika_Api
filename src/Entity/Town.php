@@ -5,7 +5,7 @@ namespace App\Entity;
 use App\Repository\TownRepository;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
-use CrEOF\Spatial\PHP\Types\Geometry\Polygon;
+use CrEOF\Spatial\PHP\Types\Geography\Polygon;
 
 use Doctrine\ORM\Mapping as ORM;
 

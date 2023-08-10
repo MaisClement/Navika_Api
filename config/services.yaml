@@ -76,6 +76,9 @@ services:
     App\Command\Provider\Remove:
         tags: [ 'console.command' ]
 
+    App\Command\Provider\Reset:
+        tags: [ 'console.command' ]
+
     App\Command\Trafic\Update:
         tags: [ 'console.command' ]
 

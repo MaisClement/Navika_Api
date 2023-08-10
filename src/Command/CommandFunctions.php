@@ -233,27 +233,6 @@ class CommandFunctions
         $req->execute(array());
         return $req;
     }
-    
-    public static function generateTownInStopRoute($db){
-        $req = $db->prepare("
-            UPDATE stop_route SR 
-
-            INNER JOIN town T
-            ON ST_Contains(
-                T.town_polygon,
-                point(SR.stop_lon, SR.stop_lat)
-            )
-            
-            SET SR.town_id = T.town_id,
-                SR.town_name = T.town_name,
-                SR.town_query_name = T.town_name,
-                SR.zip_code = T.zip_code
-                
-            WHERE SR.town_id IS NULL;
-        ");
-        $req->execute(array());
-        return $req;
-    }
 
     public static function generateQueryRoute($db){
         $req = $db->prepare("

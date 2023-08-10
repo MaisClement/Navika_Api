@@ -155,7 +155,7 @@ class Schedules
         //On utilise l'api (differe selon le provider)
 
         if ($provider == 'SNCF') {
-//_SNCF
+
             //SNCF GC
             $client = HttpClient::create();
             $response = $client->request('GET', $sncf_url, [
@@ -164,40 +164,40 @@ class Schedules
                 ],
             ]);
             $status = $response->getStatusCode();
-//_SNCF
+
             if ($status != 200){
                 return new JsonResponse(Functions::ErrorMessage(520, 'Invalid fetched data'), 520);
             }
-//_SNCF
+
             $content = $response->getContent();
             $results = json_decode($content);
-//_SNCF
+
             //SNCF API
             $api_client = HttpClient::create();
             $api_response = $api_client->request('GET', $sncf_url_api, [
                 'auth_basic' => [$this->params->get('sncf_api_key'), ''],
             ]);
             $api_status = $api_response->getStatusCode();
-//_SNCF
+
             if ($api_status != 200){
                 return new JsonResponse(Functions::ErrorMessage(520, 'Invalid fetched data'), 520);
             }
-//_SNCF
+
             $api_content = $api_response->getContent();
             $api_results = json_decode($api_content);
-//_SNCF
+
             $departures = [];
             $ungrouped_departures = [];
-//_SNCF
+
             foreach ($results as $result) {
-//_SNCF
+
                 $details = Functions::getApiDetails($api_results, $result->trainNumber);
-//_SNCF
+
                 $dep = array(
                     "informations" => array(
                         "direction" => array(
                             "id"         =>  (string)    $details['to_id'],
-                            "name"       =>  (string)    $result->traffic->destination,
+                            "name"       =>  (string)    isset($result->traffic->oldDestination) ? $result->traffic->oldDestination : $result->traffic->destination,
                         ),
                         "origin" => array(
                             "id"         =>  (string)    "",
@@ -223,10 +223,10 @@ class Schedules
                         "platform"                  =>  (string)  $result->platform->track != null ? $result->platform->track : ($result->trainMode == "CAR" ? "GR" : "-"),
                     )
                 );
-//_SNCF
+
                 // Si groupé
                 $departures[] = $dep;
-//_SNCF
+
                 // Si dégroupé
                 $dep['informations']['line'] = array(
                     "id"         =>  (string)    "SNCF",
@@ -238,13 +238,13 @@ class Schedules
                 );
                 $ungrouped_departures[] = $dep;
             }
-//_SNCF
+
             // Train non regroupé
             if (isset($_GET['ungroupDepartures']) && $_GET['ungroupDepartures'] == 'true') {
                 $json['departures'] = $ungrouped_departures;
-//_SNCF
+
             } else { // Train regroupé
-//_SNCF
+
                 $json['departures'][] = array(
                     "id"         =>  (string)    "SNCF",
                     "code"       =>  (string)    "SNCF",
@@ -255,12 +255,12 @@ class Schedules
                     "departures" =>  $departures
                 );
             }
-//_SNCF
+
             //modes
             $json['place']['modes'] = ['nationalrail'];
-//_SNCF
+
         } else if ($provider == 'IDFM') {
-//*IDFM
+
             $client = HttpClient::create();
             $response = $client->request('GET', $prim_url, [
                 'headers' => [

@@ -741,7 +741,8 @@ class Functions
         return $results->fetchAll();
     }
 
-    public static function getTripStopsByNameOrId($em, $trip_id, $date){    
+    public static function getTripStopsByNameOrId($em, $trip_id, $date)
+    {
         $req = $em->prepare("
             SELECT *
 
@@ -786,5 +787,21 @@ class Functions
         $req->bindValue("trip_id", $trip_id);
         $results = $req->executeQuery();
         return $results->fetchAll();
+    }
+  
+    public static function setTownForStopRoute($db, $stop_id, $town)
+    {
+        $req = $db->prepare("
+            UPDATE stop_route SR 
+
+            SET SR.town_id = ?,
+                SR.town_name = ?,
+                SR.town_query_name = ?,
+                SR.zip_code = ?
+                
+            WHERE SR.stop_id = ?;
+        ");
+        $req->execute( [$town->getTownId(), $town->getTownName(), $town->getTownName(), $town->getZipCode(), $stop_id] );
+        return $req;
     }
 }
