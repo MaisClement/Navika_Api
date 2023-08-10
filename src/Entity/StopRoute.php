@@ -216,6 +216,16 @@ class StopRoute
         return $this;
     }
 
+    public function setTown(Town $town): static
+    {
+        $this->town_id = $town;
+        $this->town_name = $town->getTownName();
+        $this->town_query_name = $town->getTownName();
+        $this->zip_code = $town->getZipCode();
+
+        return $this;
+    }
+
     public function getTownId(): ?Town
     {
         return $this->town_id;

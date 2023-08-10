@@ -39,6 +39,17 @@ class TownRepository extends ServiceEntityRepository
         }
     }
 
+    public function findTownByCoordinates($longitude, $latitude)
+    {
+        $queryBuilder = $this->createQueryBuilder('t')
+            ->select('t')
+            ->where('stcontains(t.town_polygon, POINT(:longitude, :latitude)) = 1')
+            ->setParameter('longitude', $longitude)
+            ->setParameter('latitude', $latitude);
+
+        return $queryBuilder->getQuery()->getOneOrNullResult();
+    }
+
 //    /**
 //     * @return Town[] Returns an array of Town objects
 //     */

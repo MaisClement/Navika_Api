@@ -7,7 +7,7 @@ doctrine:
         
         types:
             geometry:   CrEOF\Spatial\DBAL\Types\GeometryType
-            point: CrEOF\Spatial\DBAL\Types\Geometry\PointType
+            point:      CrEOF\Spatial\DBAL\Types\Geometry\PointType
             polygon:    CrEOF\Spatial\DBAL\Types\Geometry\PolygonType
             linestring: CrEOF\Spatial\DBAL\Types\Geometry\LineStringType
 
@@ -33,6 +33,7 @@ doctrine:
                 DATE_FORMAT: DoctrineExtensions\Query\Mysql\DateFormat
                 
             numeric_functions:
+                stcontains: CrEOF\Spatial\ORM\Query\AST\Functions\MySql\STContains
                 stdistance: CrEOF\Spatial\ORM\Query\AST\Functions\MySql\STDistance
                 stdistancesphere: CrEOF\Spatial\ORM\Query\AST\Functions\MySql\STDistanceSphere
                 distance:               CrEOF\Spatial\ORM\Query\AST\Functions\MySql\Distance
