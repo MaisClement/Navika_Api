@@ -198,7 +198,7 @@ class Stops
                             'type'      =>  (string)    'stop_area',
                             'distance'  =>  (int)       $search_type != 1 ? Functions::calculateDistance($stop->getStopLat(), $stop->getStopLon(), $lat, $lon) : 0,
                             'town'      =>  (string)    $stop->getTownName(),
-                            'zip_code'  =>  (string)    '',
+                            'zip_code'  =>  (string)    $stop->getZipCode(),
                             'coord'     => array(
                                 'lat'       =>      floatval($stop->getStopLat()),
                                 'lon'       =>      floatval($stop->getStopLon()),

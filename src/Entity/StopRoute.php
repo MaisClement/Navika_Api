@@ -262,6 +262,18 @@ class StopRoute
         return $this;
     }
 
+    public function getZipCode(): ?string
+    {
+        return $this->zip_code;
+    }
+
+    public function setZipCode(?string $zip_code): static
+    {
+        $this->zip_code = $zip_code;
+
+        return $this;
+    }
+
     public function getStops(): ?Stops
     {
         return $this->stops;

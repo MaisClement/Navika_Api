@@ -48,6 +48,7 @@ php bin/console app:trafic:update
 
 php bin/console app:timetables:update
 
+php bin/console app:provider:reset
 
 // ------
 php bin/console app:provider:remove OURA
