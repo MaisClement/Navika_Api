@@ -238,20 +238,20 @@ class Lines
         $timetables['timetables'] = [];
 
         $_timetables = $route->getTimetables();
-        foreach( $_timetables as $timetables) {
-            if ( $timetables->getType() == 'map') {
+        foreach( $_timetables as $timetable) {
+            if ( $timetable->getType() == 'map') {
                 $timetables['map'][] = array(
-                    "name"      => (String)     $timetables->getName(),
-                    "url"       => (String)     $timetables->getUrl(),
+                    "name"      => (String)     $timetable->getName(),
+                    "url"       => (String)     $timetable->getUrl(),
                 );
             }
-            if ( $timetables->getType() == 'timetables' && str_ends_with($timetables->getUrl(), '.pdf')) {
+            if ( $timetable->getType() == 'timetables' && str_ends_with($timetable->getUrl(), '.pdf')) {
                 $timetables['timetables'][] = array(
-                    "name"      => (String)     $timetables->getName(),
-                    "url"       => (String)     $timetables->getUrl(),
+                    "name"      => (String)     $timetable->getName(),
+                    "url"       => (String)     $timetable->getUrl(),
                 );
             }
-        }        
+        }             
 
         // ----
         $json = [];
