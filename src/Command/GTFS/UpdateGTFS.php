@@ -421,32 +421,6 @@ class UpdateGTFS extends Command
 
         CommandFunctions::prepareStopRoute($db);
 
-        $output->writeln('> Updating stop_toute for Town...');
-
-        $_stops = [];
-        $stops = $this->stopRouteRepository->findBy(['town_id' => null]);
-
-        foreach( $stops as $stop ) {
-            $stop_id = $stop->getStopId()->getStopId();
-
-            if ( !in_array($stop_id, $_stops) ) {
-                // echo $stop->getStopName();
-
-                $_stops[] = $stop_id;
-
-                $town = $this->townRepository->findTownByCoordinates( $stop->getStopLon(), $stop->getStopLat() );
-        
-                if ( $town != null ) {
-                    Functions::setTownForStopRoute($db, $stop_id, $town);
-                    // $stop->setTown( $town );
-                    // $this->entityManager->flush();
-                } else {
-                    echo 'null';
-                }
-
-            }            
-        }
-
         $output->writeln('> Preparing for query...');
         CommandFunctions::generateQueryRoute($db);
         
