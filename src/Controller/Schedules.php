@@ -197,7 +197,7 @@ class Schedules
                     "informations" => array(
                         "direction" => array(
                             "id"         =>  (string)    $details['to_id'],
-                            "name"       =>  (string)    isset($result->traffic->oldDestination) ? $result->traffic->oldDestination : $result->traffic->destination,
+                            "name"       =>  (string)    $result->traffic->oldDestination != "" ? $result->traffic->oldDestination : $result->traffic->destination,
                         ),
                         "origin" => array(
                             "id"         =>  (string)    "",
