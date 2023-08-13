@@ -706,7 +706,7 @@ class Functions
             INNER JOIN trips T 
             ON ST.trip_id = T.trip_id
             
-            INNER JOIN calendar C 
+            LEFT JOIN calendar C 
             ON T.service_id = C.service_id
             
             LEFT JOIN calendar_dates CD 
@@ -727,9 +727,9 @@ class Functions
                             OR DATE_FORMAT(:date, '%w') = '6' AND C.saturday = '1'
                             OR DATE_FORMAT(:date, '%w') = '0' AND C.sunday = '1'
                         ) 
-                        AND (CD.exception_type <> 2 OR CD.exception_type IS NULL)
+                        AND (CD.exception_type <> '2' OR CD.exception_type IS NULL)
                     )
-                    OR CD.exception_type = 1 
+                    OR CD.exception_type = '1' 
                 )
             ORDER BY ST.departure_time
         ");

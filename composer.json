@@ -54,7 +54,6 @@
     },
     "scripts": {
         "auto-scripts": {
-            "php -dmemory_limit=512M bin/console cache:clear": "script",
             "assets:install %PUBLIC_DIR%": "symfony-cmd"
         },
         "post-install-cmd": [

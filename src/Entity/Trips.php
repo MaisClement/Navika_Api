@@ -21,11 +21,10 @@ class Trips
 
     #[ORM\Id]
     #[ORM\Column(length: 255)]
-    private ?string $trip_id = null;    
-
-    #[ORM\ManyToOne(inversedBy: 'trips')]
-    #[ORM\JoinColumn(name: "service_id", referencedColumnName: "service_id", nullable: true, onDelete: "CASCADE")]
-    private ?Calendar $service_id = null;
+    private ?string $trip_id = null;
+    
+    #[ORM\Column(type: Types::TEXT, nullable: true)]
+    private ?string $service_id = null;
 
     #[ORM\Column(type: Types::TEXT, nullable: true)]
     private ?string $trip_headsign = null;

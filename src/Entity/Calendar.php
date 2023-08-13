@@ -11,11 +11,15 @@ use Doctrine\ORM\Mapping as ORM;
 #[ORM\Entity(repositoryClass: CalendarRepository::class)]
 class Calendar
 {
+    #[ORM\Id]
+    #[ORM\GeneratedValue]
+    #[ORM\Column]
+    private ?int $id = null;
+
     #[ORM\ManyToOne(inversedBy: 'calendars')]
     #[ORM\JoinColumn(name: "provider_id",  nullable: true, onDelete: "CASCADE")]
     private ?Provider $provider_id = null;
 
-    #[ORM\Id]
     #[ORM\Column(length: 255)]
     private ?string $service_id = null;
 
@@ -45,9 +49,6 @@ class Calendar
 
     #[ORM\Column(type: Types::DATE_MUTABLE)]
     private ?\DateTimeInterface $end_date = null;
-
-    #[ORM\OneToMany(mappedBy: 'service_id', targetEntity: CalendarDates::class)]
-    private Collection $calendarDates;
 
     public function __construct()
     {

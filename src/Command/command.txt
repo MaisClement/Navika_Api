@@ -44,6 +44,8 @@ php bin/console app:gbfs:update
 
 php bin/console app:gtfs:update
 
+php bin/console app:town:update
+
 php bin/console app:trafic:update
 
 php bin/console app:timetables:update

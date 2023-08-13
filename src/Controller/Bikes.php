@@ -72,11 +72,11 @@ class Bikes
         $response = $client->request('GET', $url);
         $status = $response->getStatusCode();
 
+        $sid = substr($id, strpos($id, ':') + 1);
+
         if ($status == 200){
             $content = $response->getContent();
             $results = json_decode($content);
-
-            $sid = substr($id, strpos($id, ':') + 1);
 
             foreach ($results->data->stations as $station) {
                 if ($station->station_id == $sid) {

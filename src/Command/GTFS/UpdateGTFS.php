@@ -75,21 +75,26 @@ class UpdateGTFS extends Command
 
             $ressource = CommandFunctions::getGTFSDataFromApi($tc_provider);
 
+            $to_update = false;
+
             if ($tc_provider->getFlag() == 1) {
                 $output->writeln('    i Not fully updated, ignored');
+                $to_update = false;
 
-            } else {
-                if ($tc_provider->getFlag() == 0 || $tc_provider->getUpdatedAt() == null) {
-                    $output->writeln('    i New file');
+            } 
 
-                } else if (strtotime($ressource['updated']) > strtotime($tc_provider->getUpdatedAt()->format('Y-m-d H:i:s'))) {
-                    $output->writeln('    i ' . $ressource['updated'] . ' - ' . $tc_provider->getUpdatedAt()->format('Y-m-d H:i:s'));
+            if ($tc_provider->getFlag() == 0 || $tc_provider->getUpdatedAt() == null) {
+                $output->writeln('    i New file');
+                $to_update = true;
 
-                    $tc_provider->setFlag(3);
-                    $tc_provider->setUpdatedAt(new DateTime());
-                    $this->entityManager->flush();
-                }
+            } else if (strtotime($ressource['updated']) > strtotime($tc_provider->getUpdatedAt()->format('Y-m-d H:i:s'))) {
+                $output->writeln('    i ' . $ressource['updated'] . ' - ' . $tc_provider->getUpdatedAt()->format('Y-m-d H:i:s'));
+                $to_update = true;
 
+            }
+            
+            if ($to_update) {
+                
                 // Let's update
                 $needupdate = true;
 
@@ -201,6 +206,10 @@ class UpdateGTFS extends Command
                             }
 
                             $set[] = "provider_id = '$provider'";
+
+                            if ($type == 'routes' && !in_array("agency_id", $file_head)) {
+                                $set[] = "agency_id = '$provider:1'";
+                            }
                             
                             $header = implode(",", $file_head);
                             $set = implode(",", $set);
@@ -332,7 +341,6 @@ class UpdateGTFS extends Command
         CommandFunctions::autoDeleteStopRoute($db);
         CommandFunctions::autoInsertStopRoute($db);
 
-        
         // ----
         $output->writeln('  > Import SNCF stops...');
 
