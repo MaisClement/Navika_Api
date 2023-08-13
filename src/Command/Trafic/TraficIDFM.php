@@ -16,7 +16,7 @@ use Symfony\Component\HttpClient\HttpClient;
 
 // php bin/console app:init:zip_code /var/www/navika/data/file/communes.geojson /var/www/navika/data/file/zip_code.json
 
-class Update extends Command
+class TraficIDFM extends Command
 {
     private $entityManager;
     private $params;
@@ -38,7 +38,7 @@ class Update extends Command
     protected function configure(): void
     {
         $this
-            ->setName('app:trafic:update')
+            ->setName('app:trafic:update:IDFM')
             ->setDescription('Update trafic data');
     }
     

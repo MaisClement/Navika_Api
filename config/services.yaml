@@ -79,7 +79,10 @@ services:
     App\Command\Provider\Reset:
         tags: [ 'console.command' ]
 
-    App\Command\Trafic\Update:
+    App\Command\Trafic\TraficIDFM:
+        tags: [ 'console.command' ]
+
+    App\Command\Trafic\TraficTAN:
         tags: [ 'console.command' ]
 
 

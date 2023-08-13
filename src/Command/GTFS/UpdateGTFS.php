@@ -7,6 +7,7 @@ use App\Controller\Functions;
 use App\Entity\StopRoute;
 use App\Entity\Stops;
 use App\Repository\ProviderRepository;
+use App\Repository\AgencyRepository;
 use App\Repository\RoutesRepository;
 use App\Repository\StationsRepository;
 use App\Repository\StopsRepository;
@@ -32,10 +33,11 @@ class UpdateGTFS extends Command
     private StopsRepository $stopsRepository;
     private TownRepository $townRepository;
     private RoutesRepository $routesRepository;
+    private AgencyRepository $agencyRepository;
     private StopRouteRepository $stopRouteRepository;
     private TempStopRouteRepository $tempStopRouteRepository;
 
-    public function __construct(EntityManagerInterface $entityManager, ParameterBagInterface $params, ProviderRepository $providerRepository, StationsRepository $stationsRepository, StopsRepository $stopsRepository, TownRepository $townRepository, StopRouteRepository $stopRouteRepository, TempStopRouteRepository $tempStopRouteRepository, RoutesRepository $routesRepository)
+    public function __construct(EntityManagerInterface $entityManager, ParameterBagInterface $params, ProviderRepository $providerRepository, StationsRepository $stationsRepository, StopsRepository $stopsRepository, TownRepository $townRepository, StopRouteRepository $stopRouteRepository, TempStopRouteRepository $tempStopRouteRepository, RoutesRepository $routesRepository, AgencyRepository $agencyRepository)
     {
         $this->entityManager = $entityManager;
         $this->params = $params;
@@ -45,6 +47,7 @@ class UpdateGTFS extends Command
         $this->stopsRepository = $stopsRepository;
         $this->townRepository = $townRepository;
         $this->routesRepository = $routesRepository;
+        $this->agencyRepository = $agencyRepository;
         $this->stopRouteRepository = $stopRouteRepository;
         $this->tempStopRouteRepository = $tempStopRouteRepository;
 
@@ -80,7 +83,6 @@ class UpdateGTFS extends Command
             if ($tc_provider->getFlag() == 1) {
                 $output->writeln('    i Not fully updated, ignored');
                 $to_update = false;
-
             } 
 
             if ($tc_provider->getFlag() == 0 || $tc_provider->getUpdatedAt() == null) {
@@ -208,7 +210,8 @@ class UpdateGTFS extends Command
                             $set[] = "provider_id = '$provider'";
 
                             if ($type == 'routes' && !in_array("agency_id", $file_head)) {
-                                $set[] = "agency_id = '$provider:1'";
+                                $agency = $this->agencyRepository->FindOneBy(['provider_id' => $provider])->getAgencyId();
+                                $set[] = "agency_id = '$agency'";
                             }
                             
                             $header = implode(",", $file_head);
@@ -389,6 +392,7 @@ class UpdateGTFS extends Command
                             $stop = $this->stopsRepository->findOneBy(['stop_id' => $id]);
                             if ( $stop == null ) {
                                 $stop = new Stops();
+                                $stop->setProviderId( $provider );
                                 $stop->setStopId( $id );
                                 $stop->setStopCode( $row[27] );
                                 $stop->setStopName( $row[4] );

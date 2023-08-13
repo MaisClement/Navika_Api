@@ -12,12 +12,13 @@ php bin/console app:init:sncf
 php bin/console app:init:town /var/www/navika/data/file/communes.geojson /var/www/navika/data/file/zip_code.json
 php bin/console app:init:town /home/walnutlebg/navika_data/communes.geojson /home/walnutlebg/navika_data/zip_code.json
 
-php bin/console app:provider:add "tc" "IDFM"    "Île-de-France Mobilités" "Île-de-France"        "6449c52caeceb71273a42dd3" 
-php bin/console app:provider:add "tc" "BIBUS"   "Bibus - Brest Métropole" "Brest"                "55ffbe0888ee387348ccb97d" 
-php bin/console app:provider:add "tc" "TAN"     "TAN - Nantes Métropole"  "Nantes Métropole"     "5b873d7206e3e76e5b2ffd32" 
-php bin/console app:provider:add "tc" "OURA"    "OURA - Agrégat AURA"     "Auvergne Rhône-Alpes" "61f7b4f89e4131deaf48fe02" 
-php bin/console app:provider:add "tc" "SIBRA"   "Sibra - Annecy"          "Annecy"               "5bd9843e634f413220f7f04a" 
-php bin/console app:provider:add "tc" "SYNCHRO" "Synchro - Chambéry"      "Grand Chambéry"       "5bae8c2806e3e75b699dc606"
+php bin/console app:provider:add "tc" "IDFM"    "Île-de-France Mobilités" "Île-de-France"               "6449c52caeceb71273a42dd3" 
+php bin/console app:provider:add "tc" "BIBUS"   "Bibus - Brest Métropole" "Brest"                       "55ffbe0888ee387348ccb97d" 
+php bin/console app:provider:add "tc" "TAN"     "TAN - Nantes Métropole"  "Nantes Métropole"            "5b873d7206e3e76e5b2ffd32" 
+php bin/console app:provider:add "tc" "OURA"    "OURA - Agrégat AURA"     "Auvergne Rhône-Alpes"        "61f7b4f89e4131deaf48fe02" 
+php bin/console app:provider:add "tc" "SIBRA"   "Sibra - Annecy"          "CA du Grand Annecy"          "5bd9843e634f413220f7f04a" 
+php bin/console app:provider:add "tc" "SYNCHRO" "Synchro - Chambéry"      "CA du Grand Chambéry"        "5bae8c2806e3e75b699dc606"
+php bin/console app:provider:add "tc" "CTS"     "CTS - Strasbourg"        "Eurométropole de Strasbourg" "5ae1715488ee384c8ba0342b"
 
 php bin/console app:provider:add "bikes" "VELIB"     "Vélib‘"       "Paris"            "https://velib-metropole-opendata.smoove.pro/opendata/Velib_Metropole/" 
 php bin/console app:provider:add "bikes" "VELOV"     "Vélo‘v"       "Lyon"             "https://transport.data.gouv.fr/gbfs/lyon/" 
@@ -46,7 +47,7 @@ php bin/console app:gtfs:update
 
 php bin/console app:town:update
 
-php bin/console app:trafic:update
+php bin/console app:trafic:update:IDFM
 
 php bin/console app:timetables:update
 
