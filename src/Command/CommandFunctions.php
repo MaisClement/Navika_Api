@@ -140,7 +140,7 @@ class CommandFunctions
 
     public static function copyTable($db, $from, $to){
         $req = $db->prepare("
-            INSERT IGNORE INTO $to 
+            INSERT INTO $to 
             SELECT * 
             FROM $from;
     

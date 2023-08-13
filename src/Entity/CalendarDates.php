@@ -22,9 +22,8 @@ class CalendarDates
     #[ORM\JoinColumn(name: "provider_id",  nullable: true, onDelete: "CASCADE")]
     private ?Provider $provider_id = null;
 
-    #[ORM\ManyToOne(inversedBy: 'calendarDates')]
-    #[ORM\JoinColumn(name: "service_id", referencedColumnName: "service_id", nullable: true, onDelete: "CASCADE")]
-    private ?Calendar $service_id = null;
+    #[ORM\Column(length: 255)]
+    private ?string $service_id = null;
 
     #[ORM\Column(type: Types::DATE_MUTABLE)]
     private ?\DateTimeInterface $date = null;
