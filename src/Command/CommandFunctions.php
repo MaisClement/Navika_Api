@@ -256,7 +256,6 @@ class CommandFunctions
             WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = '$table'
         ";
         $statement = $db->executeQuery($query);
-        $results = $statement->fetchAll();
-        return $results;
+        return $statement->fetchAll();
     }
 }

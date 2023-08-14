@@ -12,6 +12,7 @@ use Symfony\Component\Routing\Annotation\Route;
 class Trafic
 {
     private TraficRepository $traficRepository;
+    private ParameterBagInterface $params;
     
     public function __construct(TraficRepository $traficRepository, ParameterBagInterface $params)
     {        
@@ -46,11 +47,7 @@ class Trafic
 
     public function getTrafic(Request $request): JsonResponse 
     {
-        if ($request->get('lines') != null) {
-            $lines = $request->get('lines');
-        } else {
-            $lines = $this->params->get('lines');
-        }
+        $lines = $request->get('lines') != null ? $request->get('lines') : $this->params->get('lines');
   
         $reports = $this->traficRepository->findAll();
 
@@ -90,15 +87,12 @@ class Trafic
                 
                 $trafic[$route_id]['severity'] = $severity;
                 
-                if ( $report->getCause() == 'future' ) {
+                if ($report->getCause() == 'future') {
                     $trafic[$route_id]['reports']['future_work'][] = $r;
-
-                } else if ( $report->getSeverity() == 2 ) {
+                } elseif ($report->getSeverity() == 2) {
                     $trafic[$route_id]['reports']['future_work'][] = $r;
-
-                } else if ( $report->getSeverity() == 3 ) {
+                } elseif ($report->getSeverity() == 3) {
                     $trafic[$route_id]['reports']['current_work'][] = $r;
-                    
                 } else {
                     $trafic[$route_id]['reports']['current_trafic'][] = $r;
                 }

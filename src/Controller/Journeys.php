@@ -12,7 +12,7 @@ use OpenApi\Attributes as OA;
 
 class Journeys
 {
-    private $params;
+    private \Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface $params;
 
     public function __construct(ParameterBagInterface $params)
     {
@@ -108,14 +108,12 @@ class Journeys
         $departure = $request->get('departure');
         $arrival = $request->get('arrival');
 
-        if ( $arrival != null ) {
+        if ($arrival != null) {
             $datetime = $arrival;
             $datetime_represents = 'arrival';
-            
-        } else if ( $departure != null ) {
+        } elseif ($departure != null) {
             $datetime = $departure;
             $datetime_represents = 'departure';
-        
         } else {
             $datetime = date(DATE_ATOM);
             $datetime_represents = 'departure';
@@ -148,13 +146,15 @@ class Journeys
 
             $sections = [];
             foreach ($result->sections as $section) {
+                $informations = [];
+                
                 if (isset($section->display_informations)) {
                     $informations = array(
                         "direction" => array(
                             "id"        =>  (string)    $section->display_informations->direction,
                             "name"      =>  (string)    $section->display_informations->direction,
                         ),
-                        "trip_id"            =>  (string)    isset($result->ItemIdentifier) ? $result->ItemIdentifier : "",
+                        "trip_id"            =>  (string)    isset($result->ItemIdentifier) !== '' && (string)    isset($result->ItemIdentifier) !== '0' ? $result->ItemIdentifier : "",
                         "trip_name"     =>  (string)    $section->display_informations->trip_short_name,
                         "headsign"      =>  (string)    $section->display_informations->headsign,
                         "description"   =>  (string)    $section->display_informations->description,
@@ -171,7 +171,7 @@ class Journeys
                 }
                 $sections[] = array(
                     "type"          =>  (string)    $section->type,
-                    "mode"          =>  (string)    isset($section->mode) ? $section->mode : $section->type,
+                    "mode"          =>  (string)    isset($section->mode) !== '' && (string)    isset($section->mode) !== '0' ? $section->mode : $section->type,
                     "arrival_date_time"     =>  (string)    $section->arrival_date_time,
                     "departure_date_time"   =>  (string)    $section->departure_date_time,
                     "duration"      =>  (int)       $section->duration,
@@ -180,12 +180,12 @@ class Journeys
                         "id"        =>  (string)    $section->from->id,
                         "name"      =>  (string)    $section->from->{$section->from->embedded_type}->name,
                         "type"      =>  (string)    $section->from->embedded_type,
-                        "distance"  =>  (int)       isset($section->from->distance) ? $section->from->distance : 0,
+                        "distance"  =>  (int)       isset($section->from->distance) !== 0 ? $section->from->distance : 0,
                         "town"      =>  (string)    Functions::getTownByAdministrativeRegions($section->from->{$section->from->embedded_type}->administrative_regions),
                         "zip_code"  =>  (string)    substr(Functions::getZipByAdministrativeRegions($section->from->{$section->from->embedded_type}->administrative_regions), 0, 2),
                         "coord"     => array(
-                            "lat"           =>  floatval($section->from->{$section->from->embedded_type}->coord->lat),
-                            "lon"           =>  floatval($section->from->{$section->from->embedded_type}->coord->lon),
+                            "lat"           =>  (float) $section->from->{$section->from->embedded_type}->coord->lat,
+                            "lon"           =>  (float) $section->from->{$section->from->embedded_type}->coord->lon,
                         ),
                     ),
                     "to" => array(
@@ -195,8 +195,8 @@ class Journeys
                         "town"      =>  (string)    Functions::getTownByAdministrativeRegions($section->to->{$section->to->embedded_type}->administrative_regions),
                         "zip_code"  =>  (string)    substr(Functions::getZipByAdministrativeRegions($section->to->{$section->to->embedded_type}->administrative_regions), 0, 2),
                         "coord"     => array(
-                            "lat"       =>  floatval($section->to->{$section->to->embedded_type}->coord->lat),
-                            "lon"       =>  floatval($section->to->{$section->to->embedded_type}->coord->lon),
+                            "lat"       =>  (float) $section->to->{$section->to->embedded_type}->coord->lat,
+                            "lon"       =>  (float) $section->to->{$section->to->embedded_type}->coord->lon,
                         ),
                     ),
                     "stop_date_times"   => isset($section->stop_date_times) ? $section->stop_date_times : null,
@@ -215,7 +215,7 @@ class Journeys
                 "departure_date_time"   => $result->departure_date_time,
                 "arrival_date_time"     => $result->arrival_date_time,
 
-                "nb_transfers"          =>  (int)    floatval($result->type),
+                "nb_transfers"          =>  (int)    (float) $result->type,
                 "co2_emission"          => $result->co2_emission->value,
                 "fare"                  => $result->fare->total->value / 100,
                 "distances"             => array(

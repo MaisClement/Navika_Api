@@ -280,15 +280,12 @@ class Routes
             
             $trafic['severity'] = $severity;
             
-            if ( $report->getCause() == 'future' ) {
+            if ($report->getCause() == 'future') {
                 $trafic['reports']['future_work'][] = $r;
-
-            } else if ( $report->getSeverity() == 2 ) {
+            } elseif ($report->getSeverity() == 2) {
                 $trafic['reports']['future_work'][] = $r;
-
-            } else if ( $report->getSeverity() == 3 ) {
+            } elseif ($report->getSeverity() == 3) {
                 $trafic['reports']['current_work'][] = $r;
-                
             } else {
                 $trafic['reports']['current_trafic'][] = $r;
             }
@@ -327,15 +324,12 @@ class Routes
             
             $trafic['severity'] = $severity;
             
-            if ( $report->getCause() == 'future' ) {
+            if ($report->getCause() == 'future') {
                 $trafic['reports']['future_work'][] = $r;
-
-            } else if ( $report->getSeverity() == 2 ) {
+            } elseif ($report->getSeverity() == 2) {
                 $trafic['reports']['future_work'][] = $r;
-
-            } else if ( $report->getSeverity() == 3 ) {
+            } elseif ($report->getSeverity() == 3) {
                 $trafic['reports']['current_work'][] = $r;
-                
             } else {
                 $trafic['reports']['current_trafic'][] = $r;
             }
@@ -363,11 +357,9 @@ class Routes
 
     public function removeStopRoute(StopRoute $stopRoute): static
     {
-        if ($this->stopRoutes->removeElement($stopRoute)) {
-            // set the owning side to null (unless already changed)
-            if ($stopRoute->getRouteId() === $this) {
-                $stopRoute->setRouteId(null);
-            }
+        // set the owning side to null (unless already changed)
+        if ($this->stopRoutes->removeElement($stopRoute) && $stopRoute->getRouteId() === $this) {
+            $stopRoute->setRouteId(null);
         }
 
         return $this;
@@ -393,11 +385,9 @@ class Routes
 
     public function removeTrip(Trips $trip): static
     {
-        if ($this->trips->removeElement($trip)) {
-            // set the owning side to null (unless already changed)
-            if ($trip->getRouteId() === $this) {
-                $trip->setRouteId(null);
-            }
+        // set the owning side to null (unless already changed)
+        if ($this->trips->removeElement($trip) && $trip->getRouteId() === $this) {
+            $trip->setRouteId(null);
         }
 
         return $this;
@@ -423,11 +413,9 @@ class Routes
 
     public function removeTrafic(Trafic $trafic): static
     {
-        if ($this->trafics->removeElement($trafic)) {
-            // set the owning side to null (unless already changed)
-            if ($trafic->getRouteId() === $this) {
-                $trafic->setRouteId(null);
-            }
+        // set the owning side to null (unless already changed)
+        if ($this->trafics->removeElement($trafic) && $trafic->getRouteId() === $this) {
+            $trafic->setRouteId(null);
         }
 
         return $this;
@@ -453,11 +441,9 @@ class Routes
 
     public function removeFareRule(FareRules $fareRule): static
     {
-        if ($this->fareRules->removeElement($fareRule)) {
-            // set the owning side to null (unless already changed)
-            if ($fareRule->getRouteId() === $this) {
-                $fareRule->setRouteId(null);
-            }
+        // set the owning side to null (unless already changed)
+        if ($this->fareRules->removeElement($fareRule) && $fareRule->getRouteId() === $this) {
+            $fareRule->setRouteId(null);
         }
 
         return $this;
@@ -483,11 +469,9 @@ class Routes
 
     public function removeTimetables(Timetables $timetables): static
     {
-        if ($this->timetables->removeElement($timetables)) {
-            // set the owning side to null (unless already changed)
-            if ($timetables->getRouteId() === $this) {
-                $timetables->setRouteId(null);
-            }
+        // set the owning side to null (unless already changed)
+        if ($this->timetables->removeElement($timetables) && $timetables->getRouteId() === $this) {
+            $timetables->setRouteId(null);
         }
 
         return $this;
@@ -513,11 +497,9 @@ class Routes
 
     public function removeRouteSub(RouteSub $routeSub): static
     {
-        if ($this->routeSubs->removeElement($routeSub)) {
-            // set the owning side to null (unless already changed)
-            if ($routeSub->getRouteId() === $this) {
-                $routeSub->setRouteId(null);
-            }
+        // set the owning side to null (unless already changed)
+        if ($this->routeSubs->removeElement($routeSub) && $routeSub->getRouteId() === $this) {
+            $routeSub->setRouteId(null);
         }
 
         return $this;

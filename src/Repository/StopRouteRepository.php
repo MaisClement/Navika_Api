@@ -39,36 +39,36 @@ class StopRouteRepository extends ServiceEntityRepository
         }
     }
 
-    public function findByQueryName($query)
+    public function findByQueryName(string $query): StopRoute
     {
         $qb = $this->createQueryBuilder('sr');
-        
+
         $qb->where($qb->expr()->like('LOWER(sr.stop_query_name)', ':query'))
             ->setParameter('query', '%' . strtolower($query) . '%');
-        
+
         return $qb->getQuery()->getResult();
     }
 
-    public function findByTownName($query)
+    public function findByTownName(string $query): StopRoute
     {
         $qb = $this->createQueryBuilder('sr');
-        
+
         $qb->where($qb->expr()->like('LOWER(sr.town_name)', ':query'))
             ->setParameter('query', '%' . strtolower($query) . '%');
-        
+
         return $qb->getQuery()->getResult();
     }
 
-    public function findByNearbyLocation($latitude, $longitude, $distance)
+    public function findByNearbyLocation(float $latitude, float $longitude, float $distance): StopRoute
     {
         $qb = $this->createQueryBuilder('l');
-        
+
         $qb->select('l')
             ->where("STDistanceSphere(POINT(l.stop_lat, l.stop_lon), POINT(:latitude, :longitude)) <= :distance")
             ->setParameter('latitude', $latitude)
             ->setParameter('longitude', $longitude)
             ->setParameter('distance', $distance);
-        
+
         return $qb->getQuery()->getResult();
     }
 

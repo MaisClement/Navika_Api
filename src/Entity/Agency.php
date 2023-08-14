@@ -179,11 +179,9 @@ class Agency
 
     public function removeRoute(Routes $route): static
     {
-        if ($this->routes->removeElement($route)) {
-            // set the owning side to null (unless already changed)
-            if ($route->getAgencyId() === $this) {
-                $route->setAgencyId(null);
-            }
+        // set the owning side to null (unless already changed)
+        if ($this->routes->removeElement($route) && $route->getAgencyId() === $this) {
+            $route->setAgencyId(null);
         }
 
         return $this;
@@ -209,11 +207,9 @@ class Agency
 
     public function removeFareAttribute(FareAttributes $fareAttribute): static
     {
-        if ($this->fareAttributes->removeElement($fareAttribute)) {
-            // set the owning side to null (unless already changed)
-            if ($fareAttribute->getAgencyId() === $this) {
-                $fareAttribute->setAgencyId(null);
-            }
+        // set the owning side to null (unless already changed)
+        if ($this->fareAttributes->removeElement($fareAttribute) && $fareAttribute->getAgencyId() === $this) {
+            $fareAttribute->setAgencyId(null);
         }
 
         return $this;

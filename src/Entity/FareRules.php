@@ -41,11 +41,6 @@ class FareRules
         $this->fareAttributes = new ArrayCollection();
     }
 
-    public function getId(): ?int
-    {
-        return $this->id;
-    }
-
     public function getProviderId(): ?Provider 
     {
         return $this->provider_id;
@@ -138,11 +133,9 @@ class FareRules
 
     public function removeFareAttribute(FareAttributes $fareAttribute): static
     {
-        if ($this->fareAttributes->removeElement($fareAttribute)) {
-            // set the owning side to null (unless already changed)
-            if ($fareAttribute->getFareId() === $this) {
-                $fareAttribute->setFareId(null);
-            }
+        // set the owning side to null (unless already changed)
+        if ($this->fareAttributes->removeElement($fareAttribute) && $fareAttribute->getFareId() === $this) {
+            $fareAttribute->setFareId(null);
         }
 
         return $this;

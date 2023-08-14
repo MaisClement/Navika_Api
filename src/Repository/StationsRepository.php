@@ -39,16 +39,16 @@ class StationsRepository extends ServiceEntityRepository
         }
     }
 
-    public function findByNearbyLocation($latitude, $longitude, $distance)
+    public function findByNearbyLocation(float $latitude, float $longitude, float $distance): Stations
     {
         $qb = $this->createQueryBuilder('l');
-        
+
         $qb->select('l')
             ->where("STDistanceSphere(POINT(l.station_lat, l.station_lon), POINT(:latitude, :longitude)) <= :distance")
             ->setParameter('latitude', $latitude)
             ->setParameter('longitude', $longitude)
             ->setParameter('distance', $distance);
-        
+
         return $qb->getQuery()->getResult();
     }
 

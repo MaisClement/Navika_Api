@@ -39,23 +39,23 @@ class RoutesRepository extends ServiceEntityRepository
         }
     }
 
-    public function findByShortName($query)
+    public function findByShortName(string $query): Routes
     {
         $qb = $this->createQueryBuilder('r');
-        
+
         $qb->where($qb->expr()->like('LOWER(r.route_short_name)', ':query'))
             ->setParameter('query', '%' . strtolower($query) . '%');
-        
+
         return $qb->getQuery()->getResult();
     }
 
-    public function findByLongName($query)
+    public function findByLongName(string $query): Routes
     {
         $qb = $this->createQueryBuilder('s');
-        
+
         $qb->where($qb->expr()->like('LOWER(s.route_long_name)', ':query'))
             ->setParameter('query', '%' . strtolower($query) . '%');
-        
+
         return $qb->getQuery()->getResult();
     }
 

@@ -102,11 +102,9 @@ class Town
 
     public function removeStopRoute(StopRoute $stopRoute): static
     {
-        if ($this->stopRoutes->removeElement($stopRoute)) {
-            // set the owning side to null (unless already changed)
-            if ($stopRoute->getTownId() === $this) {
-                $stopRoute->setTownId(null);
-            }
+        // set the owning side to null (unless already changed)
+        if ($this->stopRoutes->removeElement($stopRoute) && $stopRoute->getTownId() === $this) {
+            $stopRoute->setTownId(null);
         }
 
         return $this;

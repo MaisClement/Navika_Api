@@ -16,12 +16,12 @@ use Symfony\Component\Routing\Annotation\Route;
 
 class Lines
 {
-    private $entityManager;
+    private \Doctrine\ORM\EntityManagerInterface $entityManager;
     private RoutesRepository $routesRepository;
     private AgencyRepository $agencyRepository;
     private StopsRepository $stopsRepository;
     private TraficRepository $traficRepository;
-    
+    private ParameterBagInterface $params;
     
     public function __construct(EntityManagerInterface $entityManager, TraficRepository $traficRepository, RoutesRepository $routesRepository, AgencyRepository $agencyRepository, StopsRepository $stopsRepository, ParameterBagInterface $params)
     {
@@ -160,10 +160,8 @@ class Lines
             // allowed_modes[]  -   forbidden_modes[]
             // allowed_lines[]    -   forbidden_lines[]
 
-            if ($filter) {
-                if ( !isset( $lines[$id] ) ) {
-                    $lines[$id] = $route->getRoute();
-                }
+            if ($filter && !isset( $lines[$id] )) {
+                $lines[$id] = $route->getRoute();
             }
         }
 
@@ -303,15 +301,12 @@ class Lines
                 
                 $json['line']['severity'] = $severity;
                 
-                if ( $report->getCause() == 'future' ) {
+                if ($report->getCause() == 'future') {
                     $json['line']['reports']['future_work'][] = $r;
-
-                } else if ( $report->getSeverity() == 2 ) {
+                } elseif ($report->getSeverity() == 2) {
                     $json['line']['reports']['future_work'][] = $r;
-
-                } else if ( $report->getSeverity() == 3 ) {
+                } elseif ($report->getSeverity() == 3) {
                     $json['line']['reports']['current_work'][] = $r;
-                    
                 } else {
                     $json['line']['reports']['current_trafic'][] = $r;
                 }

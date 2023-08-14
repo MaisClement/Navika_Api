@@ -135,21 +135,16 @@ class Stops
             $search_type = 3;
             $stops1 = $this->stopRouteRepository->findByQueryName( $query );
             $stops2 = $this->stopRouteRepository->findByTownName( $query );
-
             $stops = array_merge($stops1, $stops2);
-
-        } else if ( $lat != null && $lon != null ) {
+        } elseif ($lat != null && $lon != null) {
             $search_type = 2;
             $stops = $this->stopRouteRepository->findByNearbyLocation($lat, $lon, 5000);
-
-        } else if ( $query != null ) {
+        } elseif ($query != null) {
             $search_type = 1;
             $stops1 = $this->stopRouteRepository->findByQueryName( $query );
             $stops2 = $this->stopRouteRepository->findByTownName( $query );
-
             $stops = array_merge($stops1, $stops2);
             // $stops = array_slice( $stops, 500 );
-            
         } else {
             return new JsonResponse(Functions::ErrorMessage(400, 'One or more parameters are missing or null, have you "q" or "lat" and "lon" ?'), 400);
         }
@@ -200,8 +195,8 @@ class Stops
                             'town'      =>  (string)    $stop->getTownName(),
                             'zip_code'  =>  (string)    $stop->getZipCode(),
                             'coord'     => array(
-                                'lat'       =>      floatval($stop->getStopLat()),
-                                'lon'       =>      floatval($stop->getStopLon()),
+                                'lat'       =>      (float) $stop->getStopLat(),
+                                'lon'       =>      (float) $stop->getStopLon(),
                             ),
                             'lines'     => array(),
                             'modes'     => array(),

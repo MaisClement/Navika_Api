@@ -24,8 +24,8 @@ use ZipArchive;
 
 class UpdateGTFS extends Command
 {
-    private $entityManager;
-    private $params;
+    private \Doctrine\ORM\EntityManagerInterface $entityManager;
+    private \Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface $params;
 
     private ProviderRepository $providerRepository;
     private StationsRepository $stationsRepository;
@@ -86,11 +86,9 @@ class UpdateGTFS extends Command
             if ($tc_provider->getFlag() == 0 || $tc_provider->getUpdatedAt() == null) {
                 $output->writeln('    i New file');
                 $to_update = true;
-
-            } else if (strtotime($ressource['updated']) > strtotime($tc_provider->getUpdatedAt()->format('Y-m-d H:i:s'))) {
+            } elseif (strtotime($ressource['updated']) > strtotime($tc_provider->getUpdatedAt()->format('Y-m-d H:i:s'))) {
                 $output->writeln('    i ' . $ressource['updated'] . ' - ' . $tc_provider->getUpdatedAt()->format('Y-m-d H:i:s'));
                 $to_update = true;
-
             }
             
             if ($to_update) {
@@ -197,7 +195,9 @@ class UpdateGTFS extends Command
 
                             $set = [];
                             // foreach file_head, if not in $table_head array, then it became '@dummy'
-                            for($i = 0; $i < count($file_head); $i++) {
+                            $counter = count($file_head);
+                            // foreach file_head, if not in $table_head array, then it became '@dummy'
+                            for($i = 0; $i < $counter; $i++) {
                                 if (!in_array($file_head[$i], $table_head)) {
                                     $file_head[$i] = '@dummy';
                                 } else {

@@ -30,11 +30,6 @@ class Frequencies
     #[ORM\Column(columnDefinition: "ENUM('0', '1')")]
     private ?string $exact_times = null;
 
-    public function getId(): ?int
-    {
-        return $this->id;
-    }
-
     public function getProviderId(): ?Provider 
     {
         return $this->provider_id;

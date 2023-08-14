@@ -58,12 +58,6 @@ class Trips
     {
         $this->frequencies = new ArrayCollection();
         $this->stopTimes = new ArrayCollection();
-        $this->calendarDates = new ArrayCollection();
-    }
-
-    public function getId(): ?int
-    {
-        return $this->id;
     }
 
     public function getProviderId(): ?Provider 
@@ -218,11 +212,9 @@ class Trips
 
     public function removeFrequency(Frequencies $frequency): static
     {
-        if ($this->frequencies->removeElement($frequency)) {
-            // set the owning side to null (unless already changed)
-            if ($frequency->getTripId() === $this) {
-                $frequency->setTripId(null);
-            }
+        // set the owning side to null (unless already changed)
+        if ($this->frequencies->removeElement($frequency) && $frequency->getTripId() === $this) {
+            $frequency->setTripId(null);
         }
 
         return $this;
@@ -248,11 +240,9 @@ class Trips
 
     public function removeStopTime(StopTimes $stopTime): static
     {
-        if ($this->stopTimes->removeElement($stopTime)) {
-            // set the owning side to null (unless already changed)
-            if ($stopTime->getTripId() === $this) {
-                $stopTime->setTripId(null);
-            }
+        // set the owning side to null (unless already changed)
+        if ($this->stopTimes->removeElement($stopTime) && $stopTime->getTripId() === $this) {
+            $stopTime->setTripId(null);
         }
 
         return $this;

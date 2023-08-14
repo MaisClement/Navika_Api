@@ -80,18 +80,6 @@ class Levels
         return $this;
     }
 
-    public function getFeedContactUrl(): ?string
-    {
-        return $this->feed_contact_url;
-    }
-
-    public function setFeedContactUrl(?string $feed_contact_url): static
-    {
-        $this->feed_contact_url = $feed_contact_url;
-
-        return $this;
-    }
-
     /**
      * @return Collection<int, Stops>
      */
@@ -112,11 +100,9 @@ class Levels
 
     public function removeStop(Stops $stop): static
     {
-        if ($this->stops->removeElement($stop)) {
-            // set the owning side to null (unless already changed)
-            if ($stop->getLevelId() === $this) {
-                $stop->setLevelId(null);
-            }
+        // set the owning side to null (unless already changed)
+        if ($this->stops->removeElement($stop) && $stop->getLevelId() === $this) {
+            $stop->setLevelId(null);
         }
 
         return $this;

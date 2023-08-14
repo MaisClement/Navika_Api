@@ -46,11 +46,6 @@ class Attributions
     #[ORM\Column(length: 255, nullable: true)]
     private ?string $attribution_phone = null;
 
-    public function getId(): ?int
-    {
-        return $this->id;
-    }
-
     public function getProviderId(): ?Provider 
     {
         return $this->provider_id;

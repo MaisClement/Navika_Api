@@ -7,14 +7,13 @@ use DateTimeZone;
 class Functions
 {
     public static function ErrorMessage($http_code, $details = ''){
-        $json = array(
+        return array(
             'error' => array(
                 'code'      =>  (int)       $http_code,
                 'message'   =>  (string)    null, // isset($config->http_code->$http_code) ? $config->http_code->$http_code : "",
                 'details'   =>  (string)    $details == ''               ? "" : $details,
             )
         );
-        return $json;
     }
 
     public static function getTransportMode($l){
@@ -90,11 +89,17 @@ class Functions
             $ta = array_search($a['mode'], $type_list);
             $tb = array_search($b['mode'], $type_list);
         
-            if ($a['code'] == 'SNCF') return -1;
-            else if ($b['code'] == 'SNCF') return +1;
+            if ($a['code'] == 'SNCF') {
+                return -1;
+            } elseif ($b['code'] == 'SNCF') {
+                return +1;
+            }
         
-            if ($a == 'TER') return +1;
-            else if ($b == 'TER') return -1;
+            if ($a == 'TER') {
+                return +1;
+            } elseif ($b == 'TER') {
+                return -1;
+            }
         
             if ($ta != $tb) {
                 return ($ta < $tb) ? -1 : 1;
@@ -142,8 +147,11 @@ class Functions
             similar_text($query, $b['name'], $b_perc_name);
     
         
-            if ($a['code'] == 'SNCF') return -1;
-            else if ($b['code'] == 'SNCF') return +1;
+            if ($a['code'] == 'SNCF') {
+                return -1;
+            } elseif ($b['code'] == 'SNCF') {
+                return +1;
+            }
         
             if ($ta != $tb) {
                 return ($ta < $tb) ? -1 : 1;
@@ -173,11 +181,11 @@ class Functions
                 $b_modes++;
             }
         
-            if ($a_modes == $b_modes) {
+            if ($a_modes === $b_modes) {
                 $a_lines = count($a["lines"]);
                 $b_lines = count($b["lines"]);
         
-                if ($a_lines == $b_lines) {
+                if ($a_lines === $b_lines) {
                     return 0;
                 }
                 return ($a_lines < $b_lines) ? 1 : -1;
@@ -241,10 +249,8 @@ class Functions
             (float) $longitudeTo
         );
         $distance = ceil( $distance );
-
-        $distance = $distance > 1000 ? 0 : $distance;
         
-        return $distance;
+        return $distance > 1000 ? 0 : $distance;
     }
 
     public static function getDistanceBeetwenPoints($latitudeFrom, $longitudeFrom, $latitudeTo, $longitudeTo) {
@@ -305,19 +311,19 @@ class Functions
     public static function getSeverity($effect, $cause, $status){
         if ($status == 'past') {
             return 0;
-        } else if ($cause == 'information') {
+        } elseif ($cause == 'information') {
             return 1;
-        } else if ($status == 'future' && $cause == 'travaux') {
+        } elseif ($status == 'future' && $cause == 'travaux') {
             return 2;
-        } else if ($cause == 'travaux') {
+        } elseif ($cause == 'travaux') {
             return 3;
-        } else if ($status == 'future') {
+        } elseif ($status == 'future') {
             return 4;
-        } else if (in_array($effect, array('REDUCED_SERVICE', 'SIGNIFICANT_DELAYS', 'DETOUR', 'ADDITIONAL_SERVICE', 'MODIFIED_SERVICE'))) {
+        } elseif (in_array($effect, array('REDUCED_SERVICE', 'SIGNIFICANT_DELAYS', 'DETOUR', 'ADDITIONAL_SERVICE', 'MODIFIED_SERVICE'))) {
             return 4;
-        } else if (in_array($effect, array('NO_SERVICE', 'STOP_MOVED'))) {
+        } elseif (in_array($effect, array('NO_SERVICE', 'STOP_MOVED'))) {
             return 5;
-        } else if (in_array($effect, array('UNKNOWN_EFFECT', 'OTHER_EFFECT', 'NO_EFFECT', 'ACCESSIBILITY_ISSUE'))) {
+        } elseif (in_array($effect, array('UNKNOWN_EFFECT', 'OTHER_EFFECT', 'NO_EFFECT', 'ACCESSIBILITY_ISSUE'))) {
             return 1;
         } else {
             return 0;
@@ -360,11 +366,11 @@ class Functions
     
         $id = str_replace($search, '', $id);
         $id = trim( $id );
-        $id = ucfirst($id);
-        return $id;
+        return ucfirst($id);
     }
 
     public static function getCSVHeader($csv, $sep = ';'){
+        $line = [];
         $file = fopen($csv, 'r');
         while (!feof($file)) {
             $line[] = fgetcsv($file, 0, $sep);
@@ -375,6 +381,7 @@ class Functions
     }
 
     public static function readCsv($csv, $sep = ';'){
+        $line = [];
         $file = fopen($csv, 'r');
         while (!feof($file)) {
             $line[] = fgetcsv($file, 0, $sep);
@@ -386,18 +393,14 @@ class Functions
     public static function prepareTime($dt, $i = false){
         if ($dt == '') return '';
 
-        if ($i == true) {
-            $datetime = date_create($dt, timezone_open('Europe/Paris'));
-        } else {
-            $datetime = date_create($dt, timezone_open('UTC'));
-        }
+        $datetime = $i == true ? date_create($dt, timezone_open('Europe/Paris')) : date_create($dt, timezone_open('UTC'));
         
         if (is_bool($datetime)) {
             $timeArray = explode(':', $dt);
     
-            $hours = intval($timeArray[0]);
-            $minutes = intval($timeArray[1]);
-            $seconds = intval($timeArray[2]);
+            $hours = (int) $timeArray[0];
+            $minutes = (int) $timeArray[1];
+            $seconds = (int) $timeArray[2];
     
             // 'cause GTFS time can be 25:00:00
             $hours %= 24;
@@ -436,13 +439,11 @@ class Functions
 
     public static function getMessage($call){
         // terminus - origin
-        if (!isset($call->ExpectedDepartureTime) && !isset($call->AimedDepartureTime))
+        if (!isset($call->ExpectedDepartureTime) && !isset($call->AimedDepartureTime)) {
             return "terminus";
-    
-        else if (!isset($call->ExpectedArrivalTime) && !isset($call->AimedArrivalTime))
+        } elseif (!isset($call->ExpectedArrivalTime) && !isset($call->AimedArrivalTime)) {
             return "origin";
-    
-        else
+        } else
             return "";
     }
 
@@ -466,8 +467,7 @@ class Functions
                 "text_color" =>  (string)    $line->text_color,
             );
         }
-        $list = Functions::order_line($list);
-        return $list;
+        return Functions::order_line($list);
     }
 
     public static function getSNCFid($links){
@@ -618,13 +618,13 @@ class Functions
     public static function getStopDateTime($call){
         return array(
             // Si l'horaire est present               On affiche l'horaire est                    Sinon, si l'autre est present                           On affiche l'autre                    Ou rien  
-            "base_departure_date_time"  =>  (string)  isset($call->AimedDepartureTime)          ? Functions::prepareTime($call->AimedDepartureTime)    : (isset($call->ExpectedDepartureTime) ? Functions::prepareTime($call->ExpectedDepartureTime) : ""),
-            "departure_date_time"       =>  (string)  isset($call->ExpectedDepartureTime)       ? Functions::prepareTime($call->ExpectedDepartureTime) : (isset($call->AimedDepartureTime)    ? Functions::prepareTime($call->AimedDepartureTime)    : ""),
-            "base_arrival_date_time"    =>  (string)  isset($call->AimedArrivalTime)            ? Functions::prepareTime($call->AimedArrivalTime)      : (isset($call->ExpectedArrivalTime)   ? Functions::prepareTime($call->ExpectedArrivalTime)   : ""),
-            "arrival_date_time"         =>  (string)  isset($call->ExpectedArrivalTime)         ? Functions::prepareTime($call->ExpectedArrivalTime)   : (isset($call->AimedArrivalTime)      ? Functions::prepareTime($call->AimedArrivalTime)      : ""),
+            "base_departure_date_time"  =>  (string)  isset($call->AimedDepartureTime) !== '' && (string)  isset($call->AimedDepartureTime) !== '0'          ? Functions::prepareTime($call->AimedDepartureTime)    : (isset($call->ExpectedDepartureTime) ? Functions::prepareTime($call->ExpectedDepartureTime) : ""),
+            "departure_date_time"       =>  (string)  isset($call->ExpectedDepartureTime) !== '' && (string)  isset($call->ExpectedDepartureTime) !== '0'       ? Functions::prepareTime($call->ExpectedDepartureTime) : (isset($call->AimedDepartureTime)    ? Functions::prepareTime($call->AimedDepartureTime)    : ""),
+            "base_arrival_date_time"    =>  (string)  isset($call->AimedArrivalTime) !== '' && (string)  isset($call->AimedArrivalTime) !== '0'            ? Functions::prepareTime($call->AimedArrivalTime)      : (isset($call->ExpectedArrivalTime)   ? Functions::prepareTime($call->ExpectedArrivalTime)   : ""),
+            "arrival_date_time"         =>  (string)  isset($call->ExpectedArrivalTime) !== '' && (string)  isset($call->ExpectedArrivalTime) !== '0'         ? Functions::prepareTime($call->ExpectedArrivalTime)   : (isset($call->AimedArrivalTime)      ? Functions::prepareTime($call->AimedArrivalTime)      : ""),
             "state"                     =>  (string)  Functions::getState($call),
-            "atStop"                    =>  (string)  isset($call->VehicleAtStop)               ? ($call->VehicleAtStop ? 'true' : 'false') : 'false',
-            "platform"                  =>  (string)  isset($call->ArrivalPlatformName->value)  ? $call->ArrivalPlatformName->value : '-'
+            "atStop"                    =>  (string)  isset($call->VehicleAtStop) !== '' && (string)  isset($call->VehicleAtStop) !== '0'               ? ($call->VehicleAtStop ? 'true' : 'false') : 'false',
+            "platform"                  =>  (string)  isset($call->ArrivalPlatformName->value) !== '' && (string)  isset($call->ArrivalPlatformName->value) !== '0'  ? $call->ArrivalPlatformName->value : '-'
         );
     }
 
@@ -649,10 +649,10 @@ class Functions
                     "departure_state"       => (string) $stop->departure_status,
                     "arrival_state"         => (string) $stop->arrival_status,
                     "message"               => (string) "",
-                    "base_departure_time"   => (string) isset($stop->base_departure_time)    ? Functions::rPrepareTime($stop->base_departure_time)    : '',
-                    "departure_time"        => (string) isset($stop->amended_departure_time) ? Functions::rPrepareTime($stop->amended_departure_time) : '',
-                    "base_arrival_time"     => (string) isset($stop->base_arrival_time)      ? Functions::rPrepareTime($stop->base_arrival_time)      : '',
-                    "arrival_time"          => (string) isset($stop->amended_arrival_time)   ? Functions::rPrepareTime($stop->amended_arrival_time)   : '',
+                    "base_departure_time"   => (string) isset($stop->base_departure_time) !== '' && (string) isset($stop->base_departure_time) !== '0'    ? Functions::rPrepareTime($stop->base_departure_time)    : '',
+                    "departure_time"        => (string) isset($stop->amended_departure_time) !== '' && (string) isset($stop->amended_departure_time) !== '0' ? Functions::rPrepareTime($stop->amended_departure_time) : '',
+                    "base_arrival_time"     => (string) isset($stop->base_arrival_time) !== '' && (string) isset($stop->base_arrival_time) !== '0'      ? Functions::rPrepareTime($stop->base_arrival_time)      : '',
+                    "arrival_time"          => (string) isset($stop->amended_arrival_time) !== '' && (string) isset($stop->amended_arrival_time) !== '0'   ? Functions::rPrepareTime($stop->amended_arrival_time)   : '',
                     "is-detour"             => $stop->is_detour,
                 ),
             );

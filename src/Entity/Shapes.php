@@ -11,11 +11,15 @@ use Doctrine\ORM\Mapping as ORM;
 #[ORM\Entity(repositoryClass: ShapesRepository::class)]
 class Shapes
 {
+    #[ORM\Id]
+    #[ORM\GeneratedValue]
+    #[ORM\Column]
+    private ?int $id = null;
+
     #[ORM\ManyToOne(inversedBy: 'shapes')]
     #[ORM\JoinColumn(name: "provider_id",  nullable: true, onDelete: "CASCADE")]
     private ?Provider $provider_id = null;
 
-    #[ORM\Id]
     #[ORM\Column(length: 255)]
     private ?string $shape_id = null;
 
@@ -132,11 +136,9 @@ class Shapes
 
     public function removeTrip(Trips $trip): static
     {
-        if ($this->trips->removeElement($trip)) {
-            // set the owning side to null (unless already changed)
-            if ($trip->getShapeId() === $this) {
-                $trip->setShapeId(null);
-            }
+        // set the owning side to null (unless already changed)
+        if ($this->trips->removeElement($trip) && $trip->getShapeId() === $this) {
+            $trip->setShapeId(null);
         }
 
         return $this;

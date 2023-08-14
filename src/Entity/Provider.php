@@ -217,11 +217,9 @@ class Provider
 
     public function removeTrip(Trips $trip): static
     {
-        if ($this->trips->removeElement($trip)) {
-            // set the owning side to null (unless already changed)
-            if ($trip->getProviderId() === $this) {
-                $trip->setProviderId(null);
-            }
+        // set the owning side to null (unless already changed)
+        if ($this->trips->removeElement($trip) && $trip->getProviderId() === $this) {
+            $trip->setProviderId(null);
         }
 
         return $this;
@@ -247,11 +245,9 @@ class Provider
 
     public function removeAgency(Agency $agency): static
     {
-        if ($this->agencies->removeElement($agency)) {
-            // set the owning side to null (unless already changed)
-            if ($agency->getProviderId() === $this) {
-                $agency->setProviderId(null);
-            }
+        // set the owning side to null (unless already changed)
+        if ($this->agencies->removeElement($agency) && $agency->getProviderId() === $this) {
+            $agency->setProviderId(null);
         }
 
         return $this;
@@ -277,11 +273,9 @@ class Provider
 
     public function removeCalendar(Calendar $calendar): static
     {
-        if ($this->calendars->removeElement($calendar)) {
-            // set the owning side to null (unless already changed)
-            if ($calendar->getProviderId() === $this) {
-                $calendar->setProviderId(null);
-            }
+        // set the owning side to null (unless already changed)
+        if ($this->calendars->removeElement($calendar) && $calendar->getProviderId() === $this) {
+            $calendar->setProviderId(null);
         }
 
         return $this;
@@ -307,11 +301,9 @@ class Provider
 
     public function removeCalendarDate(CalendarDates $calendarDate): static
     {
-        if ($this->calendarDates->removeElement($calendarDate)) {
-            // set the owning side to null (unless already changed)
-            if ($calendarDate->getProviderId() === $this) {
-                $calendarDate->setProviderId(null);
-            }
+        // set the owning side to null (unless already changed)
+        if ($this->calendarDates->removeElement($calendarDate) && $calendarDate->getProviderId() === $this) {
+            $calendarDate->setProviderId(null);
         }
 
         return $this;
@@ -337,11 +329,9 @@ class Provider
 
     public function removeAttribution(Attributions $attribution): static
     {
-        if ($this->attributions->removeElement($attribution)) {
-            // set the owning side to null (unless already changed)
-            if ($attribution->getProviderId() === $this) {
-                $attribution->setProviderId(null);
-            }
+        // set the owning side to null (unless already changed)
+        if ($this->attributions->removeElement($attribution) && $attribution->getProviderId() === $this) {
+            $attribution->setProviderId(null);
         }
 
         return $this;
@@ -367,11 +357,9 @@ class Provider
 
     public function removeTranslation(Translations $translation): static
     {
-        if ($this->translations->removeElement($translation)) {
-            // set the owning side to null (unless already changed)
-            if ($translation->getProviderId() === $this) {
-                $translation->setProviderId(null);
-            }
+        // set the owning side to null (unless already changed)
+        if ($this->translations->removeElement($translation) && $translation->getProviderId() === $this) {
+            $translation->setProviderId(null);
         }
 
         return $this;
@@ -397,11 +385,9 @@ class Provider
 
     public function removeTransfer(Transfers $transfer): static
     {
-        if ($this->transfers->removeElement($transfer)) {
-            // set the owning side to null (unless already changed)
-            if ($transfer->getProviderId() === $this) {
-                $transfer->setProviderId(null);
-            }
+        // set the owning side to null (unless already changed)
+        if ($this->transfers->removeElement($transfer) && $transfer->getProviderId() === $this) {
+            $transfer->setProviderId(null);
         }
 
         return $this;
@@ -427,11 +413,9 @@ class Provider
 
     public function removeStopTime(StopTimes $stopTime): static
     {
-        if ($this->stopTimes->removeElement($stopTime)) {
-            // set the owning side to null (unless already changed)
-            if ($stopTime->getProviderId() === $this) {
-                $stopTime->setProviderId(null);
-            }
+        // set the owning side to null (unless already changed)
+        if ($this->stopTimes->removeElement($stopTime) && $stopTime->getProviderId() === $this) {
+            $stopTime->setProviderId(null);
         }
 
         return $this;
@@ -457,11 +441,9 @@ class Provider
 
     public function removeStop(Stops $stop): static
     {
-        if ($this->stops->removeElement($stop)) {
-            // set the owning side to null (unless already changed)
-            if ($stop->getProviderId() === $this) {
-                $stop->setProviderId(null);
-            }
+        // set the owning side to null (unless already changed)
+        if ($this->stops->removeElement($stop) && $stop->getProviderId() === $this) {
+            $stop->setProviderId(null);
         }
 
         return $this;
@@ -487,11 +469,9 @@ class Provider
 
     public function removeStation(Stations $station): static
     {
-        if ($this->stations->removeElement($station)) {
-            // set the owning side to null (unless already changed)
-            if ($station->getProviderId() === $this) {
-                $station->setProviderId(null);
-            }
+        // set the owning side to null (unless already changed)
+        if ($this->stations->removeElement($station) && $station->getProviderId() === $this) {
+            $station->setProviderId(null);
         }
 
         return $this;
@@ -517,11 +497,9 @@ class Provider
 
     public function removeShape(Shapes $shape): static
     {
-        if ($this->shapes->removeElement($shape)) {
-            // set the owning side to null (unless already changed)
-            if ($shape->getProviderId() === $this) {
-                $shape->setProviderId(null);
-            }
+        // set the owning side to null (unless already changed)
+        if ($this->shapes->removeElement($shape) && $shape->getProviderId() === $this) {
+            $shape->setProviderId(null);
         }
 
         return $this;
@@ -547,11 +525,9 @@ class Provider
 
     public function removeRoute(Routes $route): static
     {
-        if ($this->routes->removeElement($route)) {
-            // set the owning side to null (unless already changed)
-            if ($route->getProviderId() === $this) {
-                $route->setProviderId(null);
-            }
+        // set the owning side to null (unless already changed)
+        if ($this->routes->removeElement($route) && $route->getProviderId() === $this) {
+            $route->setProviderId(null);
         }
 
         return $this;
@@ -577,11 +553,9 @@ class Provider
 
     public function removePathway(Pathways $pathway): static
     {
-        if ($this->pathways->removeElement($pathway)) {
-            // set the owning side to null (unless already changed)
-            if ($pathway->getProviderId() === $this) {
-                $pathway->setProviderId(null);
-            }
+        // set the owning side to null (unless already changed)
+        if ($this->pathways->removeElement($pathway) && $pathway->getProviderId() === $this) {
+            $pathway->setProviderId(null);
         }
 
         return $this;
@@ -607,11 +581,9 @@ class Provider
 
     public function removeLevel(Levels $level): static
     {
-        if ($this->levels->removeElement($level)) {
-            // set the owning side to null (unless already changed)
-            if ($level->getProviderId() === $this) {
-                $level->setProviderId(null);
-            }
+        // set the owning side to null (unless already changed)
+        if ($this->levels->removeElement($level) && $level->getProviderId() === $this) {
+            $level->setProviderId(null);
         }
 
         return $this;
@@ -637,11 +609,9 @@ class Provider
 
     public function removeFrequency(Frequencies $frequency): static
     {
-        if ($this->frequencies->removeElement($frequency)) {
-            // set the owning side to null (unless already changed)
-            if ($frequency->getProviderId() === $this) {
-                $frequency->setProviderId(null);
-            }
+        // set the owning side to null (unless already changed)
+        if ($this->frequencies->removeElement($frequency) && $frequency->getProviderId() === $this) {
+            $frequency->setProviderId(null);
         }
 
         return $this;
@@ -667,11 +637,9 @@ class Provider
 
     public function removeFeedInfo(FeedInfo $feedInfo): static
     {
-        if ($this->feedInfos->removeElement($feedInfo)) {
-            // set the owning side to null (unless already changed)
-            if ($feedInfo->getProviderId() === $this) {
-                $feedInfo->setProviderId(null);
-            }
+        // set the owning side to null (unless already changed)
+        if ($this->feedInfos->removeElement($feedInfo) && $feedInfo->getProviderId() === $this) {
+            $feedInfo->setProviderId(null);
         }
 
         return $this;
@@ -697,11 +665,9 @@ class Provider
 
     public function removeFareRule(FareRules $fareRule): static
     {
-        if ($this->fareRules->removeElement($fareRule)) {
-            // set the owning side to null (unless already changed)
-            if ($fareRule->getProviderId() === $this) {
-                $fareRule->setProviderId(null);
-            }
+        // set the owning side to null (unless already changed)
+        if ($this->fareRules->removeElement($fareRule) && $fareRule->getProviderId() === $this) {
+            $fareRule->setProviderId(null);
         }
 
         return $this;
@@ -727,11 +693,9 @@ class Provider
 
     public function removeFareAttribute(FareAttributes $fareAttribute): static
     {
-        if ($this->fareAttributes->removeElement($fareAttribute)) {
-            // set the owning side to null (unless already changed)
-            if ($fareAttribute->getProviderId() === $this) {
-                $fareAttribute->setProviderId(null);
-            }
+        // set the owning side to null (unless already changed)
+        if ($this->fareAttributes->removeElement($fareAttribute) && $fareAttribute->getProviderId() === $this) {
+            $fareAttribute->setProviderId(null);
         }
 
         return $this;
@@ -757,11 +721,9 @@ class Provider
 
     public function removeTrafic(Trafic $trafic): static
     {
-        if ($this->trafics->removeElement($trafic)) {
-            // set the owning side to null (unless already changed)
-            if ($trafic->getProviderId() === $this) {
-                $trafic->setProviderId(null);
-            }
+        // set the owning side to null (unless already changed)
+        if ($this->trafics->removeElement($trafic) && $trafic->getProviderId() === $this) {
+            $trafic->setProviderId(null);
         }
 
         return $this;

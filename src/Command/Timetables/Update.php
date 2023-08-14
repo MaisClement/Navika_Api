@@ -18,8 +18,8 @@ use Symfony\Component\HttpClient\HttpClient;
 
 class Update extends Command
 {
-    private $entityManager;
-    private $params;
+    private \Doctrine\ORM\EntityManagerInterface $entityManager;
+    private \Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface $params;
     
     private RoutesRepository $routesRepository;
     private TimetablesRepository $timetablesRepository;

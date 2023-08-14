@@ -14,7 +14,8 @@ class Index
 {
 
     private MessagesRepository $messagesRepository;
-    
+    private ParameterBagInterface $params;
+
     public function __construct(MessagesRepository $messagesRepository, ParameterBagInterface $params)
     {
         $this->params = $params;
@@ -149,7 +150,7 @@ class Index
             "app"         => array(
                 "current_version"      =>  (string)       $app_version,
                 "lastest_version"      =>  (string)       $this->params->get('app.version.lastest'),
-                "support"              =>  (string)       $support ? 'true' : 'false',
+                "support"              =>  (bool)       $support !== '' && $support !== '0' ? true : false,
             ),
             "message"     => $messages,
         );

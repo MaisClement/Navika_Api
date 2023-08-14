@@ -18,8 +18,8 @@ use Symfony\Component\HttpClient\HttpClient;
 
 class Update extends Command
 {
-    private $entityManager;
-    private $params;
+    private \Doctrine\ORM\EntityManagerInterface $entityManager;
+    private \Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface $params;
     
     private RoutesRepository $routesRepository;
     private TraficRepository $traficRepository;
@@ -88,15 +88,12 @@ class Update extends Command
                 
                 $id = $link->id;
                 
-                if ( $link->type == "disruption" ) {
-                    if ( isset( $reports[$id] ) ) {
-                        $route = $this->routesRepository->findOneBy( ['route_id' => 'IDFM:' . Functions::idfmFormat($line->line->id)] );
-
-                        if ($route != null) {
-                            $r = $reports[$id];
-                            $r->setRouteId( $route );
-                            $this->entityManager->persist( $r );
-                        }
+                if ($link->type == "disruption" && isset( $reports[$id] )) {
+                    $route = $this->routesRepository->findOneBy( ['route_id' => 'IDFM:' . Functions::idfmFormat($line->line->id)] );
+                    if ($route != null) {
+                        $r = $reports[$id];
+                        $r->setRouteId( $route );
+                        $this->entityManager->persist( $r );
                     }
                 }
             }
