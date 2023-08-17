@@ -39,7 +39,7 @@ class StopRouteRepository extends ServiceEntityRepository
         }
     }
 
-    public function findByQueryName(string $query): StopRoute
+    public function findByQueryName(string $query): array
     {
         $qb = $this->createQueryBuilder('sr');
 
@@ -49,7 +49,7 @@ class StopRouteRepository extends ServiceEntityRepository
         return $qb->getQuery()->getResult();
     }
 
-    public function findByTownName(string $query): StopRoute
+    public function findByTownName(string $query): array
     {
         $qb = $this->createQueryBuilder('sr');
 
@@ -59,7 +59,7 @@ class StopRouteRepository extends ServiceEntityRepository
         return $qb->getQuery()->getResult();
     }
 
-    public function findByNearbyLocation(float $latitude, float $longitude, float $distance): StopRoute
+    public function findByNearbyLocation(float $latitude, float $longitude, float $distance): array
     {
         $qb = $this->createQueryBuilder('l');
 

@@ -39,7 +39,7 @@ class AgencyRepository extends ServiceEntityRepository
         }
     }
 
-    public function findByName(string $query): Agency
+    public function findByName(string $query): array
     {
         $qb = $this->createQueryBuilder('s');
 

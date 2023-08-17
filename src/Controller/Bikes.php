@@ -58,8 +58,8 @@ class Bikes
             'name'     => $station->getStationName(),
             'url'      => $station->getProviderId()->getUrl(),
             'coord' => array(
-                'lat'      => $station->getStationLat(),
-                'lon'      => $station->getStationLon(),
+                'lat'      => (double) $station->getStationLat(),
+                'lon'      => (double) $station->getStationLon(),
             ),
             'capacity' => (int) $station->getStationCapacity(),
         );

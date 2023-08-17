@@ -7,6 +7,7 @@ use App\Controller\Functions;
 use App\Entity\StopRoute;
 use App\Entity\Stops;
 use App\Repository\ProviderRepository;
+use App\Repository\AgencyRepository;
 use App\Repository\RoutesRepository;
 use App\Repository\StationsRepository;
 use App\Repository\StopsRepository;
@@ -24,18 +25,19 @@ use ZipArchive;
 
 class UpdateGTFS extends Command
 {
-    private \Doctrine\ORM\EntityManagerInterface $entityManager;
-    private \Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface $params;
+    private $entityManager;
+    private $params;
 
     private ProviderRepository $providerRepository;
     private StationsRepository $stationsRepository;
     private StopsRepository $stopsRepository;
     private TownRepository $townRepository;
     private RoutesRepository $routesRepository;
+    private AgencyRepository $agencyRepository;
     private StopRouteRepository $stopRouteRepository;
     private TempStopRouteRepository $tempStopRouteRepository;
 
-    public function __construct(EntityManagerInterface $entityManager, ParameterBagInterface $params, ProviderRepository $providerRepository, StationsRepository $stationsRepository, StopsRepository $stopsRepository, TownRepository $townRepository, StopRouteRepository $stopRouteRepository, TempStopRouteRepository $tempStopRouteRepository, RoutesRepository $routesRepository)
+    public function __construct(EntityManagerInterface $entityManager, ParameterBagInterface $params, ProviderRepository $providerRepository, StationsRepository $stationsRepository, StopsRepository $stopsRepository, TownRepository $townRepository, StopRouteRepository $stopRouteRepository, TempStopRouteRepository $tempStopRouteRepository, RoutesRepository $routesRepository, AgencyRepository $agencyRepository)
     {
         $this->entityManager = $entityManager;
         $this->params = $params;
@@ -45,6 +47,7 @@ class UpdateGTFS extends Command
         $this->stopsRepository = $stopsRepository;
         $this->townRepository = $townRepository;
         $this->routesRepository = $routesRepository;
+        $this->agencyRepository = $agencyRepository;
         $this->stopRouteRepository = $stopRouteRepository;
         $this->tempStopRouteRepository = $tempStopRouteRepository;
 
@@ -80,15 +83,16 @@ class UpdateGTFS extends Command
             if ($tc_provider->getFlag() == 1) {
                 $output->writeln('    i Not fully updated, ignored');
                 $to_update = false;
-
             } 
 
             if ($tc_provider->getFlag() == 0 || $tc_provider->getUpdatedAt() == null) {
                 $output->writeln('    i New file');
                 $to_update = true;
-            } elseif (strtotime($ressource['updated']) > strtotime($tc_provider->getUpdatedAt()->format('Y-m-d H:i:s'))) {
+
+            } else if (strtotime($ressource['updated']) > strtotime($tc_provider->getUpdatedAt()->format('Y-m-d H:i:s'))) {
                 $output->writeln('    i ' . $ressource['updated'] . ' - ' . $tc_provider->getUpdatedAt()->format('Y-m-d H:i:s'));
                 $to_update = true;
+
             }
             
             if ($to_update) {
@@ -131,7 +135,10 @@ class UpdateGTFS extends Command
                     foreach ($ressource['filenames'] as $filename) {
                         // on deplace hors d'un potentiel fichier
                         $content = file_get_contents($dir . '/' . $provider . '/' . $filename);
-                        $content = str_replace('\r\n', '\n', $content);
+                        unlink($dir . '/' . $provider . '/' . $filename);
+                        $content = str_replace('\r\n', '\n,', $content);
+                        $content = str_replace('\n', ',\n', $content);
+                        $content = preg_replace('/[\x00-\x09\x0B\x0C\x0E-\x1F\x80-\xFF]/', '', $content);
                         file_put_contents($dir . '/' . $provider . '/' . $filename, $content);
 
                         if (strpos($filename, '/')) {
@@ -141,10 +148,6 @@ class UpdateGTFS extends Command
                     }
 
                     unlink($zip_name);
-
-                    // remove file and clear data
-                    // $output->writeln('    > Remove old data...');
-                    // CommandFunctions::clearProviderData($db, $provider);
 
                     // import gtfs
                     $output->writeln('    > Import new GTFS...');
@@ -184,20 +187,21 @@ class UpdateGTFS extends Command
                         if (is_file($file)) {
                             echo '        ' . $type . '        ';
 
+                            // Get field of the table in bd
                             $table_head = [];
                             $results = CommandFunctions::getColumn($db, $type);
                             foreach ($results as $obj) {
                                 $table_head[] = $obj['COLUMN_NAME'];
                             }
 
+                            // Get field in file
                             $header = Functions::getCSVHeader($file)[0][0];
                             $file_head = explode(",", $header);
 
                             $set = [];
                             // foreach file_head, if not in $table_head array, then it became '@dummy'
-                            $counter = count($file_head);
-                            // foreach file_head, if not in $table_head array, then it became '@dummy'
-                            for($i = 0; $i < $counter; $i++) {
+                            
+                            for($i = 0; $i < count($file_head); $i++) {
                                 if (!in_array($file_head[$i], $table_head)) {
                                     $file_head[$i] = '@dummy';
                                 } else {
@@ -205,13 +209,28 @@ class UpdateGTFS extends Command
                                 }
                             }
 
+                            if ($type == 'calendar_dates') {
+                                print_r($file_head);
+                                if ($file_head[2] == "exception_type") {
+                                    echo 'yes';
+                                } else {
+                                    echo 'no';
+                                }
+                            }
+
                             $set[] = "provider_id = '$provider'";
 
                             if ($type == 'routes' && !in_array("agency_id", $file_head)) {
-                                $set[] = "agency_id = '$provider:1'";
+                                $agency = $this->agencyRepository->FindOneBy(['provider_id' => $provider])->getAgencyId();
+                                $set[] = "agency_id = '$agency'";
+                            }
+
+                            if ($type == 'stops' && !in_array("location_type", $file_head)) {
+                                $set[] = "location_type = '0'";
                             }
                             
                             $header = implode(",", $file_head);
+
                             $set = implode(",", $set);
 
                             try {
@@ -234,11 +253,12 @@ class UpdateGTFS extends Command
                                 
                                 CommandFunctions::clearProviderDataInTable($db, $type, $provider);
                                 echo '4/5 ';
-                                // On réactive la vérification
-                                CommandFunctions::endDBUpdate($db);
                                 
                                 CommandFunctions::copyTable($db, $table, $type);
                                 echo '5/5 ' . PHP_EOL;
+
+                                // On réactive la vérification
+                                CommandFunctions::endDBUpdate($db);
 
                             } catch (\Exception $e) {
                                 echo PHP_EOL;
@@ -342,85 +362,86 @@ class UpdateGTFS extends Command
         CommandFunctions::autoInsertStopRoute($db);
 
         // ----
-        $output->writeln('  > Import SNCF stops...');
-
-        $SNCF_FORBIDDEN_DEPT = array("75", "92", "93", "94", "77", "78", "91", "95");
-        $SNCF_FORCE = array("Bréval", "Gazeran", "Angerville", "Monnerville", "Guillerval");
-        $SNCF_FORBIDDEN = array("Crépy-en-Valois", "Château-Thierry", "Montargis", "Malesherbes", "Dreux", "Gisors", "Creil", "Le Plessis-Belleville", "Nanteuil-le-Haudouin ", "Ormoy-Villers", "Mareuil-sur-Ourcq", "La Ferté-Milon", "Nogent-l'Artaud - Charly", "Dordives", "Ferrières - Fontenay", "Marchezais - Broué", "Vernon - Giverny", "Trie-Château", "Chaumont-en-Vexin", "Liancourt-Saint-Pierre", "Lavilletertre", "Boran-sur-Oise", "Précy-sur-Oise", "Saint-Leu-d'Esserent", "Chantilly - Gouvieux", "Orry-la-Ville - Coye", "La Borne Blanche");
-
-        $provider = $this->providerRepository->FindOneBy(['id' => 'SNCF']);
-
-        $url = $provider->getUrl();
-        $id = $provider->getId();
-        $file = $dir . '/' . $id . '.csv';
-
-        $output->writeln('    ' . $url);
-        $sncf = file_get_contents($url);
-        file_put_contents($file, $sncf);
-        
-
-        $route = $this->routesRepository->FindOneBy(['route_id' => 'SNCF']);
-
-        $s = [];
-        $sncf = Functions::readCsv($file);
-        
-        foreach ($sncf as $row) {
-            if ( !is_bool($row) && $row[0] != 'code' && $row[1] != '' && $row[1] != false) {
-
-                $id = 'SNCF:' . substr($row[2], 2);
-
-                if ( !in_array($id, $s) ) {
-                    $s[] = $id;
-
-                    $allowed = true;
-                    if (in_array($row[8], $SNCF_FORBIDDEN_DEPT)) {
-                        $allowed = false;
-                    }
-                    if (in_array($row[4], $SNCF_FORBIDDEN)) {
-                        $allowed = false;
-                    }
-                    if (in_array($row[4], $SNCF_FORCE)){
-                        $allowed = true;
-                    }
-
-                    if ($allowed == true) {
-                        try {
-
-                            $stop = $this->stopsRepository->findOneBy(['stop_id' => $id]);
-                            if ( $stop == null ) {
-                                $stop = new Stops();
-                                $stop->setStopId( $id );
-                                $stop->setStopCode( $row[27] );
-                                $stop->setStopName( $row[4] );
-                                $stop->setStopLat( isset($row[11]) ? $row[11] : '' );
-                                $stop->setStopLon( isset($row[10]) ? $row[10] : '' );
-                                $stop->setLocationType( '0' );
-                                $stop->setVehicleType( '2' );
-                            }
-            
-                            $stop_route = new StopRoute();
-                            $stop_route->setRouteKey( 'SNCF-' . $id );
-                            $stop_route->setRouteId( $route );
-                            $stop_route->setRouteShortName( $route->getRouteShortName() );
-                            $stop_route->setRouteLongName( $route->getRouteLongName() );
-                            $stop_route->setRouteType( $route->getRouteType() );
-                            $stop_route->setRouteColor( $route->getRouteColor() );
-                            $stop_route->setRouteTextColor( $route->getRouteTextColor() );
-                            $stop_route->setStopId( $stop );
-                            $stop_route->setStopName( $stop->getStopName() );
-                            $stop_route->setStopQueryName( $stop->getStopName() );
-                            $stop_route->setStopLat( $stop->getStopLat() );
-                            $stop_route->setStopLon( $stop->getStopLon() );
-                            
-                            $this->entityManager->persist($stop);
-                            $this->entityManager->persist($stop_route);
-                        } catch (\Exception $e) {
-                            echo $e;
-                        }
-                    }                    
-                }
-            }
-        }
+//SNCF        $output->writeln('  > Import SNCF stops...');
+//SNCF
+//SNCF        $SNCF_FORBIDDEN_DEPT = array("75", "92", "93", "94", "77", "78", "91", "95");
+//SNCF        $SNCF_FORCE = array("Bréval", "Gazeran", "Angerville", "Monnerville", "Guillerval");
+//SNCF        $SNCF_FORBIDDEN = array("Crépy-en-Valois", "Château-Thierry", "Montargis", "Malesherbes", "Dreux", "Gisors", "Creil", "Le Plessis-Belleville", "Nanteuil-le-Haudouin ", "Ormoy-Villers", "Mareuil-sur-Ourcq", "La Ferté-Milon", "Nogent-l'Artaud - Charly", "Dordives", "Ferrières - Fontenay", "Marchezais - Broué", "Vernon - Giverny", "Trie-Château", "Chaumont-en-Vexin", "Liancourt-Saint-Pierre", "Lavilletertre", "Boran-sur-Oise", "Précy-sur-Oise", "Saint-Leu-d'Esserent", "Chantilly - Gouvieux", "Orry-la-Ville - Coye", "La Borne Blanche");
+//SNCF
+//SNCF        $provider = $this->providerRepository->FindOneBy(['id' => 'SNCF']);
+//SNCF
+//SNCF        $url = $provider->getUrl();
+//SNCF        $id = $provider->getId();
+//SNCF        $file = $dir . '/' . $id . '.csv';
+//SNCF
+//SNCF        $output->writeln('    ' . $url);
+//SNCF        $sncf = file_get_contents($url);
+//SNCF        file_put_contents($file, $sncf);
+//SNCF        
+//SNCF
+//SNCF        $route = $this->routesRepository->FindOneBy(['route_id' => 'SNCF']);
+//SNCF
+//SNCF        $s = [];
+//SNCF        $sncf = Functions::readCsv($file);
+//SNCF        
+//SNCF        foreach ($sncf as $row) {
+//SNCF            if ( !is_bool($row) && $row[0] != 'code' && $row[1] != '' && $row[1] != false) {
+//SNCF
+//SNCF                $id = 'SNCF:' . substr($row[2], 2);
+//SNCF
+//SNCF                if ( !in_array($id, $s) ) {
+//SNCF                    $s[] = $id;
+//SNCF
+//SNCF                    $allowed = true;
+//SNCF                    if (in_array($row[8], $SNCF_FORBIDDEN_DEPT)) {
+//SNCF                        $allowed = false;
+//SNCF                    }
+//SNCF                    if (in_array($row[4], $SNCF_FORBIDDEN)) {
+//SNCF                        $allowed = false;
+//SNCF                    }
+//SNCF                    if (in_array($row[4], $SNCF_FORCE)){
+//SNCF                        $allowed = true;
+//SNCF                    }
+//SNCF
+//SNCF                    if ($allowed == true) {
+//SNCF                        try {
+//SNCF
+//SNCF                            $stop = $this->stopsRepository->findOneBy(['stop_id' => $id]);
+//SNCF                            if ( $stop == null ) {
+//SNCF                                $stop = new Stops();
+//SNCF                                $stop->setProviderId( $provider );
+//SNCF                                $stop->setStopId( $id );
+//SNCF                                $stop->setStopCode( $row[27] );
+//SNCF                                $stop->setStopName( $row[4] );
+//SNCF                                $stop->setStopLat( isset($row[11]) ? $row[11] : '' );
+//SNCF                                $stop->setStopLon( isset($row[10]) ? $row[10] : '' );
+//SNCF                                $stop->setLocationType( '0' );
+//SNCF                                $stop->setVehicleType( '2' );
+//SNCF                            }
+//SNCF            
+//SNCF                            $stop_route = new StopRoute();
+//SNCF                            $stop_route->setRouteKey( 'SNCF-' . $id );
+//SNCF                            $stop_route->setRouteId( $route );
+//SNCF                            $stop_route->setRouteShortName( $route->getRouteShortName() );
+//SNCF                            $stop_route->setRouteLongName( $route->getRouteLongName() );
+//SNCF                            $stop_route->setRouteType( $route->getRouteType() );
+//SNCF                            $stop_route->setRouteColor( $route->getRouteColor() );
+//SNCF                            $stop_route->setRouteTextColor( $route->getRouteTextColor() );
+//SNCF                            $stop_route->setStopId( $stop );
+//SNCF                            $stop_route->setStopName( $stop->getStopName() );
+//SNCF                            $stop_route->setStopQueryName( $stop->getStopName() );
+//SNCF                            $stop_route->setStopLat( $stop->getStopLat() );
+//SNCF                            $stop_route->setStopLon( $stop->getStopLon() );
+//SNCF                            
+//SNCF                            $this->entityManager->persist($stop);
+//SNCF                            $this->entityManager->persist($stop_route);
+//SNCF                        } catch (\Exception $e) {
+//SNCF                            echo $e;
+//SNCF                        }
+//SNCF                    }                    
+//SNCF                }
+//SNCF            }
+//SNCF        }
         $this->entityManager->flush();
 
         $output->writeln('<fg=white;bg=green>           </>');
@@ -428,32 +449,6 @@ class UpdateGTFS extends Command
         $output->writeln('<fg=white;bg=green>           </>');
 
         CommandFunctions::prepareStopRoute($db);
-
-        $output->writeln('> Updating stop_toute for Town...');
-
-        $_stops = [];
-        $stops = $this->stopRouteRepository->findBy(['town_id' => null]);
-
-        foreach( $stops as $stop ) {
-            $stop_id = $stop->getStopId()->getStopId();
-
-            if ( !in_array($stop_id, $_stops) ) {
-                // echo $stop->getStopName();
-
-                $_stops[] = $stop_id;
-
-                $town = $this->townRepository->findTownByCoordinates( $stop->getStopLon(), $stop->getStopLat() );
-        
-                if ( $town != null ) {
-                    Functions::setTownForStopRoute($db, $stop_id, $town);
-                    // $stop->setTown( $town );
-                    // $this->entityManager->flush();
-                } else {
-                    echo 'null';
-                }
-
-            }            
-        }
 
         $output->writeln('> Preparing for query...');
         CommandFunctions::generateQueryRoute($db);

@@ -39,7 +39,7 @@ class RoutesRepository extends ServiceEntityRepository
         }
     }
 
-    public function findByShortName(string $query): Routes
+    public function findByShortName(string $query): array
     {
         $qb = $this->createQueryBuilder('r');
 
@@ -49,7 +49,7 @@ class RoutesRepository extends ServiceEntityRepository
         return $qb->getQuery()->getResult();
     }
 
-    public function findByLongName(string $query): Routes
+    public function findByLongName(string $query): array
     {
         $qb = $this->createQueryBuilder('s');
 

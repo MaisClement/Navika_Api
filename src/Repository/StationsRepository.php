@@ -39,7 +39,7 @@ class StationsRepository extends ServiceEntityRepository
         }
     }
 
-    public function findByNearbyLocation(float $latitude, float $longitude, float $distance): Stations
+    public function findByNearbyLocation(float $latitude, float $longitude, float $distance): array
     {
         $qb = $this->createQueryBuilder('l');
 

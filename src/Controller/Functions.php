@@ -706,10 +706,10 @@ class Functions
             INNER JOIN trips T 
             ON ST.trip_id = T.trip_id
             
-            LEFT JOIN calendar C 
+            JOIN calendar C 
             ON T.service_id = C.service_id
             
-            LEFT JOIN calendar_dates CD 
+            JOIN calendar_dates CD 
             ON (T.service_id = CD.service_id AND CD.date = :date)
             
             WHERE S.parent_station = :stop_id
@@ -732,6 +732,7 @@ class Functions
                     OR CD.exception_type = '1' 
                 )
             ORDER BY ST.departure_time
+            LIMIT 30
         ");
         $req->bindValue("date", $date);
         $req->bindValue("route_id", $route_id);

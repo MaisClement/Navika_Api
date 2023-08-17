@@ -238,8 +238,8 @@ class Routes
             "code"       =>  (string)    $this->route_short_name,
             "name"       =>  (string)    $this->route_long_name,
             "mode"       =>  (string)    Functions::getTransportMode($this->route_type),
-            "color"      =>  (string)    strlen($this->route_color) < 6 ? "ffffff" : $this->route_color,
-            "text_color" =>  (string)    strlen($this->route_text_color) < 6 ? "000000" : $this->route_text_color,
+            "color"      =>  (string)    $this->route_color == null ? "ffffff" : substr($this->route_color, 0, 6),
+            "text_color" =>  (string)    $this->route_text_color == null ? "ffffff" : substr($this->route_text_color, 0, 6),
             "agency"     => array(
                 "id"         =>              $this->agency_id->getAgencyId(),
                 "name"       =>              $this->agency_id->getAgencyName(),
