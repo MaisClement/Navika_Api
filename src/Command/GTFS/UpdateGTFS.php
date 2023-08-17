@@ -209,15 +209,6 @@ class UpdateGTFS extends Command
                                 }
                             }
 
-                            if ($type == 'calendar_dates') {
-                                print_r($file_head);
-                                if ($file_head[2] == "exception_type") {
-                                    echo 'yes';
-                                } else {
-                                    echo 'no';
-                                }
-                            }
-
                             $set[] = "provider_id = '$provider'";
 
                             if ($type == 'routes' && !in_array("agency_id", $file_head)) {
@@ -362,86 +353,86 @@ class UpdateGTFS extends Command
         CommandFunctions::autoInsertStopRoute($db);
 
         // ----
-//SNCF        $output->writeln('  > Import SNCF stops...');
-//SNCF
-//SNCF        $SNCF_FORBIDDEN_DEPT = array("75", "92", "93", "94", "77", "78", "91", "95");
-//SNCF        $SNCF_FORCE = array("Bréval", "Gazeran", "Angerville", "Monnerville", "Guillerval");
-//SNCF        $SNCF_FORBIDDEN = array("Crépy-en-Valois", "Château-Thierry", "Montargis", "Malesherbes", "Dreux", "Gisors", "Creil", "Le Plessis-Belleville", "Nanteuil-le-Haudouin ", "Ormoy-Villers", "Mareuil-sur-Ourcq", "La Ferté-Milon", "Nogent-l'Artaud - Charly", "Dordives", "Ferrières - Fontenay", "Marchezais - Broué", "Vernon - Giverny", "Trie-Château", "Chaumont-en-Vexin", "Liancourt-Saint-Pierre", "Lavilletertre", "Boran-sur-Oise", "Précy-sur-Oise", "Saint-Leu-d'Esserent", "Chantilly - Gouvieux", "Orry-la-Ville - Coye", "La Borne Blanche");
-//SNCF
-//SNCF        $provider = $this->providerRepository->FindOneBy(['id' => 'SNCF']);
-//SNCF
-//SNCF        $url = $provider->getUrl();
-//SNCF        $id = $provider->getId();
-//SNCF        $file = $dir . '/' . $id . '.csv';
-//SNCF
-//SNCF        $output->writeln('    ' . $url);
-//SNCF        $sncf = file_get_contents($url);
-//SNCF        file_put_contents($file, $sncf);
-//SNCF        
-//SNCF
-//SNCF        $route = $this->routesRepository->FindOneBy(['route_id' => 'SNCF']);
-//SNCF
-//SNCF        $s = [];
-//SNCF        $sncf = Functions::readCsv($file);
-//SNCF        
-//SNCF        foreach ($sncf as $row) {
-//SNCF            if ( !is_bool($row) && $row[0] != 'code' && $row[1] != '' && $row[1] != false) {
-//SNCF
-//SNCF                $id = 'SNCF:' . substr($row[2], 2);
-//SNCF
-//SNCF                if ( !in_array($id, $s) ) {
-//SNCF                    $s[] = $id;
-//SNCF
-//SNCF                    $allowed = true;
-//SNCF                    if (in_array($row[8], $SNCF_FORBIDDEN_DEPT)) {
-//SNCF                        $allowed = false;
-//SNCF                    }
-//SNCF                    if (in_array($row[4], $SNCF_FORBIDDEN)) {
-//SNCF                        $allowed = false;
-//SNCF                    }
-//SNCF                    if (in_array($row[4], $SNCF_FORCE)){
-//SNCF                        $allowed = true;
-//SNCF                    }
-//SNCF
-//SNCF                    if ($allowed == true) {
-//SNCF                        try {
-//SNCF
-//SNCF                            $stop = $this->stopsRepository->findOneBy(['stop_id' => $id]);
-//SNCF                            if ( $stop == null ) {
-//SNCF                                $stop = new Stops();
-//SNCF                                $stop->setProviderId( $provider );
-//SNCF                                $stop->setStopId( $id );
-//SNCF                                $stop->setStopCode( $row[27] );
-//SNCF                                $stop->setStopName( $row[4] );
-//SNCF                                $stop->setStopLat( isset($row[11]) ? $row[11] : '' );
-//SNCF                                $stop->setStopLon( isset($row[10]) ? $row[10] : '' );
-//SNCF                                $stop->setLocationType( '0' );
-//SNCF                                $stop->setVehicleType( '2' );
-//SNCF                            }
-//SNCF            
-//SNCF                            $stop_route = new StopRoute();
-//SNCF                            $stop_route->setRouteKey( 'SNCF-' . $id );
-//SNCF                            $stop_route->setRouteId( $route );
-//SNCF                            $stop_route->setRouteShortName( $route->getRouteShortName() );
-//SNCF                            $stop_route->setRouteLongName( $route->getRouteLongName() );
-//SNCF                            $stop_route->setRouteType( $route->getRouteType() );
-//SNCF                            $stop_route->setRouteColor( $route->getRouteColor() );
-//SNCF                            $stop_route->setRouteTextColor( $route->getRouteTextColor() );
-//SNCF                            $stop_route->setStopId( $stop );
-//SNCF                            $stop_route->setStopName( $stop->getStopName() );
-//SNCF                            $stop_route->setStopQueryName( $stop->getStopName() );
-//SNCF                            $stop_route->setStopLat( $stop->getStopLat() );
-//SNCF                            $stop_route->setStopLon( $stop->getStopLon() );
-//SNCF                            
-//SNCF                            $this->entityManager->persist($stop);
-//SNCF                            $this->entityManager->persist($stop_route);
-//SNCF                        } catch (\Exception $e) {
-//SNCF                            echo $e;
-//SNCF                        }
-//SNCF                    }                    
-//SNCF                }
-//SNCF            }
-//SNCF        }
+        $output->writeln('  > Import SNCF stops...');
+
+        $SNCF_FORBIDDEN_DEPT = array("75", "92", "93", "94", "77", "78", "91", "95");
+        $SNCF_FORCE = array("Bréval", "Gazeran", "Angerville", "Monnerville", "Guillerval");
+        $SNCF_FORBIDDEN = array("Crépy-en-Valois", "Château-Thierry", "Montargis", "Malesherbes", "Dreux", "Gisors", "Creil", "Le Plessis-Belleville", "Nanteuil-le-Haudouin ", "Ormoy-Villers", "Mareuil-sur-Ourcq", "La Ferté-Milon", "Nogent-l'Artaud - Charly", "Dordives", "Ferrières - Fontenay", "Marchezais - Broué", "Vernon - Giverny", "Trie-Château", "Chaumont-en-Vexin", "Liancourt-Saint-Pierre", "Lavilletertre", "Boran-sur-Oise", "Précy-sur-Oise", "Saint-Leu-d'Esserent", "Chantilly - Gouvieux", "Orry-la-Ville - Coye", "La Borne Blanche");
+
+        $provider = $this->providerRepository->FindOneBy(['id' => 'SNCF']);
+
+        $url = $provider->getUrl();
+        $id = $provider->getId();
+        $file = $dir . '/' . $id . '.csv';
+
+        $output->writeln('    ' . $url);
+        $sncf = file_get_contents($url);
+        file_put_contents($file, $sncf);
+        
+
+        $route = $this->routesRepository->FindOneBy(['route_id' => 'SNCF']);
+
+        $s = [];
+        $sncf = Functions::readCsv($file);
+        
+        foreach ($sncf as $row) {
+            if ( !is_bool($row) && $row[0] != 'code' && $row[1] != '' && $row[1] != false) {
+
+                $id = 'SNCF:' . substr($row[2], 2);
+
+                if ( !in_array($id, $s) ) {
+                    $s[] = $id;
+
+                    $allowed = true;
+                    if (in_array($row[8], $SNCF_FORBIDDEN_DEPT)) {
+                        $allowed = false;
+                    }
+                    if (in_array($row[4], $SNCF_FORBIDDEN)) {
+                        $allowed = false;
+                    }
+                    if (in_array($row[4], $SNCF_FORCE)){
+                        $allowed = true;
+                    }
+
+                    if ($allowed == true) {
+                        try {
+
+                            $stop = $this->stopsRepository->findOneBy(['stop_id' => $id]);
+                            if ( $stop == null ) {
+                                $stop = new Stops();
+                                $stop->setProviderId( $provider );
+                                $stop->setStopId( $id );
+                                $stop->setStopCode( $row[27] );
+                                $stop->setStopName( $row[4] );
+                                $stop->setStopLat( isset($row[11]) ? $row[11] : '' );
+                                $stop->setStopLon( isset($row[10]) ? $row[10] : '' );
+                                $stop->setLocationType( '0' );
+                                $stop->setVehicleType( '2' );
+                            }
+            
+                            $stop_route = new StopRoute();
+                            $stop_route->setRouteKey( 'SNCF-' . $id );
+                            $stop_route->setRouteId( $route );
+                            $stop_route->setRouteShortName( $route->getRouteShortName() );
+                            $stop_route->setRouteLongName( $route->getRouteLongName() );
+                            $stop_route->setRouteType( $route->getRouteType() );
+                            $stop_route->setRouteColor( $route->getRouteColor() );
+                            $stop_route->setRouteTextColor( $route->getRouteTextColor() );
+                            $stop_route->setStopId( $stop );
+                            $stop_route->setStopName( $stop->getStopName() );
+                            $stop_route->setStopQueryName( $stop->getStopName() );
+                            $stop_route->setStopLat( $stop->getStopLat() );
+                            $stop_route->setStopLon( $stop->getStopLon() );
+                            
+                            $this->entityManager->persist($stop);
+                            $this->entityManager->persist($stop_route);
+                        } catch (\Exception $e) {
+                            echo $e;
+                        }
+                    }                    
+                }
+            }
+        }
         $this->entityManager->flush();
 
         $output->writeln('<fg=white;bg=green>           </>');

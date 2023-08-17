@@ -1,0 +1,19 @@
+clear
+
+php bin/console cache:clear
+
+php bin/console doctrine:database:drop --force
+
+php bin/console doctrine:database:create
+
+php bin/console doctrine:migrations:migrate --no-interaction
+
+php bin/console app:provider:add "tc" "ILEVIA"	"Ilévia - Lille"	"Métropole Européenne de Lille"	"58b69b59a3a7295a7d8251db"
+
+php bin/console app:gtfs:update
+
+
+
+
+php bin/console app:provider:add "tc" "CTRL"	"CTRL - Lorient" 	"CA Lorient Agglomération"	"61c97dd9a3499a9c8e8b8ea0"
+php bin/console app:provider:add "tc" "ASTUCE"	"Astuce - Rouen" 	"Métropole Rouen Normandie"	"5cd4321f8b4c4137d1244318"
