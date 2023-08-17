@@ -14,8 +14,8 @@ use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
 class Reset extends Command
 {
     private ProviderRepository $providerRepository;
-    private $entityManager;
-    private $params;
+    private \Doctrine\ORM\EntityManagerInterface $entityManager;
+    private \Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface $params;
     
     public function __construct(EntityManagerInterface $entityManager, ParameterBagInterface $params, ProviderRepository $providerRepository)
     {

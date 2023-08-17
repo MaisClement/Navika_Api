@@ -78,11 +78,9 @@ class Subscribers
 
     public function removeRouteSub(RouteSub $routeSub): static
     {
-        if ($this->routeSubs->removeElement($routeSub)) {
-            // set the owning side to null (unless already changed)
-            if ($routeSub->getSubscriberId() === $this) {
-                $routeSub->setSubscriberId(null);
-            }
+        // set the owning side to null (unless already changed)
+        if ($this->routeSubs->removeElement($routeSub) && $routeSub->getSubscriberId() === $this) {
+            $routeSub->setSubscriberId(null);
         }
 
         return $this;

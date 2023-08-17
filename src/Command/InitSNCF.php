@@ -12,7 +12,7 @@ use Symfony\Component\Console\Output\OutputInterface;
 
 class InitSNCF extends Command
 {
-    private $entityManager;
+    private \Doctrine\ORM\EntityManagerInterface $entityManager;
     
     public function __construct(EntityManagerInterface $entityManager)
     {

@@ -71,5 +71,9 @@
             "allow-contrib": false,
             "require": "6.3.*"
         }
+    },
+    "require-dev": {
+        "phpstan/phpstan": "^1.10",
+        "rector/rector": "^0.17.12"
     }
 }

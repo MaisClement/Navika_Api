@@ -13,8 +13,8 @@ use OpenApi\Attributes as OA;
 
 class VehicleJourney
 {
-    private $entityManager;
-    private $params;
+    private \Doctrine\ORM\EntityManagerInterface $entityManager;
+    private \Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface $params;
 
     public function __construct(EntityManagerInterface $entityManager, ParameterBagInterface $params)
     {
@@ -50,11 +50,7 @@ class VehicleJourney
             return new JsonResponse(Functions::ErrorMessage(400, 'One or more parameters are missing or null, have you "id" ?'), 400);
         }
 
-        if (str_starts_with($id, 'SNCF:') || str_starts_with($id, 'vehicle_journey:SNCF')) {
-            $provider = 'SNCF';
-        } else {
-            $provider = 'ADMIN';
-        }
+        $provider = str_starts_with($id, 'SNCF:') || str_starts_with($id, 'vehicle_journey:SNCF') ? 'SNCF' : 'ADMIN';
         
         $json = [];
 
@@ -97,8 +93,8 @@ class VehicleJourney
                         "lon"           => $result->stop_point->coord->lon,
                     ),
                     "stop_time" => array(
-                        "departure_time" =>  (string)  isset($result->departure_time) ? Functions::prepareTime($result->departure_time, true) : "",
-                        "arrival_time"  =>  (string)  isset($result->arrival_time)   ? Functions::prepareTime($result->arrival_time, true)   : "",
+                        "departure_time" =>  (string)  isset($result->departure_time) !== '' && (string)  isset($result->departure_time) !== '0' ? Functions::prepareTime($result->departure_time, true) : "",
+                        "arrival_time"  =>  (string)  isset($result->arrival_time) !== '' && (string)  isset($result->arrival_time) !== '0'   ? Functions::prepareTime($result->arrival_time, true)   : "",
                     ),
                     "disruption" => null ?? null,
                 );
@@ -115,7 +111,6 @@ class VehicleJourney
                     "id"            =>  $id,
                     "name"          =>  $el->name,
                     "mode"          =>  "rail",
-                    "name"          =>  $el->name,
                     "headsign"      =>  $el->stop_times[count($el->stop_times) - 1]->stop_point->name,
                     "description"   =>  "",
                     "message"       =>  "",
@@ -151,7 +146,7 @@ class VehicleJourney
                     "name"              => (string) $obj['stop_name'],
                     "id"                => (string) $obj['parent_station'],
                     "order"             => (int)    $order,
-                    "type"              => (int)    $len - 1 == $order ? 'terminus' : ($order == 0 ? 'origin' : ''),
+                    "type"              => (int)    $len - 1 === $order ? 'terminus' : ($order == 0 ? 'origin' : ''),
                     "coords" => array(
                         "lat"           => $obj['stop_lat'],
                         "lon"           => $obj['stop_lon'],
@@ -170,11 +165,10 @@ class VehicleJourney
         
             $vehicle_journey = array(
                 "informations" => array(
-                    "id"            =>  $trip_id,
-                    "name"          =>  $trip_headsign,
-                    "mode"          =>  Functions::getTransportMode($route_type),
+                    "id"            =>  $trip_id ?? '',
+                    "mode"          =>  Functions::getTransportMode($route_type ?? ''),
                     "name"          =>  $id,
-                    "headsign"      =>  $trip_headsign,
+                    "headsign"      =>  $trip_headsign ?? '',
                     "description"   =>  '',
                     "message"       =>  '',
                     "origin" => array(

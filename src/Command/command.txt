@@ -4,21 +4,32 @@ php bin/console doctrine:database:drop --force
 
 php bin/console doctrine:database:create
 
-php bin/console make:migration
-
 php bin/console doctrine:migrations:migrate --no-interaction
+
+php bin/console make:migration
 
 php bin/console app:init:sncf
 php bin/console app:init:town /var/www/navika/data/file/communes.geojson /var/www/navika/data/file/zip_code.json
 php bin/console app:init:town /home/walnutlebg/navika_data/communes.geojson /home/walnutlebg/navika_data/zip_code.json
 
-php bin/console app:provider:add "tc" "IDFM"    "Île-de-France Mobilités" "Île-de-France"               "6449c52caeceb71273a42dd3" 
-php bin/console app:provider:add "tc" "BIBUS"   "Bibus - Brest Métropole" "Brest"                       "55ffbe0888ee387348ccb97d" 
-php bin/console app:provider:add "tc" "TAN"     "TAN - Nantes Métropole"  "Nantes Métropole"            "5b873d7206e3e76e5b2ffd32" 
-php bin/console app:provider:add "tc" "OURA"    "OURA - Agrégat AURA"     "Auvergne Rhône-Alpes"        "61f7b4f89e4131deaf48fe02" 
-php bin/console app:provider:add "tc" "SIBRA"   "Sibra - Annecy"          "CA du Grand Annecy"          "5bd9843e634f413220f7f04a" 
-php bin/console app:provider:add "tc" "SYNCHRO" "Synchro - Chambéry"      "CA du Grand Chambéry"        "5bae8c2806e3e75b699dc606"
-php bin/console app:provider:add "tc" "CTS"     "CTS - Strasbourg"        "Eurométropole de Strasbourg" "5ae1715488ee384c8ba0342b"
+php bin/console app:provider:add "tc" "IDFM"    "Île-de-France Mobilités" "Île-de-France"                   "6449c52caeceb71273a42dd3" 
+php bin/console app:provider:add "tc" "BIBUS"   "Bibus - Brest Métropole" "Brest"                           "55ffbe0888ee387348ccb97d" 
+php bin/console app:provider:add "tc" "TAN"     "TAN - Nantes Métropole"  "Nantes Métropole"                "5b873d7206e3e76e5b2ffd32" 
+php bin/console app:provider:add "tc" "OURA"    "OURA - Agrégat AURA"     "Auvergne Rhône-Alpes"            "61f7b4f89e4131deaf48fe02" 
+php bin/console app:provider:add "tc" "SIBRA"   "Sibra - Annecy"          "CA du Grand Annecy"              "5bd9843e634f413220f7f04a" 
+php bin/console app:provider:add "tc" "SYNCHRO" "Synchro - Chambéry"      "CA du Grand Chambéry"            "5bae8c2806e3e75b699dc606"
+php bin/console app:provider:add "tc" "CTS"     "CTS - Strasbourg"        "Eurométropole de Strasbourg"     "5ae1715488ee384c8ba0342b"
+
+php bin/console app:provider:add "tc" "IRIGO"	"Irigo - Angers"	      "Angers Loire Métropole"	        "6178cee254e3b3f0744a1318"
+php bin/console app:provider:add "tc" "ILEVIA"	"Ilévia - Lille"	      "Métropole Européenne de Lille"	"58b69b59a3a7295a7d8251db"
+php bin/console app:provider:add "tc" "CTRL"	"CTRL - Lorient"           "CA Lorient Agglomération"	    "61c97dd9a3499a9c8e8b8ea0"
+php bin/console app:provider:add "tc" "ASTUCE"	"Astuce - Rouen" 	      "Métropole Rouen Normandie"	    "5cd4321f8b4c4137d1244318"
+
+php bin/console app:provider:add "tc" "ZOU"	    "Zou - Région SUD"	      "Provence-Alpes-Côte d’Azur"	    "5ce8865306e3e760b2d57ec0"
+php bin/console app:provider:add "tc" "LIA"	    "LiA - Le Havre"	      "Le Havre Seine Métropole"	    "617c12b7f9aaa6853cf6d303"
+php bin/console app:provider:add "tc" "FILBLEU"	"Fil Bleu - Tours"	      "Mobilités de Touraine"	        "638157af7f6b7cd00e2908e1"
+php bin/console app:provider:add "tc" "TBM"	    "TBM - Bordeaux"	      "Bordeaux Métropole"	            "61a025b3a95e6e49a64ed7a0"
+
 
 php bin/console app:provider:add "bikes" "VELIB"     "Vélib‘"       "Paris"            "https://velib-metropole-opendata.smoove.pro/opendata/Velib_Metropole/" 
 php bin/console app:provider:add "bikes" "VELOV"     "Vélo‘v"       "Lyon"             "https://transport.data.gouv.fr/gbfs/lyon/" 

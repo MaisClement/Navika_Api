@@ -18,12 +18,13 @@ use OpenApi\Attributes as OA;
 
 class Schedules
 {
-    private $entityManager;
+    private \Doctrine\ORM\EntityManagerInterface $entityManager;
     private StopRouteRepository $stopRouteRepository;
     private TripsRepository $tripsRepository;
     private StopTimesRepository $stopTimesRepository;
     private StopsRepository $stopsRepository;
     private RoutesRepository $routesRepository;
+    private ParameterBagInterface $params;
     
     public function __construct(EntityManagerInterface $entityManager, StopRouteRepository $stopRouteRepository, TripsRepository $tripsRepository, StopTimesRepository $stopTimesRepository, StopsRepository $stopsRepository, ParameterBagInterface $params, RoutesRepository $routesRepository)
     {        
@@ -87,7 +88,7 @@ class Schedules
 
         if (str_contains($id, 'SNCF:')) {
             $provider = 'SNCF';
-        } else if (str_contains($id, 'IDFM:')) {
+        } elseif (str_contains($id, 'IDFM:')) {
             $provider = 'IDFM';
         } else {
             $provider = 'ADMIN';
@@ -108,8 +109,8 @@ class Schedules
             'town'      =>  (string)    $routes[0]->getTownName(),
             'zip_code'  =>  (string)    '',
             'coord'     => array(
-                'lat'       =>      floatval( $routes[0]->getStopLat() ),
-                'lon'       =>      floatval( $routes[0]->getStopLon() ),
+                'lat'       =>      (float) $routes[0]->getStopLat(),
+                'lon'       =>      (float) $routes[0]->getStopLon(),
             ),
             'modes'     => array()
         );
@@ -131,11 +132,11 @@ class Schedules
                 // Si c'est du ferré, l'affichage est different
                 if ($route->getTransportMode() == "rail" || $route->getTransportMode() == "nationalrail") {
                     $lines_data[$line_id]['departures'] = [];
-        
+
                     if (!in_array($line_id, $departures_lines)) {
                         $departures_lines[] = $line_id;
                     }
-                
+
                 // Affichage normal
                 } else {
                     $lines_data[$line_id]['terminus_schedules'] = [];
@@ -163,31 +164,24 @@ class Schedules
                 ],
             ]);
             $status = $response->getStatusCode();
-
             if ($status != 200){
                 return new JsonResponse(Functions::ErrorMessage(520, 'Invalid fetched data'), 520);
             }
-
             $content = $response->getContent();
             $results = json_decode($content);
-
             //SNCF API
             $api_client = HttpClient::create();
             $api_response = $api_client->request('GET', $sncf_url_api, [
                 'auth_basic' => [$this->params->get('sncf_api_key'), ''],
             ]);
             $api_status = $api_response->getStatusCode();
-
             if ($api_status != 200){
                 return new JsonResponse(Functions::ErrorMessage(520, 'Invalid fetched data'), 520);
             }
-
             $api_content = $api_response->getContent();
             $api_results = json_decode($api_content);
-
             $departures = [];
             $ungrouped_departures = [];
-
             foreach ($results as $result) {
 
                 $details = Functions::getApiDetails($api_results, $result->trainNumber);
@@ -237,7 +231,6 @@ class Schedules
                 );
                 $ungrouped_departures[] = $dep;
             }
-
             // Train non regroupé
             if (isset($_GET['ungroupDepartures']) && $_GET['ungroupDepartures'] == 'true') {
                 $json['departures'] = $ungrouped_departures;
@@ -254,12 +247,9 @@ class Schedules
                     "departures" =>  $departures
                 );
             }
-
             //modes
             $json['place']['modes'] = ['nationalrail'];
-
-        } else if ($provider == 'IDFM') {
-
+        } elseif ($provider == 'IDFM') {
             $client = HttpClient::create();
             $response = $client->request('GET', $prim_url, [
                 'headers' => [
@@ -267,21 +257,16 @@ class Schedules
                 ],
             ]);
             $status = $response->getStatusCode();
-
             if ($status != 200){
                 return new JsonResponse(Functions::ErrorMessage(520, 'Invalid fetched data'), 520);
             }
-
             $content = $response->getContent();
             $results = json_decode($content);
-
             $results = $results->Siri->ServiceDelivery->StopMonitoringDelivery[0]->MonitoredStopVisit;
-
             $schedules = [];
             $departures = [];
             $ungrouped_departures = [];
             $direction = [];
-
             foreach ($results as $result) {
                 if (!isset($result->MonitoredVehicleJourney->MonitoredCall)) {
                     return new JsonResponse(Functions::ErrorMessage(520, 'Invalid fetched data'), 520);
@@ -297,9 +282,9 @@ class Schedules
 
                         $dir = $this->stopsRepository->findStopById( $destination_ref );
                         
-                        if ( $dir != null && $dir->getStopName() != null ) {
+                        if ($dir != null && $dir->getStopName() != null) {
                             $direction[$destination_ref] = Functions::gareFormat( $dir->getStopName() );
-                        } else if ( isset( $call->DestinationDisplay[0]->value ) ){
+                        } elseif (isset( $call->DestinationDisplay[0]->value )) {
                             $direction[$destination_ref] = Functions::gareFormat( $call->DestinationDisplay[0]->value );
                         }
                     }
@@ -318,8 +303,7 @@ class Schedules
                     }
 
                     if (($lines_data[$line_id]['mode'] == "rail" || $lines_data[$line_id]['mode'] == "nationalrail") && Functions::callIsFuture($call)) {
-                            // Si c'est du ferré, l'affichage est different
-
+                        // Si c'est du ferré, l'affichage est different
                         if (!in_array($line_id, $departures_lines)) {
                             $departures_lines[] = $line_id;
                         }
@@ -329,24 +313,21 @@ class Schedules
                                     "id"         =>  (string)   $destination_ref,
                                     "name"       =>  (string)   $direction[$destination_ref],
                                 ),
-                                "id"            =>  (string)  isset($result->MonitoredVehicleJourney->TrainNumbers->TrainNumberRef[0]->value) ? $result->MonitoredVehicleJourney->TrainNumbers->TrainNumberRef[0]->value : ( $result->MonitoredVehicleJourney->VehicleJourneyName[0]->value ? $result->MonitoredVehicleJourney->VehicleJourneyName[0]->value : ''),
-                                "name"          =>  (string)  isset($result->MonitoredVehicleJourney->TrainNumbers->TrainNumberRef[0]->value) ? $result->MonitoredVehicleJourney->TrainNumbers->TrainNumberRef[0]->value : ( $result->MonitoredVehicleJourney->VehicleJourneyName[0]->value ? $result->MonitoredVehicleJourney->VehicleJourneyName[0]->value : ''),
+                                "id"            =>  (string)  isset($result->MonitoredVehicleJourney->TrainNumbers->TrainNumberRef[0]->value) !== '' && (string)  isset($result->MonitoredVehicleJourney->TrainNumbers->TrainNumberRef[0]->value) !== '0' ? $result->MonitoredVehicleJourney->TrainNumbers->TrainNumberRef[0]->value : ( $result->MonitoredVehicleJourney->VehicleJourneyName[0]->value ? $result->MonitoredVehicleJourney->VehicleJourneyName[0]->value : ''),
+                                "name"          =>  (string)  isset($result->MonitoredVehicleJourney->TrainNumbers->TrainNumberRef[0]->value) !== '' && (string)  isset($result->MonitoredVehicleJourney->TrainNumbers->TrainNumberRef[0]->value) !== '0' ? $result->MonitoredVehicleJourney->TrainNumbers->TrainNumberRef[0]->value : ( $result->MonitoredVehicleJourney->VehicleJourneyName[0]->value ? $result->MonitoredVehicleJourney->VehicleJourneyName[0]->value : ''),
                                 "mode"          =>  (string)  $lines_data[$line_id]['mode'],
-                                "trip_name"     =>  (string)  isset($result->MonitoredVehicleJourney->TrainNumbers->TrainNumberRef[0]->value) ? $result->MonitoredVehicleJourney->TrainNumbers->TrainNumberRef[0]->value : ( $result->MonitoredVehicleJourney->VehicleJourneyName[0]->value ? $result->MonitoredVehicleJourney->VehicleJourneyName[0]->value : ''),
-                                "headsign"      =>  (string)  isset($result->MonitoredVehicleJourney->JourneyNote[0]->value) ? $result->MonitoredVehicleJourney->JourneyNote[0]->value : '',
+                                "trip_name"     =>  (string)  isset($result->MonitoredVehicleJourney->TrainNumbers->TrainNumberRef[0]->value) !== '' && (string)  isset($result->MonitoredVehicleJourney->TrainNumbers->TrainNumberRef[0]->value) !== '0' ? $result->MonitoredVehicleJourney->TrainNumbers->TrainNumberRef[0]->value : ( $result->MonitoredVehicleJourney->VehicleJourneyName[0]->value ? $result->MonitoredVehicleJourney->VehicleJourneyName[0]->value : ''),
+                                "headsign"      =>  (string)  isset($result->MonitoredVehicleJourney->JourneyNote[0]->value) !== '' && (string)  isset($result->MonitoredVehicleJourney->JourneyNote[0]->value) !== '0' ? $result->MonitoredVehicleJourney->JourneyNote[0]->value : '',
                                 "description"   =>  (string)  '',
                                 "message"       =>  (string)  Functions::getMessage($call),
                             ),
                             "stop_date_time" => Functions::getStopDateTime($call)
                         );
                         $departures[$line_id][] = $dep;
-
                         $dep['informations']['line'] = $lines_data[$line_id];
                         $ungrouped_departures[] = $dep;
-                        
-                    } else if ( Functions::callIsFuture($call) ){
+                    } elseif (Functions::callIsFuture($call)) {
                         // Affichage normal
-
                         if (!isset($terminus_data[$line_id][$destination_ref])) {
                             $terminus_data[$line_id][$destination_ref] = array(
                                 "id"         =>  (string)    $destination_ref,
@@ -354,20 +335,16 @@ class Schedules
                                 "schedules"  =>  array()
                             );
                         }
-
                         if (isset($call->ExpectedDepartureTime)) {
                             $schedules[$line_id][$destination_ref][] = Functions::getStopDateTime($call);
                         }
                     }
                 }
             }
-
             $l = [];
-
             foreach ($departures_lines as $departures_line) {
                 $l[] = $lines_data[$departures_line];
             }
-
             // Train non regroupé
             if (isset($ungroupDepartures) && $ungroupDepartures == 'true') {
                 $ungrouped_departures = Functions::orderDeparture( $ungrouped_departures );
@@ -385,9 +362,7 @@ class Schedules
                     $json['departures'][] = $line;
                 }
             }
-
             $lines_data = Functions::order_line($lines_data);
-                
             foreach ($lines_data as $line) {
                 if ($line['mode'] != 'rail' && $line['mode'] != 'nationalrail') {
 
@@ -405,8 +380,6 @@ class Schedules
                     $json['schedules'][] = $line;
                 }
             }
-
-
         } else {
             foreach ($lines_data as $line) {
                 if ($line['mode'] != 'rail' && $line['mode'] != 'nationalrail') {
@@ -418,7 +391,8 @@ class Schedules
 
 //FROM BD
         if ( isset( $json['schedules'] ) ) {
-            for ($i = 0; $i < count($json['schedules']); $i++) { 
+            $counter = count($json['schedules']);
+            for ($i = 0; $i < $counter; $i++) { 
                 $line = $json['schedules'][$i];
                 $terminus = [];
                 if (count($line['terminus_schedules']) == 0){

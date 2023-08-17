@@ -13,8 +13,8 @@ use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
 
 class Add extends Command
 {
-    private $entityManager;
-    private $params;
+    private \Doctrine\ORM\EntityManagerInterface $entityManager;
+    private \Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface $params;
 
     private ProviderRepository $providerRepository;
     
@@ -51,7 +51,7 @@ class Add extends Command
 
         // Check if provider is not already registered
         $providers = $this->providerRepository->Find($id);
-        if ( $providers !== null ) {
+        if ( $providers instanceof \App\Entity\Provider ) {
             $output->writeln('<fg=blue>ℹ️ Provider already registered</>');
             return Command::SUCCESS;
         }

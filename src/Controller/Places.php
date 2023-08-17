@@ -12,7 +12,7 @@ use Symfony\Component\Routing\Annotation\Route;
 
 class Places
 {
-    private $params;
+    private \Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface $params;
 
     public function __construct(ParameterBagInterface $params)
     {
@@ -72,24 +72,16 @@ class Places
         if (isset($q) && isset($lat) && isset($lon)) {
             $query = $q;
             $query = urldecode(trim($query));
-
             $url = $this->params->get('prim_url') . '/places?q=' . $query . '&from' . $lon . ';' . $lat . '=&depth=2';
-        
             $search_type = 3;
-
-        } else if (isset($lat) && isset($lon)) {
+        } elseif (isset($lat) && isset($lon)) {
             $url = $this->params->get('prim_url') . '/coord/' . $lon . ';' . $lat . '/places_nearby?depth=2&distance=1000';
-
             $search_type = 2;
-
-        } else if (isset($q)) {
+        } elseif (isset($q)) {
             $query = $q;
             $query = urldecode(trim($query));
-
             $url = $this->params->get('prim_url') . '/places?q=' . $query . '&depth=2';
-
             $search_type = 1;
-            
         } else {
             return new JsonResponse(Functions::ErrorMessage(400, 'One or more parameters are missing or null, have you "q" or "lat" and "lon" ?'), 400);
         }
@@ -113,9 +105,9 @@ class Places
 
         if ($search_type == 3) {
             $results = $results->places;
-        } else if ($search_type == 2) {
+        } elseif ($search_type == 2) {
             $results = $results->places_nearby;
-        } else if ($search_type == 1) {
+        } elseif ($search_type === 1) {
             $results = $results->places;
         } else {
             return new JsonResponse(Functions::ErrorMessage(500), 500);
@@ -127,12 +119,12 @@ class Places
                 "id"        =>  (string)    $result->id,
                 "name"      =>  (string)    $result->{$result->embedded_type}->name,
                 "type"      =>  (string)    $result->embedded_type,
-                "distance"  =>              floatval( isset($result->distance) ? $result->distance : 0 ),
+                "distance"  =>              (float) (isset($result->distance) ? $result->distance : 0),
                 "town"      =>  (string)    Functions::getTownByAdministrativeRegions($result->{$result->embedded_type}->administrative_regions),
                 "zip_code"  =>  (string)    Functions::getZipByAdministrativeRegions($result->{$result->embedded_type}->administrative_regions),
                 "coord"     => array(
-                    "lat"       =>  floatval($result->{$result->embedded_type}->coord->lat),
-                    "lon"       =>  floatval($result->{$result->embedded_type}->coord->lon),
+                    "lat"       =>  (float) $result->{$result->embedded_type}->coord->lat,
+                    "lon"       =>  (float) $result->{$result->embedded_type}->coord->lon,
                 ),
                 "lines"     =>              isset($result->{$result->embedded_type}->lines) ? Functions::getAllLines($result->{$result->embedded_type}->lines) : [],
                 "modes"     =>              isset($result->stop_area->physical_modes) ? Functions::getPhysicalModes($result->stop_area->physical_modes) : [],

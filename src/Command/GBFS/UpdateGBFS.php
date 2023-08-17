@@ -14,8 +14,8 @@ use Symfony\Component\HttpClient\HttpClient;
 
 class UpdateGBFS extends Command
 {
-    private $entityManager;
-    private $params;
+    private \Doctrine\ORM\EntityManagerInterface $entityManager;
+    private \Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface $params;
 
     private StationsRepository $stationsRepository;
     private ProviderRepository $providerRepository;
@@ -83,7 +83,7 @@ class UpdateGBFS extends Command
 
                     if (isset($content->data->fr)) {
                         $feeds = $content->data->fr->feeds;
-                    } else if (isset($content->data->en)) {
+                    } elseif (isset($content->data->en)) {
                         $feeds = $content->data->en->feeds;
                     } else {
                         echo '🤔';
@@ -96,7 +96,7 @@ class UpdateGBFS extends Command
                                 $_response = $client->request('GET', $feed->url);
                                 $_status = $response->getStatusCode();
 
-                                if ($status != 200) {
+                                if ($status !== 200) {
                                     return Command::FAILURE;
                                 }
 

@@ -76,7 +76,6 @@ class Stops
     public function __construct()
     {
         $this->stopTimes = new ArrayCollection();
-        $this->stops = new ArrayCollection();
         $this->pathways = new ArrayCollection();
         $this->transfers = new ArrayCollection();
         $this->fareRules = new ArrayCollection();
@@ -202,18 +201,6 @@ class Stops
         return $this;
     }
 
-    public function getStops(): ?self
-    {
-        return $this->Stops;
-    }
-
-    public function setStops(?self $Stops): static
-    {
-        $this->Stops = $Stops;
-
-        return $this;
-    }
-
     public function getVehicleType(): ?string
     {
         return $this->vehicle_type;
@@ -294,11 +281,9 @@ class Stops
 
     public function removeStopTime(StopTimes $stopTime): static
     {
-        if ($this->stopTimes->removeElement($stopTime)) {
-            // set the owning side to null (unless already changed)
-            if ($stopTime->getStopId() === $this) {
-                $stopTime->setStopId(null);
-            }
+        // set the owning side to null (unless already changed)
+        if ($this->stopTimes->removeElement($stopTime) && $stopTime->getStopId() === $this) {
+            $stopTime->setStopId(null);
         }
 
         return $this;
@@ -336,11 +321,9 @@ class Stops
 
     public function removePathway(Pathways $pathway): static
     {
-        if ($this->pathways->removeElement($pathway)) {
-            // set the owning side to null (unless already changed)
-            if ($pathway->getFromStopId() === $this) {
-                $pathway->setFromStopId(null);
-            }
+        // set the owning side to null (unless already changed)
+        if ($this->pathways->removeElement($pathway) && $pathway->getFromStopId() === $this) {
+            $pathway->setFromStopId(null);
         }
 
         return $this;
@@ -366,11 +349,9 @@ class Stops
 
     public function removeTransfer(Transfers $transfer): static
     {
-        if ($this->transfers->removeElement($transfer)) {
-            // set the owning side to null (unless already changed)
-            if ($transfer->getFromStopId() === $this) {
-                $transfer->setFromStopId(null);
-            }
+        // set the owning side to null (unless already changed)
+        if ($this->transfers->removeElement($transfer) && $transfer->getFromStopId() === $this) {
+            $transfer->setFromStopId(null);
         }
 
         return $this;
@@ -396,11 +377,9 @@ class Stops
 
     public function removeFareRule(FareRules $fareRule): static
     {
-        if ($this->fareRules->removeElement($fareRule)) {
-            // set the owning side to null (unless already changed)
-            if ($fareRule->getOriginId() === $this) {
-                $fareRule->setOriginId(null);
-            }
+        // set the owning side to null (unless already changed)
+        if ($this->fareRules->removeElement($fareRule) && $fareRule->getOriginId() === $this) {
+            $fareRule->setOriginId(null);
         }
 
         return $this;

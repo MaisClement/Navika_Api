@@ -31,11 +31,6 @@ class CalendarDates
     #[ORM\Column(columnDefinition: "ENUM('0', '1', '2')")]
     private ?int $exception_type = null;
 
-    public function __construct()
-    {
-        $this->calendars = new ArrayCollection();
-    }
-
     public function getId(): ?int
     {
         return $this->id;
@@ -85,58 +80,6 @@ class CalendarDates
     public function setExceptionType(int $exception_type): static
     {
         $this->exception_type = $exception_type;
-
-        return $this;
-    }
-
-    /**
-     * @return Collection<int, Calendar>
-     */
-    public function getCalendars(): Collection
-    {
-        return $this->calendars;
-    }
-
-    public function addCalendar(Calendar $calendar): static
-    {
-        if (!$this->calendars->contains($calendar)) {
-            $this->calendars->add($calendar);
-            $calendar->setServiceId($this);
-        }
-
-        return $this;
-    }
-
-    public function removeCalendar(Calendar $calendar): static
-    {
-        if ($this->calendars->removeElement($calendar)) {
-            // set the owning side to null (unless already changed)
-            if ($calendar->getServiceId() === $this) {
-                $calendar->setServiceId(null);
-            }
-        }
-
-        return $this;
-    }
-
-    public function addServiceId(Calendar $serviceId): static
-    {
-        if (!$this->service_id->contains($serviceId)) {
-            $this->service_id->add($serviceId);
-            $serviceId->setCalendarDates($this);
-        }
-
-        return $this;
-    }
-
-    public function removeServiceId(Calendar $serviceId): static
-    {
-        if ($this->service_id->removeElement($serviceId)) {
-            // set the owning side to null (unless already changed)
-            if ($serviceId->getCalendarDates() === $this) {
-                $serviceId->setCalendarDates(null);
-            }
-        }
 
         return $this;
     }

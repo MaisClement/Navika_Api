@@ -79,11 +79,13 @@ class Near
         // ------ Places
         //
         $places = [];
+        $lines = [];
+        $modes = [];
+
         foreach($stops as $stop) {
             if (($zoom >= 15000 && ($stop->getTransportMode() == 'rail' || $stop->getTransportMode() == 'nationalrail')) || $zoom < 15000) {
             
                 if (!isset($places[$stop->getStopId()->getStopId()])) {
-
                     $places[$stop->getStopId()->getStopId()] = array(
                         'id'        =>              $stop->getStopId()->getStopId(),
                         'name'      =>  (string)    $stop->getStopName(),
@@ -92,8 +94,8 @@ class Near
                         'town'      =>  (string)    $stop->getTownName(),
                         'zip_code'  =>  (string)    '',
                         'coord'     => array(
-                            'lat'       =>      floatval($stop->getStopLat()),
-                            'lon'       =>      floatval($stop->getStopLon()),
+                            'lat'       =>      (float) $stop->getStopLat(),
+                            'lon'       =>      (float) $stop->getStopLon(),
                         ),
                         'lines'     => array(),
                         'modes'     => array(),
@@ -137,8 +139,8 @@ class Near
                     'name'      =>  (string)    $bike->getStationName(),
                     'capacity'  =>  (int)       $bike->getStationCapacity(),
                     'coord'     => array(
-                        'lat'       => floatval( $bike->getStationLat() ),
-                        'lon'       => floatval( $bike->getStationLon() ),
+                        'lat'       => (float) $bike->getStationLat(),
+                        'lon'       => (float) $bike->getStationLon(),
                     ),
                 );
             }

@@ -50,11 +50,6 @@ class Calendar
     #[ORM\Column(type: Types::DATE_MUTABLE)]
     private ?\DateTimeInterface $end_date = null;
 
-    public function __construct()
-    {
-        $this->calendarDates = new ArrayCollection();
-    }
-
     public function getProviderId(): ?Provider 
     {
         return $this->provider_id;
@@ -183,40 +178,6 @@ class Calendar
     public function setEndDate(\DateTimeInterface $end_date): static
     {
         $this->end_date = $end_date;
-
-        return $this;
-    }
-
-    public function getCalendarDates(): ?CalendarDates
-    {
-        return $this->calendarDates;
-    }
-
-    public function setCalendarDates(?CalendarDates $calendarDates): static
-    {
-        $this->calendarDates = $calendarDates;
-
-        return $this;
-    }
-
-    public function addCalendarDates(CalendarDates $calendarDates): static
-    {
-        if (!$this->calendarDates->contains($calendarDates)) {
-            $this->calendarDates->add($calendarDates);
-            $calendarDates->setServiceId($this);
-        }
-
-        return $this;
-    }
-
-    public function removeCalendarDates(CalendarDates $calendarDates): static
-    {
-        if ($this->calendarDates->removeElement($calendarDates)) {
-            // set the owning side to null (unless already changed)
-            if ($calendarDates->getServiceId() === $this) {
-                $calendarDates->setServiceId(null);
-            }
-        }
 
         return $this;
     }

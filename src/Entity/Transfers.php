@@ -28,11 +28,6 @@ class Transfers
     #[ORM\Column(nullable: true)]
     private ?int $min_transfer_time = null;
 
-    public function getId(): ?int
-    {
-        return $this->id;
-    }
-
     public function getProviderId(): ?Provider 
     {
         return $this->provider_id;

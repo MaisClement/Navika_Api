@@ -50,7 +50,7 @@ class Bikes
     public function getBikes($id)
     {
         //--- On recupere les infos de la base de données
-        if (!$station = $this->stationsRepository->findOneBy( ['station_id' => $id] )) {
+        if (!($station = $this->stationsRepository->findOneBy( ['station_id' => $id] )) instanceof \App\Entity\Stations) {
             return new JsonResponse(Functions::ErrorMessage(400, 'Nothing where found for this station'), 400);
         }
         
@@ -58,8 +58,8 @@ class Bikes
             'name'     => $station->getStationName(),
             'url'      => $station->getProviderId()->getUrl(),
             'coord' => array(
-                'lat'      => $station->getStationLat(),
-                'lon'      => $station->getStationLon(),
+                'lat'      => (double) $station->getStationLat(),
+                'lon'      => (double) $station->getStationLon(),
             ),
             'capacity' => (int) $station->getStationCapacity(),
         );
@@ -87,7 +87,7 @@ class Bikes
                                 $json[$key] = $nb;
                             }
                         }
-                    } else if (isset($station->num_bikes_available)) {
+                    } elseif (isset($station->num_bikes_available)) {
                         $json['bike'] = $station->num_bikes_available;
                     }
             

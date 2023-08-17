@@ -58,11 +58,6 @@ class TempStopRoute
     #[ORM\Column(length: 255, nullable: true)]
     private ?string $zip_code = null;
 
-    public function getId(): ?int
-    {
-        return $this->id;
-    }
-
     public function getRouteKey(): ?string
     {
         return $this->route_key;

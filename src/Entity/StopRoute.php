@@ -273,16 +273,4 @@ class StopRoute
 
         return $this;
     }
-
-    public function getStops(): ?Stops
-    {
-        return $this->stops;
-    }
-
-    public function setStops(?Stops $stops): static
-    {
-        $this->stops = $stops;
-
-        return $this;
-    }
 }
