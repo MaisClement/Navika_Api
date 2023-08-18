@@ -136,8 +136,8 @@ class UpdateGTFS extends Command
                         // on deplace hors d'un potentiel fichier
                         $content = file_get_contents($dir . '/' . $provider . '/' . $filename);
                         unlink($dir . '/' . $provider . '/' . $filename);
-                        $content = str_replace('\r\n', '\n,', $content);
-                        $content = str_replace('\n', ',\n', $content);
+                        $content = str_replace("\r\n", "\n", $content);
+                        $content = str_replace("\n", ",\n", $content);
                         $content = preg_replace('/[\x00-\x09\x0B\x0C\x0E-\x1F\x80-\xFF]/', '', $content);
                         file_put_contents($dir . '/' . $provider . '/' . $filename, $content);
 
