@@ -138,7 +138,7 @@ class UpdateGTFS extends Command
                         unlink($dir . '/' . $provider . '/' . $filename);
                         $content = str_replace("\r\n", "\n", $content);
                         $content = str_replace("\n", ",\n", $content);
-                        $content = preg_replace('/[\x00-\x09\x0B\x0C\x0E-\x1F\x80-\xFF]/', '', $content);
+                        $content = preg_replace('/[\x00-\x09\x0B\x0C\x0E-\x1F\x7F-\x9F\x{80}-\x{FF}]/', '', $content);
                         file_put_contents($dir . '/' . $provider . '/' . $filename, $content);
 
                         if (strpos($filename, '/')) {
