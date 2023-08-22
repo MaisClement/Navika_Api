@@ -149,7 +149,6 @@ class UpdateGTFS extends Command
                     }
 
                     unlink($zip_name);
-                    exit;
 
                     // import gtfs
                     $output->writeln('    > Import new GTFS...');
