@@ -149,6 +149,7 @@ class UpdateGTFS extends Command
                     }
 
                     unlink($zip_name);
+                    exit;
 
                     // import gtfs
                     $output->writeln('    > Import new GTFS...');
@@ -178,10 +179,6 @@ class UpdateGTFS extends Command
                         'translations' => [],
                         'attributions' => []
                     ];
-
-                    $tc_provider->setFlag(1);
-                    $tc_provider->setUpdatedAt(new DateTime());
-                    $this->entityManager->flush();
 
                     foreach ($types as $type => $columns) {
                         $file = $dir . '/' . $provider . '/' . $type . '.txt';
@@ -261,11 +258,8 @@ class UpdateGTFS extends Command
                             }
                         }
                     }
-
-                    echo '      ' . $err . ' errors' . PHP_EOL;
-
                 }
-                $tc_provider->setFlag(2);
+                $tc_provider->setFlag(1);
                 $tc_provider->setUpdatedAt(new DateTime());
                 $this->entityManager->flush();
             }
