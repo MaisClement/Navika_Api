@@ -9,6 +9,8 @@ use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 
 #[ORM\Entity(repositoryClass: TripsRepository::class)]
+#[ORM\Index(name: "trips_trip_short_name", fields: ["trip_short_name"])]
+
 class Trips
 {
     #[ORM\ManyToOne(inversedBy: 'trips')]

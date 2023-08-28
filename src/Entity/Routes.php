@@ -250,47 +250,7 @@ class Routes
 
     public function getRouteAndTrafic(): ?array
     {
-        $reports = $this->trafics;
-        // ---
-        $trafic = [];
-        $trafic = $this->getRoute();
-        $trafic['severity'] = 0;
-        $trafic['reports']['future_work'] = [];
-        $trafic['reports']['current_work'] = [];
-        $trafic['reports']['current_trafic'] = [];
-
-        foreach ($reports as $report) {
-            $route_id = $this->route_id;
-            
-            $r = array(
-                "id"            =>  (string)    $report->getId(),
-                "status"        =>  (string)    $report->getStatus(),
-                "cause"         =>  (string)    $report->getCause(),
-                "category"      =>  (string)    $report->getCategory(),
-                "severity"      =>  (int)       $report->getSeverity(),
-                "effect"        =>  (string)    $report->getEffect(),
-                "updated_at"    =>  (string)    $report->getUpdatedAt()->format("Y-m-d\TH:i:sP"),
-                "message"       =>  array(
-                    "title"     =>      $report->getTitle(),
-                    "text"      =>      $report->getText(),
-                ),
-            );
-
-            $severity = $trafic['severity'] > $report->getSeverity() ? $trafic['severity'] : $report->getSeverity();
-            
-            $trafic['severity'] = $severity;
-            
-            if ($report->getCause() == 'future') {
-                $trafic['reports']['future_work'][] = $r;
-            } elseif ($report->getSeverity() == 2) {
-                $trafic['reports']['future_work'][] = $r;
-            } elseif ($report->getSeverity() == 3) {
-                $trafic['reports']['current_work'][] = $r;
-            } else {
-                $trafic['reports']['current_trafic'][] = $r;
-            }
-        }
-        return $trafic;
+        return array_merge($this->getRoute(), $this->getTrafic());
     }
 
     public function getTrafic(): ?array

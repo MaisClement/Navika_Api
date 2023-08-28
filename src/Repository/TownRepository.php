@@ -39,7 +39,7 @@ class TownRepository extends ServiceEntityRepository
         }
     }
 
-    public function findTownByCoordinates(string $longitude, string $latitude): Town
+    public function findTownByCoordinates(string $longitude, string $latitude)
     {
         $queryBuilder = $this->createQueryBuilder('t')
             ->select('t')

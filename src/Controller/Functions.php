@@ -746,7 +746,6 @@ class Functions
     {
         $req = $em->prepare("
             SELECT *
-
             FROM trips T
             
             JOIN stop_times ST 
@@ -804,5 +803,31 @@ class Functions
         ");
         $req->execute( [$town->getTownId(), $town->getTownName(), $town->getTownName(), $town->getZipCode(), $stop_id] );
         return $req;
+    }
+
+    public static function getStopsOfRoutes($em, $route_id)
+    {
+        $req = $em->prepare("
+            SELECT DISTINCT SR.stop_id, SR.stop_name, SR.stop_lat, SR.stop_lon, SR.town_name, SR.zip_code
+            FROM stops AS S
+            
+            JOIN stop_times ST 
+            ON S.stop_id = ST.stop_id
+            
+            JOIN trips T 
+            ON ST.trip_id = T.trip_id
+            
+            JOIN routes R 
+            ON T.route_id = R.route_id
+            
+            JOIN stop_route SR
+            ON S.parent_station = SR.stop_id
+            
+            WHERE R.route_id = :route_id
+            ORDER BY ST.stop_sequence;
+        ");
+        $req->bindValue("route_id", $route_id);
+        $results = $req->executeQuery();
+        return $results->fetchAll();
     }
 }

@@ -179,28 +179,11 @@ class Stops
                 if ($request->get('forbidden_lines')) {
                     $filter = !in_array($stop->getRouteId()->getRouteId(), $request->get('forbidden_lines'));
                 }
-    
-                // allowed_modes[]  -   forbidden_modes[]
-                // allowed_ids[]    -   forbidden_ids[]
-                // allowed_lines[]    -   forbidden_lines[]
-    
+        
                 if ($filter) {
                     if (!isset($places[$stop->getStopId()->getStopId()])) {
-    
-                        $places[$stop->getStopId()->getStopId()] = array(
-                            'id'        =>              $stop->getStopId()->getStopId(),
-                            'name'      =>  (string)    $stop->getStopName(),
-                            'type'      =>  (string)    'stop_area',
-                            'distance'  =>  (int)       $search_type != 1 ? Functions::calculateDistance($stop->getStopLat(), $stop->getStopLon(), $lat, $lon) : 0,
-                            'town'      =>  (string)    $stop->getTownName(),
-                            'zip_code'  =>  (string)    $stop->getZipCode(),
-                            'coord'     => array(
-                                'lat'       =>      (float) $stop->getStopLat(),
-                                'lon'       =>      (float) $stop->getStopLon(),
-                            ),
-                            'lines'     => array(),
-                            'modes'     => array(),
-                        );
+
+                        $places[$stop->getStopId()->getStopId()] = $stop->getStop($lat, $lon);
     
                         $lines[$stop->getStopId()->getStopId()] = [];
                         $modes[$stop->getStopId()->getStopId()] = [];

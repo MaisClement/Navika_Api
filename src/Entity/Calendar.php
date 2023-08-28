@@ -9,6 +9,8 @@ use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 
 #[ORM\Entity(repositoryClass: CalendarRepository::class)]
+#[ORM\Index(name: "calendar_service_id", fields: ["service_id"])]
+
 class Calendar
 {
     #[ORM\Id]

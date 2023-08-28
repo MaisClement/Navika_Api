@@ -98,7 +98,7 @@ class Schedules
         $routes = $this->stopRouteRepository->findBy( ['stop_id' => $id] );
 
         if ( count( $routes ) < 1 ) {
-            return new JsonResponse(Functions::ErrorMessage(400, 'Nothing where found for this station'), 400);
+            return new JsonResponse(Functions::ErrorMessage(400, 'Nothing where found for this stop'), 400);
         }
 
         $json['place'] = array(

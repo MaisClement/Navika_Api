@@ -52,7 +52,6 @@ class Lines
         schema: new OA\Schema(type: 'string')
     )]
 
-
     #[OA\Parameter(
         name:"allowed_modes[]",
         in:"query",
@@ -211,7 +210,6 @@ class Lines
     public function getLineDetails($id, Request $request): JsonResponse 
     {
         $db = $this->entityManager->getConnection();
-        $id;
 
         //--- On regarde si l'arrêt existe bien et on recuppere toutes les lignes
         $route = $this->routesRepository->findOneBy( ['route_id' => $id] );
@@ -253,66 +251,149 @@ class Lines
 
         // ----
         $json = [];
-        $json['line'] = $route->getRoute();
+        $json['line'] = $route->getRouteAndTrafic();
 
-        // ---
-        $json['line']['reports'] = [];
-        $json['line']['reports']['future_work'] = [];
-        $json['line']['reports']['current_work'] = [];
-        $json['line']['reports']['current_trafic'] = [];
-        $json['line']['severity'] = 0;
+        // ----
+        $stops = Functions::getStopsOfRoutes($db, $id);
 
-        $reports = $this->traficRepository->findAll();
-        foreach ($reports as $report) {
-            $route_id = $report->getRouteId()->getRouteId();
-            if ($route_id == $id){
-                if (!isset($trafic)) {
-                    $trafic = array(
-                        "id"         =>  (string)    $route_id,
-                        "code"       =>  (string)    $report->getRouteId()->getRouteShortName(),
-                        "name"       =>  (string)    $report->getRouteId()->getRouteLongName(),
-                        "mode"       =>  (string)    $report->getRouteId()->getRouteType(),
-                        "color"      =>  (string)    $report->getRouteId()->getRouteColor(),
-                        "text_color" =>  (string)    $report->getRouteId()->getRouteTextColor(),
-                        "severity"   =>  (int)       1,
-                        "reports"    =>  array(
-                            "current_trafic"    => [], // $current_trafic,
-                            "current_work"      => [], // $current_work,
-                            "future_work"       => [], // $future_work
-                        )
-                    );
-                }
-                
-                $r = array(
-                    "id"            =>  (string)    $report->getId(),
-                    "status"        =>  (string)    $report->getStatus(),
-                    "cause"         =>  (string)    $report->getCause(),
-                    "category"      =>  (string)    $report->getCategory(),
-                    "severity"      =>  (int)       $report->getSeverity(),
-                    "effect"        =>  (string)    $report->getEffect(),
-                    "updated_at"    =>  (string)    $report->getUpdatedAt()->format("Y-m-d\TH:i:sP"),
-                    "message"       =>  array(
-                        "title"     =>      $report->getTitle(),
-                        "text"      =>      $report->getText(),
-                    ),
-                );
+        $json['line']['stops'] = [];
 
-                $severity = $json['line']['severity'] > $report->getSeverity() ? $json['line']['severity'] : $report->getSeverity();
-                
-                $json['line']['severity'] = $severity;
-                
-                if ($report->getCause() == 'future') {
-                    $json['line']['reports']['future_work'][] = $r;
-                } elseif ($report->getSeverity() == 2) {
-                    $json['line']['reports']['future_work'][] = $r;
-                } elseif ($report->getSeverity() == 3) {
-                    $json['line']['reports']['current_work'][] = $r;
-                } else {
-                    $json['line']['reports']['current_trafic'][] = $r;
-                }
-            }
+        foreach($stops as $stop) {
+            $json['line']['stops'][] = array(
+                'id'        =>              $stop['stop_id'],
+                'name'      =>  (string)    $stop['stop_name'],
+                'type'      =>  (string)    'stop_area',
+                'distance'  =>  (float)     0,
+                'town'      =>  (string)    $stop['town_name'],
+                'zip_code'  =>  (string)    $stop['zip_code'],
+                'coord'     => array(
+                    'lat'       =>      (float) $stop['stop_lat'],
+                    'lon'       =>      (float) $stop['stop_lon'],
+                ),
+            );
         }
 
+        // ---        
+        $json['line']['terminus'] = $terminus;
+        $json['line']['timetables'] = $timetables;
+
+        if ($request->get('flag') != null) {
+            $json["flag"] = (int) $request->get('flag');
+        }
+
+        return new JsonResponse($json);
+    }
+
+    /**
+     * Get routes schedules
+     * 
+     * Get routes schedules 
+     *  
+     */
+    #[Route('/lines/{id}/schedules/{stop}', name: 'get_line_schedules', methods: ['GET'])]
+    #[OA\Tag(name: 'Lines')]
+    #[OA\Parameter(
+        name:"line_id",
+        in:"path",
+        description:"Line Id",
+        required: true,
+        schema: new OA\Schema(type: 'string')
+    )]
+    #[OA\Parameter(
+        name:"stop_id",
+        in:"path",
+        description:"Stop Id",
+        required: true,
+        schema: new OA\Schema(type: 'string')
+    )]
+    #[OA\Parameter(
+        name:"date",
+        in:"query",
+        description:"Date",
+        schema: new OA\Schema(type: 'string')
+    )]
+
+    #[OA\Response(
+        response: 200,
+        description: ''
+    )]    
+    #[OA\Response(
+        response: 400,
+        description: 'Bad request'
+    )]
+
+    public function getLineSchedules($line_id, $stop_id, Request $request): JsonResponse 
+    {
+        $db = $this->entityManager->getConnection();
+
+        //--- On regarde si l'arrêt existe bien et on recuppere toutes les lignes
+        $route = $this->routesRepository->findOneBy( ['route_id' => $line_id] );
+        if ( $route == null ) {
+            return new JsonResponse(Functions::ErrorMessage(400, 'Nothing where found for this route'), 400);
+        }
+        
+        $routes = $this->stopRouteRepository->findBy( ['stop_id' => $stop_id] );
+        if ( count( $routes ) < 1 ) {
+            return new JsonResponse(Functions::ErrorMessage(400, 'Nothing where found for this stop'), 400);
+        }
+        
+        //--- On regarde si l'arrêt existe bien et on recuppere toutes les lignes
+
+        $_terminus = Functions::getTerminusForLine($db, $route);
+
+        $terminus = [];
+        foreach($_terminus as $terminu) {
+            $terminus[] = array(
+                "id"      =>  (String)    $terminu['stop_id'],
+                "name"    =>  (String)    $terminu['stop_name'],
+            );
+        }
+
+        // ---
+        $timetables = [];
+        $timetables['map'] = [];
+        $timetables['timetables'] = [];
+
+        $_timetables = $route->getTimetables();
+        foreach( $_timetables as $timetable) {
+            if ( $timetable->getType() == 'map') {
+                $timetables['map'][] = array(
+                    "name"      => (String)     $timetable->getName(),
+                    "url"       => (String)     $timetable->getUrl(),
+                );
+            }
+            if ( $timetable->getType() == 'timetables' && str_ends_with($timetable->getUrl(), '.pdf')) {
+                $timetables['timetables'][] = array(
+                    "name"      => (String)     $timetable->getName(),
+                    "url"       => (String)     $timetable->getUrl(),
+                );
+            }
+        }             
+
+        // ----
+        $json = [];
+        $json['line'] = $route->getRouteAndTrafic();
+
+        // ----
+        $stops = Functions::getStopsOfRoutes($db, $id);
+
+        $json['line']['stops'] = [];
+
+        foreach($stops as $stop) {
+            $json['line']['stops'][] = array(
+                'id'        =>              $stop['stop_id'],
+                'name'      =>  (string)    $stop['stop_name'],
+                'type'      =>  (string)    'stop_area',
+                'distance'  =>  (float)     0,
+                'town'      =>  (string)    $stop['town_name'],
+                'zip_code'  =>  (string)    $stop['zip_code'],
+                'coord'     => array(
+                    'lat'       =>      (float) $stop['stop_lat'],
+                    'lon'       =>      (float) $stop['stop_lon'],
+                ),
+            );
+        }
+        
         // ---        
         $json['line']['terminus'] = $terminus;
         $json['line']['timetables'] = $timetables;
