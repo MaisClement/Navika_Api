@@ -697,7 +697,6 @@ class Functions
     public static function getSchedulesByStop($em, $stop_id, $route_id, $date, $departure_time){    
         $req = $em->prepare("
             SELECT DISTINCT ST.trip_id, ST.departure_time, ST.arrival_time, T.*
-    
             FROM stops S
             
             INNER JOIN stop_times ST 
@@ -732,7 +731,6 @@ class Functions
                     OR CD.exception_type = '1' 
                 )
             ORDER BY ST.departure_time
-            LIMIT 30
         ");
         $req->bindValue("date", $date);
         $req->bindValue("route_id", $route_id);
@@ -808,7 +806,7 @@ class Functions
     public static function getStopsOfRoutes($em, $route_id)
     {
         $req = $em->prepare("
-            SELECT DISTINCT SR.stop_id, SR.stop_name, SR.stop_lat, SR.stop_lon, SR.town_name, SR.zip_code
+            SELECT DISTINCT S2.*
             FROM stops AS S
             
             JOIN stop_times ST 
@@ -820,11 +818,11 @@ class Functions
             JOIN routes R 
             ON T.route_id = R.route_id
             
-            JOIN stop_route SR
-            ON S.parent_station = SR.stop_id
+            JOIN stops S2
+            ON S.parent_station = S2.stop_id
             
             WHERE R.route_id = :route_id
-            ORDER BY ST.stop_sequence;
+            ORDER BY T.trip_id, ST.stop_sequence;
         ");
         $req->bindValue("route_id", $route_id);
         $results = $req->executeQuery();

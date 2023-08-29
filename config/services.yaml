@@ -58,7 +58,6 @@ services:
         tags: ['controller.service_arguments']
 
     App\Controller\Lines:
-        autowire: true
         tags: ['controller.service_arguments']
 
 
@@ -78,7 +77,7 @@ services:
     App\Command\Trafic\TraficIDFM:
         tags: [ 'console.command' ]
 
-    App\Command\Trafic\TraficTAN:
+    App\Command\Trafic\TraficGTFS:
         tags: [ 'console.command' ]
 
 

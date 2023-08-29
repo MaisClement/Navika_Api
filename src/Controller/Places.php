@@ -65,19 +65,25 @@ class Places
 
     public function searchPlaces(Request $request)
     {
-        $q   = $request->get('q');
+        $search = ['-', ' ', "'"];
+        $replace =['', '', ''];;
+  
+        $q = $request->get('q');
+        $q = urldecode( trim( $q ) );
+        $query = str_replace($search, $replace, $q);
+
         $lat = $request->get('lat');
         $lon = $request->get('lon');
-  
-        if (isset($q) && isset($lat) && isset($lon)) {
+
+        if ( is_string($query) && $lat != null && $lon != null ) {
             $query = $q;
             $query = urldecode(trim($query));
             $url = $this->params->get('prim_url') . '/places?q=' . $query . '&from' . $lon . ';' . $lat . '=&depth=2';
             $search_type = 3;
-        } elseif (isset($lat) && isset($lon)) {
+        } else if ( $lat != null && $lon != null ) {
             $url = $this->params->get('prim_url') . '/coord/' . $lon . ';' . $lat . '/places_nearby?depth=2&distance=1000';
             $search_type = 2;
-        } elseif (isset($q)) {
+        } else if ( is_string($query) ) {
             $query = $q;
             $query = urldecode(trim($query));
             $url = $this->params->get('prim_url') . '/places?q=' . $query . '&depth=2';
@@ -88,47 +94,53 @@ class Places
 
         // ------------
 
-        $client = HttpClient::create();        
-        $response = $client->request('GET', $url, [
-            'headers' => [
-                'apiKey' => $this->params->get('prim_api_key'),
-            ],
-        ]);
-        $status = $response->getStatusCode();
-
-        if ($status != 200){
-            return new JsonResponse(Functions::ErrorMessage(500, 'Cannot get data from provider'), 500);
-        }
-
-        $content = $response->getContent();
-        $results = json_decode($content);
-
-        if ($search_type == 3) {
-            $results = $results->places;
-        } elseif ($search_type == 2) {
-            $results = $results->places_nearby;
-        } elseif ($search_type === 1) {
-            $results = $results->places;
+        if ($search_type == 1 && $query == "") {
+            $places = [];
         } else {
-            return new JsonResponse(Functions::ErrorMessage(500), 500);
-        }
+            $client = HttpClient::create();        
+            $response = $client->request('GET', $url, [
+                'headers' => [
+                    'apiKey' => $this->params->get('prim_api_key'),
+                ],
+            ]);
+            $status = $response->getStatusCode();
 
-        $places = [];
-        foreach ($results as $result) {
-            $places[] = array(
-                "id"        =>  (string)    $result->id,
-                "name"      =>  (string)    $result->{$result->embedded_type}->name,
-                "type"      =>  (string)    $result->embedded_type,
-                "distance"  =>              (float) (isset($result->distance) ? $result->distance : 0),
-                "town"      =>  (string)    Functions::getTownByAdministrativeRegions($result->{$result->embedded_type}->administrative_regions),
-                "zip_code"  =>  (string)    Functions::getZipByAdministrativeRegions($result->{$result->embedded_type}->administrative_regions),
-                "coord"     => array(
-                    "lat"       =>  (float) $result->{$result->embedded_type}->coord->lat,
-                    "lon"       =>  (float) $result->{$result->embedded_type}->coord->lon,
-                ),
-                "lines"     =>              isset($result->{$result->embedded_type}->lines) ? Functions::getAllLines($result->{$result->embedded_type}->lines) : [],
-                "modes"     =>              isset($result->stop_area->physical_modes) ? Functions::getPhysicalModes($result->stop_area->physical_modes) : [],
-            );
+            print_r($status);
+
+            if ($status != 200){
+                return new JsonResponse(Functions::ErrorMessage(500, 'Cannot get data from provider'), 500);
+            }
+
+            $content = $response->getContent();
+            $results = json_decode($content);
+
+            if ($search_type == 3) {
+                $results = $results->places;
+            } elseif ($search_type == 2) {
+                $results = $results->places_nearby;
+            } elseif ($search_type === 1) {
+                $results = $results->places;
+            } else {
+                return new JsonResponse(Functions::ErrorMessage(500), 500);
+            }
+
+            $places = [];
+            foreach ($results as $result) {
+                $places[] = array(
+                    "id"        =>  (string)    $result->id,
+                    "name"      =>  (string)    $result->{$result->embedded_type}->name,
+                    "type"      =>  (string)    $result->embedded_type,
+                    "distance"  =>              (float) (isset($result->distance) ? $result->distance : 0),
+                    "town"      =>  (string)    Functions::getTownByAdministrativeRegions($result->{$result->embedded_type}->administrative_regions),
+                    "zip_code"  =>  (string)    Functions::getZipByAdministrativeRegions($result->{$result->embedded_type}->administrative_regions),
+                    "coord"     => array(
+                        "lat"       =>  (float) $result->{$result->embedded_type}->coord->lat,
+                        "lon"       =>  (float) $result->{$result->embedded_type}->coord->lon,
+                    ),
+                    "lines"     =>              isset($result->{$result->embedded_type}->lines) ? Functions::getAllLines($result->{$result->embedded_type}->lines) : [],
+                    "modes"     =>              isset($result->stop_area->physical_modes) ? Functions::getPhysicalModes($result->stop_area->physical_modes) : [],
+                );
+            }        
         }
 
         $json["places"] = $places;
