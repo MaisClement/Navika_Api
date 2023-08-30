@@ -105,8 +105,6 @@ class Places
             ]);
             $status = $response->getStatusCode();
 
-            print_r($status);
-
             if ($status != 200){
                 return new JsonResponse(Functions::ErrorMessage(500, 'Cannot get data from provider'), 500);
             }
