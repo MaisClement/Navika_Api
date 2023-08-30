@@ -642,17 +642,17 @@ class Functions
                     "lon"           => $stop->stop_point->coord->lon,
                 ),
                 "stop_time" => array(
-                    "departure_time" =>  isset($stop->base_departure_time)    ? Functions::rPrepareTime($stop->base_departure_time)    : '',
-                    "arrival_time"   =>  isset($stop->base_arrival_time)      ? Functions::rPrepareTime($stop->base_arrival_time)      : '',
+                    "departure_time" =>  isset($stop->base_departure_time)    ? Functions::rPrepareTime($stop->base_departure_time) : '',
+                    "arrival_time"   =>  isset($stop->base_arrival_time)      ? Functions::rPrepareTime($stop->base_arrival_time)   : '',
                 ),
                 "disruption" => array(
                     "departure_state"       => (string) $stop->departure_status,
                     "arrival_state"         => (string) $stop->arrival_status,
                     "message"               => (string) "",
-                    "base_departure_time"   => (string) isset($stop->base_departure_time) !== '' && (string) isset($stop->base_departure_time) !== '0'    ? Functions::rPrepareTime($stop->base_departure_time)    : '',
-                    "departure_time"        => (string) isset($stop->amended_departure_time) !== '' && (string) isset($stop->amended_departure_time) !== '0' ? Functions::rPrepareTime($stop->amended_departure_time) : '',
-                    "base_arrival_time"     => (string) isset($stop->base_arrival_time) !== '' && (string) isset($stop->base_arrival_time) !== '0'      ? Functions::rPrepareTime($stop->base_arrival_time)      : '',
-                    "arrival_time"          => (string) isset($stop->amended_arrival_time) !== '' && (string) isset($stop->amended_arrival_time) !== '0'   ? Functions::rPrepareTime($stop->amended_arrival_time)   : '',
+                    "base_departure_time"   => (string) isset($stop->base_departure_time)    !== '' && isset($stop->base_departure_time)    !== '0' ? Functions::rPrepareTime($stop->base_departure_time)    : '',
+                    "departure_time"        => (string) isset($stop->amended_departure_time) !== '' && isset($stop->amended_departure_time) !== '0' ? Functions::rPrepareTime($stop->amended_departure_time) : '',
+                    "base_arrival_time"     => (string) isset($stop->base_arrival_time)      !== '' && isset($stop->base_arrival_time)      !== '0' ? Functions::rPrepareTime($stop->base_arrival_time)      : '',
+                    "arrival_time"          => (string) isset($stop->amended_arrival_time)   !== '' && isset($stop->amended_arrival_time)   !== '0' ? Functions::rPrepareTime($stop->amended_arrival_time)   : '',
                     "is-detour"             => $stop->is_detour,
                 ),
             );
@@ -662,17 +662,17 @@ class Functions
     }
 
     public static function callIsFuture($call){
-        if ( isset($call->AimedDepartureTime) ) {
-            return date_create($call->AimedDepartureTime) >= date_create();
-        }
-        if ( isset($call->AimedArrivalTime) ) {
-            return date_create($call->AimedArrivalTime) >= date_create();
-        }
         if ( isset($call->ExpectedDepartureTime) ) {
             return date_create($call->ExpectedDepartureTime) >= date_create();
         }
         if ( isset($call->ExpectedArrivalTime) ) {
             return date_create($call->ExpectedArrivalTime) >= date_create();
+        }
+        if ( isset($call->AimedDepartureTime) ) {
+            return date_create($call->AimedDepartureTime) >= date_create();
+        }
+        if ( isset($call->AimedArrivalTime) ) {
+            return date_create($call->AimedArrivalTime) >= date_create();
         }
     }
 
