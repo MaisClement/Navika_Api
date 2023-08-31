@@ -104,8 +104,16 @@ class Lines
         $q = $request->get('q');
         $q = urldecode( trim( $q ) );
         $query = $q;
-  
-        if ( !is_string($query) ) {
+
+        if ( is_string($query) && $query == "" ) {
+            $json = [];
+            $json['lines'] = [];
+            if ($request->get('flag') != null) {
+                $json["flag"] = (int) $request->get('flag');
+            }
+            return new JsonResponse($json);
+            
+        } else {
             return new JsonResponse(Functions::ErrorMessage(400, 'One or more parameters are missing or null, have you "q" ?'), 400);
         }
 
