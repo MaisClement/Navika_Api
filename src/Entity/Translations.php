@@ -14,7 +14,7 @@ class Translations
     private ?int $id = null;
 
     #[ORM\ManyToOne(inversedBy: 'translations')]
-    #[ORM\JoinColumn(name: "provider_id",  nullable: true, onDelete: "CASCADE")]
+    #[ORM\JoinColumn(name: "provider_id", nullable: true, onDelete: "CASCADE")]
     private ?Provider $provider_id = null;
 
     #[ORM\Column(length: 255)]
@@ -43,7 +43,7 @@ class Translations
         return $this->id;
     }
 
-    public function getProviderId(): ?Provider 
+    public function getProviderId(): ?Provider
     {
         return $this->provider_id;
     }

@@ -9,17 +9,17 @@ use Doctrine\ORM\Mapping as ORM;
 class Transfers
 {
     #[ORM\ManyToOne(inversedBy: 'transfers')]
-    #[ORM\JoinColumn(name: "provider_id",  nullable: true, onDelete: "CASCADE")]
+    #[ORM\JoinColumn(name: "provider_id", nullable: true, onDelete: "CASCADE")]
     private ?Provider $provider_id = null;
 
     #[ORM\Id]
     #[ORM\ManyToOne(inversedBy: 'transfers')]
-    #[ORM\JoinColumn(name: "from_stop_id", referencedColumnName: "stop_id",  nullable: true, onDelete: "CASCADE")]
+    #[ORM\JoinColumn(name: "from_stop_id", referencedColumnName: "stop_id", nullable: true, onDelete: "CASCADE")]
     private ?Stops $from_stop_id = null;
 
     #[ORM\Id]
     #[ORM\ManyToOne(inversedBy: 'transfers')]
-    #[ORM\JoinColumn(name: "to_stop_id", referencedColumnName: "stop_id",  nullable: true, onDelete: "CASCADE")]
+    #[ORM\JoinColumn(name: "to_stop_id", referencedColumnName: "stop_id", nullable: true, onDelete: "CASCADE")]
     private ?Stops $to_stop_id = null;
 
     #[ORM\Column(columnDefinition: 'ENUM("0", "1", "2", "3", "4", "5")')]
@@ -28,7 +28,7 @@ class Transfers
     #[ORM\Column(nullable: true)]
     private ?int $min_transfer_time = null;
 
-    public function getProviderId(): ?Provider 
+    public function getProviderId(): ?Provider
     {
         return $this->provider_id;
     }

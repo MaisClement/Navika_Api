@@ -39,7 +39,7 @@ class FeedInfoRepository extends ServiceEntityRepository
         }
     }
 
-//    /**
+    //    /**
 //     * @return FeedInfo[] Returns an array of FeedInfo objects
 //     */
 //    public function findByExampleField($value): array
@@ -54,7 +54,7 @@ class FeedInfoRepository extends ServiceEntityRepository
 //        ;
 //    }
 
-//    public function findOneBySomeField($value): ?FeedInfo
+    //    public function findOneBySomeField($value): ?FeedInfo
 //    {
 //        return $this->createQueryBuilder('f')
 //            ->andWhere('f.exampleField = :val')

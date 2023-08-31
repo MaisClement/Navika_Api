@@ -14,18 +14,21 @@ use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
 
 class Remove extends Command
 {
+    private $entityManager;
+    private $params;
+
     private ProviderRepository $providerRepository;
-    private \Doctrine\ORM\EntityManagerInterface $entityManager;
-    private \Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface $params;
-    
+
     public function __construct(EntityManagerInterface $entityManager, ParameterBagInterface $params, ProviderRepository $providerRepository)
     {
-        $this->providerRepository = $providerRepository;
         $this->entityManager = $entityManager;
         $this->params = $params;
+
+        $this->providerRepository = $providerRepository;
+
         parent::__construct();
     }
-    
+
     protected function configure(): void
     {
         $this
@@ -40,32 +43,32 @@ class Remove extends Command
                 true
             );
     }
-    
+
     function execute(InputInterface $input, OutputInterface $output): int
     {
         $id = $input->getArgument('id');
         $i = $input->getOption('clear-data');
 
-        $provider = $this->providerRepository->find( $id );
+        $provider = $this->providerRepository->find($id);
         if ($provider == null) {
             $output->writeln('<error>Unknow provider</error>');
             return Command::FAILURE;
         }
 
-        if ( $i == true ) {
+        if ($i == true) {
             $input = new ArrayInput([
                 'command' => 'app:provider:clear',
-                'id'    => $id,
+                'id' => $id,
             ]);
             $returnCode = $this->getApplication()->doRun($input, $output);
         }
 
         $this->entityManager->remove($provider);
-        
+
         $this->entityManager->flush();
-        
+
         $output->writeln('<info>✅ Provider removed successfully</info>');
-        
+
         return Command::SUCCESS;
     }
 }

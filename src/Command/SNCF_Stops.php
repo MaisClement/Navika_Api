@@ -2,29 +2,18 @@
 
 namespace App\Command;
 
-use App\Command\CommandFunctions;
 use App\Controller\Functions;
 use App\Entity\StopRoute;
 use App\Entity\Stops;
 use App\Repository\ProviderRepository;
-use App\Repository\AgencyRepository;
 use App\Repository\RoutesRepository;
-use App\Repository\StationsRepository;
 use App\Repository\StopsRepository;
-use App\Repository\TownRepository;
-use App\Repository\StopRouteRepository;
-use App\Repository\TempStopRouteRepository;
-use DateTime;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\Console\Command\Command;
+use Symfony\Component\Console\Helper\ProgressIndicator;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
-use Symfony\Component\HttpClient\HttpClient;
-use ZipArchive;
-use Symfony\Component\Console\Helper\ProgressIndicator;
-use Symfony\Component\Console\Helper\ProgressBar;
-use Symfony\Component\Console\Input\ArrayInput;
 
 class SNCF_Stops extends Command
 {
@@ -32,27 +21,17 @@ class SNCF_Stops extends Command
     private $params;
 
     private ProviderRepository $providerRepository;
-    private StationsRepository $stationsRepository;
     private StopsRepository $stopsRepository;
-    private TownRepository $townRepository;
     private RoutesRepository $routesRepository;
-    private AgencyRepository $agencyRepository;
-    private StopRouteRepository $stopRouteRepository;
-    private TempStopRouteRepository $tempStopRouteRepository;
 
-    public function __construct(EntityManagerInterface $entityManager, ParameterBagInterface $params, ProviderRepository $providerRepository, StationsRepository $stationsRepository, StopsRepository $stopsRepository, TownRepository $townRepository, StopRouteRepository $stopRouteRepository, TempStopRouteRepository $tempStopRouteRepository, RoutesRepository $routesRepository, AgencyRepository $agencyRepository)
+    public function __construct(EntityManagerInterface $entityManager, ParameterBagInterface $params, ProviderRepository $providerRepository, StopsRepository $stopsRepository, RoutesRepository $routesRepository)
     {
         $this->entityManager = $entityManager;
         $this->params = $params;
 
         $this->providerRepository = $providerRepository;
-        $this->stationsRepository = $stationsRepository;
         $this->stopsRepository = $stopsRepository;
-        $this->townRepository = $townRepository;
         $this->routesRepository = $routesRepository;
-        $this->agencyRepository = $agencyRepository;
-        $this->stopRouteRepository = $stopRouteRepository;
-        $this->tempStopRouteRepository = $tempStopRouteRepository;
 
         parent::__construct();
     }
@@ -68,14 +47,14 @@ class SNCF_Stops extends Command
     {
         $dir = sys_get_temp_dir();
         $db = $this->entityManager->getConnection();
-        
+
         // --
         $progressIndicator = new ProgressIndicator($output, 'verbose', 100, ['⠏', '⠛', '⠹', '⢸', '⣰', '⣤', '⣆', '⡇']);
         $progressIndicator->start('Import SNCF stops...');
         // --
 
         // ---
-               
+
         $SNCF_FORBIDDEN_DEPT = array("75", "92", "93", "94", "77", "78", "91", "95");
         $SNCF_FORCE = array("Bréval", "Gazeran", "Angerville", "Monnerville", "Guillerval");
         $SNCF_FORBIDDEN = array("Crépy-en-Valois", "Château-Thierry", "Montargis", "Malesherbes", "Dreux", "Gisors", "Creil", "Le Plessis-Belleville", "Nanteuil-le-Haudouin ", "Ormoy-Villers", "Mareuil-sur-Ourcq", "La Ferté-Milon", "Nogent-l'Artaud - Charly", "Dordives", "Ferrières - Fontenay", "Marchezais - Broué", "Vernon - Giverny", "Trie-Château", "Chaumont-en-Vexin", "Liancourt-Saint-Pierre", "Lavilletertre", "Boran-sur-Oise", "Précy-sur-Oise", "Saint-Leu-d'Esserent", "Chantilly - Gouvieux", "Orry-la-Ville - Coye", "La Borne Blanche");
@@ -91,7 +70,7 @@ class SNCF_Stops extends Command
 
         // On supprime les arrêts deja existant
         $stops = $provider->getStops();
-        foreach($stops as $stop) {
+        foreach ($stops as $stop) {
             $progressIndicator->advance();
             $this->entityManager->remove($stop);
         }

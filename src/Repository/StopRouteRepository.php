@@ -72,7 +72,7 @@ class StopRouteRepository extends ServiceEntityRepository
         return $qb->getQuery()->getResult();
     }
 
-//    /**
+    //    /**
 //     * @return StopRoute[] Returns an array of StopRoute objects
 //     */
 //    public function findByExampleField($value): array
@@ -87,7 +87,7 @@ class StopRouteRepository extends ServiceEntityRepository
 //        ;
 //    }
 
-//    public function findOneBySomeField($value): ?StopRoute
+    //    public function findOneBySomeField($value): ?StopRoute
 //    {
 //        return $this->createQueryBuilder('s')
 //            ->andWhere('s.exampleField = :val')

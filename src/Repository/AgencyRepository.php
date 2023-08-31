@@ -49,7 +49,7 @@ class AgencyRepository extends ServiceEntityRepository
         return $qb->getQuery()->getResult();
     }
 
-//    /**
+    //    /**
 //     * @return Agency[] Returns an array of Agency objects
 //     */
 //    public function findByExampleField($value): array
@@ -64,7 +64,7 @@ class AgencyRepository extends ServiceEntityRepository
 //        ;
 //    }
 
-//    public function findOneBySomeField($value): ?Agency
+    //    public function findOneBySomeField($value): ?Agency
 //    {
 //        return $this->createQueryBuilder('a')
 //            ->andWhere('a.exampleField = :val')

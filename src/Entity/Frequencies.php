@@ -10,7 +10,7 @@ use Doctrine\ORM\Mapping as ORM;
 class Frequencies
 {
     #[ORM\ManyToOne(inversedBy: 'frequencies')]
-    #[ORM\JoinColumn(name: "provider_id",  nullable: true, onDelete: "CASCADE")]
+    #[ORM\JoinColumn(name: "provider_id", nullable: true, onDelete: "CASCADE")]
     private ?Provider $provider_id = null;
 
     #[ORM\Id]
@@ -30,7 +30,7 @@ class Frequencies
     #[ORM\Column(columnDefinition: 'ENUM("0", "1")')]
     private ?string $exact_times = null;
 
-    public function getProviderId(): ?Provider 
+    public function getProviderId(): ?Provider
     {
         return $this->provider_id;
     }

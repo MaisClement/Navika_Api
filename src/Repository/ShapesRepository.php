@@ -39,7 +39,7 @@ class ShapesRepository extends ServiceEntityRepository
         }
     }
 
-//    /**
+    //    /**
 //     * @return Shapes[] Returns an array of Shapes objects
 //     */
 //    public function findByExampleField($value): array
@@ -54,7 +54,7 @@ class ShapesRepository extends ServiceEntityRepository
 //        ;
 //    }
 
-//    public function findOneBySomeField($value): ?Shapes
+    //    public function findOneBySomeField($value): ?Shapes
 //    {
 //        return $this->createQueryBuilder('s')
 //            ->andWhere('s.exampleField = :val')

@@ -39,7 +39,7 @@ class TransfersRepository extends ServiceEntityRepository
         }
     }
 
-//    /**
+    //    /**
 //     * @return Transfers[] Returns an array of Transfers objects
 //     */
 //    public function findByExampleField($value): array
@@ -54,7 +54,7 @@ class TransfersRepository extends ServiceEntityRepository
 //        ;
 //    }
 
-//    public function findOneBySomeField($value): ?Transfers
+    //    public function findOneBySomeField($value): ?Transfers
 //    {
 //        return $this->createQueryBuilder('t')
 //            ->andWhere('t.exampleField = :val')

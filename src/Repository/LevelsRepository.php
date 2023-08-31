@@ -39,7 +39,7 @@ class LevelsRepository extends ServiceEntityRepository
         }
     }
 
-//    /**
+    //    /**
 //     * @return Levels[] Returns an array of Levels objects
 //     */
 //    public function findByExampleField($value): array
@@ -54,7 +54,7 @@ class LevelsRepository extends ServiceEntityRepository
 //        ;
 //    }
 
-//    public function findOneBySomeField($value): ?Levels
+    //    public function findOneBySomeField($value): ?Levels
 //    {
 //        return $this->createQueryBuilder('l')
 //            ->andWhere('l.exampleField = :val')

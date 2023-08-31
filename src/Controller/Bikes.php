@@ -4,17 +4,25 @@ namespace App\Controller;
 
 use App\Controller\Functions;
 use App\Repository\StationsRepository;
+use Doctrine\ORM\EntityManagerInterface;
 use OpenApi\Attributes as OA;
+use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
 use Symfony\Component\HttpClient\HttpClient;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\Routing\Annotation\Route;
 
 class Bikes
 {
+    private $entityManager;
+    private $params;
+
     private StationsRepository $stationsRepository;
     
-    public function __construct(StationsRepository $stationsRepository)
+    public function __construct(EntityManagerInterface $entityManager, ParameterBagInterface $params, StationsRepository $stationsRepository)
     {
+        $this->entityManager = $entityManager;
+        $this->params = $params;
+        
         $this->stationsRepository = $stationsRepository;
     }
 

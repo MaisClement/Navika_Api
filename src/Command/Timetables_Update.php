@@ -19,30 +19,30 @@ use Symfony\Component\Console\Helper\ProgressIndicator;
 
 class Timetables_Update extends Command
 {
-    private \Doctrine\ORM\EntityManagerInterface $entityManager;
-    private \Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface $params;
-    
+    private $entityManager;
+    private $params;
+
     private RoutesRepository $routesRepository;
     private TimetablesRepository $timetablesRepository;
-    
+
     public function __construct(EntityManagerInterface $entityManager, ParameterBagInterface $params, TimetablesRepository $timetablesRepository, RoutesRepository $routesRepository)
     {
         $this->entityManager = $entityManager;
         $this->params = $params;
-        
+
         $this->routesRepository = $routesRepository;
         $this->timetablesRepository = $timetablesRepository;
-        
+
         parent::__construct();
     }
- 
+
     protected function configure(): void
     {
         $this
             ->setName('app:timetables:update')
             ->setDescription('Update timetables data');
     }
-    
+
     function execute(InputInterface $input, OutputInterface $output): int
     {
         $dir = sys_get_temp_dir();
@@ -53,12 +53,12 @@ class Timetables_Update extends Command
         $progressIndicator->start('Geting timetable...');
 
         $url = $this->params->get('prim_url_timetables');
-        
+
         $client = HttpClient::create();
         $response = $client->request('GET', $url);
         $status = $response->getStatusCode();
 
-        if ($status != 200){
+        if ($status != 200) {
             return Command::FAILURE;
         }
 
@@ -72,28 +72,28 @@ class Timetables_Update extends Command
             // Loader
             $progressIndicator->advance();
 
-            if ( !is_bool($row) && $row[0] != 'ID_Line') {
-                
+            if (!is_bool($row) && $row[0] != 'ID_Line') {
+
                 $route_id = 'IDFM:' . $row[0];
                 $type = $row[3] == 'HORAIRE' ? 'timetables' : 'map';
 
-                $route = $this->routesRepository->findOneBy( ['route_id' => $route_id] );
+                $route = $this->routesRepository->findOneBy(['route_id' => $route_id]);
 
                 if ($route != null) {
                     $timetables = new Timetables();
-                    $timetables->setRouteId( $route );
-                    $timetables->setType( $type );
-                    $timetables->setName( $row[1] );
-                    $timetables->setUrl( $row[2] );
-    
-                    $this->entityManager->persist( $timetables );
+                    $timetables->setRouteId($route);
+                    $timetables->setType($type);
+                    $timetables->setName($row[1]);
+                    $timetables->setUrl($row[2]);
+
+                    $this->entityManager->persist($timetables);
                 }
             }
-        }      
+        }
 
         // On efface les messages existant
-        progressIndicator->setMessage('Removing old timetables...');
-        
+        $progressIndicator->setMessage('Removing old timetables...');
+
         $old_timetables = $this->timetablesRepository->findAll();
 
         foreach ($old_timetables as $old_timetables) {
@@ -103,14 +103,14 @@ class Timetables_Update extends Command
 
             $this->entityManager->remove($old_timetables);
         }
-        
+
         // On sauvegarde
         $progressIndicator->setMessage('Saving data...');
-                
+
         $this->entityManager->flush();
-        
+
         $progressIndicator->finish('<info>✅ OK</info>');
-        
+
         return Command::SUCCESS;
     }
 }

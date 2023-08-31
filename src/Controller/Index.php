@@ -3,6 +3,7 @@
 namespace App\Controller;
 
 use App\Repository\MessagesRepository;
+use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\HttpClient\HttpClient;
@@ -13,11 +14,15 @@ use OpenApi\Attributes as OA;
 class Index
 {
 
-    private MessagesRepository $messagesRepository;
-    private ParameterBagInterface $params;
+    private $entityManager;
+    private $params;
 
-    public function __construct(MessagesRepository $messagesRepository, ParameterBagInterface $params)
+    private MessagesRepository $messagesRepository;
+
+
+    public function __construct(EntityManagerInterface $entityManager, ParameterBagInterface $params, MessagesRepository $messagesRepository)
     {
+        $this->entityManager = $entityManager;
         $this->params = $params;
 
         $this->messagesRepository = $messagesRepository;

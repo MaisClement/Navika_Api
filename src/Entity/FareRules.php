@@ -11,7 +11,7 @@ use Doctrine\ORM\Mapping as ORM;
 class FareRules
 {
     #[ORM\ManyToOne(inversedBy: 'fareRules')]
-    #[ORM\JoinColumn(name: "provider_id",  nullable: true, onDelete: "CASCADE")]
+    #[ORM\JoinColumn(name: "provider_id", nullable: true, onDelete: "CASCADE")]
     private ?Provider $provider_id = null;
 
     #[ORM\Id]
@@ -41,7 +41,7 @@ class FareRules
         $this->fareAttributes = new ArrayCollection();
     }
 
-    public function getProviderId(): ?Provider 
+    public function getProviderId(): ?Provider
     {
         return $this->provider_id;
     }

@@ -52,7 +52,7 @@ class StationsRepository extends ServiceEntityRepository
         return $qb->getQuery()->getResult();
     }
 
-//    /**
+    //    /**
 //     * @return Stations[] Returns an array of Stations objects
 //     */
 //    public function findByExampleField($value): array
@@ -67,7 +67,7 @@ class StationsRepository extends ServiceEntityRepository
 //        ;
 //    }
 
-//    public function findOneBySomeField($value): ?Stations
+    //    public function findOneBySomeField($value): ?Stations
 //    {
 //        return $this->createQueryBuilder('s')
 //            ->andWhere('s.exampleField = :val')

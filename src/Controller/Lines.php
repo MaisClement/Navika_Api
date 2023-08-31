@@ -17,13 +17,12 @@ use Symfony\Component\Routing\Annotation\Route;
 
 class Lines
 {
-    private \Doctrine\ORM\EntityManagerInterface $entityManager;
+    private $entityManager;
+    private $params;
+
     private RoutesRepository $routesRepository;
     private StopRouteRepository $stopRouteRepository;
     private AgencyRepository $agencyRepository;
-    private StopsRepository $stopsRepository;
-    private TraficRepository $traficRepository;
-    private ParameterBagInterface $params;
     
     public function __construct(EntityManagerInterface $entityManager, TraficRepository $traficRepository, RoutesRepository $routesRepository, StopRouteRepository $stopRouteRepository, AgencyRepository $agencyRepository, StopsRepository $stopsRepository, ParameterBagInterface $params)
     {
@@ -33,8 +32,6 @@ class Lines
         $this->routesRepository = $routesRepository;
         $this->stopRouteRepository = $stopRouteRepository;
         $this->agencyRepository = $agencyRepository;
-        $this->stopsRepository = $stopsRepository;
-        $this->traficRepository = $traficRepository;
     }
     
     /**

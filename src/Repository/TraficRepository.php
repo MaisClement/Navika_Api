@@ -39,7 +39,7 @@ class TraficRepository extends ServiceEntityRepository
         }
     }
 
-//    /**
+    //    /**
 //     * @return Trafic[] Returns an array of Trafic objects
 //     */
 //    public function findByExampleField($value): array
@@ -54,7 +54,7 @@ class TraficRepository extends ServiceEntityRepository
 //        ;
 //    }
 
-//    public function findOneBySomeField($value): ?Trafic
+    //    public function findOneBySomeField($value): ?Trafic
 //    {
 //        return $this->createQueryBuilder('t')
 //            ->andWhere('t.exampleField = :val')

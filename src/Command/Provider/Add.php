@@ -13,21 +13,21 @@ use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
 
 class Add extends Command
 {
-    private \Doctrine\ORM\EntityManagerInterface $entityManager;
-    private \Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface $params;
+    private $entityManager;
+    private $params;
 
     private ProviderRepository $providerRepository;
-    
+
     public function __construct(EntityManagerInterface $entityManager, ParameterBagInterface $params, ProviderRepository $providerRepository, )
     {
         $this->entityManager = $entityManager;
         $this->params = $params;
 
         $this->providerRepository = $providerRepository;
-        
+
         parent::__construct();
     }
-    
+
     protected function configure(): void
     {
         $this
@@ -39,7 +39,7 @@ class Add extends Command
             ->addArgument('area', InputArgument::REQUIRED, 'Area')
             ->addArgument('url', InputArgument::REQUIRED, 'Url');
     }
-    
+
     function execute(InputInterface $input, OutputInterface $output): int
     {
         $id = $input->getArgument('id');
@@ -51,7 +51,7 @@ class Add extends Command
 
         // Check if provider is not already registered
         $providers = $this->providerRepository->Find($id);
-        if ( $providers instanceof \App\Entity\Provider ) {
+        if ($providers instanceof \App\Entity\Provider) {
             $output->writeln('<fg=blue>ℹ️ Provider already registered</>');
             return Command::SUCCESS;
         }
@@ -67,11 +67,11 @@ class Add extends Command
         $provider->setFlag($flag);
 
         $this->entityManager->persist($provider);
-        
+
         $this->entityManager->flush();
-        
+
         $output->writeln('<info>✅ New provider added successfully</info>');
-        
+
         return Command::SUCCESS;
     }
 }

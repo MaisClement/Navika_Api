@@ -10,7 +10,7 @@ use Doctrine\ORM\Mapping as ORM;
 class Pathways
 {
     #[ORM\ManyToOne(inversedBy: 'pathways')]
-    #[ORM\JoinColumn(name: "provider_id",  nullable: true, onDelete: "CASCADE")]
+    #[ORM\JoinColumn(name: "provider_id", nullable: true, onDelete: "CASCADE")]
     private ?Provider $provider_id = null;
 
     #[ORM\Id]
@@ -52,7 +52,7 @@ class Pathways
     #[ORM\Column(length: 255, nullable: true)]
     private ?string $reversed_signposted_as = null;
 
-    public function getProviderId(): ?Provider 
+    public function getProviderId(): ?Provider
     {
         return $this->provider_id;
     }

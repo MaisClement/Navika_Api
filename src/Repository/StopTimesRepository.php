@@ -39,7 +39,7 @@ class StopTimesRepository extends ServiceEntityRepository
         }
     }
 
-//    /**
+    //    /**
 //     * @return StopTimes[] Returns an array of StopTimes objects
 //     */
 //    public function findByExampleField($value): array
@@ -54,7 +54,7 @@ class StopTimesRepository extends ServiceEntityRepository
 //        ;
 //    }
 
-//    public function findOneBySomeField($value): ?StopTimes
+    //    public function findOneBySomeField($value): ?StopTimes
 //    {
 //        return $this->createQueryBuilder('s')
 //            ->andWhere('s.exampleField = :val')

@@ -11,7 +11,7 @@ use Doctrine\ORM\Mapping as ORM;
 class Levels
 {
     #[ORM\ManyToOne(inversedBy: 'levels')]
-    #[ORM\JoinColumn(name: "provider_id",  nullable: true, onDelete: "CASCADE")]
+    #[ORM\JoinColumn(name: "provider_id", nullable: true, onDelete: "CASCADE")]
     private ?Provider $provider_id = null;
 
     #[ORM\Id]
@@ -32,7 +32,7 @@ class Levels
         $this->stops = new ArrayCollection();
     }
 
-    public function getProviderId(): ?Provider 
+    public function getProviderId(): ?Provider
     {
         return $this->provider_id;
     }

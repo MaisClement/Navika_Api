@@ -15,7 +15,7 @@ class Agency
     private ?string $agency_id = null;
 
     #[ORM\ManyToOne(inversedBy: 'agencies')]
-    #[ORM\JoinColumn(name: "provider_id",  nullable: true, onDelete: "CASCADE")]
+    #[ORM\JoinColumn(name: "provider_id", nullable: true, onDelete: "CASCADE")]
     private ?Provider $provider_id = null;
 
     #[ORM\Column(length: 255)]
@@ -51,7 +51,7 @@ class Agency
         $this->fareAttributes = new ArrayCollection();
     }
 
-    public function getProviderId(): ?Provider 
+    public function getProviderId(): ?Provider
     {
         return $this->provider_id;
     }

@@ -39,7 +39,7 @@ class CalendarRepository extends ServiceEntityRepository
         }
     }
 
-//    /**
+    //    /**
 //     * @return Calendar[] Returns an array of Calendar objects
 //     */
 //    public function findByExampleField($value): array
@@ -54,7 +54,7 @@ class CalendarRepository extends ServiceEntityRepository
 //        ;
 //    }
 
-//    public function findOneBySomeField($value): ?Calendar
+    //    public function findOneBySomeField($value): ?Calendar
 //    {
 //        return $this->createQueryBuilder('c')
 //            ->andWhere('c.exampleField = :val')

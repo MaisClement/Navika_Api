@@ -15,8 +15,8 @@ use Symfony\Component\Console\Helper\ProgressBar;
 
 class GBFS extends Command
 {
-    private \Doctrine\ORM\EntityManagerInterface $entityManager;
-    private \Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface $params;
+    private $entityManager;
+    private $params;
 
     private StationsRepository $stationsRepository;
     private ProviderRepository $providerRepository;

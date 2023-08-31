@@ -39,7 +39,7 @@ class SubscribersRepository extends ServiceEntityRepository
         }
     }
 
-//    /**
+    //    /**
 //     * @return Subscribers[] Returns an array of Subscribers objects
 //     */
 //    public function findByExampleField($value): array
@@ -54,7 +54,7 @@ class SubscribersRepository extends ServiceEntityRepository
 //        ;
 //    }
 
-//    public function findOneBySomeField($value): ?Subscribers
+    //    public function findOneBySomeField($value): ?Subscribers
 //    {
 //        return $this->createQueryBuilder('s')
 //            ->andWhere('s.exampleField = :val')

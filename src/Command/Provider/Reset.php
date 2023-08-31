@@ -3,28 +3,30 @@
 namespace App\Command\Provider;
 
 use App\Repository\ProviderRepository;
-use Doctrine\ORM\EntityManagerInterface;
 use DateTime;
+use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\Console\Command\Command;
-use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
 
 class Reset extends Command
 {
+    private $entityManager;
+    private $params;
+
     private ProviderRepository $providerRepository;
-    private \Doctrine\ORM\EntityManagerInterface $entityManager;
-    private \Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface $params;
-    
+
     public function __construct(EntityManagerInterface $entityManager, ParameterBagInterface $params, ProviderRepository $providerRepository)
     {
-        $this->providerRepository = $providerRepository;
         $this->entityManager = $entityManager;
         $this->params = $params;
+
+        $this->providerRepository = $providerRepository;
+
         parent::__construct();
     }
-    
+
     protected function configure(): void
     {
         $this
@@ -35,8 +37,8 @@ class Reset extends Command
     protected function execute(InputInterface $input, OutputInterface $output): int
     {
         $providers = $this->providerRepository->findAll();
-        
-        foreach ( $providers as $provider ) {
+
+        foreach ($providers as $provider) {
             $provider->setFlag(0);
             $provider->setUpdatedAt(new DateTime());
             $this->entityManager->flush();

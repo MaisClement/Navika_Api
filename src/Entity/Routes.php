@@ -14,7 +14,7 @@ use Doctrine\ORM\Mapping as ORM;
 class Routes
 {
     #[ORM\ManyToOne(inversedBy: 'routes')]
-    #[ORM\JoinColumn(name: "provider_id",  nullable: true, onDelete: "CASCADE")]
+    #[ORM\JoinColumn(name: "provider_id", nullable: true, onDelete: "CASCADE")]
     private ?Provider $provider_id = null;
 
     #[ORM\Id]
@@ -25,7 +25,7 @@ class Routes
     #[ORM\JoinColumn(name: "agency_id", referencedColumnName: "agency_id", nullable: false, onDelete: "CASCADE")]
     private ?Agency $agency_id = null;
 
-   #[ORM\Column(type: Types::TEXT, nullable: true)]
+    #[ORM\Column(type: Types::TEXT, nullable: true)]
     private ?string $route_short_name = null;
 
     #[ORM\Column(type: Types::TEXT, nullable: true)]
@@ -83,7 +83,7 @@ class Routes
         $this->routeSubs = new ArrayCollection();
     }
 
-    public function getProviderId(): ?Provider 
+    public function getProviderId(): ?Provider
     {
         return $this->provider_id;
     }
@@ -235,16 +235,16 @@ class Routes
     public function getRoute(): ?array
     {
         return array(
-            "id"         =>  (string)    $this->route_id,
-            "code"       =>  (string)    $this->route_short_name,
-            "name"       =>  (string)    $this->route_long_name,
-            "mode"       =>  (string)    Functions::getTransportMode($this->route_type),
-            "color"      =>  (string)    $this->route_color == null ? "ffffff" : substr($this->route_color, 0, 6),
-            "text_color" =>  (string)    $this->route_text_color == null ? "ffffff" : substr($this->route_text_color, 0, 6),
-            "agency"     => array(
-                "id"         =>              $this->agency_id->getAgencyId(),
-                "name"       =>              $this->agency_id->getAgencyName(),
-                "area"       =>              $this->provider_id->getArea(),
+            "id" => (string) $this->route_id,
+            "code" => (string) $this->route_short_name,
+            "name" => (string) $this->route_long_name,
+            "mode" => (string) Functions::getTransportMode($this->route_type),
+            "color" => (string) $this->route_color == null ? "ffffff" : substr($this->route_color, 0, 6),
+            "text_color" => (string) $this->route_text_color == null ? "ffffff" : substr($this->route_text_color, 0, 6),
+            "agency" => array(
+                "id" => $this->agency_id->getAgencyId(),
+                "name" => $this->agency_id->getAgencyName(),
+                "area" => $this->provider_id->getArea(),
             )
         );
     }
@@ -266,25 +266,25 @@ class Routes
 
         foreach ($reports as $report) {
             $route_id = $this->route_id;
-            
+
             $r = array(
-                "id"            =>  (string)    $report->getId(),
-                "status"        =>  (string)    $report->getStatus(),
-                "cause"         =>  (string)    $report->getCause(),
-                "category"      =>  (string)    $report->getCategory(),
-                "severity"      =>  (int)       $report->getSeverity(),
-                "effect"        =>  (string)    $report->getEffect(),
-                "updated_at"    =>  (string)    $report->getUpdatedAt()->format("Y-m-d\TH:i:sP"),
-                "message"       =>  array(
-                    "title"     =>      $report->getTitle(),
-                    "text"      =>      $report->getText(),
+                "id" => (string) $report->getId(),
+                "status" => (string) $report->getStatus(),
+                "cause" => (string) $report->getCause(),
+                "category" => (string) $report->getCategory(),
+                "severity" => (int) $report->getSeverity(),
+                "effect" => (string) $report->getEffect(),
+                "updated_at" => (string) $report->getUpdatedAt()->format("Y-m-d\TH:i:sP"),
+                "message" => array(
+                    "title" => $report->getTitle(),
+                    "text" => $report->getText(),
                 ),
             );
 
             $severity = $trafic['severity'] > $report->getSeverity() ? $trafic['severity'] : $report->getSeverity();
-            
+
             $trafic['severity'] = $severity;
-            
+
             if ($report->getCause() == 'future') {
                 $trafic['reports']['future_work'][] = $r;
             } elseif ($report->getSeverity() == 2) {

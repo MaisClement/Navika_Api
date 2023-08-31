@@ -10,14 +10,18 @@ use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Helper\ProgressIndicator;
+use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
 
 class Town_Init extends Command
 {
-    private \Doctrine\ORM\EntityManagerInterface $entityManager;
+    private $entityManager;
+    private $params;
     
-    public function __construct(EntityManagerInterface $entityManager)
+    public function __construct(EntityManagerInterface $entityManager, ParameterBagInterface $params)
     {
         $this->entityManager = $entityManager;
+        $this->params = $params;
+
         parent::__construct();
     }
  

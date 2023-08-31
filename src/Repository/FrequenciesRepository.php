@@ -39,7 +39,7 @@ class FrequenciesRepository extends ServiceEntityRepository
         }
     }
 
-//    /**
+    //    /**
 //     * @return Frequencies[] Returns an array of Frequencies objects
 //     */
 //    public function findByExampleField($value): array
@@ -54,7 +54,7 @@ class FrequenciesRepository extends ServiceEntityRepository
 //        ;
 //    }
 
-//    public function findOneBySomeField($value): ?Frequencies
+    //    public function findOneBySomeField($value): ?Frequencies
 //    {
 //        return $this->createQueryBuilder('f')
 //            ->andWhere('f.exampleField = :val')

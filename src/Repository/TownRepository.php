@@ -50,7 +50,7 @@ class TownRepository extends ServiceEntityRepository
         return $queryBuilder->getQuery()->getOneOrNullResult();
     }
 
-//    /**
+    //    /**
 //     * @return Town[] Returns an array of Town objects
 //     */
 //    public function findByExampleField($value): array
@@ -65,7 +65,7 @@ class TownRepository extends ServiceEntityRepository
 //        ;
 //    }
 
-//    public function findOneBySomeField($value): ?Town
+    //    public function findOneBySomeField($value): ?Town
 //    {
 //        return $this->createQueryBuilder('t')
 //            ->andWhere('t.exampleField = :val')

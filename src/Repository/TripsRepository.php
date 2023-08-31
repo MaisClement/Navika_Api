@@ -39,7 +39,7 @@ class TripsRepository extends ServiceEntityRepository
         }
     }
 
-//    /**
+    //    /**
 //     * @return Trips[] Returns an array of Trips objects
 //     */
 //    public function findByExampleField($value): array
@@ -54,7 +54,7 @@ class TripsRepository extends ServiceEntityRepository
 //        ;
 //    }
 
-//    public function findOneBySomeField($value): ?Trips
+    //    public function findOneBySomeField($value): ?Trips
 //    {
 //        return $this->createQueryBuilder('t')
 //            ->andWhere('t.exampleField = :val')

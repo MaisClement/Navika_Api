@@ -21,7 +21,7 @@ class StopTownRepository extends ServiceEntityRepository
         parent::__construct($registry, StopTown::class);
     }
 
-//    /**
+    //    /**
 //     * @return StopTown[] Returns an array of StopTown objects
 //     */
 //    public function findByExampleField($value): array
@@ -36,7 +36,7 @@ class StopTownRepository extends ServiceEntityRepository
 //        ;
 //    }
 
-//    public function findOneBySomeField($value): ?StopTown
+    //    public function findOneBySomeField($value): ?StopTown
 //    {
 //        return $this->createQueryBuilder('s')
 //            ->andWhere('s.exampleField = :val')

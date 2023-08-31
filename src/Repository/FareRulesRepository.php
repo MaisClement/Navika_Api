@@ -39,7 +39,7 @@ class FareRulesRepository extends ServiceEntityRepository
         }
     }
 
-//    /**
+    //    /**
 //     * @return FareRules[] Returns an array of FareRules objects
 //     */
 //    public function findByExampleField($value): array
@@ -54,7 +54,7 @@ class FareRulesRepository extends ServiceEntityRepository
 //        ;
 //    }
 
-//    public function findOneBySomeField($value): ?FareRules
+    //    public function findOneBySomeField($value): ?FareRules
 //    {
 //        return $this->createQueryBuilder('f')
 //            ->andWhere('f.exampleField = :val')

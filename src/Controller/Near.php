@@ -5,18 +5,26 @@ namespace App\Controller;
 use App\Controller\Functions;
 use App\Repository\StationsRepository;
 use App\Repository\StopRouteRepository;
+use Doctrine\ORM\EntityManagerInterface;
 use OpenApi\Attributes as OA;
+use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Routing\Annotation\Route;
 
 class Near
 {
+    private $entityManager;
+    private $params;
+
     private StopRouteRepository $stopRouteRepository;
     private StationsRepository $stationsRepository;
     
-    public function __construct(StopRouteRepository $stopRouteRepository, StationsRepository $stationsRepository)
+    public function __construct(EntityManagerInterface $entityManager, ParameterBagInterface $params, StopRouteRepository $stopRouteRepository, StationsRepository $stationsRepository)
     {
+        $this->entityManager = $entityManager;
+        $this->params = $params;
+        
         $this->stopRouteRepository = $stopRouteRepository;
         $this->stationsRepository = $stationsRepository;
     }

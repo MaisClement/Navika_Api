@@ -39,7 +39,7 @@ class TranslationsRepository extends ServiceEntityRepository
         }
     }
 
-//    /**
+    //    /**
 //     * @return Translations[] Returns an array of Translations objects
 //     */
 //    public function findByExampleField($value): array
@@ -54,7 +54,7 @@ class TranslationsRepository extends ServiceEntityRepository
 //        ;
 //    }
 
-//    public function findOneBySomeField($value): ?Translations
+    //    public function findOneBySomeField($value): ?Translations
 //    {
 //        return $this->createQueryBuilder('t')
 //            ->andWhere('t.exampleField = :val')

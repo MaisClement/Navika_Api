@@ -19,7 +19,7 @@ class CalendarDates
     private ?int $id = null;
 
     #[ORM\ManyToOne(inversedBy: 'calendarDates')]
-    #[ORM\JoinColumn(name: "provider_id",  nullable: true, onDelete: "CASCADE")]
+    #[ORM\JoinColumn(name: "provider_id", nullable: true, onDelete: "CASCADE")]
     private ?Provider $provider_id = null;
 
     #[ORM\Column(length: 255)]
@@ -36,7 +36,7 @@ class CalendarDates
         return $this->id;
     }
 
-    public function getProviderId(): ?Provider 
+    public function getProviderId(): ?Provider
     {
         return $this->provider_id;
     }

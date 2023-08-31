@@ -12,11 +12,12 @@ use Symfony\Component\Console\Output\OutputInterface;
 
 class SNCF_Init extends Command
 {
-    private \Doctrine\ORM\EntityManagerInterface $entityManager;
+    private $entityManager;
     
     public function __construct(EntityManagerInterface $entityManager)
     {
         $this->entityManager = $entityManager;
+        
         parent::__construct();
     }
  

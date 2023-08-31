@@ -14,18 +14,21 @@ use Symfony\Component\Console\Helper\ProgressIndicator;
 
 class Clear extends Command
 {
+    private $entityManager;
+    private $params;
+
     private ProviderRepository $providerRepository;
-    private \Doctrine\ORM\EntityManagerInterface $entityManager;
-    private \Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface $params;
-    
+
     public function __construct(EntityManagerInterface $entityManager, ParameterBagInterface $params, ProviderRepository $providerRepository)
     {
-        $this->providerRepository = $providerRepository;
         $this->entityManager = $entityManager;
         $this->params = $params;
+
+        $this->providerRepository = $providerRepository;
+
         parent::__construct();
     }
-    
+
     protected function configure(): void
     {
         $this
@@ -33,16 +36,16 @@ class Clear extends Command
             ->setDescription('Add provider')
             ->addArgument('id', InputArgument::REQUIRED, 'Id');
     }
-    
+
     function execute(InputInterface $input, OutputInterface $output): int
     {
         $id = $input->getArgument('id');
         $db = $this->entityManager->getConnection();
 
-        $provider = $this->providerRepository->find( $id );
+        $provider = $this->providerRepository->find($id);
         if ($provider == null) {
             $output->writeln('<warning>Unknow provider</warning>');
-        
+
             return Command::FAILURE;
         }
 
@@ -69,7 +72,7 @@ class Clear extends Command
             'agency'
         ];
 
-        foreach( $tables as $table ) {
+        foreach ($tables as $table) {
             $progressIndicator->advance();
             $progressIndicator->setMessage("Clearing $table...");
             CommandFunctions::clearProviderDataInTable($db, $table, $id);
@@ -79,11 +82,11 @@ class Clear extends Command
         $progressIndicator->finish('Finished');
 
         // ---
-        
+
         $this->entityManager->flush();
-        
+
         $output->writeln('<info>✅ Provider data cleared successfully</info>');
-        
+
         return Command::SUCCESS;
     }
 }

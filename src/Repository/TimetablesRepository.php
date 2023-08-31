@@ -39,7 +39,7 @@ class TimetablesRepository extends ServiceEntityRepository
         }
     }
 
-//    /**
+    //    /**
 //     * @return Timetables[] Returns an array of Timetables objects
 //     */
 //    public function findByExampleField($value): array
@@ -54,7 +54,7 @@ class TimetablesRepository extends ServiceEntityRepository
 //        ;
 //    }
 
-//    public function findOneBySomeField($value): ?Timetables
+    //    public function findOneBySomeField($value): ?Timetables
 //    {
 //        return $this->createQueryBuilder('t')
 //            ->andWhere('t.exampleField = :val')

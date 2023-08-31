@@ -3,6 +3,7 @@
 namespace App\Controller;
 
 use App\Controller\Functions;
+use Doctrine\ORM\EntityManagerInterface;
 use OpenApi\Attributes as OA;
 use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
 use Symfony\Component\HttpClient\HttpClient;
@@ -12,13 +13,14 @@ use Symfony\Component\Routing\Annotation\Route;
 
 class Places
 {
-    private \Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface $params;
+    private $entityManager;
+    private $params;
 
-    public function __construct(ParameterBagInterface $params)
+    public function __construct(EntityManagerInterface $entityManager, ParameterBagInterface $params)
     {
+        $this->entityManager = $entityManager;
         $this->params = $params;
     }
- 
     
     /**
      * Get places

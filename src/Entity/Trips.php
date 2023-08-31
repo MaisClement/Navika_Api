@@ -14,7 +14,7 @@ use Doctrine\ORM\Mapping as ORM;
 class Trips
 {
     #[ORM\ManyToOne(inversedBy: 'trips')]
-    #[ORM\JoinColumn(name: "provider_id",  nullable: true, onDelete: "CASCADE")]
+    #[ORM\JoinColumn(name: "provider_id", nullable: true, onDelete: "CASCADE")]
     private ?Provider $provider_id = null;
 
     #[ORM\ManyToOne(inversedBy: 'trips')]
@@ -24,7 +24,7 @@ class Trips
     #[ORM\Id]
     #[ORM\Column(length: 255)]
     private ?string $trip_id = null;
-    
+
     #[ORM\Column(type: Types::TEXT, nullable: true)]
     private ?string $service_id = null;
 
@@ -61,7 +61,7 @@ class Trips
         $this->stopTimes = new ArrayCollection();
     }
 
-    public function getProviderId(): ?Provider 
+    public function getProviderId(): ?Provider
     {
         return $this->provider_id;
     }

@@ -10,17 +10,17 @@ use Doctrine\ORM\Mapping as ORM;
 class FareAttributes
 {
     #[ORM\ManyToOne(inversedBy: 'fareAttributes')]
-    #[ORM\JoinColumn(name: "provider_id",  nullable: true, onDelete: "CASCADE")]
+    #[ORM\JoinColumn(name: "provider_id", nullable: true, onDelete: "CASCADE")]
     private ?Provider $provider_id = null;
-    
+
     #[ORM\Id]
     #[ORM\ManyToOne(inversedBy: 'fareAttributes')]
-    #[ORM\JoinColumn(name: "fare_id", referencedColumnName: "fare_id",  nullable: true, onDelete: "CASCADE")]
+    #[ORM\JoinColumn(name: "fare_id", referencedColumnName: "fare_id", nullable: true, onDelete: "CASCADE")]
     private ?FareRules $fare_id = null;
 
     #[ORM\Id]
     #[ORM\ManyToOne(inversedBy: 'fareAttributes')]
-    #[ORM\JoinColumn(name: "agency_id", referencedColumnName: "agency_id",  nullable: true, onDelete: "CASCADE")]
+    #[ORM\JoinColumn(name: "agency_id", referencedColumnName: "agency_id", nullable: true, onDelete: "CASCADE")]
     private ?Agency $agency_id = null;
 
     #[ORM\Column(type: Types::DECIMAL, precision: 15, scale: '0')]
@@ -38,7 +38,7 @@ class FareAttributes
     #[ORM\Column(nullable: true)]
     private ?int $transfer_duration = null;
 
-    public function getProviderId(): ?Provider 
+    public function getProviderId(): ?Provider
     {
         return $this->provider_id;
     }

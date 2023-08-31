@@ -39,7 +39,7 @@ class AttributionsRepository extends ServiceEntityRepository
         }
     }
 
-//    /**
+    //    /**
 //     * @return Attributions[] Returns an array of Attributions objects
 //     */
 //    public function findByExampleField($value): array
@@ -54,7 +54,7 @@ class AttributionsRepository extends ServiceEntityRepository
 //        ;
 //    }
 
-//    public function findOneBySomeField($value): ?Attributions
+    //    public function findOneBySomeField($value): ?Attributions
 //    {
 //        return $this->createQueryBuilder('a')
 //            ->andWhere('a.exampleField = :val')

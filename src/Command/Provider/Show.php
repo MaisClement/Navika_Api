@@ -2,19 +2,17 @@
 
 namespace App\Command\Provider;
 
-use App\Entity\Provider;
 use App\Repository\ProviderRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\Console\Command\Command;
-use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
 
 class Show extends Command
 {
-    private \Doctrine\ORM\EntityManagerInterface $entityManager;
-    private \Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface $params;
+    private $entityManager;
+    private $params;
 
     private ProviderRepository $providerRepository;
     

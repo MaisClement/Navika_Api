@@ -16,11 +16,11 @@ class StopTown
     private ?int $id = null;
 
     #[ORM\ManyToOne(inversedBy: 'stopTowns')]
-    #[ORM\JoinColumn(name: "stop_id", referencedColumnName: "stop_id",nullable: true, onDelete: "CASCADE")]
+    #[ORM\JoinColumn(name: "stop_id", referencedColumnName: "stop_id", nullable: true, onDelete: "CASCADE")]
     private ?Stops $stop_id = null;
 
     #[ORM\ManyToOne(inversedBy: 'stopTowns')]
-    #[ORM\JoinColumn(name: "town_id", referencedColumnName: "town_id",nullable: true, onDelete: "CASCADE")]
+    #[ORM\JoinColumn(name: "town_id", referencedColumnName: "town_id", nullable: true, onDelete: "CASCADE")]
     private ?Town $town_id = null;
 
     public function getStopId(): ?Stops

@@ -39,7 +39,7 @@ class PathwaysRepository extends ServiceEntityRepository
         }
     }
 
-//    /**
+    //    /**
 //     * @return Pathways[] Returns an array of Pathways objects
 //     */
 //    public function findByExampleField($value): array
@@ -54,7 +54,7 @@ class PathwaysRepository extends ServiceEntityRepository
 //        ;
 //    }
 
-//    public function findOneBySomeField($value): ?Pathways
+    //    public function findOneBySomeField($value): ?Pathways
 //    {
 //        return $this->createQueryBuilder('p')
 //            ->andWhere('p.exampleField = :val')

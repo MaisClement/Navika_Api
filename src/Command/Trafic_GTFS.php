@@ -18,8 +18,8 @@ use Symfony\Component\HttpClient\HttpClient;
 
 class Trafic_GTFS extends Command
 {
-    private \Doctrine\ORM\EntityManagerInterface $entityManager;
-    private \Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface $params;
+    private $entityManager;
+    private $params;
     
     private RoutesRepository $routesRepository;
     private TraficRepository $traficRepository;

@@ -9,7 +9,7 @@ use Doctrine\ORM\Mapping as ORM;
 class Stations
 {
     #[ORM\ManyToOne(inversedBy: 'stations')]
-    #[ORM\JoinColumn(name: "provider_id",  nullable: true, onDelete: "CASCADE")]
+    #[ORM\JoinColumn(name: "provider_id", nullable: true, onDelete: "CASCADE")]
     private ?Provider $provider_id = null;
 
     #[ORM\Id]
@@ -28,7 +28,7 @@ class Stations
     #[ORM\Column(nullable: true)]
     private ?int $station_capacity = null;
 
-    public function getProviderId(): ?Provider 
+    public function getProviderId(): ?Provider
     {
         return $this->provider_id;
     }

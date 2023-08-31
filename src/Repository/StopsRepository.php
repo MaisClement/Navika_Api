@@ -57,7 +57,7 @@ class StopsRepository extends ServiceEntityRepository
         return $qb->getQuery()->getOneOrNullResult();
     }
 
-//    /**
+    //    /**
 //     * @return Stops[] Returns an array of Stops objects
 //     */
 //    public function findByExampleField($value): array
@@ -72,7 +72,7 @@ class StopsRepository extends ServiceEntityRepository
 //        ;
 //    }
 
-//    public function findOneBySomeField($value): ?Stops
+    //    public function findOneBySomeField($value): ?Stops
 //    {
 //        return $this->createQueryBuilder('s')
 //            ->andWhere('s.exampleField = :val')

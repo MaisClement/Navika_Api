@@ -17,7 +17,7 @@ class Shapes
     private ?int $id = null;
 
     #[ORM\ManyToOne(inversedBy: 'shapes')]
-    #[ORM\JoinColumn(name: "provider_id",  nullable: true, onDelete: "CASCADE")]
+    #[ORM\JoinColumn(name: "provider_id", nullable: true, onDelete: "CASCADE")]
     private ?Provider $provider_id = null;
 
     #[ORM\Column(length: 255)]
@@ -35,12 +35,7 @@ class Shapes
     #[ORM\Column(type: Types::DECIMAL, precision: 15, scale: '0', nullable: true)]
     private ?string $shape_dist_traveled = null;
 
-    public function __construct()
-    {
-        $this->trips = new ArrayCollection();
-    }
-
-    public function getProviderId(): ?Provider 
+    public function getProviderId(): ?Provider
     {
         return $this->provider_id;
     }
@@ -64,12 +59,12 @@ class Shapes
         return $this;
     }
 
-    public function getShapePtLat(): array
+    public function getShapePtLat(): ?string
     {
         return $this->shape_pt_lat;
     }
 
-    public function setShapePtLat(array $shape_pt_lat): static
+    public function setShapePtLat(string $shape_pt_lat): static
     {
         $this->shape_pt_lat = $shape_pt_lat;
 
@@ -108,41 +103,6 @@ class Shapes
     public function setShapeDistTraveled(?string $shape_dist_traveled): static
     {
         $this->shape_dist_traveled = $shape_dist_traveled;
-
-        return $this;
-    }
-
-    /**
-     * @return Collection<int, Trips>
-     */
-    public function getTrips(): Collection
-    {
-        return $this->trips;
-    }
-
-    public function addTrip(Trips $trip): static
-    {
-        if (!$this->trips->contains($trip)) {
-            $this->trips->add($trip);
-            $trip->setShapeId($this);
-        }
-
-        return $this;
-    }
-
-    public function removeTrip(Trips $trip): static
-    {
-        // set the owning side to null (unless already changed)
-        if ($this->trips->removeElement($trip) && $trip->getShapeId() === $this) {
-            $trip->setShapeId(null);
-        }
-
-        return $this;
-    }
-
-    public function setTrips(?Trips $trips): static
-    {
-        $this->trips = $trips;
 
         return $this;
     }

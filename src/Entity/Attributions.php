@@ -9,7 +9,7 @@ use Doctrine\ORM\Mapping as ORM;
 class Attributions
 {
     #[ORM\ManyToOne(inversedBy: 'attributions')]
-    #[ORM\JoinColumn(name: "provider_id",  nullable: true, onDelete: "CASCADE")]
+    #[ORM\JoinColumn(name: "provider_id", nullable: true, onDelete: "CASCADE")]
     private ?Provider $provider_id = null;
 
     #[ORM\Id]
@@ -46,7 +46,7 @@ class Attributions
     #[ORM\Column(length: 255, nullable: true)]
     private ?string $attribution_phone = null;
 
-    public function getProviderId(): ?Provider 
+    public function getProviderId(): ?Provider
     {
         return $this->provider_id;
     }

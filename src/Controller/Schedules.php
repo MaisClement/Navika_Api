@@ -18,13 +18,12 @@ use OpenApi\Attributes as OA;
 
 class Schedules
 {
-    private \Doctrine\ORM\EntityManagerInterface $entityManager;
+    private $entityManager;
+    private $params;
+
     private StopRouteRepository $stopRouteRepository;
-    private TripsRepository $tripsRepository;
-    private StopTimesRepository $stopTimesRepository;
     private StopsRepository $stopsRepository;
     private RoutesRepository $routesRepository;
-    private ParameterBagInterface $params;
     
     public function __construct(EntityManagerInterface $entityManager, StopRouteRepository $stopRouteRepository, TripsRepository $tripsRepository, StopTimesRepository $stopTimesRepository, StopsRepository $stopsRepository, ParameterBagInterface $params, RoutesRepository $routesRepository)
     {        
@@ -33,8 +32,6 @@ class Schedules
         
         $this->stopRouteRepository = $stopRouteRepository;
         $this->routesRepository = $routesRepository;
-        $this->tripsRepository = $tripsRepository;
-        $this->stopTimesRepository = $stopTimesRepository;
         $this->stopsRepository = $stopsRepository;
     }
  

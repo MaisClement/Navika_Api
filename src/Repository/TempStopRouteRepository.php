@@ -39,7 +39,7 @@ class TempStopRouteRepository extends ServiceEntityRepository
         }
     }
 
-//    /**
+    //    /**
 //     * @return TempStopRoute[] Returns an array of TempStopRoute objects
 //     */
 //    public function findByExampleField($value): array
@@ -54,7 +54,7 @@ class TempStopRouteRepository extends ServiceEntityRepository
 //        ;
 //    }
 
-//    public function findOneBySomeField($value): ?TempStopRoute
+    //    public function findOneBySomeField($value): ?TempStopRoute
 //    {
 //        return $this->createQueryBuilder('t')
 //            ->andWhere('t.exampleField = :val')
