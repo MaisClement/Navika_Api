@@ -112,8 +112,8 @@ class Lines
                 $json["flag"] = (int) $request->get('flag');
             }
             return new JsonResponse($json);
-            
-        } else {
+
+        } else if ( !is_string($query) ){
             return new JsonResponse(Functions::ErrorMessage(400, 'One or more parameters are missing or null, have you "q" ?'), 400);
         }
 
