@@ -22,7 +22,7 @@ class Transfers
     #[ORM\JoinColumn(name: "to_stop_id", referencedColumnName: "stop_id",  nullable: true, onDelete: "CASCADE")]
     private ?Stops $to_stop_id = null;
 
-    #[ORM\Column(columnDefinition: "ENUM('0', '1', '2', '3', '4', '5')")]
+    #[ORM\Column(columnDefinition: 'ENUM("0", "1", "2", "3", "4", "5")')]
     private ?string $transfer_type = null;
 
     #[ORM\Column(nullable: true)]

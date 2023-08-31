@@ -60,26 +60,5 @@ services:
     App\Controller\Lines:
         tags: ['controller.service_arguments']
 
-
-
-    App\Command\InitTown:
-        tags: [ 'console.command' ]
-
-    App\Command\Provider\Add:
-        tags: [ 'console.command' ]
-
-    App\Command\Provider\Remove:
-        tags: [ 'console.command' ]
-
-    App\Command\Provider\Reset:
-        tags: [ 'console.command' ]
-
-    App\Command\Trafic\TraficIDFM:
-        tags: [ 'console.command' ]
-
-    App\Command\Trafic\TraficGTFS:
-        tags: [ 'console.command' ]
-
-
     # add more service definitions when explicit configuration is needed
     # please note that last definitions always *replace* previous ones

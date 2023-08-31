@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Command\Trafic;
+namespace App\Command;
 
 use App\Controller\Functions;
 use App\Entity\Trafic;
@@ -14,9 +14,9 @@ use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
 use Symfony\Component\HttpClient\HttpClient;
 
-// php bin/console app:init:zip_code /var/www/navika/data/file/communes.geojson /var/www/navika/data/file/zip_code.json
+use Symfony\Component\Console\Helper\ProgressIndicator;
 
-class TraficIDFM extends Command
+class Trafic_IDFM extends Command
 {
     private $entityManager;
     private $params;
@@ -45,7 +45,8 @@ class TraficIDFM extends Command
     function execute(InputInterface $input, OutputInterface $output): int
     {
         // Récupération du trafic
-        $output->writeln('> Geting trafic...');
+        $progressIndicator = new ProgressIndicator($output, 'verbose', 100, ['⠏', '⠛', '⠹', '⢸', '⣰', '⣤', '⣆', '⡇']);
+        $progressIndicator->start('Geting trafic...');
 
         $url = $this->params->get('prim_url') . '/line_reports?count=10000';
         
@@ -61,12 +62,19 @@ class TraficIDFM extends Command
             return Command::FAILURE;
         }
 
+        // Loader
+        $progressIndicator->advance();
+
         $content = $response->getContent();
         $results = json_decode($content);
 
         // On crée les messages
         $reports = [];
         foreach ( $results->disruptions as $disruption ) {
+
+            // Loader
+            $progressIndicator->advance();
+
             if ( $disruption->status != 'past' ) {
                 $msg = new Trafic();
                 $msg->setStatus    ( $disruption->status );
@@ -84,6 +92,10 @@ class TraficIDFM extends Command
 
         // On assigne une ligne aux messages
         foreach ( $results->line_reports as $line ) {
+
+            // Loader
+            $progressIndicator->advance();
+
             foreach ( $line->line->links as $link ) {
                 
                 $id = $link->id;
@@ -103,20 +115,24 @@ class TraficIDFM extends Command
         }
 
         // On efface les messages existant
-        $output->writeln('> Remove old...');
+        $progressIndicator->setMessage('Remove old...');
         
         $old_messages = $this->traficRepository->findAll();
         foreach ($old_messages as $old_message) {
+
+            // Loader
+            $progressIndicator->advance();
+
             $this->entityManager->remove($old_message);
         }
         
         // On sauvegarde
-        $output->writeln('> Saving...');
+        $progressIndicator->setMessage('Saving...');
                 
         $this->entityManager->flush();
 
         // Monitoring
-        $output->writeln('> Monitoring...');
+        $progressIndicator->setMessage('Monitoring...');
 
         $url = 'https://uptime.betterstack.com/api/v1/heartbeat/pbe86jt9hZHP5sW93MJNxw7C';
         
@@ -128,7 +144,7 @@ class TraficIDFM extends Command
             return Command::FAILURE;
         }
         
-        $output->writeln('<info>✅ OK</info>');
+        $progressIndicator->finish('<info>✅ OK</info>');
         
         return Command::SUCCESS;
     }

@@ -18,17 +18,17 @@ class Pathways
     private ?string $pathway_id = null;
 
     #[ORM\ManyToOne(inversedBy: 'pathways')]
-    #[ORM\JoinColumn(name: "from_stop_id", referencedColumnName: "stop_id",  nullable: true, onDelete: "CASCADE")]
+    #[ORM\JoinColumn(name: "from_stop_id", referencedColumnName: "stop_id", nullable: true, onDelete: "CASCADE")]
     private ?Stops $from_stop_id = null;
 
     #[ORM\ManyToOne(inversedBy: 'pathways')]
-    #[ORM\JoinColumn(name: "to_stop_id", referencedColumnName: "stop_id",  nullable: true, onDelete: "CASCADE")]
+    #[ORM\JoinColumn(name: "to_stop_id", referencedColumnName: "stop_id", nullable: true, onDelete: "CASCADE")]
     private ?Stops $to_stop_id = null;
 
-    #[ORM\Column(columnDefinition: "ENUM('0', '1', '2', '3', '4', '5', '6', '7')")]
+    #[ORM\Column(columnDefinition: 'ENUM("0", "1", "2", "3", "4", "5", "6", "7")')]
     private ?string $pathway_mode = null;
 
-    #[ORM\Column(columnDefinition: "ENUM('0', '1')")]
+    #[ORM\Column(columnDefinition: 'ENUM("0", "1")')]
     private ?string $is_bidirectional = null;
 
     #[ORM\Column(type: Types::DECIMAL, precision: 15, scale: '0', nullable: true)]

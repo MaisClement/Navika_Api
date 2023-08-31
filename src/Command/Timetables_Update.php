@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Command\Timetables;
+namespace App\Command;
 
 use App\Controller\Functions;
 use App\Entity\Timetables;
@@ -13,10 +13,11 @@ use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
 use Symfony\Component\HttpClient\HttpClient;
+use Symfony\Component\Console\Helper\ProgressIndicator;
 
 // php bin/console app:init:zip_code /var/www/navika/data/file/communes.geojson /var/www/navika/data/file/zip_code.json
 
-class Update extends Command
+class Timetables_Update extends Command
 {
     private \Doctrine\ORM\EntityManagerInterface $entityManager;
     private \Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface $params;
@@ -48,7 +49,8 @@ class Update extends Command
         $file = $dir . '/timetables.csv';
 
         // Récupération du trafic
-        $output->writeln('> Geting timetables...');
+        $progressIndicator = new ProgressIndicator($output, 'verbose', 100, ['⠏', '⠛', '⠹', '⢸', '⣰', '⣤', '⣆', '⡇']);
+        $progressIndicator->start('Geting timetable...');
 
         $url = $this->params->get('prim_url_timetables');
         
@@ -66,6 +68,10 @@ class Update extends Command
         $content = Functions::readCsv($file);
 
         foreach ($content as $row) {
+
+            // Loader
+            $progressIndicator->advance();
+
             if ( !is_bool($row) && $row[0] != 'ID_Line') {
                 
                 $route_id = 'IDFM:' . $row[0];
@@ -86,20 +92,24 @@ class Update extends Command
         }      
 
         // On efface les messages existant
-        $output->writeln('> Remove old...');
+        progressIndicator->setMessage('Removing old timetables...');
         
         $old_timetables = $this->timetablesRepository->findAll();
 
         foreach ($old_timetables as $old_timetables) {
+
+            // Loader
+            $progressIndicator->advance();
+
             $this->entityManager->remove($old_timetables);
         }
         
         // On sauvegarde
-        $output->writeln('> Saving...');
+        $progressIndicator->setMessage('Saving data...');
                 
         $this->entityManager->flush();
         
-        $output->writeln('<info>✅ OK</info>');
+        $progressIndicator->finish('<info>✅ OK</info>');
         
         return Command::SUCCESS;
     }

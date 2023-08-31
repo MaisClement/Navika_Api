@@ -9,8 +9,9 @@ use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
+use Symfony\Component\Console\Helper\ProgressIndicator;
 
-class InitTown extends Command
+class Town_Init extends Command
 {
     private \Doctrine\ORM\EntityManagerInterface $entityManager;
     
@@ -41,9 +42,8 @@ class InitTown extends Command
 
         // ---
 
-        $output->writeln('> Initialisation...');
-
-        
+        $progressIndicator = new ProgressIndicator($output, 'verbose', 100, ['⠏', '⠛', '⠹', '⢸', '⣰', '⣤', '⣆', '⡇']);
+        $progressIndicator->start('Importing cities into the database...');
 
         foreach ($towns['features'] as $feature) {
             try {
@@ -51,6 +51,10 @@ class InitTown extends Command
                 $id = $feature['properties']['code'];
 
                 if ($feature['geometry']['type'] == 'Polygon') {
+
+                    // Loader
+                    $progressIndicator->advance();
+
                     $polygon = new Polygon($feature['geometry']['coordinates']);
     
                     foreach($zip_codes as $code) {
@@ -68,18 +72,16 @@ class InitTown extends Command
         
                     $this->entityManager->persist($town);
                 }
-                
-
             } catch (\Exception $e) {
                 echo $name;
             }      
         }
         
-        $output->writeln('> Ecriture...');
+        $progressIndicator->setMessage('Saving data...');
         
         $this->entityManager->flush();
         
-        $output->writeln('  OK ✅');
+        $progressIndicator->finish('  OK ✅');
         
         return Command::SUCCESS;
     }

@@ -10,7 +10,7 @@ use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 
-class InitSNCF extends Command
+class SNCF_Init extends Command
 {
     private \Doctrine\ORM\EntityManagerInterface $entityManager;
     

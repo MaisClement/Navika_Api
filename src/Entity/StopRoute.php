@@ -20,6 +20,10 @@ class StopRoute
     private ?string $route_key = null;
 
     #[ORM\ManyToOne(inversedBy: 'stopRoutes')]
+    #[ORM\JoinColumn(name: "stop_id", referencedColumnName: "stop_id", nullable: false, onDelete: "CASCADE")]
+    private ?Stops $stop_id = null;
+
+    #[ORM\ManyToOne(inversedBy: 'stopRoutes')]
     #[ORM\JoinColumn(name: "route_id", referencedColumnName: "route_id", nullable: false, onDelete: "CASCADE")]
     private ?Routes $route_id = null;
 
@@ -62,10 +66,6 @@ class StopRoute
 
     #[ORM\Column(length: 255, nullable: true)]
     private ?string $zip_code = null;
-
-    #[ORM\ManyToOne(inversedBy: 'stopRoutes')]
-    #[ORM\JoinColumn(name: "stop_id", referencedColumnName: "stop_id", nullable: false, onDelete: "CASCADE")]
-    private ?Stops $stop_id = null;
 
     public function getRouteKey(): ?string
     {

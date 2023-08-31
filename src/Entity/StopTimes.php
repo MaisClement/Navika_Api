@@ -41,22 +41,22 @@ class StopTimes
     #[ORM\Column(length: 255, nullable: true)]
     private ?string $local_zone_id = null;
 
-    #[ORM\Column(columnDefinition: "ENUM('0', '1', '2', '3')")]
+    #[ORM\Column(columnDefinition: 'ENUM("0", "1", "2", "3")')]
     private ?int $pickup_type = null;
 
-    #[ORM\Column(columnDefinition: "ENUM('0', '1', '2', '3')")]
+    #[ORM\Column(columnDefinition: 'ENUM("0", "1", "2", "3")')]
     private ?int $drop_off_type = null;
 
-    #[ORM\Column(columnDefinition: "ENUM('0', '1', '2', '3')")]
+    #[ORM\Column(columnDefinition: 'ENUM("0", "1", "2", "3")')]
     private ?int $continuous_pickup = null;
 
-    #[ORM\Column(columnDefinition: "ENUM('0', '1', '2', '3')")]
+    #[ORM\Column(columnDefinition: 'ENUM("0", "1", "2", "3")')]
     private ?int $continuous_drop_off = null;
 
     #[ORM\Column(type: Types::DECIMAL, precision: 15, scale: '0', nullable: true)]
     private ?string $shape_dist_traveled = null;
 
-    #[ORM\Column(columnDefinition: "ENUM('0', '1')")]
+    #[ORM\Column(columnDefinition: 'ENUM("0", "1")')]
     private ?int $timepoint = null;
 
     public function getProviderId(): ?Provider 

@@ -94,7 +94,7 @@ class Schedules
             $provider = 'ADMIN';
         }
 
-        //--- On regarde si l'arrêt existe bien et on recuppere toutes les lignes
+        // --- On regarde si l'arrêt existe bien et on recuppere toutes les lignes
         $routes = $this->stopRouteRepository->findBy( ['stop_id' => $id] );
 
         if ( count( $routes ) < 1 ) {
@@ -151,7 +151,7 @@ class Schedules
         $sncf_url = 'https://garesetconnexions-online.azure-api.net/API/PIV/Departures/00' . $qId;
         $sncf_url_api = 'https://api.sncf.com/v1/coverage/sncf/stop_areas/stop_area:SNCF:' . $qId . '/departures?count=30&data_freshness=realtime';
 
-        //------------
+        // ------------
         //On utilise l'api (differe selon le provider)
 
         if ($provider == 'SNCF') {

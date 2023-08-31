@@ -28,7 +28,7 @@ class CalendarDates
     #[ORM\Column(type: Types::DATE_MUTABLE)]
     private ?\DateTimeInterface $date = null;
 
-    #[ORM\Column(columnDefinition: "ENUM('0', '1', '2')")]
+    #[ORM\Column(columnDefinition: 'ENUM("0", "1", "2")')]
     private ?int $exception_type = null;
 
     public function getId(): ?int

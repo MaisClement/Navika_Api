@@ -2,17 +2,17 @@
 
 namespace App\Command\Provider;
 
+use App\Command\CommandFunctions;
 use App\Repository\ProviderRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputArgument;
-use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
-use Symfony\Component\Console\Input\ArrayInput;
 use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
+use Symfony\Component\Console\Helper\ProgressIndicator;
 
-class Remove extends Command
+class Clear extends Command
 {
     private ProviderRepository $providerRepository;
     private \Doctrine\ORM\EntityManagerInterface $entityManager;
@@ -29,42 +29,60 @@ class Remove extends Command
     protected function configure(): void
     {
         $this
-            ->setName('app:provider:remove')
+            ->setName('app:provider:clear')
             ->setDescription('Add provider')
-            ->addArgument('id', InputArgument::REQUIRED, 'id')
-            ->addOption(
-                'clear-data',
-                'i',
-                InputOption::VALUE_OPTIONAL,
-                'Skip data deletion',
-                true
-            );
+            ->addArgument('id', InputArgument::REQUIRED, 'Id');
     }
     
     function execute(InputInterface $input, OutputInterface $output): int
     {
         $id = $input->getArgument('id');
-        $i = $input->getOption('clear-data');
+        $db = $this->entityManager->getConnection();
 
         $provider = $this->providerRepository->find( $id );
         if ($provider == null) {
-            $output->writeln('<error>Unknow provider</error>');
+            $output->writeln('<warning>Unknow provider</warning>');
+        
             return Command::FAILURE;
         }
 
-        if ( $i == true ) {
-            $input = new ArrayInput([
-                'command' => 'app:provider:clear',
-                'id'    => $id,
-            ]);
-            $returnCode = $this->getApplication()->doRun($input, $output);
+        $progressIndicator = new ProgressIndicator($output, 'verbose', 100, ['⠏', '⠛', '⠹', '⢸', '⣰', '⣤', '⣆', '⡇']);
+        $progressIndicator->start('Clearing data...');
+
+        $tables = [
+            'attributions',
+            'translations',
+            'feed_info',
+            'frequencies',
+            'fare_attributes',
+            'fare_rules',
+            'stop_times',
+            'pathways',
+            'transfers',
+            'stops',
+            'levels',
+            'trips',
+            'shapes',
+            'calendar_dates',
+            'calendar',
+            'routes',
+            'agency'
+        ];
+
+        foreach( $tables as $table ) {
+            $progressIndicator->advance();
+            $progressIndicator->setMessage("Clearing $table...");
+            CommandFunctions::clearProviderDataInTable($db, $table, $id);
+            $progressIndicator->advance();
         }
 
-        $this->entityManager->remove($provider);
+        $progressIndicator->finish('Finished');
+
+        // ---
         
         $this->entityManager->flush();
         
-        $output->writeln('<info>✅ Provider removed successfully</info>');
+        $output->writeln('<info>✅ Provider data cleared successfully</info>');
         
         return Command::SUCCESS;
     }

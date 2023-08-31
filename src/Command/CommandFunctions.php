@@ -130,9 +130,9 @@ class CommandFunctions
         $req = $db->prepare("
             UPDATE $table
             SET $column = CASE
-                WHEN $column IS NOT NULL AND $column != '' AND $column NOT LIKE ? THEN CONCAT(?, $column)
+                WHEN $column NOT LIKE ? THEN CONCAT(?, $column)
                 ELSE $column
-                END;
+            END;
         ");
         $req->execute( [$prefix_ch, $prefix] );
         return $req;
@@ -150,9 +150,9 @@ class CommandFunctions
         return $req;
     }
 
-    public static function truncateTempStopRoute($db){
+    public static function truncateTable($db, $table){
         $req = $db->prepare("
-            TRUNCATE temp_stop_route;
+            TRUNCATE $table;
         ");
         $req->execute( [] );
         return $req;
@@ -161,22 +161,21 @@ class CommandFunctions
     public static function generateTempStopRoute($db){
         $req = $db->prepare("
             INSERT INTO temp_stop_route
-            (route_key, route_id, route_short_name, route_long_name, route_type, route_color, route_text_color, stop_id, stop_name, stop_query_name, stop_lat, stop_lon)
-
+            (route_key, route_id, route_short_name, route_long_name, route_type, route_color, route_text_color, stop_id, stop_name, stop_query_name, stop_lat, stop_lon, town_id)
+            
             SELECT DISTINCT 
-            CONCAT(R.route_id, '-', S2.stop_id) as route_key, R.route_id, R.route_short_name, R.route_long_name, R.route_type, R.route_color, R.route_text_color,
-            S2.stop_id, S2.stop_name, S2.stop_name, S2.stop_lat, S2.stop_lon
+            CONCAT(R.route_id, '-', S2.stop_id) as route_key, R.route_id, R.route_short_name, R.route_long_name, R.route_type, R.route_color, R.route_text_color, S2.stop_id, S2.stop_name, S2.stop_name, S2.stop_lat, S2.stop_lon, S2.town_id
             FROM routes R
-
+            
             INNER JOIN trips T
             ON R.route_id = T.route_id
-
+            
             INNER JOIN stop_times ST
             ON T.trip_id = ST.trip_id
-
+            
             INNER JOIN stops S
             ON ST.stop_id = S.stop_id
-
+            
             INNER JOIN stops S2
             ON S.parent_station = S2.stop_id;
         ");

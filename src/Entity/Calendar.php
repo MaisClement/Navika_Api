@@ -25,25 +25,25 @@ class Calendar
     #[ORM\Column(length: 255)]
     private ?string $service_id = null;
 
-    #[ORM\Column(columnDefinition: "ENUM('0', '1')")]
+    #[ORM\Column(columnDefinition: 'ENUM("0", "1")')]
     private ?string $monday = null;
 
-    #[ORM\Column(columnDefinition: "ENUM('0', '1')")]
+    #[ORM\Column(columnDefinition: 'ENUM("0", "1")')]
     private ?string $tuesday = null;
 
-    #[ORM\Column(columnDefinition: "ENUM('0', '1')")]
+    #[ORM\Column(columnDefinition: 'ENUM("0", "1")')]
     private ?string $wednesday = null;
 
-    #[ORM\Column(columnDefinition: "ENUM('0', '1')")]
+    #[ORM\Column(columnDefinition: 'ENUM("0", "1")')]
     private ?string $thursday = null;
 
-    #[ORM\Column(columnDefinition: "ENUM('0', '1')")]
+    #[ORM\Column(columnDefinition: 'ENUM("0", "1")')]
     private ?string $friday = null;
 
-    #[ORM\Column(columnDefinition: "ENUM('0', '1')")]
+    #[ORM\Column(columnDefinition: 'ENUM("0", "1")')]
     private ?string $saturday = null;
 
-    #[ORM\Column(columnDefinition: "ENUM('0', '1')")]
+    #[ORM\Column(columnDefinition: 'ENUM("0", "1")')]
     private ?string $sunday = null;
 
     #[ORM\Column(type: Types::DATE_MUTABLE)]

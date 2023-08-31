@@ -29,10 +29,10 @@ class FareAttributes
     #[ORM\Column(length: 255)]
     private ?string $currency_type = null;
 
-    #[ORM\Column(columnDefinition: "ENUM('0', '1')")]
+    #[ORM\Column(columnDefinition: 'ENUM("0", "1")')]
     private ?string $payment_method = null;
 
-    #[ORM\Column(columnDefinition: "ENUM('0', '1', '2')")]
+    #[ORM\Column(columnDefinition: 'ENUM("0", "1", "2")')]
     private ?string $transfers = null;
 
     #[ORM\Column(nullable: true)]

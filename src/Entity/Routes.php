@@ -10,6 +10,7 @@ use App\Controller\Functions;
 use Doctrine\ORM\Mapping as ORM;
 
 #[ORM\Entity(repositoryClass: RoutesRepository::class)]
+
 class Routes
 {
     #[ORM\ManyToOne(inversedBy: 'routes')]
@@ -48,10 +49,10 @@ class Routes
     #[ORM\Column(nullable: true)]
     private ?int $route_sort_order = null;
 
-    #[ORM\Column(columnDefinition: "ENUM('0', '1', '2', '3')")]
+    #[ORM\Column(columnDefinition: 'ENUM("0", "1", "2", "3")')]
     private ?string $continuous_pickup = null;
 
-    #[ORM\Column(columnDefinition: "ENUM('0', '1', '2', '3')")]
+    #[ORM\Column(columnDefinition: 'ENUM("0", "1", "2", "3")')]
     private ?string $continuous_drop_off = null;
 
     #[ORM\OneToMany(mappedBy: 'route_id', targetEntity: StopRoute::class)]

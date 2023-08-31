@@ -9,10 +9,6 @@ use Doctrine\ORM\Mapping as ORM;
 #[ORM\Entity(repositoryClass: TraficRepository::class)]
 class Trafic
 {
-    #[ORM\ManyToOne(inversedBy: 'trafics')]
-    #[ORM\JoinColumn(name: "provider_id",  nullable: true, onDelete: "CASCADE")]
-    private ?Provider $provider_id = null;
-
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
@@ -155,18 +151,6 @@ class Trafic
     public function setRouteId(?Routes $route_id): static
     {
         $this->route_id = $route_id;
-
-        return $this;
-    }
-
-    public function getProviderId(): ?Provider
-    {
-        return $this->provider_id;
-    }
-
-    public function setProviderId(?Provider $provider_id): static
-    {
-        $this->provider_id = $provider_id;
 
         return $this;
     }

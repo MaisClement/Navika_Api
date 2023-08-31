@@ -28,13 +28,13 @@ class Attributions
     #[ORM\Column(length: 255)]
     private ?string $organization_name = null;
 
-    #[ORM\Column(columnDefinition: "ENUM('0', '1')")]
+    #[ORM\Column(columnDefinition: 'ENUM("0", "1")')]
     private ?string $is_producer = null;
 
-    #[ORM\Column(columnDefinition: "ENUM('0', '1')")]
+    #[ORM\Column(columnDefinition: 'ENUM("0", "1")')]
     private ?string $is_operator = null;
 
-    #[ORM\Column(columnDefinition: "ENUM('0', '1')")]
+    #[ORM\Column(columnDefinition: 'ENUM("0", "1")')]
     private ?string $is_authority = null;
 
     #[ORM\Column(length: 255, nullable: true)]

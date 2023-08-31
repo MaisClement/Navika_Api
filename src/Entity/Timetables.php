@@ -17,7 +17,7 @@ class Timetables
     #[ORM\JoinColumn(name: "route_id", referencedColumnName: "route_id", nullable: true, onDelete: "CASCADE")]
     private ?Routes $route_id = null;
 
-    #[ORM\Column(columnDefinition: "ENUM('timetables', 'map')")]
+    #[ORM\Column(columnDefinition: 'ENUM("timetables", "map")')]
     private ?string $type = null;
 
     #[ORM\Column(length: 255)]

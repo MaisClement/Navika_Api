@@ -49,7 +49,7 @@ class Bikes
 
     public function getBikes($id)
     {
-        //--- On recupere les infos de la base de données
+        // --- On recupere les infos de la base de données
         if (!($station = $this->stationsRepository->findOneBy( ['station_id' => $id] )) instanceof \App\Entity\Stations) {
             return new JsonResponse(Functions::ErrorMessage(400, 'Nothing where found for this station'), 400);
         }
@@ -66,7 +66,7 @@ class Bikes
 
         $url = $station->getProviderId()->getUrl() . 'station_status.json';
 
-        //--- Infos en temps réel
+        // --- Infos en temps réel
         $client = HttpClient::create();
         
         $response = $client->request('GET', $url);

@@ -5,6 +5,7 @@ namespace App\Controller;
 use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
 use App\Controller\Functions;
 use App\Repository\RoutesRepository;
+use App\Repository\StopRouteRepository;
 use App\Repository\AgencyRepository;
 use App\Repository\StopsRepository;
 use App\Repository\TraficRepository;
@@ -18,17 +19,19 @@ class Lines
 {
     private \Doctrine\ORM\EntityManagerInterface $entityManager;
     private RoutesRepository $routesRepository;
+    private StopRouteRepository $stopRouteRepository;
     private AgencyRepository $agencyRepository;
     private StopsRepository $stopsRepository;
     private TraficRepository $traficRepository;
     private ParameterBagInterface $params;
     
-    public function __construct(EntityManagerInterface $entityManager, TraficRepository $traficRepository, RoutesRepository $routesRepository, AgencyRepository $agencyRepository, StopsRepository $stopsRepository, ParameterBagInterface $params)
+    public function __construct(EntityManagerInterface $entityManager, TraficRepository $traficRepository, RoutesRepository $routesRepository, StopRouteRepository $stopRouteRepository, AgencyRepository $agencyRepository, StopsRepository $stopsRepository, ParameterBagInterface $params)
     {
         $this->entityManager = $entityManager;
         $this->params = $params;
 
         $this->routesRepository = $routesRepository;
+        $this->stopRouteRepository = $stopRouteRepository;
         $this->agencyRepository = $agencyRepository;
         $this->stopsRepository = $stopsRepository;
         $this->traficRepository = $traficRepository;
@@ -101,13 +104,11 @@ class Lines
 
     public function searchLines(Request $request): JsonResponse 
     {
-        $q   = $request->get('q');
+        $q = $request->get('q');
+        $q = urldecode( trim( $q ) );
+        $query = $q;
   
-        if (isset($q)) {
-            $query = $q;
-            $query = urldecode(trim($query));
-            
-        } else {
+        if ( !is_string($query) ) {
             return new JsonResponse(Functions::ErrorMessage(400, 'One or more parameters are missing or null, have you "q" ?'), 400);
         }
 
@@ -117,15 +118,15 @@ class Lines
         $routes2 = $this->routesRepository->findByLongName( $query );
         $agencies = $this->agencyRepository->findByName( $query );
 
-            //Pre process for agency 
-            $routes3 = [];
+        //Pre process for agency 
+        $routes3 = [];
 
-            foreach($agencies as $agency) {
-                $routes_agency = $agency->getRoutes();
-                foreach( $routes_agency as $r ) {
-                    $routes3[] = $r;
-                }
+        foreach($agencies as $agency) {
+            $routes_agency = $agency->getRoutes();
+            foreach( $routes_agency as $r ) {
+                $routes3[] = $r;
             }
+        }
         $routes = array_merge($routes1, $routes2, $routes3);
 
         // ------ Places
@@ -264,8 +265,8 @@ class Lines
                 'name'      =>  (string)    $stop['stop_name'],
                 'type'      =>  (string)    'stop_area',
                 'distance'  =>  (float)     0,
-                'town'      =>  (string)    $stop['town_name'],
-                'zip_code'  =>  (string)    $stop['zip_code'],
+                'town'      =>  (string)    isset($stop['town_name']) ? $stop['town_name'] : '',
+                'zip_code'  =>  (string)    isset($stop['zip_code'])  ? $stop['zip_code']  : '',
                 'coord'     => array(
                     'lat'       =>      (float) $stop['stop_lat'],
                     'lon'       =>      (float) $stop['stop_lon'],
@@ -287,10 +288,9 @@ class Lines
     /**
      * Get routes schedules
      * 
-     * Get routes schedules 
-     *  
+     * Get routes schedules
      */
-    #[Route('/lines/{id}/schedules/{stop}', name: 'get_line_schedules', methods: ['GET'])]
+    #[Route('/lines/{line_id}/schedules/{stop_id}', name: 'get_line_schedules', methods: ['GET'])]
     #[OA\Tag(name: 'Lines')]
     #[OA\Parameter(
         name:"line_id",
@@ -326,81 +326,33 @@ class Lines
     {
         $db = $this->entityManager->getConnection();
 
-        //--- On regarde si l'arrêt existe bien et on recuppere toutes les lignes
-        $route = $this->routesRepository->findOneBy( ['route_id' => $line_id] );
-        if ( $route == null ) {
-            return new JsonResponse(Functions::ErrorMessage(400, 'Nothing where found for this route'), 400);
-        }
-        
-        $routes = $this->stopRouteRepository->findBy( ['stop_id' => $stop_id] );
+        //--- On regarde si la requette est cohérente
+        $routes = $this->stopRouteRepository->findBy( ['stop_id' => $stop_id, 'route_id' => $line_id] );
         if ( count( $routes ) < 1 ) {
-            return new JsonResponse(Functions::ErrorMessage(400, 'Nothing where found for this stop'), 400);
+            return new JsonResponse(Functions::ErrorMessage(400, 'Nothing where found for this route and stop'), 400);
         }
+
         
         //--- On regarde si l'arrêt existe bien et on recuppere toutes les lignes
+        $objs = Functions::getSchedulesByStop($db, $stop_id, $line_id, date("Y-m-d"), "00:00:00");
 
-        $_terminus = Functions::getTerminusForLine($db, $route);
+        print_r($objs);
+        exit;
 
-        $terminus = [];
-        foreach($_terminus as $terminu) {
-            $terminus[] = array(
-                "id"      =>  (String)    $terminu['stop_id'],
-                "name"    =>  (String)    $terminu['stop_name'],
+        $schedules = [];
+
+        foreach($objs as $obj) {
+            if ( !isset( $schedules[$obj['direction_id']] ) ) {
+                $schedules[$obj['direction_id']] = [];
+            }
+
+            $schedules[$obj['direction_id']][] = array(
+                "departure_date_time"       =>  (string)  Functions::prepareTime($obj['departure_time'], true),
+                "direction"                 =>  (string)    Functions::gareFormat($obj['trip_headsign']),
             );
         }
 
-        // ---
-        $timetables = [];
-        $timetables['map'] = [];
-        $timetables['timetables'] = [];
-
-        $_timetables = $route->getTimetables();
-        foreach( $_timetables as $timetable) {
-            if ( $timetable->getType() == 'map') {
-                $timetables['map'][] = array(
-                    "name"      => (String)     $timetable->getName(),
-                    "url"       => (String)     $timetable->getUrl(),
-                );
-            }
-            if ( $timetable->getType() == 'timetables' && str_ends_with($timetable->getUrl(), '.pdf')) {
-                $timetables['timetables'][] = array(
-                    "name"      => (String)     $timetable->getName(),
-                    "url"       => (String)     $timetable->getUrl(),
-                );
-            }
-        }             
-
-        // ----
-        $json = [];
-        $json['line'] = $route->getRouteAndTrafic();
-
-        // ----
-        $stops = Functions::getStopsOfRoutes($db, $id);
-
-        $json['line']['stops'] = [];
-
-        foreach($stops as $stop) {
-            $json['line']['stops'][] = array(
-                'id'        =>              $stop['stop_id'],
-                'name'      =>  (string)    $stop['stop_name'],
-                'type'      =>  (string)    'stop_area',
-                'distance'  =>  (float)     0,
-                'town'      =>  (string)    $stop['town_name'],
-                'zip_code'  =>  (string)    $stop['zip_code'],
-                'coord'     => array(
-                    'lat'       =>      (float) $stop['stop_lat'],
-                    'lon'       =>      (float) $stop['stop_lon'],
-                ),
-            );
-        }
-        
-        // ---        
-        $json['line']['terminus'] = $terminus;
-        $json['line']['timetables'] = $timetables;
-
-        if ($request->get('flag') != null) {
-            $json["flag"] = (int) $request->get('flag');
-        }
+        $json = $schedules;
 
         return new JsonResponse($json);
     }

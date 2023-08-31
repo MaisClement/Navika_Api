@@ -35,10 +35,6 @@ class Shapes
     #[ORM\Column(type: Types::DECIMAL, precision: 15, scale: '0', nullable: true)]
     private ?string $shape_dist_traveled = null;
 
-    #[ORM\OneToMany(mappedBy: 'shape_id', targetEntity: Trips::class)]
-    private Collection $trips;
-
-
     public function __construct()
     {
         $this->trips = new ArrayCollection();
@@ -140,6 +136,13 @@ class Shapes
         if ($this->trips->removeElement($trip) && $trip->getShapeId() === $this) {
             $trip->setShapeId(null);
         }
+
+        return $this;
+    }
+
+    public function setTrips(?Trips $trips): static
+    {
+        $this->trips = $trips;
 
         return $this;
     }

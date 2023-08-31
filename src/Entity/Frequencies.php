@@ -27,7 +27,7 @@ class Frequencies
     #[ORM\Column]
     private ?int $headway_secs = null;
 
-    #[ORM\Column(columnDefinition: "ENUM('0', '1')")]
+    #[ORM\Column(columnDefinition: 'ENUM("0", "1")')]
     private ?string $exact_times = null;
 
     public function getProviderId(): ?Provider 

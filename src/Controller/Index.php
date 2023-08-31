@@ -54,7 +54,7 @@ class Index
             2 => 1,
         );
 
-        //--- Version
+        // --- Version
         $app_version = $request->get('v') ?? 'null';
         $support = in_array( $app_version, $this->params->get('app.version.supported') );
 
@@ -90,7 +90,7 @@ class Index
             );
         }
 
-        //--- Message de la base de données
+        // --- Message de la base de données
         $_messages = $this->messagesRepository->findAll();
 
         foreach ($_messages as $message) {
@@ -109,7 +109,7 @@ class Index
             );
         }
 
-        //--- Message de IDFM
+        // --- Message de IDFM
         $client = HttpClient::create();
         
         $response = $client->request('GET', 'https://api-iv.iledefrance-mobilites.fr/banners');
@@ -141,7 +141,7 @@ class Index
                 );
             }
         }
-        //---
+        // ---
 
         $json = array(
             "api"         => array(

@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Command\GBFS;
+namespace App\Command;
 
 use App\Entity\Stations;
 use App\Repository\ProviderRepository;
@@ -11,8 +11,9 @@ use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
 use Symfony\Component\HttpClient\HttpClient;
+use Symfony\Component\Console\Helper\ProgressBar;
 
-class UpdateGBFS extends Command
+class GBFS extends Command
 {
     private \Doctrine\ORM\EntityManagerInterface $entityManager;
     private \Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface $params;
@@ -43,8 +44,11 @@ class UpdateGBFS extends Command
         $dir = sys_get_temp_dir();
         $db = $this->entityManager->getConnection();
 
-        $output->writeln('> Looking for GBFS...');
-
+        ProgressBar::setFormatDefinition('custom', '%percent%% [%bar%] %elapsed% - %remaining% | %message%');
+        $progressBar = new ProgressBar($output, 100);
+        $progressBar->setFormat('custom');
+        $progressBar->start();
+        $progressBar->setMessage('Looking for GBFS...');
 
         // ---
         $stations = $this->stationsRepository->findAll();
@@ -52,12 +56,15 @@ class UpdateGBFS extends Command
             $this->entityManager->remove($station);
         }
 
+        $progressBar->advance();
 
         // ---
         $bike_providers = $this->providerRepository->FindBy(['type' => 'bikes']);
 
+        $progressBar->setMaxSteps( count($bike_providers) + 2 );
+
         foreach ($bike_providers as $gbfs) {
-            echo '  > ' . $gbfs->getId() . PHP_EOL;
+            $progressBar->setMessage( $gbfs->getId() );
 
             // ---
             $url = $gbfs->getUrl() . 'gbfs.json';
@@ -123,11 +130,13 @@ class UpdateGBFS extends Command
             } catch(\Exception $e){
                 error_log($e->getMessage());
             }
+            // Loader
+            $progressBar->advance();
         }
         
-        $output->writeln('> Ecriture...');
-        
         $this->entityManager->flush();
+        
+        $progressBar->finish();
         
         return Command::SUCCESS;
     }

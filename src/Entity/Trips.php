@@ -34,21 +34,20 @@ class Trips
     #[ORM\Column(type: Types::TEXT, nullable: true)]
     private ?string $trip_short_name = null;
 
-    #[ORM\Column(columnDefinition: "ENUM('0', '1')")]
+    #[ORM\Column(columnDefinition: 'ENUM("0", "1")')]
     private ?string $direction_id = null;
 
     #[ORM\Column(length: 255, nullable: true)]
     private ?string $block_id = null;
 
-    #[ORM\Column(columnDefinition: "ENUM('0', '1', '2')")]
+    #[ORM\Column(columnDefinition: 'ENUM("0", "1", "2")')]
     private ?string $wheelchair_accessible = null;
 
-    #[ORM\Column(columnDefinition: "ENUM('0', '1', '2')")]
+    #[ORM\Column(columnDefinition: 'ENUM("0", "1", "2")')]
     private ?string $bikes_allowed = null;
 
-    #[ORM\ManyToOne(inversedBy: 'trips')]
-    #[ORM\JoinColumn(name: "shape_id", referencedColumnName: "shape_id", nullable: true, onDelete: "CASCADE")]
-    private ?Shapes $shape_id = null;
+    #[ORM\Column(length: 255)]
+    private ?string $shape_id = null;
 
     #[ORM\OneToMany(mappedBy: 'trip_id', targetEntity: Frequencies::class)]
     private Collection $frequencies;

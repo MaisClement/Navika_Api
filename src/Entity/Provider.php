@@ -27,10 +27,10 @@ class Provider
     #[ORM\Column(nullable: true)]
     private ?\DateTime $updated_at = null;
 
-    #[ORM\Column(columnDefinition: "ENUM('0', '1', '2')")]
+    #[ORM\Column(columnDefinition: 'ENUM("0", "1", "2")')]
     private ?string $flag = null;
 
-    #[ORM\Column(columnDefinition: "ENUM('tc', 'bikes')")]
+    #[ORM\Column(columnDefinition: 'ENUM("tc", "bikes")')]
     private ?string $type = null;
 
     #[ORM\OneToMany(mappedBy: 'provider_id', targetEntity: Trips::class)]
