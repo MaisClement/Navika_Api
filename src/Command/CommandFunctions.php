@@ -137,12 +137,10 @@ class CommandFunctions
 
         $req = $db->prepare("
             UPDATE $table
-            SET $column = CASE
-                WHEN $column NOT LIKE ? THEN CONCAT(?, $column)
-                ELSE $column
-            END;
+            SET $column = CONCAT(?, $column)
+            WHERE $column NOT LIKE ?;
         ");
-        $req->execute([$prefix_ch, $prefix]);
+        $req->execute([$prefix, $prefix_ch]);
         return $req;
     }
 
@@ -172,10 +170,10 @@ class CommandFunctions
     {
         $req = $db->prepare("
             INSERT INTO temp_stop_route
-            (route_key, route_id, route_short_name, route_long_name, route_type, route_color, route_text_color, stop_id, stop_name, stop_query_name, stop_lat, stop_lon, town_id)
+            (route_key, route_id, route_short_name, route_long_name, route_type, route_color, route_text_color, stop_id, stop_name, stop_query_name, stop_lat, stop_lon)
             
             SELECT DISTINCT 
-            CONCAT(R.route_id, '-', S2.stop_id) as route_key, R.route_id, R.route_short_name, R.route_long_name, R.route_type, R.route_color, R.route_text_color, S2.stop_id, S2.stop_name, S2.stop_name, S2.stop_lat, S2.stop_lon, S2.town_id
+            CONCAT(R.route_id, '-', S2.stop_id) as route_key, R.route_id, R.route_short_name, R.route_long_name, R.route_type, R.route_color, R.route_text_color, S2.stop_id, S2.stop_name, S2.stop_name, S2.stop_lat, S2.stop_lon
             FROM routes R
             
             INNER JOIN trips T
