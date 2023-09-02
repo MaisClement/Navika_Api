@@ -114,7 +114,8 @@ class GTFS_Update extends Command
             $status = $response->getStatusCode();
 
             if ($status != 200) {
-                return Command::FAILURE;
+                echo 'Fail to download GTFS !';
+                break;
             }
 
             $zip = $response->getContent();
