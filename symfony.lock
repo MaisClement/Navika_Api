@@ -35,6 +35,9 @@
             "migrations/.gitignore"
         ]
     },
+    "kreait/firebase-bundle": {
+        "version": "5.0.0"
+    },
     "nelmio/api-doc-bundle": {
         "version": "4.12",
         "recipe": {

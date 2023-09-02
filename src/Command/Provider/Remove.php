@@ -34,12 +34,19 @@ class Remove extends Command
         $this
             ->setName('app:provider:remove')
             ->setDescription('Add provider')
-            ->addArgument('id', InputArgument::REQUIRED, 'id')
+            ->addArgument('id', InputArgument::OPTIONAL, 'id')
             ->addOption(
-                'clear-data',
-                'i',
+                'skip-clear',
+                null,
                 InputOption::VALUE_OPTIONAL,
                 'Skip data deletion',
+                true
+            )
+            ->addOption(
+                'all',
+                null,
+                InputOption::VALUE_OPTIONAL,
+                'All',
                 true
             );
     }
@@ -47,27 +54,40 @@ class Remove extends Command
     function execute(InputInterface $input, OutputInterface $output): int
     {
         $id = $input->getArgument('id');
-        $i = $input->getOption('clear-data');
+        $all = $input->getOption('all');
+        $i = $input->getOption('skip-clear');
 
-        $provider = $this->providerRepository->find($id);
-        if ($provider == null) {
-            $output->writeln('<error>Unknow provider</error>');
+        // --
+        $providers = [];
+
+        if ($all == null) {
+            $providers = $this->providerRepository->findAll();
+
+        } else if ($id != null) {
+            $provider = $this->providerRepository->find($id);
+            if ($provider == null) {
+                $output->writeln('<warning>Unknow provider</warning>');
+                return Command::FAILURE;
+            }
+            $providers[] = $provider;
+        } else {
             return Command::FAILURE;
         }
 
-        if ($i == true) {
-            $input = new ArrayInput([
-                'command' => 'app:provider:clear',
-                'id' => $id,
-            ]);
-            $returnCode = $this->getApplication()->doRun($input, $output);
+        foreach($providers as $provider) {
+            if ($i == true) {
+                $input = new ArrayInput([
+                    'command' => 'app:provider:clear',
+                    'id' => $provider->getId(),
+                ]);
+                $returnCode = $this->getApplication()->doRun($input, $output);
+            }
+
+            $this->entityManager->remove($provider);
+            $this->entityManager->flush();
+
+            $output->writeln('<info>✅ Provider removed successfully</info>');
         }
-
-        $this->entityManager->remove($provider);
-
-        $this->entityManager->flush();
-
-        $output->writeln('<info>✅ Provider removed successfully</info>');
 
         return Command::SUCCESS;
     }

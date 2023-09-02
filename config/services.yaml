@@ -60,5 +60,11 @@ services:
     App\Controller\Lines:
         tags: ['controller.service_arguments']
 
+    App\Controller\Notifications:
+        tags: ['controller.service_arguments']
+
+    App\EventListener\ExceptionListener:
+        tags: [kernel.event_listener]
+
     # add more service definitions when explicit configuration is needed
     # please note that last definitions always *replace* previous ones

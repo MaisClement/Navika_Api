@@ -21,6 +21,9 @@ class RouteSub
     #[ORM\JoinColumn(name: "route_id", referencedColumnName: "route_id", nullable: true, onDelete: "CASCADE")]
     private ?Routes $route_id = null;
 
+    #[ORM\Column(columnDefinition: 'ENUM("alert", "all")')]
+    private ?string $type = null;
+
     #[ORM\Column(columnDefinition: 'ENUM("0", "1")')]
     private ?string $monday = null;
 
@@ -73,6 +76,18 @@ class RouteSub
     public function setRouteId(?Routes $route_id): static
     {
         $this->route_id = $route_id;
+
+        return $this;
+    }
+
+    public function getType(): ?string
+    {
+        return $this->type;
+    }
+
+    public function setType(string $type): static
+    {
+        $this->type = $type;
 
         return $this;
     }

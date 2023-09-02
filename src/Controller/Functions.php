@@ -16,6 +16,16 @@ class Functions
         );
     }
 
+    public static function SuccessMessage($http_code, $details = ''){
+        return array(
+            'succes' => array(
+                'code'      =>  (int)       $http_code,
+                'message'   =>  (string)    null, // isset($config->http_code->$http_code) ? $config->http_code->$http_code : "",
+                'details'   =>  (string)    $details == ''               ? "" : $details,
+            )
+        );
+    }
+
     public static function getTransportMode($l){
         $modes = array(
             0 => 'tram',
@@ -218,19 +228,20 @@ class Functions
 
     public static function orderDeparture($array) {
         usort ($array, function($a, $b) {
-
-            if ( isset( $a['stop_date_time']['departure_date_time']) ) {
-                $a = $a['stop_date_time']['departure_date_time'];
-            }
+            
             if ( isset( $a['stop_date_time']['arrival_date_time']) ) {
                 $a = $a['stop_date_time']['arrival_date_time'];
             }
-
-            if ( isset( $b['stop_date_time']['departure_date_time']) ) {
-                $b = $b['stop_date_time']['departure_date_time'];
+            if ( isset( $a['stop_date_time']['departure_date_time']) ) {
+                $a = $a['stop_date_time']['departure_date_time'];
             }
+
+            
             if ( isset( $b['stop_date_time']['arrival_date_time']) ) {
                 $b = $b['stop_date_time']['arrival_date_time'];
+            }
+            if ( isset( $b['stop_date_time']['departure_date_time']) ) {
+                $b = $b['stop_date_time']['departure_date_time'];
             }
         
             if ($a == $b) {

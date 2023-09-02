@@ -7,4 +7,5 @@ return [
     Symfony\Bundle\MakerBundle\MakerBundle::class => ['dev' => true],
     Nelmio\ApiDocBundle\NelmioApiDocBundle::class => ['all' => true],
     Symfony\Bundle\TwigBundle\TwigBundle::class => ['all' => true],
+    Kreait\Firebase\Symfony\Bundle\FirebaseBundle::class => ['all' => true],
 ];

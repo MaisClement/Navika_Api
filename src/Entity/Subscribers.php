@@ -19,7 +19,7 @@ class Subscribers
     private ?string $fcm_token = null;
 
     #[ORM\Column]
-    private ?\DateTimeImmutable $created_at = null;
+    private ?\DateTime $created_at = null;
 
     #[ORM\OneToMany(mappedBy: 'subscriber_id', targetEntity: RouteSub::class)]
     private Collection $routeSubs;
@@ -34,7 +34,7 @@ class Subscribers
         return $this->id;
     }
 
-    public function getFcmToken(): ?string
+    private function getFcmToken(): ?string
     {
         return $this->fcm_token;
     }
@@ -46,12 +46,12 @@ class Subscribers
         return $this;
     }
 
-    public function getCreatedAt(): ?\DateTimeImmutable
+    public function getCreatedAt(): ?\DateTime
     {
         return $this->created_at;
     }
 
-    public function setCreatedAt(\DateTimeImmutable $created_at): static
+    public function setCreatedAt(\DateTime $created_at): static
     {
         $this->created_at = $created_at;
 
