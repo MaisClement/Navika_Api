@@ -229,18 +229,16 @@ class Functions
     public static function orderDeparture($array) {
         usort ($array, function($a, $b) {
             
-            if ( isset( $a['stop_date_time']['arrival_date_time']) ) {
+            if ( $a['stop_date_time']['arrival_date_time'] != "" ) {
                 $a = $a['stop_date_time']['arrival_date_time'];
-            }
-            if ( isset( $a['stop_date_time']['departure_date_time']) ) {
+            } else if ( $a['stop_date_time']['departure_date_time'] != "" ) {
                 $a = $a['stop_date_time']['departure_date_time'];
             }
 
             
-            if ( isset( $b['stop_date_time']['arrival_date_time']) ) {
+            if ( $b['stop_date_time']['arrival_date_time'] != "" ) {
                 $b = $b['stop_date_time']['arrival_date_time'];
-            }
-            if ( isset( $b['stop_date_time']['departure_date_time']) ) {
+            } else if ( $b['stop_date_time']['departure_date_time'] != "" ) {
                 $b = $b['stop_date_time']['departure_date_time'];
             }
         
