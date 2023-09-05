@@ -245,6 +245,7 @@ class Schedules
             }
             //modes
             $json['place']['modes'] = ['nationalrail'];
+            
         } elseif ($provider == 'IDFM') {
             $client = HttpClient::create();
             $response = $client->request('GET', $prim_url, [

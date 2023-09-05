@@ -341,9 +341,6 @@ class Lines
         //--- On regarde si l'arrêt existe bien et on recuppere toutes les lignes
         $objs = Functions::getSchedulesByStop($db, $stop_id, $line_id, date("Y-m-d"), "00:00:00");
 
-        print_r($objs);
-        exit;
-
         $schedules = [];
 
         foreach($objs as $obj) {

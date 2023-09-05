@@ -427,9 +427,9 @@ class Functions
         return date_format($datetime, DATE_ATOM);
     }
 
-    public static function rPrepareTime($dt) {
+    public static function rPrepareTime($dt, $i = false) {
         $time = substr($dt, 0, 2) . ':' . substr($dt, 2, 2) . ':' .substr($dt, 4, 2);
-        return Functions::prepareTime($time);
+        return Functions::prepareTime($time, $i);
     }
 
     public static function getState($call){
@@ -651,17 +651,17 @@ class Functions
                     "lon"           => $stop->stop_point->coord->lon,
                 ),
                 "stop_time" => array(
-                    "departure_time" =>  isset($stop->base_departure_time)    ? Functions::rPrepareTime($stop->base_departure_time) : '',
-                    "arrival_time"   =>  isset($stop->base_arrival_time)      ? Functions::rPrepareTime($stop->base_arrival_time)   : '',
+                    "departure_time" =>  isset($stop->base_departure_time)    ? Functions::rPrepareTime($stop->base_departure_time, true) : '',
+                    "arrival_time"   =>  isset($stop->base_arrival_time)      ? Functions::rPrepareTime($stop->base_arrival_time, true)   : '',
                 ),
                 "disruption" => array(
                     "departure_state"       => (string) $stop->departure_status,
                     "arrival_state"         => (string) $stop->arrival_status,
                     "message"               => (string) "",
-                    "base_departure_time"   => (string) isset($stop->base_departure_time)    !== '' && isset($stop->base_departure_time)    !== '0' ? Functions::rPrepareTime($stop->base_departure_time)    : '',
-                    "departure_time"        => (string) isset($stop->amended_departure_time) !== '' && isset($stop->amended_departure_time) !== '0' ? Functions::rPrepareTime($stop->amended_departure_time) : '',
-                    "base_arrival_time"     => (string) isset($stop->base_arrival_time)      !== '' && isset($stop->base_arrival_time)      !== '0' ? Functions::rPrepareTime($stop->base_arrival_time)      : '',
-                    "arrival_time"          => (string) isset($stop->amended_arrival_time)   !== '' && isset($stop->amended_arrival_time)   !== '0' ? Functions::rPrepareTime($stop->amended_arrival_time)   : '',
+                    "base_departure_time"   => (string) isset($stop->base_departure_time)    !== '' && isset($stop->base_departure_time)    !== '0' ? Functions::rPrepareTime($stop->base_departure_time, true)    : '',
+                    "departure_time"        => (string) isset($stop->amended_departure_time) !== '' && isset($stop->amended_departure_time) !== '0' ? Functions::rPrepareTime($stop->amended_departure_time, true) : '',
+                    "base_arrival_time"     => (string) isset($stop->base_arrival_time)      !== '' && isset($stop->base_arrival_time)      !== '0' ? Functions::rPrepareTime($stop->base_arrival_time, true)      : '',
+                    "arrival_time"          => (string) isset($stop->amended_arrival_time)   !== '' && isset($stop->amended_arrival_time)   !== '0' ? Functions::rPrepareTime($stop->amended_arrival_time, true)   : '',
                     "is-detour"             => $stop->is_detour,
                 ),
             );
@@ -714,10 +714,10 @@ class Functions
             INNER JOIN trips T 
             ON ST.trip_id = T.trip_id
             
-            JOIN calendar C 
+            LEFT JOIN calendar C 
             ON T.service_id = C.service_id
             
-            JOIN calendar_dates CD 
+            LEFT JOIN calendar_dates CD 
             ON (T.service_id = CD.service_id AND CD.date = :date)
             
             WHERE S.parent_station = :stop_id

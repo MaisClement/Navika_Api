@@ -174,11 +174,24 @@ class Notifications
 
         $json = array(
             "id" => $routeSub->getId(),
-
-            "message" => 'Subscription created',
+            "line" => $routeSub->getRouteId()->getRouteId(),
+            "type" => $routeSub->getType(),
+            "days" => array(
+                "monday"    => $routeSub->getMonday()    == "1" ? true : false,
+                "tuesday"   => $routeSub->getTuesday()   == "1" ? true : false,
+                "wednesday" => $routeSub->getWednesday() == "1" ? true : false,
+                "thursday"  => $routeSub->getThursday()  == "1" ? true : false,
+                "friday"    => $routeSub->getFriday()    == "1" ? true : false,
+                "saturday"  => $routeSub->getSaturday()  == "1" ? true : false,
+                "sunday"    => $routeSub->getSunday()    == "1" ? true : false,
+            ),
+            "times" => array(
+                "start_time" => $routeSub->getStartTime()->format('H:i:s'),
+                "end_time" => $routeSub->getEndTime()->format('H:i:s'),
+            ),
         );
 
-        return new JsonResponse(Functions::SuccessMessage(200, 'Subscription created'), 200);
+        return new JsonResponse($json);
     }
     
     /**
@@ -218,13 +231,13 @@ class Notifications
             "line" => $routeSub->getRouteId()->getRouteId(),
             "type" => $routeSub->getType(),
             "days" => array(
-                "monday"    => $routeSub->getMonday(),
-                "tuesday"   => $routeSub->getTuesday(),
-                "wednesday" => $routeSub->getWednesday(),
-                "thursday"  => $routeSub->getThursday(),
-                "friday"    => $routeSub->getFriday(),
-                "saturday"  => $routeSub->getSaturday(),
-                "sunday"    => $routeSub->getSunday(),
+                "monday"    => $routeSub->getMonday()    == "1" ? true : false,
+                "tuesday"   => $routeSub->getTuesday()   == "1" ? true : false,
+                "wednesday" => $routeSub->getWednesday() == "1" ? true : false,
+                "thursday"  => $routeSub->getThursday()  == "1" ? true : false,
+                "friday"    => $routeSub->getFriday()    == "1" ? true : false,
+                "saturday"  => $routeSub->getSaturday()  == "1" ? true : false,
+                "sunday"    => $routeSub->getSunday()    == "1" ? true : false,
             ),
             "times" => array(
                 "start_time" => $routeSub->getStartTime()->format('H:i:s'),
