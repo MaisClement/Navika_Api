@@ -14,6 +14,9 @@ class Trafic
     #[ORM\Column]
     private ?int $id = null;
 
+    #[ORM\Column]
+    private ?string $report_id = null;
+
     #[ORM\Column(length: 255)]
     private ?string $status = null;
 
@@ -45,6 +48,18 @@ class Trafic
     public function getId(): ?int
     {
         return $this->id;
+    }
+
+    public function getReportId(): ?string
+    {
+        return $this->report_id;
+    }
+
+    public function setReportId(string $report_id): static
+    {
+        $this->report_id = $report_id;
+
+        return $this;
     }
 
     public function getStatus(): ?string

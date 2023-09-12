@@ -147,6 +147,7 @@ class Schedules
         $prim_url = 'https://prim.iledefrance-mobilites.fr/marketplace/stop-monitoring?MonitoringRef=STIF:StopPoint:Q:' . $qId . ':';
         $sncf_url = 'https://garesetconnexions-online.azure-api.net/API/PIV/Departures/00' . $qId;
         $sncf_url_api = 'https://api.sncf.com/v1/coverage/sncf/stop_areas/stop_area:SNCF:' . $qId . '/departures?count=30&data_freshness=realtime';
+        $sncf_url_api2 = 'https://api.sncf.com/v1/coverage/sncf/stop_areas/stop_area:SNCF:' . $qId . '/departures?count=30&data_freshness=base_schedule';
 
         // ------------
         //On utilise l'api (differe selon le provider)
@@ -165,6 +166,7 @@ class Schedules
             }
             $content = $response->getContent();
             $results = json_decode($content);
+            
             //SNCF API
             $api_client = HttpClient::create();
             $api_response = $api_client->request('GET', $sncf_url_api, [
@@ -176,11 +178,24 @@ class Schedules
             }
             $api_content = $api_response->getContent();
             $api_results = json_decode($api_content);
+
+            //SNCF API
+            $api_client2 = HttpClient::create();
+            $api_response2 = $api_client2->request('GET', $sncf_url_api2, [
+                'auth_basic' => [$this->params->get('sncf_api_key'), ''],
+            ]);
+            $api_status2 = $api_response2->getStatusCode();
+            if ($api_status2 != 200){
+                return new JsonResponse(Functions::ErrorMessage(520, 'Invalid fetched data'), 520);
+            }
+            $api_content2 = $api_response2->getContent();
+            $api_results2 = json_decode($api_content2);
+
             $departures = [];
             $ungrouped_departures = [];
             foreach ($results as $result) {
 
-                $details = Functions::getApiDetails($api_results, $result->trainNumber);
+                $details = Functions::getApiDetails($api_results, $api_results2, $result->trainNumber);
 
                 $dep = array(
                     "informations" => array(

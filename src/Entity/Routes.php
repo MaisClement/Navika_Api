@@ -268,7 +268,7 @@ class Routes
             $route_id = $this->route_id;
 
             $r = array(
-                "id" => (string) $report->getId(),
+                "id" => (string) $report->getReportId(),
                 "status" => (string) $report->getStatus(),
                 "cause" => (string) $report->getCause(),
                 "category" => (string) $report->getCategory(),

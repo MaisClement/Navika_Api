@@ -8,6 +8,8 @@ use Kreait\Firebase\Messaging\Notification;
 
 class Notify
 {
+    private $messaging;
+
     public function __construct($messaging)
     {
         $this->messaging = $messaging;

@@ -11,6 +11,7 @@ use Doctrine\ORM\Mapping as ORM;
 
 #[ORM\Entity(repositoryClass: TownRepository::class)]
 #[ORM\Index(name: "town_polygon", fields: ["town_polygon"])]
+
 class Town
 {
     #[ORM\Id]

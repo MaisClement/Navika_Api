@@ -71,12 +71,11 @@ class Trafic_IDFM extends Command
         // On crée les messages
         $reports = [];
         foreach ( $results->disruptions as $disruption ) {
-
-            // Loader
             $progressIndicator->advance();
 
             if ( $disruption->status != 'past' ) {
                 $msg = new Trafic();
+                $msg->setReportId  ( $disruption->id );
                 $msg->setStatus    ( $disruption->status );
                 $msg->setCause     ( $disruption->cause );
                 $msg->setCategory  ( $disruption->category );
@@ -92,8 +91,6 @@ class Trafic_IDFM extends Command
 
         // On assigne une ligne aux messages
         foreach ( $results->line_reports as $line ) {
-
-            // Loader
             $progressIndicator->advance();
 
             foreach ( $line->line->links as $link ) {
@@ -114,15 +111,24 @@ class Trafic_IDFM extends Command
             }
         }
 
+//TODO        // On calcule les notifications
+//TODO        $progressIndicator->setMessage('Remove old...');
+//TODO        
+//TODO        $old_messages = $this->traficRepository->findAll();
+//TODO
+//TODO        // Pour tous les old_messages, si 
+//TODO        foreach ($old_messages as $old_message) {
+//TODO            $id = $old_message->getReportId();
+//TODO
+//TODO            if ( isset( $reports[$id] ) ) {
+//TODO                unset( $reports[$id] );
+//TODO            }
+//TODO        }
+//TODO
+
         // On efface les messages existant
-        $progressIndicator->setMessage('Remove old...');
-        
-        $old_messages = $this->traficRepository->findAll();
         foreach ($old_messages as $old_message) {
-
-            // Loader
             $progressIndicator->advance();
-
             $this->entityManager->remove($old_message);
         }
         

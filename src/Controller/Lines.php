@@ -332,16 +332,16 @@ class Lines
         $db = $this->entityManager->getConnection();
 
         //--- On regarde si la requette est cohérente
-        $routes = $this->stopRouteRepository->findBy( ['stop_id' => $stop_id, 'route_id' => $line_id] );
-        if ( count( $routes ) < 1 ) {
+        $routes = $this->stopRouteRepository->findOneBy( ['stop_id' => $stop_id, 'route_id' => $line_id] );
+        if ( $routes == null ) {
             return new JsonResponse(Functions::ErrorMessage(400, 'Nothing where found for this route and stop'), 400);
         }
-
         
-        //--- On regarde si l'arrêt existe bien et on recuppere toutes les lignes
         $objs = Functions::getSchedulesByStop($db, $stop_id, $line_id, date("Y-m-d"), "00:00:00");
 
-        $schedules = [];
+        $json = [];
+        $json['line'] = $routes->getRouteId()->getRoute();
+        $json['line']['schedules'] = [];
 
         foreach($objs as $obj) {
             if ( !isset( $schedules[$obj['direction_id']] ) ) {
@@ -349,12 +349,14 @@ class Lines
             }
 
             $schedules[$obj['direction_id']][] = array(
-                "departure_date_time"       =>  (string)  Functions::prepareTime($obj['departure_time'], true),
-                "direction"                 =>  (string)    Functions::gareFormat($obj['trip_headsign']),
+                "departure_date_time" => (string) Functions::prepareTime($obj['departure_time'], true),
+                "direction"           => (string) Functions::gareFormat($obj['trip_headsign']),
             );
         }
 
-        $json = $schedules;
+        foreach($schedules as $key => $s) {
+            $json['line']['schedules'][] = $schedules[$key];
+        }
 
         return new JsonResponse($json);
     }

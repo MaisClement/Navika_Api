@@ -267,7 +267,6 @@ class GTFS_Update extends Command
         }
 
         foreach ($to_update as $update) {
-
             $tc_provider = $update['provider'];
             $tc_provider->setFlag(2);
             $tc_provider->setUpdatedAt(new DateTime());
