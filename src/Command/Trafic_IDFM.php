@@ -126,6 +126,8 @@ class Trafic_IDFM extends Command
 //TODO        }
 //TODO
 
+        $old_messages = $this->traficRepository->findAll(); 
+
         // On efface les messages existant
         foreach ($old_messages as $old_message) {
             $progressIndicator->advance();
