@@ -249,7 +249,7 @@ class Notifications
     }
     
     /**
-     * Get subscription
+     * Remove subscription
      * 
      * 
      */
@@ -284,5 +284,54 @@ class Notifications
         $this->entityManager->flush();
 
         return new JsonResponse(Functions::SuccessMessage(200, 'Subscription removed'), 200);
+    }
+
+    /**
+     * Remove subscription
+     * 
+     * 
+     */
+    #[Route('/notification/renew', name: 'renew_notification_token', methods: ['POST'])]
+    #[OA\Tag(name: 'Notifications')]
+    #[OA\Parameter(
+        name:"old_token",
+        in:"path",
+        description:"Old FCM Token",
+        required: true,
+        schema: new OA\Schema(type: 'string')
+    )]
+    #[OA\Parameter(
+        name:"new_token",
+        in:"path",
+        description:"New FCM Token",
+        required: true,
+        schema: new OA\Schema(type: 'string')
+    )]
+
+    #[OA\Response(
+        response: 200,
+        description: 'Return near objects'
+    )]
+    #[OA\Response(
+        response: 400,
+        description: 'Bad request'
+    )]
+
+    public function renewNotificationToken(Request $request)
+    {
+        $old_token = $request->request->get('old_token');
+        $new_token = $request->request->get('new_token');
+
+        $subscriber = $this->subscribersRepository->findOneBy(['fcm_token' => $old_token ]);
+
+        if ($subscriber == null) {
+            return new JsonResponse(Functions::ErrorMessage(400, 'Nothing where found for this token'), 400);
+        }
+
+        $subscriber->setFcmToken( $new_token );
+        
+        $this->entityManager->flush();
+
+        return new JsonResponse(Functions::SuccessMessage(200, 'Token updated'), 200);
     }
 }

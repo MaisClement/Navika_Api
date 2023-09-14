@@ -47,7 +47,7 @@ class Show extends Command
             } else {
                 $output->writeln( '   updated: never' );
             }
-            $output->writeln( '');
+            $output->writeln( '' );
         }
         
         return Command::SUCCESS;

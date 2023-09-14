@@ -34,7 +34,7 @@ class Subscribers
         return $this->id;
     }
 
-    private function getFcmToken(): ?string
+    public function getFcmToken(): ?string
     {
         return $this->fcm_token;
     }
