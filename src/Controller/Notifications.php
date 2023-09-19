@@ -166,7 +166,7 @@ class Notifications
         $body = 'Vous serez alerté à chaque perturbation sur votre ligne.';
 
         $notif = new Notify($this->messaging);
-        $notif->sendNotification($token, $title, $body);
+        $notif->sendNotificationToUser($token, $title, $body, []);
 
         //--
 

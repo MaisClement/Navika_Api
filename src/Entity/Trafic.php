@@ -45,6 +45,40 @@ class Trafic
     #[ORM\JoinColumn(name: "route_id", referencedColumnName: "route_id", nullable: false, onDelete: "CASCADE")]
     private ?Routes $route_id = null;
 
+    public function getReport(): ?array
+    {
+        return array(
+            "id" =>         $this->getReportId(),
+            "status" =>     $this->getStatus(),
+            "cause" =>      $this->getCause(),
+            "category" =>   $this->getCategory(),
+            "severity" =>   $this->getSeverity(),
+            "effect" =>     $this->getEffect(),
+            "updated_at" => $this->getUpdatedAt()->format("Y-m-d\TH:i:sP"),
+            "message" =>    array(
+                "title" =>      $this->getTitle(),
+                "text" =>       $this->getText(),
+            ),
+        );
+    }
+
+    public function getReportMessage(): ?array
+    {
+        return array(
+            "id" =>         $this->getReportId(),
+            "type" =>       'report',
+            "line" =>       (string)    $this->getRouteId()->getRouteId(),
+            "status" =>     (string)    $this->getStatus(),
+            "cause" =>      (string)    $this->getCause(),
+            "category" =>   (string)    $this->getCategory(),
+            "severity" =>   (int)       $this->getSeverity(),
+            "effect" =>     (string)    $this->getEffect(),
+            "updated_at" => $this->getUpdatedAt()->format("Y-m-d\TH:i:sP"),
+            "title" =>      (string)    $this->getTitle(),
+            "body" =>       (string)    $this->getText(),
+        );
+    }
+
     public function getId(): ?int
     {
         return $this->id;

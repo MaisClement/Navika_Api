@@ -17,6 +17,7 @@ use Symfony\Component\HttpClient\HttpClient;
 use Kreait\Firebase\Messaging\CloudMessage;
 use Kreait\Firebase\Messaging\Notification;
 use Kreait\Firebase\Contract\Messaging;
+use App\Repository\SubscribersRepository;
 
 use Symfony\Component\Console\Helper\ProgressIndicator;
 
@@ -28,8 +29,9 @@ class Trafic_IDFM extends Command
     private Messaging $messaging;
     private RoutesRepository $routesRepository;
     private TraficRepository $traficRepository;
+    private SubscribersRepository $subscribersRepository;
 
-    public function __construct(EntityManagerInterface $entityManager, ParameterBagInterface $params, Messaging $messaging, RoutesRepository $routesRepository, TraficRepository $traficRepository)
+    public function __construct(EntityManagerInterface $entityManager, ParameterBagInterface $params, Messaging $messaging, RoutesRepository $routesRepository, TraficRepository $traficRepository, SubscribersRepository $subscribersRepository)
     {
         $this->entityManager = $entityManager;
         $this->params = $params;
@@ -37,6 +39,7 @@ class Trafic_IDFM extends Command
         $this->messaging = $messaging;
         $this->routesRepository = $routesRepository;
         $this->traficRepository = $traficRepository;
+        $this->subscribersRepository = $subscribersRepository;
 
         parent::__construct();
     }
@@ -137,39 +140,24 @@ class Trafic_IDFM extends Command
         // On envoie les notification
         foreach($reports as $report) {
 
+            //TOPIC  if ($report->getRouteId() != null) {
+            //TOPIC      $topic = str_replace( ':' , '_', $report->getRouteId()->getRouteId() );
+            //TOPIC      $title = $report->getTitle();
+            //TOPIC      $body = $report->getText();
+            //TOPIC
+            //TOPIC      $notif->sendNotificationToTopic($topic, $title, $body);
+            //TOPIC  }
+            
             if ($report->getRouteId() != null) {
                 foreach ($report->getRouteId()->getRouteSubs() as $sub) {
-    
+                    $progressIndicator->advance();
+
                     // On vérifie que l'on soit ne soit pas un jour interdit
                     $allow = true;
-    
-                    if ( date('w') == '1' && $sub->getMonday()    == '0') {
-                        $allow = false;
-                    }
-                    if ( date('w') == '2' && $sub->getTuesday()   == '0') {
-                        $allow = false;
-                    }
-                    if ( date('w') == '3' && $sub->getWednesday() == '0') {
-                        $allow = false;
-                    }
-                    if ( date('w') == '4' && $sub->getThursday()  == '0') {
-                        $allow = false;
-                    }
-                    if ( date('w') == '5' && $sub->getFriday()    == '0') {
-                        $allow = false;
-                    }
-                    if ( date('w') == '6' && $sub->getSaturday()  == '0') {
-                        $allow = false;
-                    }
-                    if ( date('w') == '0' && $sub->getSunday()    == '0') {
-                        $allow = false;
-                    }
-                    
-
+                   
                     if ($sub->getType() == 'all' && $report->getSeverity() < 3 ) {
                         $allow = false;
-                    }
-                    if ($sub->getType() == 'alert' && $report->getSeverity() < 4 ) {
+                    } else if ($sub->getType() == 'alert' && $report->getSeverity() < 4 ) {
                         $allow = false;
                     }
     
@@ -178,8 +166,11 @@ class Trafic_IDFM extends Command
                         $title = $report->getTitle();
                         $body = $report->getText();
                 
-                        $notif->sendNotification($token, $title, $body);
-                        $output->writeln('✅ Send');
+                        $res = $notif->sendMessage($token, $report->getReportMessage() );
+        
+                        // if ($res == 'NotFound') {
+                        //     $this->entityManager->remove($sub);
+                        // }
                     }
                 }
             }

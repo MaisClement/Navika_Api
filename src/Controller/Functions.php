@@ -327,7 +327,7 @@ class Functions
         } elseif ($cause == 'travaux') {
             return 3;
         } elseif ($status == 'future') {
-            return 4;
+            return 1;
         } elseif (in_array($effect, array('REDUCED_SERVICE', 'SIGNIFICANT_DELAYS', 'DETOUR', 'ADDITIONAL_SERVICE', 'MODIFIED_SERVICE'))) {
             return 4;
         } elseif (in_array($effect, array('NO_SERVICE', 'STOP_MOVED'))) {

@@ -5,6 +5,7 @@ namespace App\Controller;
 use Kreait\Firebase\Contract\Messaging;
 use Kreait\Firebase\Messaging\CloudMessage;
 use Kreait\Firebase\Messaging\Notification;
+use Kreait\Firebase\Exception\Messaging\NotFound;
 
 class Notify
 {
@@ -15,7 +16,7 @@ class Notify
         $this->messaging = $messaging;
     }
  
-    public function sendNotification($fcm_token, $title, $body)
+    public function sendNotificationToUser($fcm_token, $title, $body, $data)
     {
         $notification = Notification::fromArray([
             'title' => $title,
@@ -25,8 +26,28 @@ class Notify
         $message = CloudMessage::withTarget('token', $fcm_token)
             ->withNotification($notification);
 
-        $this->messaging->send($message);
+        $message = $message->withData(['test' => 'test']);
 
+        try {
+            $this->messaging->send($message);
+        } catch (\Exception $e) {
+            print_r($e);
+            echo  "NotFound" ;
+            return 'NotFound';
+        }
+
+        return true;
+    }
+ 
+    public function sendMessage($token, $report)
+    {
+        $message = CloudMessage::fromArray([
+            'token' => $token,
+            'data' => $report, // optional
+        ]);
+    
+        $this->messaging->send($message);
+    
         return true;
     }
 }
