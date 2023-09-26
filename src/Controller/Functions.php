@@ -76,6 +76,14 @@ class Functions
         }
     }
 
+    public static function getJourneyId($links){
+        foreach ($links as $link) {
+            if ($link->rel == 'this_journey') {
+                return base64_encode(substr( $link->href , strpos( $link->href , 'journeys')));
+            }
+        }
+    }
+
     public static function order_line($array) {
         usort ($array, function($a, $b) {
             $type_list = [

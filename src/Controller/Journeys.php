@@ -213,6 +213,7 @@ class Journeys
             $journeys[] = array(
                 "type"                  =>  (string) $result->type,
                 "duration"              =>  (int) $result->duration,
+                "unique_id"             =>  (string) Functions::getJourneyId($result->links),
 
                 "requested_date_time"   => $result->requested_date_time,
                 "departure_date_time"   => $result->departure_date_time,
