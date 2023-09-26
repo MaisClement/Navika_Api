@@ -164,11 +164,11 @@ class Journeys
 
         $url = $this->params->get('prim_url') . '/' . $url;
         
-        $json = $this->getJourneys($url, $request->get('flag'));
+        $json = $this->getJourneys($url, $request->get('flag'), $id);
         return new JsonResponse(['journey' => $json['journeys'][0]]);
     }
 
-    public function getJourneys($url, $flag)
+    public function getJourneys($url, $flag, $uid = null)
     {
         $client = HttpClient::create();        
         $response = $client->request('GET', $url, [
@@ -261,7 +261,7 @@ class Journeys
             $journeys[] = array(
                 "type"                  =>  (string) $result->type,
                 "duration"              =>  (int) $result->duration,
-                "unique_id"             =>  (string) Functions::getJourneyId($result->links),
+                "unique_id"             =>  (string) $uid != null ? $uid : Functions::getJourneyId($result->links),
 
                 "requested_date_time"   => $result->requested_date_time,
                 "departure_date_time"   => $result->departure_date_time,
