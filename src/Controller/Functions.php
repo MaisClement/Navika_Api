@@ -79,9 +79,17 @@ class Functions
     public static function getJourneyId($links){
         foreach ($links as $link) {
             if ($link->rel == 'this_journey') {
-                return base64_encode(substr( $link->href , strpos( $link->href , 'journeys')));
+                return Functions::base64url_encode(substr( $link->href , strpos( $link->href , 'journeys')));
             }
         }
+    }
+
+    public static function base64url_encode($s) {
+        return str_replace(array('+', '/'), array('-', '_'), base64_encode($s));
+    }
+    
+    public static function base64url_decode($s) {
+        return base64_decode(str_replace(array('-', '_'), array('+', '/'), $s));
     }
 
     public static function order_line($array) {

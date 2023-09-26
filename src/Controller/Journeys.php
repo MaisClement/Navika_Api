@@ -34,7 +34,7 @@ class Journeys
      * 
      * Result can be filtered using more filter parameters like "forbidden_id[]" or "forbidden_lines[]"
      */
-    #[Route('/journeys', name: 'get_journeys', methods: ['GET'])]
+    #[Route('/journeys', name: 'get_journeys_search', methods: ['GET'])]
     #[OA\Tag(name: 'Journeys')]
     #[OA\Parameter(
         name:"from",
@@ -89,15 +89,12 @@ class Journeys
         )
     )]
 
-
-
-
     #[OA\Response(
         response: 200,
         description: ''
     )] 
     
-    public function getJourneys(Request $request)
+    public function getJourneysSearch(Request $request)
     {
         $from   = $request->get('from');
         $to     = $request->get('to');
@@ -125,9 +122,54 @@ class Journeys
         $traveler_type = $request->get('traveler_type') ?? 'standard';
 
         $url = $this->params->get('prim_url') . '/journeys?from=' . $from . '&to=' . $to . '&datetime=' . $datetime . '&datetime_represents=' . $datetime_represents . '&traveler_type=' . $traveler_type . '&depth=3&data_freshness=realtime';
-        //echo $url;
-        // $url = urlencode(trim($url));
+        
+        $json = $this->getJourneys($url, $request->get('flag'));
+        return new JsonResponse($json);
+    }
 
+    /**
+     * Get journey
+     * 
+     * Get journey based on a unique_id
+     * 
+     * This endpoint is used to get a journey already searched
+     */
+    #[Route('/journey/{id}', name: 'get_journeys_id', methods: ['GET'])]
+    #[OA\Tag(name: 'Journeys')]
+    #[OA\Parameter(
+        name:"id",
+        in:"path",
+        description:"Journey id",
+        required: true,
+    )]
+
+    #[OA\Response(
+        response: 200,
+        description: ''
+    )] 
+    
+    public function getJourneysId($id, Request $request)
+    {
+        if (!isset($id) || $id == null) {
+            return new JsonResponse(Functions::ErrorMessage(400, 'Journey id seems to be invalid'), 400);
+        }
+
+        $url = Functions::base64url_decode($id);
+
+        if ($url == false) {
+            return new JsonResponse(Functions::ErrorMessage(400, 'Journey id seems to be invalid'), 400);
+        }
+
+        // ------------
+
+        $url = $this->params->get('prim_url') . '/' . $url;
+        
+        $json = $this->getJourneys($url, $request->get('flag'));
+        return new JsonResponse(['journey' => $json['journeys'][0]]);
+    }
+
+    public function getJourneys($url, $flag)
+    {
         $client = HttpClient::create();        
         $response = $client->request('GET', $url, [
             'headers' => [
@@ -179,29 +221,35 @@ class Journeys
                     "departure_date_time"   =>  (string)    $section->departure_date_time,
                     "duration"      =>  (int)       $section->duration,
                     "informations"  => isset($section->display_informations) ? $informations : null,
-                    "from" => array(
-                        "id"        =>  (string)    $section->from->id,
-                        "name"      =>  (string)    $section->from->{$section->from->embedded_type}->name,
-                        "type"      =>  (string)    $section->from->embedded_type,
-                        "distance"  =>  (int)       isset($section->from->distance) !== 0 ? $section->from->distance : 0,
-                        "town"      =>  (string)    Functions::getTownByAdministrativeRegions($section->from->{$section->from->embedded_type}->administrative_regions),
-                        "zip_code"  =>  (string)    substr(Functions::getZipByAdministrativeRegions($section->from->{$section->from->embedded_type}->administrative_regions), 0, 2),
-                        "coord"     => array(
-                            "lat"           =>  (float) $section->from->{$section->from->embedded_type}->coord->lat,
-                            "lon"           =>  (float) $section->from->{$section->from->embedded_type}->coord->lon,
-                        ),
-                    ),
-                    "to" => array(
-                        "id"        =>  (string)    $section->to->id,
-                        "name"      =>  (string)    $section->to->{$section->to->embedded_type}->name,
-                        "type"      =>  (string)    $section->to->embedded_type,
-                        "town"      =>  (string)    Functions::getTownByAdministrativeRegions($section->to->{$section->to->embedded_type}->administrative_regions),
-                        "zip_code"  =>  (string)    substr(Functions::getZipByAdministrativeRegions($section->to->{$section->to->embedded_type}->administrative_regions), 0, 2),
-                        "coord"     => array(
-                            "lat"       =>  (float) $section->to->{$section->to->embedded_type}->coord->lat,
-                            "lon"       =>  (float) $section->to->{$section->to->embedded_type}->coord->lon,
-                        ),
-                    ),
+                    "from" => isset($section->from)
+                        ? array(
+                            "id"        =>  (string)    $section->from->id,
+                            "name"      =>  (string)    $section->from->{$section->from->embedded_type}->name,
+                            "type"      =>  (string)    $section->from->embedded_type,
+                            "distance"  =>  (int)       isset($section->from->distance) !== 0 ? $section->from->distance : 0,
+                            "town"      =>  (string)    !isset($section->from->{$section->from->embedded_type}->administrative_regions) ? '' : Functions::getTownByAdministrativeRegions($section->from->{$section->from->embedded_type}->administrative_regions),
+                            "zip_code"  =>  (string)    !isset($section->from->{$section->from->embedded_type}->administrative_regions) ? '' : substr(Functions::getZipByAdministrativeRegions($section->from->{$section->from->embedded_type}->administrative_regions), 0, 2),
+                            "coord"     => array(
+                                "lat"           =>  (float) $section->from->{$section->from->embedded_type}->coord->lat,
+                                "lon"           =>  (float) $section->from->{$section->from->embedded_type}->coord->lon,
+                            ),
+                        )
+                        : array()
+                    ,
+                    "to" => isset($section->to)
+                        ? array(
+                            "id"        =>  (string)    $section->to->id,
+                            "name"      =>  (string)    $section->to->{$section->to->embedded_type}->name,
+                            "type"      =>  (string)    $section->to->embedded_type,
+                            "town"      =>  (string)    !isset($section->to->{$section->to->embedded_type}->administrative_regions) ? '' : Functions::getTownByAdministrativeRegions($section->to->{$section->to->embedded_type}->administrative_regions),
+                            "zip_code"  =>  (string)    !isset($section->to->{$section->to->embedded_type}->administrative_regions) ? '' : substr(Functions::getZipByAdministrativeRegions($section->to->{$section->to->embedded_type}->administrative_regions), 0, 2),
+                            "coord"     => array(
+                                "lat"       =>  (float) $section->to->{$section->to->embedded_type}->coord->lat,
+                                "lon"       =>  (float) $section->to->{$section->to->embedded_type}->coord->lon,
+                            ),
+                        )
+                        : array()
+                    ,
                     "stop_date_times"   => isset($section->stop_date_times) ? $section->stop_date_times : null,
                     "geojson"           => isset($section->geojson)         ? $section->geojson : null,
                 );
@@ -221,6 +269,7 @@ class Journeys
 
                 "nb_transfers"          =>  (int)    (float) $result->type,
                 "co2_emission"          => $result->co2_emission->value,
+                "car_co2_emission"      => $results->context->car_direct_path->co2_emission->value,
                 "fare"                  => $result->fare->total->value / 100,
                 "distances"             => array(
                     "walking"                  => $result->distances->walking,
@@ -232,10 +281,10 @@ class Journeys
 
         $json["journeys"] = $journeys;
 
-        if ($request->get('flag') != null) {
-            $json["flag"] = (int) $request->get('flag');
+        if ($flag != null) {
+            $json["flag"] = (int) $flag;
         }
 
-        return new JsonResponse($json);
+        return $json;
     }
 }
