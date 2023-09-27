@@ -10,16 +10,21 @@ use Symfony\Component\HttpClient\HttpClient;
 use Symfony\Component\HttpFoundation\Request;
 use App\Controller\Functions;
 use OpenApi\Attributes as OA;
+use App\Repository\RoutesRepository;
 
 class Journeys
 {
     private $entityManager;
     private $params;
 
-    public function __construct(EntityManagerInterface $entityManager, ParameterBagInterface $params)
+    private RoutesRepository $routesRepository;
+
+    public function __construct(EntityManagerInterface $entityManager, ParameterBagInterface $params, RoutesRepository $routesRepository)
     {
         $this->entityManager = $entityManager;
         $this->params = $params;
+
+        $this->routesRepository = $routesRepository;
     }
  
     /**
@@ -194,6 +199,7 @@ class Journeys
                 $informations = [];
                 
                 if (isset($section->display_informations)) {
+                    $route = $this->routesRepository->findOneBy( ['route_id' => "IDFM:" . Functions::idfmFormat( Functions::getLineId($section->links) ) ] );
                     $informations = array(
                         "direction" => array(
                             "id"        =>  (string)    $section->display_informations->direction,
@@ -204,14 +210,7 @@ class Journeys
                         "headsign"      =>  (string)    $section->display_informations->headsign,
                         "description"   =>  (string)    $section->display_informations->description,
                         "message"       =>  (string)    "",
-                        "line"     => array(
-                            "id"         =>  (string)   "IDFM:" . Functions::idfmFormat( Functions::getLineId($section->links) ),
-                            "code"       =>  (string)   $section->display_informations->code,
-                            "name"       =>  (string)   $section->display_informations->network . ' ' . $section->display_informations->name,
-                            "mode"       =>  (string)   $section->display_informations->physical_mode,
-                            "color"      =>  (string)   $section->display_informations->color,
-                            "text_color" =>  (string)   $section->display_informations->text_color,
-                        ),
+                        "line"     => $route->getRouteAndTrafic(),
                     );
                 }
                 $sections[] = array(
