@@ -126,7 +126,9 @@ class Journeys
 
         $traveler_type = $request->get('traveler_type') ?? 'standard';
 
-        $url = $this->params->get('prim_url') . '/journeys?from=' . $from . '&to=' . $to . '&datetime=' . $datetime . '&datetime_represents=' . $datetime_represents . '&traveler_type=' . $traveler_type . '&depth=3&data_freshness=realtime';
+        // forbidden_mode
+
+        $url = $this->params->get('prim_url') . '/journeys?from=' . $from . '&to=' . $to . '&datetime=' . $datetime . '&datetime_represents=' . $datetime_represents . '&traveler_type=' . $traveler_type . '&depth=3&data_freshness=realtime' . Functions::getForbiddenModesURI( $request->get('forbidden_mode') );
         
         $json = $this->getJourneys($url, $request->get('flag'));
         return new JsonResponse($json);

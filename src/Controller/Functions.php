@@ -156,7 +156,7 @@ class Functions
                 'commercial_mode:LongDistanceTrain',
                 'commercial_mode:Metro',
                 'metro',
-                'commercial_mode:RailShuttle',
+                'commercial_mode:Shuttle',
                 'commercial_mode:Tramway',
                 'tram',
                 'commercial_mode:Bus',
@@ -753,7 +753,8 @@ class Functions
             
             WHERE S.parent_station = :stop_id
                 AND T.route_id = :route_id
-                AND departure_time >= :departure_time
+                AND ST.departure_time >= :departure_time
+                AND ST.pickup_type != '1'
                 AND (
                     (C.start_date <= :date
                         AND C.end_date >= :date
@@ -867,5 +868,52 @@ class Functions
         $req->bindValue("route_id", $route_id);
         $results = $req->executeQuery();
         return $results->fetchAll();
+    }
+
+    public static function getForbiddenModesURI($forbidden_modes) {
+        if ($forbidden_modes == null) {
+            return '';
+        }
+        $uri = [];
+        $all = [
+            'rail' => [
+                'physical_mode:Train',
+                'physical_mode:LocalTrain',
+                'physical_mode:LongDistanceTrain',
+                'physical_mode:RailShuttle',
+                'physical_mode:RapidTransit',
+            ],
+            'metro' => [
+                'physical_mode:Metro',
+                'physical_mode:Shuttle',
+            ],
+            'tram' => [
+                'physical_mode:Tramway',
+            ],
+            'bus' => [
+                'physical_mode:Bus',
+                'physical_mode:BusRapidTransit',
+                'physical_mode:Coach',
+            ],
+            'cable' => [
+                'physical_mode:SuspendedCableCar',
+            ],
+            'funicular' => [
+                'physical_mode:Funicular',
+            ]
+        ];
+
+        foreach($forbidden_modes as $forbidden_mode) {
+            foreach( $all[$forbidden_mode] as $el) {
+                $uri[] = $el;
+            }
+        }
+
+        return '&forbidden_uris[]=' . implode('&forbidden_uris[]=', $uri);
+        
+    // physical_mode:Air
+    // physical_mode:Boat
+    // physical_mode:Ferry
+
     }
 }

@@ -30,10 +30,7 @@ php bin/console app:provider:add "tc" "LIA"	        "LiA - Le Havre"	      "Le H
 php bin/console app:provider:add "tc" "FILBLEU"	    "Fil Bleu - Tours"	      "Mobilités de Touraine"	        "638157af7f6b7cd00e2908e1"
 php bin/console app:provider:add "tc" "TBM"	        "TBM - Bordeaux"	      "Bordeaux Métropole"	            "61a025b3a95e6e49a64ed7a0"
 
-
 php bin/console app:provider:add "tc" "TISSEO"	    "Tisséo - Toulouse"	      "Toulouse Métropole"	            "56b0c2fba3a7294d39b88a86"
-
-
 
 php bin/console app:provider:add "bikes" "VELIB"     "Vélib‘"       "Paris"            "https://velib-metropole-opendata.smoove.pro/opendata/Velib_Metropole/" 
 php bin/console app:provider:add "bikes" "VELOV"     "Vélo‘v"       "Lyon"             "https://transport.data.gouv.fr/gbfs/lyon/" 
