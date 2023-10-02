@@ -900,6 +900,10 @@ class Functions
             ],
             'funicular' => [
                 'physical_mode:Funicular',
+            ],
+            'boat' => [
+                'physical_mode:Boat',
+                'physical_mode:Ferry',
             ]
         ];
 

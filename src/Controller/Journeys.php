@@ -90,7 +90,7 @@ class Journeys
         description:"Forbidden transportation mode",
         schema: new OA\Schema( 
             type: "array", 
-            items: new OA\Items(type: "string", enum: ['rail', 'metro', 'tram', 'bus', 'cable', 'funicular'])
+            items: new OA\Items(type: "string", enum: ['rail', 'metro', 'tram', 'bus', 'cable', 'funicular', 'boat'])
         )
     )]
 

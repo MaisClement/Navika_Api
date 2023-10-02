@@ -153,7 +153,7 @@ class Trafic_IDFM extends Command
                     $progressIndicator->advance();
 
                     // On vérifie que l'on soit ne soit pas un jour interdit
-                    $allow = true;
+                    $allow = true;  
                    
                     if ($sub->getType() == 'all' && $report->getSeverity() < 3 ) {
                         $allow = false;
@@ -165,12 +165,14 @@ class Trafic_IDFM extends Command
                         $token = $sub->getSubscriberId()->getFcmToken();
                         $title = $report->getTitle();
                         $body = $report->getText();
-                
-                        $res = $notif->sendMessage($token, $report->getReportMessage() );
-        
-                        // if ($res == 'NotFound') {
-                        //     $this->entityManager->remove($sub);
-                        // }
+
+                        try {
+                            $notif->sendMessage($token, $report->getReportMessage() );
+                        } catch (\Exception $e) {
+                            if (get_class($e) == 'Kreait\Firebase\Exception\Messaging\NotFound') {
+                                $this->entityManager->remove($sub);
+                            }
+                        }
                     }
                 }
             }

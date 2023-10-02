@@ -35,19 +35,15 @@ class Notify
             echo  "NotFound" ;
             return 'NotFound';
         }
-
-        return true;
     }
  
     public function sendMessage($token, $report)
     {
         $message = CloudMessage::fromArray([
             'token' => $token,
-            'data' => $report, // optional
+            'data' => $report,
         ]);
     
         $this->messaging->send($message);
-    
-        return true;
     }
 }
