@@ -2,10 +2,8 @@
 
 namespace App\Controller;
 
-use Kreait\Firebase\Contract\Messaging;
 use Kreait\Firebase\Messaging\CloudMessage;
 use Kreait\Firebase\Messaging\Notification;
-use Kreait\Firebase\Exception\Messaging\NotFound;
 
 class Notify
 {

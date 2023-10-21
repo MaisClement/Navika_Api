@@ -13,18 +13,14 @@ use Symfony\Component\Routing\Annotation\Route;
 
 class Trafic
 {
-    private $entityManager;
     private $params;
     
-    private TraficRepository $traficRepository;
     private RoutesRepository $routesRepository;
 
-    public function __construct(EntityManagerInterface $entityManager, ParameterBagInterface $params, TraficRepository $traficRepository, RoutesRepository $routesRepository)
+    public function __construct(ParameterBagInterface $params, RoutesRepository $routesRepository)
     {
-        $this->entityManager = $entityManager;
         $this->params = $params;
 
-        $this->traficRepository = $traficRepository;
         $this->routesRepository = $routesRepository;
     }
 

@@ -96,7 +96,7 @@ class VehicleJourney
                         "departure_time" => (string) isset($result->departure_time) !== '' && (string) isset($result->departure_time) !== '0' ? Functions::prepareTime($result->departure_time, true) : "",
                         "arrival_time" => (string) isset($result->arrival_time) !== '' && (string) isset($result->arrival_time) !== '0' ? Functions::prepareTime($result->arrival_time, true) : "",
                     ),
-                    "disruption" => null ?? null,
+                    "disruption" => null,
                 );
                 $order++;
             }
@@ -152,8 +152,8 @@ class VehicleJourney
                         "lon" => $obj['stop_lon'],
                     ),
                     "stop_time" => array(
-                        "departure_time" => (string) Functions::prepareTime($obj['departure_time'], true) ?? "",
-                        "arrival_time" => (string) Functions::prepareTime($obj['arrival_time'], true) ?? '',
+                        "departure_time" => Functions::prepareTime($obj['departure_time'], true) ?? "",
+                        "arrival_time" => Functions::prepareTime($obj['arrival_time'], true) ?? '',
                     ),
                     "disruption" => null,
                 );

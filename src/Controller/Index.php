@@ -3,26 +3,22 @@
 namespace App\Controller;
 
 use App\Repository\MessagesRepository;
-use Doctrine\ORM\EntityManagerInterface;
-use Symfony\Component\HttpFoundation\JsonResponse;
-use Symfony\Component\Routing\Annotation\Route;
-use Symfony\Component\HttpClient\HttpClient;
-use Symfony\Component\HttpFoundation\Request;
-use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
 use OpenApi\Attributes as OA;
+use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
+use Symfony\Component\HttpClient\HttpClient;
+use Symfony\Component\HttpFoundation\JsonResponse;
+use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\Routing\Annotation\Route;
 
 class Index
 {
-
-    private $entityManager;
     private $params;
 
     private MessagesRepository $messagesRepository;
 
 
-    public function __construct(EntityManagerInterface $entityManager, ParameterBagInterface $params, MessagesRepository $messagesRepository)
+    public function __construct(ParameterBagInterface $params, MessagesRepository $messagesRepository)
     {
-        $this->entityManager = $entityManager;
         $this->params = $params;
 
         $this->messagesRepository = $messagesRepository;
@@ -155,7 +151,7 @@ class Index
             "app"         => array(
                 "current_version"      =>  (string)       $app_version,
                 "lastest_version"      =>  (string)       $this->params->get('app.version.lastest'),
-                "support"              =>  (bool)       $support !== '' && $support !== '0' ? true : false,
+                "support"              =>  (bool)         $support != '' && $support != '0' ? true : false,
             ),
             "message"     => $messages,
         );

@@ -6,8 +6,6 @@ use App\Controller\Functions;
 use App\Repository\RoutesRepository;
 use App\Repository\StopRouteRepository;
 use App\Repository\StopsRepository;
-use App\Repository\StopTimesRepository;
-use App\Repository\TripsRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
 use Symfony\Component\HttpClient\HttpClient;
@@ -25,7 +23,7 @@ class Schedules
     private StopsRepository $stopsRepository;
     private RoutesRepository $routesRepository;
     
-    public function __construct(EntityManagerInterface $entityManager, StopRouteRepository $stopRouteRepository, TripsRepository $tripsRepository, StopTimesRepository $stopTimesRepository, StopsRepository $stopsRepository, ParameterBagInterface $params, RoutesRepository $routesRepository)
+    public function __construct(EntityManagerInterface $entityManager, StopRouteRepository $stopRouteRepository, StopsRepository $stopsRepository, ParameterBagInterface $params, RoutesRepository $routesRepository)
     {        
         $this->entityManager = $entityManager;
         $this->params = $params;
@@ -195,7 +193,7 @@ class Schedules
             $ungrouped_departures = [];
             foreach ($results as $result) {
 
-                $details = Functions::getApiDetails($api_results, $api_results2, $result->trainNumber);
+                $details = Functions::getApiDetails($api_results, [], $result->trainNumber);
 
                 $dep = array(
                     "informations" => array(

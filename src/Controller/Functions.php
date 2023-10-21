@@ -416,29 +416,29 @@ class Functions
     }
 
     public static function prepareTime($dt, $i = false){
-        if ($dt == '') return '';
+        if ($dt == '') return null;
 
         $datetime = $i == true ? date_create($dt, timezone_open('Europe/Paris')) : date_create($dt, timezone_open('UTC'));
         
-        if (is_bool($datetime)) {
-            $timeArray = explode(':', $dt);
+        if (!is_bool($datetime)) return null;
+
+        $timeArray = explode(':', $dt);
     
-            $hours = (int) $timeArray[0];
-            $minutes = (int) $timeArray[1];
-            $seconds = (int) $timeArray[2];
-    
-            // 'cause GTFS time can be 25:00:00
-            $hours %= 24;
-            $minutes %= 60;
-            $seconds %= 60;
-    
-            $datetime = new DateTime();
-            $datetime->setTime($hours, $minutes, $seconds);
-            $datetime->setTimezone(new DateTimeZone('Europe/Paris'));
-    
-            if ($timeArray[0] >= 24) {
-                $datetime->modify('+1 day');
-            }
+        $hours = (int) $timeArray[0];
+        $minutes = (int) $timeArray[1];
+        $seconds = (int) $timeArray[2];
+
+        // 'cause GTFS time can be 25:00:00
+        $hours %= 24;
+        $minutes %= 60;
+        $seconds %= 60;
+
+        $datetime = new DateTime();
+        $datetime->setTime($hours, $minutes, $seconds);
+        $datetime->setTimezone(new DateTimeZone('Europe/Paris'));
+
+        if ($timeArray[0] >= 24) {
+            $datetime->modify('+1 day');
         }
         return date_format($datetime, DATE_ATOM);
     }
@@ -507,12 +507,7 @@ class Functions
         $departures = [];
         
         foreach ($api_results2->departures as $api_result) {
-            if ($api_result->display_informations->headsign == $name) {
-                $stop_date_time = $api_result->stop_date_time;
-                $direction = $api_result->display_informations->direction;
-    
-                $links = $api_result->display_informations->links;
-    
+            if ($api_result->display_informations->headsign == $name) {    
                 $departures = array(
                     "id"                =>  (string)    Functions::getSNCFid($api_result->links),
                     "name"              =>  (string)    $api_result->display_informations->headsign,
@@ -523,11 +518,6 @@ class Functions
         }
         foreach ($api_results->departures as $api_result) {
             if ($api_result->display_informations->headsign == $name) {
-                $stop_date_time = $api_result->stop_date_time;
-                $direction = $api_result->display_informations->direction;
-    
-                $links = $api_result->display_informations->links;
-    
                 $departures = array(
                     "id"                =>  (string)    Functions::getSNCFid($api_result->links),
                     "name"              =>  (string)    $api_result->display_informations->headsign,
@@ -826,22 +816,6 @@ class Functions
         $req->bindValue("trip_id", $trip_id);
         $results = $req->executeQuery();
         return $results->fetchAll();
-    }
-  
-    public static function setTownForStopRoute($db, $stop_id, $town)
-    {
-        $req = $db->prepare("
-            UPDATE stop_route SR 
-
-            SET SR.town_id = ?,
-                SR.town_name = ?,
-                SR.town_query_name = ?,
-                SR.zip_code = ?
-                
-            WHERE SR.stop_id = ?;
-        ");
-        $req->execute( [$town->getTownId(), $town->getTownName(), $town->getTownName(), $town->getZipCode(), $stop_id] );
-        return $req;
     }
 
     public static function getStopsOfRoutes($em, $route_id)

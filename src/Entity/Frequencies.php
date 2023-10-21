@@ -42,12 +42,12 @@ class Frequencies
         return $this;
     }
 
-    public function getTripId(): ?string
+    public function getTripId(): ?Trips
     {
         return $this->trip_id;
     }
 
-    public function setTripId(string $trip_id): static
+    public function setTripId(Trips $trip_id): static
     {
         $this->trip_id = $trip_id;
 

@@ -16,15 +16,13 @@ use Symfony\Component\Console\Helper\ProgressBar;
 class GBFS extends Command
 {
     private $entityManager;
-    private $params;
 
     private StationsRepository $stationsRepository;
     private ProviderRepository $providerRepository;
     
-    public function __construct(EntityManagerInterface $entityManager, ParameterBagInterface $params, StationsRepository $stationsRepository, ProviderRepository $providerRepository)
+    public function __construct(EntityManagerInterface $entityManager, StationsRepository $stationsRepository, ProviderRepository $providerRepository)
     {
         $this->entityManager = $entityManager;
-        $this->params = $params;
 
         $this->providerRepository = $providerRepository;
         $this->stationsRepository = $stationsRepository;
@@ -101,10 +99,10 @@ class GBFS extends Command
                         foreach ($feeds as $feed) {
                             if ($feed->name == 'station_information') {
                                 $_client = HttpClient::create();
-                                $_response = $client->request('GET', $feed->url);
+                                $_response = $_client->request('GET', $feed->url);
                                 $_status = $response->getStatusCode();
 
-                                if ($status !== 200) {
+                                if ($_status != 200) {
                                     return Command::FAILURE;
                                 }
 

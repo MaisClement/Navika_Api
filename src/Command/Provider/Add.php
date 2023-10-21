@@ -14,14 +14,12 @@ use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
 class Add extends Command
 {
     private $entityManager;
-    private $params;
 
     private ProviderRepository $providerRepository;
 
-    public function __construct(EntityManagerInterface $entityManager, ParameterBagInterface $params, ProviderRepository $providerRepository, )
+    public function __construct(EntityManagerInterface $entityManager, ProviderRepository $providerRepository, )
     {
         $this->entityManager = $entityManager;
-        $this->params = $params;
 
         $this->providerRepository = $providerRepository;
 
@@ -47,7 +45,7 @@ class Add extends Command
         $name = $input->getArgument('name');
         $area = $input->getArgument('area');
         $url = $input->getArgument('url');
-        $flag = 0;
+        $flag = '0';
 
         // Check if provider is not already registered
         $providers = $this->providerRepository->Find($id);

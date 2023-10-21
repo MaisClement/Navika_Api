@@ -18,16 +18,14 @@ use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
 class SNCF_Stops extends Command
 {
     private $entityManager;
-    private $params;
 
     private ProviderRepository $providerRepository;
     private StopsRepository $stopsRepository;
     private RoutesRepository $routesRepository;
 
-    public function __construct(EntityManagerInterface $entityManager, ParameterBagInterface $params, ProviderRepository $providerRepository, StopsRepository $stopsRepository, RoutesRepository $routesRepository)
+    public function __construct(EntityManagerInterface $entityManager, ProviderRepository $providerRepository, StopsRepository $stopsRepository, RoutesRepository $routesRepository)
     {
         $this->entityManager = $entityManager;
-        $this->params = $params;
 
         $this->providerRepository = $providerRepository;
         $this->stopsRepository = $stopsRepository;

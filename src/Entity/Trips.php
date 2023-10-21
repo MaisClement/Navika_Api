@@ -73,12 +73,12 @@ class Trips
         return $this;
     }
 
-    public function getRouteId(): ?string
+    public function getRouteId(): ?Routes
     {
         return $this->route_id;
     }
 
-    public function setRouteId(string $route_id): static
+    public function setRouteId(Routes $route_id): static
     {
         $this->route_id = $route_id;
 

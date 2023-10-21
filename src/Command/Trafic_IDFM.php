@@ -14,8 +14,6 @@ use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
 use Symfony\Component\HttpClient\HttpClient;
-use Kreait\Firebase\Messaging\CloudMessage;
-use Kreait\Firebase\Messaging\Notification;
 use Kreait\Firebase\Contract\Messaging;
 use App\Repository\SubscribersRepository;
 
@@ -29,9 +27,8 @@ class Trafic_IDFM extends Command
     private Messaging $messaging;
     private RoutesRepository $routesRepository;
     private TraficRepository $traficRepository;
-    private SubscribersRepository $subscribersRepository;
 
-    public function __construct(EntityManagerInterface $entityManager, ParameterBagInterface $params, Messaging $messaging, RoutesRepository $routesRepository, TraficRepository $traficRepository, SubscribersRepository $subscribersRepository)
+    public function __construct(EntityManagerInterface $entityManager, ParameterBagInterface $params, Messaging $messaging, RoutesRepository $routesRepository, TraficRepository $traficRepository)
     {
         $this->entityManager = $entityManager;
         $this->params = $params;
@@ -39,7 +36,6 @@ class Trafic_IDFM extends Command
         $this->messaging = $messaging;
         $this->routesRepository = $routesRepository;
         $this->traficRepository = $traficRepository;
-        $this->subscribersRepository = $subscribersRepository;
 
         parent::__construct();
     }

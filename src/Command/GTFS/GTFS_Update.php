@@ -21,19 +21,15 @@ use ZipArchive;
 class GTFS_Update extends Command
 {
     private $entityManager;
-    private $params;
 
     private ProviderRepository $providerRepository;
-    private RoutesRepository $routesRepository;
     private AgencyRepository $agencyRepository;
 
-    public function __construct(EntityManagerInterface $entityManager, ParameterBagInterface $params, ProviderRepository $providerRepository, RoutesRepository $routesRepository, AgencyRepository $agencyRepository)
+    public function __construct(EntityManagerInterface $entityManager, ProviderRepository $providerRepository, AgencyRepository $agencyRepository)
     {
         $this->entityManager = $entityManager;
-        $this->params = $params;
 
         $this->providerRepository = $providerRepository;
-        $this->routesRepository = $routesRepository;
         $this->agencyRepository = $agencyRepository;
 
         parent::__construct();
@@ -296,7 +292,7 @@ class GTFS_Update extends Command
                     }
                 }
             }
-            $tc_provider->setFlag(1);
+            $tc_provider->setFlag('1');
             $tc_provider->setUpdatedAt(new DateTime());
             $this->entityManager->flush();
             $progressBar->clear();
@@ -304,7 +300,7 @@ class GTFS_Update extends Command
 
         foreach ($to_update as $update) {
             $tc_provider = $update['provider'];
-            $tc_provider->setFlag(2);
+            $tc_provider->setFlag('2');
             $tc_provider->setUpdatedAt(new DateTime());
             $this->entityManager->flush();
         }

@@ -15,12 +15,10 @@ use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
 class Town_Init extends Command
 {
     private $entityManager;
-    private $params;
     
-    public function __construct(EntityManagerInterface $entityManager, ParameterBagInterface $params)
+    public function __construct(EntityManagerInterface $entityManager)
     {
         $this->entityManager = $entityManager;
-        $this->params = $params;
 
         parent::__construct();
     }

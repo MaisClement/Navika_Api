@@ -65,36 +65,36 @@ class FareRules
         return $this;
     }
 
-    public function getRouteId(): ?string
+    public function getRouteId(): ?Routes
     {
         return $this->route_id;
     }
 
-    public function setRouteId(?string $route_id): static
+    public function setRouteId(?Routes $route_id): static
     {
         $this->route_id = $route_id;
 
         return $this;
     }
 
-    public function getOriginId(): ?string
+    public function getOriginId(): ?Stops
     {
         return $this->origin_id;
     }
 
-    public function setOriginId(?string $origin_id): static
+    public function setOriginId(?Stops $origin_id): static
     {
         $this->origin_id = $origin_id;
 
         return $this;
     }
 
-    public function getDestinationId(): ?string
+    public function getDestinationId(): ?Stops
     {
         return $this->destination_id;
     }
 
-    public function setDestinationId(?string $destination_id): static
+    public function setDestinationId(?Stops $destination_id): static
     {
         $this->destination_id = $destination_id;
 

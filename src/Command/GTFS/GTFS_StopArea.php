@@ -14,14 +14,12 @@ use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
 class GTFS_StopArea extends Command
 {
     private $entityManager;
-    private $params;
 
     private StopsRepository $stopsRepository;
 
-    public function __construct(EntityManagerInterface $entityManager, ParameterBagInterface $params, StopsRepository $stopsRepository)
+    public function __construct(EntityManagerInterface $entityManager, StopsRepository $stopsRepository)
     {
         $this->entityManager = $entityManager;
-        $this->params = $params;
 
         $this->stopsRepository = $stopsRepository;
 

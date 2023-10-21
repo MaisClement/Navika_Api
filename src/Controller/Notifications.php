@@ -3,36 +3,31 @@
 namespace App\Controller;
 
 use App\Controller\Functions;
-use App\Entity\Subscribers;
 use App\Entity\RouteSub;
+use App\Entity\Subscribers;
 use App\Repository\RoutesRepository;
-use App\Repository\SubscribersRepository;
 use App\Repository\RouteSubRepository;
-use Doctrine\ORM\EntityManagerInterface;
+use App\Repository\SubscribersRepository;
 use DateTime;
+use Doctrine\ORM\EntityManagerInterface;
+use Kreait\Firebase\Contract\Messaging;
 use OpenApi\Attributes as OA;
-use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Routing\Annotation\Route;
-use Kreait\Firebase\Messaging\CloudMessage;
-use Kreait\Firebase\Messaging\Notification;
-use Kreait\Firebase\Contract\Messaging;
 
 class Notifications
 {
     private $entityManager;
-    private $params;
 
     private Messaging $messaging;
     private RoutesRepository $routesRepository;
     private RouteSubRepository $routeSubRepository;
     private SubscribersRepository $subscribersRepository;
     
-    public function __construct(EntityManagerInterface $entityManager, ParameterBagInterface $params, Messaging $messaging, RoutesRepository $routesRepository, RouteSubRepository $routeSubRepository, SubscribersRepository $subscribersRepository)
+    public function __construct(EntityManagerInterface $entityManager, Messaging $messaging, RoutesRepository $routesRepository, RouteSubRepository $routeSubRepository, SubscribersRepository $subscribersRepository)
     {
         $this->entityManager = $entityManager;
-        $this->params = $params;
         
         $this->messaging = $messaging;
         $this->routesRepository = $routesRepository;

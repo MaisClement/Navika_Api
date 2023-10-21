@@ -50,12 +50,12 @@ class FareAttributes
         return $this;
     }
 
-    public function getFareId(): ?string
+    public function getFareId(): ?FareRules
     {
         return $this->fare_id;
     }
 
-    public function setFareId(string $fare_id): static
+    public function setFareId(FareRules $fare_id): static
     {
         $this->fare_id = $fare_id;
 
@@ -110,12 +110,12 @@ class FareAttributes
         return $this;
     }
 
-    public function getAgencyId(): ?int
+    public function getAgencyId(): ?Agency
     {
         return $this->agency_id;
     }
 
-    public function setAgencyId(int $agency_id): static
+    public function setAgencyId(Agency $agency_id): static
     {
         $this->agency_id = $agency_id;
 

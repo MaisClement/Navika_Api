@@ -12,12 +12,10 @@ use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
 class GTFS_StopRoute extends Command
 {
     private $entityManager;
-    private $params;
 
-    public function __construct(EntityManagerInterface $entityManager, ParameterBagInterface $params)
+    public function __construct(EntityManagerInterface $entityManager)
     {
         $this->entityManager = $entityManager;
-        $this->params = $params;
 
         parent::__construct();
     }

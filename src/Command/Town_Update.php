@@ -17,15 +17,13 @@ use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
 class Town_Update extends Command
 {
     private $entityManager;
-    private $params;
 
     private StopsRepository $stopsRepository;
     private TownRepository $townRepository;
 
-    public function __construct(EntityManagerInterface $entityManager, ParameterBagInterface $params, StopsRepository $stopsRepository, TownRepository $townRepository)
+    public function __construct(EntityManagerInterface $entityManager, StopsRepository $stopsRepository, TownRepository $townRepository)
     {
         $this->entityManager = $entityManager;
-        $this->params = $params;
 
         $this->stopsRepository = $stopsRepository;
         $this->townRepository = $townRepository;

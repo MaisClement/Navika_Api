@@ -14,17 +14,11 @@ use Symfony\Component\Routing\Annotation\Route;
 
 class Near
 {
-    private $entityManager;
-    private $params;
-
     private StopRouteRepository $stopRouteRepository;
     private StationsRepository $stationsRepository;
     
-    public function __construct(EntityManagerInterface $entityManager, ParameterBagInterface $params, StopRouteRepository $stopRouteRepository, StationsRepository $stationsRepository)
+    public function __construct(StopRouteRepository $stopRouteRepository, StationsRepository $stationsRepository)
     {
-        $this->entityManager = $entityManager;
-        $this->params = $params;
-        
         $this->stopRouteRepository = $stopRouteRepository;
         $this->stationsRepository = $stationsRepository;
     }

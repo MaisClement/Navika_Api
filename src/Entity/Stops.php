@@ -241,12 +241,12 @@ class Stops
         return $this;
     }
 
-    public function getLevelId(): ?int
+    public function getLevelId(): ?Levels
     {
         return $this->level_id;
     }
 
-    public function setLevelId(int $level_id): static
+    public function setLevelId(Levels $level_id): static
     {
         $this->level_id = $level_id;
 

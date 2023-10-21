@@ -77,7 +77,7 @@ class Places
         $lat = $request->get('lat');
         $lon = $request->get('lon');
 
-        if ( ( is_string($query) && $query != "" ) && $lat != null && $lon != null ) {
+        if ( ( is_string($request->get('q')) && $query != "" ) && $lat != null && $lon != null ) {
             $query = $q;
             $query = urldecode(trim($query));
             $url = $this->params->get('prim_url') . '/places?q=' . $query . '&from' . $lon . ';' . $lat . '=&depth=2';
@@ -85,12 +85,12 @@ class Places
         } else if ( $lat != null && $lon != null ) {
             $url = $this->params->get('prim_url') . '/coord/' . $lon . ';' . $lat . '/places_nearby?depth=2&distance=1000';
             $search_type = 2;
-        } else if ( is_string($query) && $query != "" ) {
+        } else if ( is_string($request->get('q')) && $query != "" ) {
             $query = $q;
             $query = urldecode(trim($query));
             $url = $this->params->get('prim_url') . '/places?q=' . $query . '&depth=2';
             $search_type = 1;
-        } else if ( is_string($query) ) {
+        } else if ( is_string($request->get('q')) ) {
             $json["places"] = [];
             if ($request->get('flag') != null) {
                 $json["flag"] = (int) $request->get('flag');

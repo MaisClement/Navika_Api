@@ -708,24 +708,4 @@ class Provider
     {
         return $this->trafics;
     }
-
-    public function addTrafic(Trafic $trafic): static
-    {
-        if (!$this->trafics->contains($trafic)) {
-            $this->trafics->add($trafic);
-            $trafic->setProviderId($this);
-        }
-
-        return $this;
-    }
-
-    public function removeTrafic(Trafic $trafic): static
-    {
-        // set the owning side to null (unless already changed)
-        if ($this->trafics->removeElement($trafic) && $trafic->getProviderId() === $this) {
-            $trafic->setProviderId(null);
-        }
-
-        return $this;
-    }
 }

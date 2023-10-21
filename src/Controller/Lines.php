@@ -7,8 +7,6 @@ use App\Controller\Functions;
 use App\Repository\RoutesRepository;
 use App\Repository\StopRouteRepository;
 use App\Repository\AgencyRepository;
-use App\Repository\StopsRepository;
-use App\Repository\TraficRepository;
 use OpenApi\Attributes as OA;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\HttpFoundation\JsonResponse;
@@ -24,7 +22,7 @@ class Lines
     private StopRouteRepository $stopRouteRepository;
     private AgencyRepository $agencyRepository;
     
-    public function __construct(EntityManagerInterface $entityManager, TraficRepository $traficRepository, RoutesRepository $routesRepository, StopRouteRepository $stopRouteRepository, AgencyRepository $agencyRepository, StopsRepository $stopsRepository, ParameterBagInterface $params)
+    public function __construct(EntityManagerInterface $entityManager, RoutesRepository $routesRepository, StopRouteRepository $stopRouteRepository, AgencyRepository $agencyRepository, ParameterBagInterface $params)
     {
         $this->entityManager = $entityManager;
         $this->params = $params;
@@ -342,6 +340,7 @@ class Lines
         $json = [];
         $json['line'] = $routes->getRouteId()->getRoute();
         $json['line']['schedules'] = [];
+        $schedules = [];
 
         foreach($objs as $obj) {
             if ( !isset( $schedules[$obj['direction_id']] ) ) {

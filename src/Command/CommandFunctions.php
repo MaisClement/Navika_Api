@@ -57,31 +57,6 @@ class CommandFunctions
         return $req;
     }
 
-    public static function clearProviderData($db, $provider_id)
-    {
-        $req = $db->prepare("
-            DELETE FROM attributions    WHERE provider_id = ?;
-            DELETE FROM translations    WHERE provider_id = ?;
-            DELETE FROM feed_info       WHERE provider_id = ?;
-            DELETE FROM frequencies     WHERE provider_id = ?;
-            DELETE FROM fare_attributes WHERE provider_id = ?;
-            DELETE FROM fare_rules      WHERE provider_id = ?;
-            DELETE FROM stop_times      WHERE provider_id = ?;
-            DELETE FROM pathways        WHERE provider_id = ?;
-            DELETE FROM transfers       WHERE provider_id = ?;
-            DELETE FROM stops           WHERE provider_id = ?;
-            DELETE FROM levels          WHERE provider_id = ?;
-            DELETE FROM trips           WHERE provider_id = ?;
-            DELETE FROM shapes          WHERE provider_id = ?;
-            DELETE FROM calendar_dates  WHERE provider_id = ?;
-            DELETE FROM calendar        WHERE provider_id = ?;
-            DELETE FROM routes          WHERE provider_id = ?;
-            DELETE FROM agency          WHERE provider_id = ?;
-        ");
-        $req->execute(array($provider_id, $provider_id, $provider_id, $provider_id, $provider_id, $provider_id, $provider_id, $provider_id, $provider_id, $provider_id, $provider_id, $provider_id, $provider_id, $provider_id, $provider_id, $provider_id, $provider_id));
-        return $req;
-    }
-
     public static function clearProviderDataInTable($db, $table, $provider_id, $fast)
     {
         if ($fast) {

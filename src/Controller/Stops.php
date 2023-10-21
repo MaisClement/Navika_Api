@@ -12,17 +12,11 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Routing\Annotation\Route;
 
 class Stops
-{
-    private $entityManager;
-    private $params;
-    
+{    
     private StopRouteRepository $stopRouteRepository;
     
-    public function __construct(EntityManagerInterface $entityManager, ParameterBagInterface $params, StopRouteRepository $stopRouteRepository)
+    public function __construct(StopRouteRepository $stopRouteRepository)
     {
-        $this->entityManager = $entityManager;
-        $this->params = $params;
-        
         $this->stopRouteRepository = $stopRouteRepository;
     }
     
@@ -139,7 +133,7 @@ class Stops
         $lat = $request->get('lat');
         $lon = $request->get('lon');
 
-        if ( ( is_string($query) && $query != "" ) && $lat != null && $lon != null ) {
+        if ( ( is_string($request->get('q')) && $query != "" ) && $lat != null && $lon != null ) {
             $search_type = 3;
             $stops1 = $this->stopRouteRepository->findByQueryName( $query );
             $stops2 = $this->stopRouteRepository->findByTownName( $query );
@@ -147,12 +141,12 @@ class Stops
         } else if ( $lat != null && $lon != null ) {
             $search_type = 2;
             $stops = $this->stopRouteRepository->findByNearbyLocation($lat, $lon, 5000);
-        } else if ( is_string($query) && $query != "" ) {
+        } else if ( is_string($request->get('q')) && $query != "" ) {
             $search_type = 1;
             $stops1 = $this->stopRouteRepository->findByQueryName( $query );
             $stops2 = $this->stopRouteRepository->findByTownName( $query );
             $stops = array_merge($stops1, $stops2);
-        } else if ( is_string($query) ) {
+        } else if ( is_string($request->get('q')) ) {
             $json["places"] = [];
             if ($request->get('flag') != null) {
                 $json["flag"] = (int) $request->get('flag');

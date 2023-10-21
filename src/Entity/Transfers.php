@@ -40,24 +40,24 @@ class Transfers
         return $this;
     }
 
-    public function getFromStopId(): ?string
+    public function getFromStopId(): ?Stops 
     {
         return $this->from_stop_id;
     }
 
-    public function setFromStopId(string $from_stop_id): static
+    public function setFromStopId(Stops $from_stop_id): static
     {
         $this->from_stop_id = $from_stop_id;
 
         return $this;
     }
 
-    public function getToStopId(): ?string
+    public function getToStopId(): ?Stops 
     {
         return $this->to_stop_id;
     }
 
-    public function setToStopId(string $to_stop_id): static
+    public function setToStopId(Stops $to_stop_id): static
     {
         $this->to_stop_id = $to_stop_id;
 

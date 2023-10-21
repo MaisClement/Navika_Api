@@ -16,14 +16,12 @@ use Symfony\Component\Console\Helper\ProgressIndicator;
 class Clear extends Command
 {
     private $entityManager;
-    private $params;
 
     private ProviderRepository $providerRepository;
 
-    public function __construct(EntityManagerInterface $entityManager, ParameterBagInterface $params, ProviderRepository $providerRepository)
+    public function __construct(EntityManagerInterface $entityManager, ProviderRepository $providerRepository)
     {
         $this->entityManager = $entityManager;
-        $this->params = $params;
 
         $this->providerRepository = $providerRepository;
 

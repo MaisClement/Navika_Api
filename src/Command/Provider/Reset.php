@@ -13,14 +13,12 @@ use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
 class Reset extends Command
 {
     private $entityManager;
-    private $params;
 
     private ProviderRepository $providerRepository;
 
-    public function __construct(EntityManagerInterface $entityManager, ParameterBagInterface $params, ProviderRepository $providerRepository)
+    public function __construct(EntityManagerInterface $entityManager, ProviderRepository $providerRepository)
     {
         $this->entityManager = $entityManager;
-        $this->params = $params;
 
         $this->providerRepository = $providerRepository;
 
@@ -39,7 +37,7 @@ class Reset extends Command
         $providers = $this->providerRepository->findAll();
 
         foreach ($providers as $provider) {
-            $provider->setFlag(0);
+            $provider->setFlag('0');
             $provider->setUpdatedAt(new DateTime());
             $this->entityManager->flush();
         }
