@@ -55,6 +55,7 @@ class GBFS extends Command
         foreach($stations as $station) {
             $this->entityManager->remove($station);
         }
+        $this->entityManager->flush();
 
         $progressBar->advance();
 
