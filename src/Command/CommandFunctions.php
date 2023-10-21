@@ -82,11 +82,20 @@ class CommandFunctions
         return $req;
     }
 
-    public static function clearProviderDataInTable($db, $table, $provider_id)
+    public static function clearProviderDataInTable($db, $table, $provider_id, $fast)
     {
-        $req = $db->prepare("
-            DELETE FROM $table    WHERE provider_id = ?;
-        ");
+        if ($fast) {
+            $req = $db->prepare("
+                DELETE FROM $table
+                WHERE provider_id = ?
+                ORDER BY `id` DESC;
+            ");
+        } else {
+            $req = $db->prepare("
+                DELETE FROM $table
+                WHERE provider_id = ?;
+            ");
+        }
         $req->execute(array($provider_id));
         return $req;
     }
@@ -108,6 +117,43 @@ class CommandFunctions
         ");
         $req->execute();
         return $req;
+    }
+
+    public static function splitFile($dir, $provider, $type)
+    {
+        $file = $dir . '/' . $provider . '/' . $type . '.txt';
+
+        // Read the CSV file
+        $csvData = file($file, FILE_IGNORE_NEW_LINES);
+
+        $linesPerFile = 30000;
+
+        $header = array_shift($csvData);
+
+        $splitCount = 1;
+        $currentSplit = [];
+
+        foreach ($csvData as $line) {
+            $currentSplit[] = $line;
+
+            if (count($currentSplit) === $linesPerFile) {
+                CommandFunctions::writeSplitFile($file, $type, $splitCount, $header, $currentSplit);
+                $currentSplit = [];
+                $splitCount++;
+            }
+        }
+
+        if (!empty($currentSplit)) {
+            CommandFunctions::writeSplitFile($file, $type, $splitCount, $header, $currentSplit);
+        }
+
+        return $splitCount;
+    }
+
+    public static function writeSplitFile($originalFilePath, $type, $splitNumber, $header, $data)
+    {
+        $splitFilePath = pathinfo($originalFilePath, PATHINFO_DIRNAME) . '/' . $type . '_' . $splitNumber . '.txt';
+        file_put_contents($splitFilePath, $header . PHP_EOL . implode(PHP_EOL, $data));
     }
 
     public static function insertFile($db, $type, $path, $header, $set, $sep = ',')

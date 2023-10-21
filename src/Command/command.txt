@@ -67,6 +67,8 @@ php bin/console app:provider:reset
 
 php bin/console app:provider:clear
 
+php bin/console app:provider:remove --all
+
 // ------
 php bin/console app:provider:remove LIA
 */2 * * * * php /var/www/Navika/bin/console app:trafic:update

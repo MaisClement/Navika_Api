@@ -12,16 +12,19 @@ use Doctrine\ORM\Mapping as ORM;
 
 class StopTimes
 {
+    #[ORM\Id]
+    #[ORM\GeneratedValue]
+    #[ORM\Column]
+    private ?int $id = null;
+
     #[ORM\ManyToOne(inversedBy: 'stopTimes')]
     #[ORM\JoinColumn(name: "provider_id", nullable: true, onDelete: "CASCADE")]
     private ?Provider $provider_id = null;
 
-    #[ORM\Id]
     #[ORM\ManyToOne(inversedBy: 'stopTimes')]
     #[ORM\JoinColumn(name: "trip_id", referencedColumnName: "trip_id", nullable: true, onDelete: "CASCADE")]
     private ?Trips $trip_id = null;
 
-    #[ORM\Id]
     #[ORM\ManyToOne(inversedBy: 'stopTimes')]
     #[ORM\JoinColumn(name: "stop_id", referencedColumnName: "stop_id", nullable: true, onDelete: "CASCADE")]
     private ?Stops $stop_id = null;

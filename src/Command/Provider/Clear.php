@@ -95,7 +95,7 @@ class Clear extends Command
             foreach ($tables as $table) {
                 $progressIndicator->advance();
                 $progressIndicator->setMessage("Clearing $table...");
-                CommandFunctions::clearProviderDataInTable($db, $table, $provider->getId());
+                CommandFunctions::clearProviderDataInTable($db, $table, $provider->getId(), false);
             }
             $this->entityManager->flush();
             $output->writeln('<info>✅ Provider data cleared successfully</info>');
