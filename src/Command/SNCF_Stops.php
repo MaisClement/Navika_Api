@@ -128,7 +128,7 @@ class SNCF_Stops extends Command
                                 $stop = new Stops();
                                 $stop->setProviderId($provider);
                                 $stop->setStopId($id);
-                                $stop->setStopCode($row[27]);
+                                $stop->setStopCode($row[22]);
                                 $stop->setStopName($row[4]);
                                 $stop->setStopLat(isset($row[11]) ? $row[11] : '');
                                 $stop->setStopLon(isset($row[10]) ? $row[10] : '');
