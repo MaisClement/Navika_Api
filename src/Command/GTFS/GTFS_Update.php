@@ -350,6 +350,9 @@ class GTFS_Update extends Command
         CommandFunctions::generateQueryRoute($db);
 
         $output->writeln('Finished');
+        
+        // Monitoring
+        file_get_contents('https://betteruptime.com/api/v1/heartbeat/SrRkcBMzc4AgsXXzzZa2qFDa');
 
         return Command::SUCCESS;
     }
