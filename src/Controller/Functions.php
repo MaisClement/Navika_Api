@@ -420,25 +420,25 @@ class Functions
 
         $datetime = $i == true ? date_create($dt, timezone_open('Europe/Paris')) : date_create($dt, timezone_open('UTC'));
         
-        if (!is_bool($datetime)) return '';
-
-        $timeArray = explode(':', $dt);
+        if (is_bool($datetime)) {
+            $timeArray = explode(':', $dt);
     
-        $hours = (int) $timeArray[0];
-        $minutes = (int) $timeArray[1];
-        $seconds = (int) $timeArray[2];
-
-        // 'cause GTFS time can be 25:00:00
-        $hours %= 24;
-        $minutes %= 60;
-        $seconds %= 60;
-
-        $datetime = new DateTime();
-        $datetime->setTime($hours, $minutes, $seconds);
-        $datetime->setTimezone(new DateTimeZone('Europe/Paris'));
-
-        if ($timeArray[0] >= 24) {
-            $datetime->modify('+1 day');
+            $hours = (int) $timeArray[0];
+            $minutes = (int) $timeArray[1];
+            $seconds = (int) $timeArray[2];
+    
+            // 'cause GTFS time can be 25:00:00
+            $hours %= 24;
+            $minutes %= 60;
+            $seconds %= 60;
+    
+            $datetime = new DateTime();
+            $datetime->setTime($hours, $minutes, $seconds);
+            $datetime->setTimezone(new DateTimeZone('Europe/Paris'));
+    
+            if ($timeArray[0] >= 24) {
+                $datetime->modify('+1 day');
+            }
         }
         return date_format($datetime, DATE_ATOM);
     }
