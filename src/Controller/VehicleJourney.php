@@ -152,8 +152,8 @@ class VehicleJourney
                         "lon" => $obj['stop_lon'],
                     ),
                     "stop_time" => array(
-                        "departure_time" => Functions::prepareTime($obj['departure_time'], true) ?? "",
-                        "arrival_time" => Functions::prepareTime($obj['arrival_time'], true) ?? '',
+                        "departure_time" => Functions::prepareTime($obj['departure_time'], true),
+                        "arrival_time" => Functions::prepareTime($obj['arrival_time'], true),
                     ),
                     "disruption" => null,
                 );

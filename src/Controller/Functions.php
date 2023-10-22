@@ -416,11 +416,11 @@ class Functions
     }
 
     public static function prepareTime($dt, $i = false){
-        if ($dt == '') return null;
+        if ($dt == '') return '';
 
         $datetime = $i == true ? date_create($dt, timezone_open('Europe/Paris')) : date_create($dt, timezone_open('UTC'));
         
-        if (!is_bool($datetime)) return null;
+        if (!is_bool($datetime)) return '';
 
         $timeArray = explode(':', $dt);
     
