@@ -334,22 +334,38 @@ class Lines
         if ( $routes == null ) {
             return new JsonResponse(Functions::ErrorMessage(400, 'Nothing where found for this route and stop'), 400);
         }
+
+        $_terminus = Functions::getTerminusForLine($db, $routes->getRouteId());
+
+        $terminus = [];
+        foreach($_terminus as $terminu) {
+            $terminus[] = array(
+                "id"      =>  (String)    $terminu['stop_id'],
+                "name"    =>  (String)    $terminu['stop_name'],
+            );
+        }
         
         $objs = Functions::getSchedulesByStop($db, $stop_id, $line_id, date("Y-m-d"), "00:00:00");
 
         $json = [];
         $json['line'] = $routes->getRouteId()->getRoute();
+        $json['line']['terminus'] = $terminus;
         $json['line']['schedules'] = [];
         $schedules = [];
 
         foreach($objs as $obj) {
+
+
+            $o = Functions::getLastStopOfTrip($db, $obj['trip_id'])[0];
+            
             if ( !isset( $schedules[$obj['direction_id']] ) ) {
                 $schedules[$obj['direction_id']] = [];
             }
-
             $schedules[$obj['direction_id']][] = array(
                 "departure_date_time" => (string) Functions::prepareTime($obj['departure_time'], true),
                 "direction"           => (string) Functions::gareFormat($obj['trip_headsign']),
+                "stop_name"           => (string) Functions::gareFormat($o['stop_name']),
+                "id"             => (string) $obj['trip_id'],
             );
         }
 

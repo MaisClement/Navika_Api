@@ -388,7 +388,8 @@ class Functions
             "Gare de",
             "Gare d'"
         ];
-    
+
+        $id = preg_replace('/- quai \d+/', '', $id);
         $id = str_replace($search, '', $id);
         $id = trim( $id );
         return ucfirst($id);
@@ -767,6 +768,31 @@ class Functions
         $req->bindValue("route_id", $route_id);
         $req->bindValue("stop_id", $stop_id);
         $req->bindValue("departure_time", $departure_time);
+        $results = $req->executeQuery();
+        return $results->fetchAll();
+    }
+
+    public static function getLastStopOfTrip($em, $trip_id){    
+        $req = $em->prepare("
+            SELECT S2.*
+            FROM trips T
+
+            JOIN stop_times ST 
+            ON T.trip_id = ST.trip_id
+
+            JOIN stops S
+            ON ST.stop_id = S.stop_id
+
+            JOIN stops S2
+            ON S.parent_station = S2.stop_id
+
+            WHERE T.trip_id = :trip_id
+
+            ORDER BY ST.stop_sequence DESC
+            LIMIT 1;
+      
+        ");
+        $req->bindValue("trip_id", $trip_id);
         $results = $req->executeQuery();
         return $results->fetchAll();
     }
