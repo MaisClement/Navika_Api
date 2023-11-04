@@ -329,6 +329,13 @@ class Lines
     {
         $db = $this->entityManager->getConnection();
 
+        $date = $request->get('date');
+
+        if (!Functions::isValidDateYMD($date)) {
+            return new JsonResponse(Functions::ErrorMessage(400, 'Invalid date, please ensure date format is Y-m-d'), 400);
+        }
+
+
         //--- On regarde si la requette est cohérente
         $routes = $this->stopRouteRepository->findOneBy( ['stop_id' => $stop_id, 'route_id' => $line_id] );
         if ( $routes == null ) {
@@ -345,7 +352,7 @@ class Lines
             );
         }
         
-        $objs = Functions::getSchedulesByStop($db, $stop_id, $line_id, date("Y-m-d"), "00:00:00");
+        $objs = Functions::getSchedulesByStop($db, $stop_id, $line_id, $date, "00:00:00");
 
         $json = [];
         $json['line'] = $routes->getRouteId()->getRoute();

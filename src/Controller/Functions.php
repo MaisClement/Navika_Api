@@ -416,6 +416,12 @@ class Functions
         return $line;
     }
 
+    public static function isValidDateYMD($date) {
+        $format = 'Y-m-d';
+        $dateTime = DateTime::createFromFormat($format, $date);
+        return $dateTime && $dateTime->format($format) === $date;
+    }
+
     public static function prepareTime($dt, $i = false){
         if ($dt == '') return '';
 
