@@ -295,6 +295,10 @@ class Routes
                 $trafic['reports']['current_trafic'][] = $r;
             }
         }
+        $trafic['reports']['future_work'] = Functions::order_reports( $trafic['reports']['future_work'] );
+        $trafic['reports']['current_work'] = Functions::order_reports( $trafic['reports']['current_work'] );
+        $trafic['reports']['current_trafic'] = Functions::order_reports( $trafic['reports']['current_trafic'] );
+
         return $trafic;
     }
 

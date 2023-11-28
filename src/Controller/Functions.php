@@ -92,6 +92,18 @@ class Functions
         return base64_decode(str_replace(array('-', '_'), array('+', '/'), $s));
     }
 
+    public static function order_reports($array) {
+        usort ($array, function($a, $b) {
+
+            if ($a["severity"] != $b["severity"]) {
+                return ($a["severity"] < $b["severity"]) ? 1 : -1;
+            }
+            
+            return ($a["updated_at"] < $b["updated_at"]) ? 1 : -1;
+        });
+        return $array;
+    }
+
     public static function order_line($array) {
         usort ($array, function($a, $b) {
             $type_list = [
