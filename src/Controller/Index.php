@@ -43,7 +43,7 @@ class Index
 
     #[OA\Response(
         response: 200,
-        description: ''
+        description: 'OK'
     )] 
     
     public function getIndex(Request $request)

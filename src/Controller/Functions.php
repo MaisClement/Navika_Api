@@ -133,9 +133,9 @@ class Functions
                 return +1;
             }
         
-            if ($a == 'TER') {
+            if ($a['name'] == 'TER') {
                 return +1;
-            } elseif ($b == 'TER') {
+            } elseif ($b['name'] == 'TER') {
                 return -1;
             }
         
@@ -389,8 +389,10 @@ class Functions
     }
 
     public static function gareFormat($id){
+        // return $id;
         $allowed_name = [
-            "Gare de l'Est"
+            "Gare de l'Est",
+            "Gare de Lyon"
         ];
     
         if (in_array($id, $allowed_name))
@@ -402,6 +404,8 @@ class Functions
         ];
 
         $id = preg_replace('/- quai \d+/', '', $id);
+        $id = preg_replace('/\([^)]+\)/', '', $id);
+        $id = str_replace('Gare des', 'Les', $id);
         $id = str_replace($search, '', $id);
         $id = trim( $id );
         return ucfirst($id);
@@ -433,6 +437,38 @@ class Functions
         $dateTime = DateTime::createFromFormat($format, $date);
         return $dateTime && $dateTime->format($format) === $date;
     }
+
+    public static function isToday($date) {
+        $today = new DateTime("today");
+        
+        $format = 'Y-m-d';
+        $dateTime = DateTime::createFromFormat($format, $date);
+        $dateTime->setTime( 0, 0, 0 );
+
+        $interval = $today->diff($dateTime);
+        $diffDays = $interval->days;
+
+        return $diffDays == 0;
+    }
+
+    public static function addRealTime($stop_name, $dt, $real_time) {
+        foreach($real_time as $el) {
+            if ($el['stop_name'] == $stop_name && Functions::isSameTime($el['date_time']['base_departure_date_time'], $dt) ) {
+                return $el['date_time'];
+            } 
+        }
+        return null;
+    }
+
+    public static function isSameTime($timestamp1, $timestamp2) {
+        $timezone1 = new DateTimeZone('UTC');
+        $timezone2 = new DateTimeZone('Europe/Paris');
+      
+        $date1 = new DateTime($timestamp1, $timezone1);
+        $date2 = new DateTime($timestamp2, $timezone2);
+      
+        return $date1 == $date2;
+      }
 
     public static function prepareTime($dt, $i = false){
         if ($dt == '') return '';
@@ -725,6 +761,22 @@ class Functions
         }
     }
 
+    public static function getParentId($em, $id) {
+        $req = $em->prepare("
+            SELECT parent_station
+            FROM stops
+            WHERE stop_id = :stop_id;
+        ");
+        $req->bindValue( "stop_id", $id );
+        $results = $req->executeQuery();
+
+        try {
+            return $results->fetchAll()[0]['parent_station'];
+        } catch(\Exception) {
+            return $id;
+        }
+    }
+
     public static function getTerminusForLine($em, \App\Entity\Routes $route){    
         $req = $em->prepare("
             SELECT DISTINCT S2.stop_name, S2.stop_id
@@ -784,6 +836,51 @@ class Functions
         ");
         $req->bindValue("date", $date);
         $req->bindValue("route_id", $route_id);
+        $req->bindValue("stop_id", $stop_id);
+        $req->bindValue("departure_time", $departure_time);
+        $results = $req->executeQuery();
+        return $results->fetchAll();
+    }
+
+    public static function getSchedules($em, $stop_id, $date, $departure_time){    
+        $req = $em->prepare("
+            SELECT DISTINCT ST.trip_id, ST.departure_time, ST.arrival_time, T.*
+            FROM stops S
+            
+            INNER JOIN stop_times ST 
+            ON S.stop_id = ST.stop_id
+            
+            INNER JOIN trips T 
+            ON ST.trip_id = T.trip_id
+            
+            LEFT JOIN calendar C 
+            ON T.service_id = C.service_id
+            
+            LEFT JOIN calendar_dates CD 
+            ON (T.service_id = CD.service_id AND CD.date = :date)
+            
+            WHERE S.parent_station = :stop_id
+                AND ST.departure_time >= :departure_time
+                AND ST.pickup_type != '1'
+                AND (
+                    (C.start_date <= :date
+                        AND C.end_date >= :date
+                        AND (
+                            DATE_FORMAT(:date, '%w') = '1' AND C.monday = '1'
+                            OR DATE_FORMAT(:date, '%w') = '2' AND C.tuesday = '1'
+                            OR DATE_FORMAT(:date, '%w') = '3' AND C.wednesday = '1'
+                            OR DATE_FORMAT(:date, '%w') = '4' AND C.thursday = '1'
+                            OR DATE_FORMAT(:date, '%w') = '5' AND C.friday = '1'
+                            OR DATE_FORMAT(:date, '%w') = '6' AND C.saturday = '1'
+                            OR DATE_FORMAT(:date, '%w') = '0' AND C.sunday = '1'
+                        ) 
+                        AND (CD.exception_type <> '2' OR CD.exception_type IS NULL)
+                    )
+                    OR CD.exception_type = '1' 
+                )
+            ORDER BY ST.departure_time
+        ");
+        $req->bindValue("date", $date);
         $req->bindValue("stop_id", $stop_id);
         $req->bindValue("departure_time", $departure_time);
         $results = $req->executeQuery();

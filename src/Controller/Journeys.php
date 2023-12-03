@@ -96,7 +96,7 @@ class Journeys
 
     #[OA\Response(
         response: 200,
-        description: ''
+        description: 'OK'
     )] 
     
     public function getJourneysSearch(Request $request)
@@ -152,7 +152,7 @@ class Journeys
 
     #[OA\Response(
         response: 200,
-        description: ''
+        description: 'OK'
     )] 
     
     public function getJourneysId($id, Request $request)
@@ -201,7 +201,9 @@ class Journeys
                 $informations = [];
                 
                 if (isset($section->display_informations)) {
+                    
                     $route = $this->routesRepository->findOneBy( ['route_id' => "IDFM:" . Functions::idfmFormat( Functions::getLineId($section->links) ) ] );
+
                     $informations = array(
                         "direction" => array(
                             "id"        =>  (string)    $section->display_informations->direction,
@@ -212,7 +214,7 @@ class Journeys
                         "headsign"      =>  (string)    $section->display_informations->headsign,
                         "description"   =>  (string)    $section->display_informations->description,
                         "message"       =>  (string)    "",
-                        "line"     => $route->getRouteAndTrafic(),
+                        "line"     => $route != null ? $route->getRouteAndTrafic() : [],
                     );
                 }
                 $sections[] = array(

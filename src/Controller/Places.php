@@ -58,7 +58,7 @@ class Places
 
     #[OA\Response(
         response: 200,
-        description: ''
+        description: 'OK'
     )]    
     #[OA\Response(
         response: 400,

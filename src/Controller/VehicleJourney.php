@@ -39,7 +39,7 @@ class VehicleJourney
 
     #[OA\Response(
         response: 200,
-        description: ''
+        description: 'OK'
     )]
 
     public function getVehicleJourneys($id, Request $request)

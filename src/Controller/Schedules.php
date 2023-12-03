@@ -65,7 +65,7 @@ class Schedules
 
     #[OA\Response(
         response: 200,
-        description: ''
+        description: 'OK'
     )]
  
     public function getSchedules($id, Request $request)
@@ -290,7 +290,8 @@ class Schedules
                     $destination_ref = 'IDFM:' . Functions::idfmFormat( $result->MonitoredVehicleJourney->DestinationRef->value );
                     if (!isset($direction[$destination_ref])) {
 
-                        $dir = $this->stopsRepository->findStopById( $destination_ref );
+                        $dir = Functions::getParentId($db, $destination_ref);
+                        $dir = $this->stopsRepository->findStopById( $dir );
                         
                         if ($dir != null && $dir->getStopName() != null) {
                             $direction[$destination_ref] = Functions::gareFormat( $dir->getStopName() );

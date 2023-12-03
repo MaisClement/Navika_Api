@@ -5,10 +5,12 @@ namespace App\Controller;
 use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
 use App\Controller\Functions;
 use App\Repository\RoutesRepository;
+use App\Repository\StopsRepository;
 use App\Repository\StopRouteRepository;
 use App\Repository\AgencyRepository;
 use OpenApi\Attributes as OA;
 use Doctrine\ORM\EntityManagerInterface;
+use Symfony\Component\HttpClient\HttpClient;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Routing\Annotation\Route;
@@ -19,15 +21,17 @@ class Lines
     private $params;
 
     private RoutesRepository $routesRepository;
+    private StopsRepository $stopsRepository;
     private StopRouteRepository $stopRouteRepository;
     private AgencyRepository $agencyRepository;
     
-    public function __construct(EntityManagerInterface $entityManager, RoutesRepository $routesRepository, StopRouteRepository $stopRouteRepository, AgencyRepository $agencyRepository, ParameterBagInterface $params)
+    public function __construct(EntityManagerInterface $entityManager, RoutesRepository $routesRepository, StopsRepository $stopsRepository, StopRouteRepository $stopRouteRepository, AgencyRepository $agencyRepository, ParameterBagInterface $params)
     {
         $this->entityManager = $entityManager;
         $this->params = $params;
 
         $this->routesRepository = $routesRepository;
+        $this->stopsRepository = $stopsRepository;
         $this->stopRouteRepository = $stopRouteRepository;
         $this->agencyRepository = $agencyRepository;
     }
@@ -90,7 +94,7 @@ class Lines
 
     #[OA\Response(
         response: 200,
-        description: ''
+        description: 'OK'
     )]    
     #[OA\Response(
         response: 400,
@@ -204,7 +208,7 @@ class Lines
 
     #[OA\Response(
         response: 200,
-        description: ''
+        description: 'OK'
     )]    
     #[OA\Response(
         response: 400,
@@ -318,7 +322,7 @@ class Lines
 
     #[OA\Response(
         response: 200,
-        description: ''
+        description: 'OK'
     )]    
     #[OA\Response(
         response: 400,
@@ -331,15 +335,59 @@ class Lines
 
         $date = $request->get('date');
 
+        //--- On regarde si la requette est cohérente
         if (!Functions::isValidDateYMD($date)) {
             return new JsonResponse(Functions::ErrorMessage(400, 'Invalid date, please ensure date format is Y-m-d'), 400);
         }
-
-
-        //--- On regarde si la requette est cohérente
+        
         $routes = $this->stopRouteRepository->findOneBy( ['stop_id' => $stop_id, 'route_id' => $line_id] );
         if ( $routes == null ) {
             return new JsonResponse(Functions::ErrorMessage(400, 'Nothing where found for this route and stop'), 400);
+        }
+
+        $real_time = [];
+        if (Functions::isToday($date) && str_contains($line_id , 'IDFM:')) {
+            $qId = Functions::idfmFormat( $stop_id );
+            $prim_url = 'https://prim.iledefrance-mobilites.fr/marketplace/stop-monitoring?MonitoringRef=STIF:StopPoint:Q:' . $qId . ':';
+            
+            $client = HttpClient::create();
+            $response = $client->request('GET', $prim_url, [
+                'headers' => [
+                    'apiKey' => $this->params->get('prim_api_key'),
+                ],
+            ]);
+            $status = $response->getStatusCode();
+            if ($status != 200){
+                return new JsonResponse(Functions::ErrorMessage(520, 'Invalid fetched data'), 520);
+            }
+            $content = $response->getContent();
+            $results = json_decode($content);
+            $results = $results->Siri->ServiceDelivery->StopMonitoringDelivery[0]->MonitoredStopVisit;
+            
+            foreach ($results as $result) {
+                if (!isset($result->MonitoredVehicleJourney->MonitoredCall)) {
+                    return new JsonResponse(Functions::ErrorMessage(520, 'Invalid fetched data'), 520);
+                }
+        
+                $l = 'IDFM:' . Functions::idfmFormat( $result->MonitoredVehicleJourney->LineRef->value );
+                
+                if ($l == $line_id) {
+                    $call = $result->MonitoredVehicleJourney->MonitoredCall;
+
+                    $destination_ref = 'IDFM:' . Functions::idfmFormat( $result->MonitoredVehicleJourney->DestinationRef->value );
+                    $dir = Functions::getParentId($db, $destination_ref);
+                    $dir = $this->stopsRepository->findStopById( $dir );
+                    
+                    if ($dir != null) {
+                        $dir = Functions::gareFormat( $dir->getStopName() );
+                    
+                        $real_time[] = [
+                            "stop_name" => $dir,
+                            "date_time" => Functions::getStopDateTime($call)
+                        ];
+                    }
+                }
+            }
         }
 
         $_terminus = Functions::getTerminusForLine($db, $routes->getRouteId());
@@ -361,19 +409,24 @@ class Lines
         $schedules = [];
 
         foreach($objs as $obj) {
-
-
             $o = Functions::getLastStopOfTrip($db, $obj['trip_id'])[0];
             
             if ( !isset( $schedules[$obj['direction_id']] ) ) {
                 $schedules[$obj['direction_id']] = [];
             }
-            $schedules[$obj['direction_id']][] = array(
+
+            // if base_departure_date_time == departure_date_time && stop_name == stop_name
+
+            $el = array(
                 "departure_date_time" => (string) Functions::prepareTime($obj['departure_time'], true),
                 "direction"           => (string) Functions::gareFormat($obj['trip_headsign']),
                 "stop_name"           => (string) Functions::gareFormat($o['stop_name']),
-                "id"             => (string) $obj['trip_id'],
+                "id"                  => (string) $obj['trip_id'],
             );
+
+            $el['date_time'] = Functions::addRealTime($el['stop_name'], $el['departure_date_time'], $real_time);
+
+            $schedules[$obj['direction_id']][] = $el;
         }
 
         foreach($schedules as $key => $s) {

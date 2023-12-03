@@ -47,9 +47,7 @@ class StopsRepository extends ServiceEntityRepository
                 $qb->expr()->andX(
                     $qb->expr()->orX(
                         'S.stop_id = :id',
-                        'S.parent_station = :id'
                     ),
-                    'S.location_type = 1'
                 )
             )
             ->setParameter('id', $id);

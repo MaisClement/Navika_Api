@@ -46,7 +46,7 @@ class Trafic
 
     #[OA\Response(
         response: 200,
-        description: ''
+        description: 'OK'
     )]
 
     public function getTrafic(Request $request): JsonResponse
