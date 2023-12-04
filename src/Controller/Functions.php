@@ -451,7 +451,12 @@ class Functions
         return $diffDays == 0;
     }
 
-    public static function addRealTime($stop_name, $dt, $real_time) {
+    public static function addRealTime($stop_name, $dt, $id, $real_time) {
+        foreach($real_time as $el) {
+            if ($el['id'] == $id ) {
+                return $el['date_time'];
+            } 
+        }
         foreach($real_time as $el) {
             if ($el['stop_name'] == $stop_name && Functions::isSameTime($el['date_time']['base_departure_date_time'], $dt) ) {
                 return $el['date_time'];
@@ -698,6 +703,16 @@ class Functions
         }
     
         return "theorical";
+    }
+
+    public static function getIDFMID($id) {
+        $pattern = '/(?<=::)\d+(?=:)/';
+    
+        if (preg_match($pattern, $id, $matches)) {
+            return $matches[0];
+        } else {
+            return null;
+        }
     }
 
     public static function getStopDateTime($call){

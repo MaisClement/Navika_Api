@@ -374,6 +374,8 @@ class Lines
                 if ($l == $line_id) {
                     $call = $result->MonitoredVehicleJourney->MonitoredCall;
 
+                    $trip_id = Functions::getIDFMID($result->MonitoredVehicleJourney->FramedVehicleJourneyRef->DatedVehicleJourneyRef);
+
                     $destination_ref = 'IDFM:' . Functions::idfmFormat( $result->MonitoredVehicleJourney->DestinationRef->value );
                     $dir = Functions::getParentId($db, $destination_ref);
                     $dir = $this->stopsRepository->findStopById( $dir );
@@ -382,6 +384,8 @@ class Lines
                         $dir = Functions::gareFormat( $dir->getStopName() );
                     
                         $real_time[] = [
+                            "id" => $trip_id,
+                            "el" => $result->MonitoredVehicleJourney->FramedVehicleJourneyRef->DatedVehicleJourneyRef,
                             "stop_name" => $dir,
                             "date_time" => Functions::getStopDateTime($call)
                         ];
@@ -415,16 +419,16 @@ class Lines
                 $schedules[$obj['direction_id']] = [];
             }
 
-            // if base_departure_date_time == departure_date_time && stop_name == stop_name
-
             $el = array(
                 "departure_date_time" => (string) Functions::prepareTime($obj['departure_time'], true),
                 "direction"           => (string) Functions::gareFormat($obj['trip_headsign']),
                 "stop_name"           => (string) Functions::gareFormat($o['stop_name']),
+                "trip_id"             => (string) substr($obj['trip_id'], strrpos($obj['trip_id'], '-') + 1 ),
                 "id"                  => (string) $obj['trip_id'],
+                "date_time"           => $obj['trip_id'],
             );
 
-            $el['date_time'] = Functions::addRealTime($el['stop_name'], $el['departure_date_time'], $real_time);
+            $el['date_time'] = Functions::addRealTime($el['stop_name'], $el['departure_date_time'], $el['trip_id'], $real_time);
 
             $schedules[$obj['direction_id']][] = $el;
         }
