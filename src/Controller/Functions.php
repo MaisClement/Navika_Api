@@ -785,11 +785,10 @@ class Functions
         $req->bindValue( "stop_id", $id );
         $results = $req->executeQuery();
 
-        try {
+        if ( isset($results->fetchAll()[0]) && isset($results->fetchAll()[0]['parent_station'])  ) {
             return $results->fetchAll()[0]['parent_station'];
-        } catch(\Exception) {
-            return $id;
         }
+        return $id;
     }
 
     public static function getTerminusForLine($em, \App\Entity\Routes $route){    
