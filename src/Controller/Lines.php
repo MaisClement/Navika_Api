@@ -371,8 +371,10 @@ class Lines
         
                 $l = 'IDFM:' . Functions::idfmFormat( $result->MonitoredVehicleJourney->LineRef->value );
                 
-                if ($l == $line_id) {
-                    $call = $result->MonitoredVehicleJourney->MonitoredCall;
+                
+                $call = $result->MonitoredVehicleJourney->MonitoredCall;
+                
+                if ($l == $line_id && Functions::callIsFuture($call)) {
 
                     $trip_id = Functions::getIDFMID($result->MonitoredVehicleJourney->FramedVehicleJourneyRef->DatedVehicleJourneyRef);
 

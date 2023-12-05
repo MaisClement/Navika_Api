@@ -177,17 +177,17 @@ class Schedules
             $api_content = $api_response->getContent();
             $api_results = json_decode($api_content);
 
-        //     //SNCF API
-        //     $api_client2 = HttpClient::create();
-        //     $api_response2 = $api_client2->request('GET', $sncf_url_api2, [
-        //         'auth_basic' => [$this->params->get('sncf_api_key'), ''],
-        //     ]);
-        //     $api_status2 = $api_response2->getStatusCode();
-        //     if ($api_status2 != 200){
-        //         return new JsonResponse(Functions::ErrorMessage(520, 'Invalid fetched data'), 520);
-        //     }
-        //     $api_content2 = $api_response2->getContent();
-        //     $api_results2 = json_decode($api_content2);
+            //     //SNCF API
+            //     $api_client2 = HttpClient::create();
+            //     $api_response2 = $api_client2->request('GET', $sncf_url_api2, [
+            //         'auth_basic' => [$this->params->get('sncf_api_key'), ''],
+            //     ]);
+            //     $api_status2 = $api_response2->getStatusCode();
+            //     if ($api_status2 != 200){
+            //         return new JsonResponse(Functions::ErrorMessage(520, 'Invalid fetched data'), 520);
+            //     }
+            //     $api_content2 = $api_response2->getContent();
+            //     $api_results2 = json_decode($api_content2);
 
             $departures = [];
             $ungrouped_departures = [];
