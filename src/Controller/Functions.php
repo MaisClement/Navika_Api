@@ -785,7 +785,9 @@ class Functions
         $req->bindValue( "stop_id", $id );
         $results = $req->executeQuery();
 
-        if ( isset($results->fetchAll()[0]) && isset($results->fetchAll()[0]['parent_station'])  ) {
+        $res = $results->fetchAll();
+
+        if ( array_key_exists(0, $res) && isset($results->fetchAll()[0]['parent_station'])  ) {
             return $results->fetchAll()[0]['parent_station'];
         }
         return $id;
