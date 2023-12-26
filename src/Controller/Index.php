@@ -111,37 +111,37 @@ class Index
         }
 
         // --- Message de IDFM
-        $client = HttpClient::create();
-        
-        $response = $client->request('GET', 'https://api-iv.iledefrance-mobilites.fr/banners');
-        $status = $response->getStatusCode();
-
-        if ($status == 200){
-            $content = $response->getContent();
-            $results = json_decode($content);
-
-            foreach ($results as $result) {
-            
-                $url = $result->link;
-                if (strpos($url, 'iledefrance-mobilites.fr') == false) {
-                    $url = 'https://me-deplacer.iledefrance-mobilites.fr' . $url;
-                }
-            
-                $messages[] = array(
-                    "id"            =>  (string)    $result->id,
-                    "status"        =>  (string)    "active",
-                    "severity"      =>  (int)       $severity_i[$result->type],
-                    "effect"        =>  (string)    "OTHER",
-                    "updated_at"    =>  (string)    $result->updatedDate,
-                    "message"       =>  array(
-                        "title"     =>      $result->title,
-                        "text"      =>      $result->description,
-                        "button"      =>    $result->buttonText,
-                        "link"      =>      $url,
-                    ),
-                );
-            }
-        }
+        // $client = HttpClient::create();
+        // 
+        // $response = $client->request('GET', 'https://api-iv.iledefrance-mobilites.fr/banners');
+        // $status = $response->getStatusCode();
+        //
+        // if ($status == 200){
+        //     $content = $response->getContent();
+        //     $results = json_decode($content);
+        //
+        //     foreach ($results as $result) {
+        //     
+        //         $url = $result->link;
+        //         if (strpos($url, 'iledefrance-mobilites.fr') == false) {
+        //             $url = 'https://me-deplacer.iledefrance-mobilites.fr' . $url;
+        //         }
+        //     
+        //         $messages[] = array(
+        //             "id"            =>  (string)    $result->id,
+        //             "status"        =>  (string)    "active",
+        //             "severity"      =>  (int)       $severity_i[$result->type],
+        //             "effect"        =>  (string)    "OTHER",
+        //             "updated_at"    =>  (string)    $result->updatedDate,
+        //             "message"       =>  array(
+        //                 "title"     =>      $result->title,
+        //                 "text"      =>      $result->description,
+        //                 "button"      =>    $result->buttonText,
+        //                 "link"      =>      $url,
+        //             ),
+        //         );
+        //     }
+        // }
         // ---
 
         $json = array(

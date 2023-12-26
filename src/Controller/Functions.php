@@ -787,8 +787,8 @@ class Functions
 
         $res = $results->fetchAll();
 
-        if ( array_key_exists(0, $res) && isset($results->fetchAll()[0]['parent_station'])  ) {
-            return $results->fetchAll()[0]['parent_station'];
+        if ( array_key_exists(0, $res) ) {
+            return $res[0]['parent_station'];
         }
         return $id;
     }
