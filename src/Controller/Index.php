@@ -59,21 +59,21 @@ class Index
         $app_version = $request->get('v') ?? 'null';
         $support = in_array( $app_version, $this->params->get('app.version.supported') );
 
-        if ($_SERVER['APP_ENV'] == "dev"){
-            $messages[] = array(
-                "id"            =>  (string)    "dev",
-                "status"        =>  (string)    "active",
-                "severity"      =>  (int)       0,
-                "effect"        =>  (string)    "OTHER",
-                "updated_at"    =>              date(DATE_ATOM),
-                "message"       =>  array(
-                    "title"     =>      "Serveur de développement",
-                    "text"      =>      "Serveur de développement, destiné uniquement à des fins de tests ou de développement.",
-                    "button"      =>    null,
-                    "link"      =>      null,
-                ),
-            );
-        }
+        // if ($_SERVER['APP_ENV'] == "dev"){
+        //     $messages[] = array(
+        //         "id"            =>  (string)    "dev",
+        //         "status"        =>  (string)    "active",
+        //         "severity"      =>  (int)       0,
+        //         "effect"        =>  (string)    "OTHER",
+        //         "updated_at"    =>              date(DATE_ATOM),
+        //         "message"       =>  array(
+        //             "title"     =>      "Serveur de développement",
+        //             "text"      =>      "Serveur de développement, destiné uniquement à des fins de tests ou de développement.",
+        //             "button"      =>    null,
+        //             "link"      =>      null,
+        //         ),
+        //     );
+        // }
 
         // if ($app_version != null && !$support) {
         //     $messages[] = array(
