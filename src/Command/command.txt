@@ -32,7 +32,7 @@ php bin/console app:provider:add "tc" "TBM"	        "TBM - Bordeaux"	      "Bord
 
 php bin/console app:provider:add "tc" "TISSEO"	    "Tisséo - Toulouse"	      "Toulouse Métropole"	            "56b0c2fba3a7294d39b88a86"
 
-php bin/console app:provider:add "bikes" "VELIB"     "Vélib‘"       "Paris"            "https://velib-metropole-opendata.smoove.pro/opendata/Velib_Metropole/" 
+php bin/console app:provider:add "bikes" "VELIB"     "Vélib‘"       "Paris"            "https://velib-metropole-opendata.smovengo.cloud/opendata/Velib_Metropole/" 
 php bin/console app:provider:add "bikes" "VELOV"     "Vélo‘v"       "Lyon"             "https://transport.data.gouv.fr/gbfs/lyon/" 
 php bin/console app:provider:add "bikes" "CVELO"     "C.Vélo"       "Clermont Ferrand" "https://clermontferrand.publicbikesystem.net/customer/gbfs/v2/" 
 php bin/console app:provider:add "bikes" "VELOMAGG"  "Vélomagg‘"    "Montpellier"      "https://montpellier-fr-smoove.klervi.net/gbfs/" 
@@ -63,6 +63,8 @@ php bin/console app:trafic:update:IDFM
 
 php bin/console app:timetables:update
 
+php bin/console app:maps:update
+
 php bin/console app:provider:reset
 
 php bin/console app:provider:clear
@@ -70,19 +72,19 @@ php bin/console app:provider:clear
 php bin/console app:provider:remove --all
 
 // ------
-php bin/console app:provider:remove LIA
-*/2 * * * * php /var/www/Navika/bin/console app:trafic:update
-0 2 * * * php /var/www/Navika/bin/console app:timetables:update
-0 2 * * * php /var/www/Navika/bin/console app:gbfs:update
-0 */1 * * * php /var/www/Navika/bin/console app:gtfs:update
-
-// Toutes les deux minutes  : app:trafic:update
-// A 2h                     : app:timetables:update
-// A 2h                     : app:gbfs:update
-//
-// Toutes les heures        : app:gtfs:update
 
 git checkout deploy
 git merge master
 git push --all origin
 git checkout master
+
+
+# Commande à minuit
+0 0 * * * php /var/www/Navika/bin/console app:timetables:update
+0 0 * * * php /var/www/Navika/bin/console app:gbfs:update
+
+# Commande toutes les 2 minutes
+*/2 * * * * php /var/www/Navika/bin/console app:trafic:update:IDFM
+
+# Commande à 8h, 14h et 18h
+0 9,14,18 * * * php /var/www/Navika/bin/console app:gtfs:update
