@@ -388,6 +388,7 @@ class Lines
                         $real_time[] = [
                             "id" => $trip_id,
                             "el" => $result->MonitoredVehicleJourney->FramedVehicleJourneyRef->DatedVehicleJourneyRef,
+                            "trip_name" => $result->trainNumber,
                             "stop_name" => $dir,
                             "date_time" => Functions::getStopDateTime($call)
                         ];
@@ -426,11 +427,12 @@ class Lines
                 "direction"           => (string) Functions::gareFormat($obj['trip_headsign']),
                 "stop_name"           => (string) Functions::gareFormat($o['stop_name']),
                 "trip_id"             => (string) substr($obj['trip_id'], strrpos($obj['trip_id'], '-') + 1 ),
+                "trip_name"           => (string) $obj['trip_short_name'],
                 "id"                  => (string) $obj['trip_id'],
                 "date_time"           => $obj['trip_id'],
             );
 
-            $el['date_time'] = Functions::addRealTime($el['stop_name'], $el['departure_date_time'], $el['trip_id'], $real_time);
+            $el['date_time'] = Functions::addRealTime($el['stop_name'], $el['departure_date_time'], $el['trip_id'], $el['trip_name'], $real_time);
 
             $schedules[$obj['direction_id']][] = $el;
         }

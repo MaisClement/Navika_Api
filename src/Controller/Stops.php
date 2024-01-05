@@ -54,7 +54,6 @@ class Stops
         schema: new OA\Schema(type: 'string')
     )]
 
-
     #[OA\Parameter(
         name:"allowed_modes[]",
         in:"query",
@@ -138,21 +137,25 @@ class Stops
             $stops1 = $this->stopRouteRepository->findByQueryName( $query );
             $stops2 = $this->stopRouteRepository->findByTownName( $query );
             $stops = array_merge($stops1, $stops2);
+        
         } else if ( $lat != null && $lon != null ) {
             $search_type = 2;
             $stops = $this->stopRouteRepository->findByNearbyLocation($lat, $lon, 5000);
+        
         } else if ( is_string($request->get('q')) && $query != "" ) {
             $search_type = 1;
             $stops1 = $this->stopRouteRepository->findByQueryName( $query );
             $stops2 = $this->stopRouteRepository->findByTownName( $query );
             $stops = array_merge($stops1, $stops2);
+        
         } else if ( is_string($request->get('q')) ) {
             $json["places"] = [];
             if ($request->get('flag') != null) {
                 $json["flag"] = (int) $request->get('flag');
             }
             return new JsonResponse($json);
-         } else {
+        
+        } else {
             return new JsonResponse(Functions::ErrorMessage(400, 'One or more parameters are missing or null, have you "q" or "lat" and "lon" ?'), 400);
         }
 
@@ -220,7 +223,7 @@ class Stops
         if ($search_type == 2) {
             $echo = Functions::orderByDistance($echo, $lat, $lon);
         } else {
-            $echo = Functions::order_places($echo);
+            $echo = Functions::orderPlaces($echo);
         }
 
         array_splice($echo, 15);

@@ -50,6 +50,18 @@ class Functions
         return $modes[$l];
     }
 
+    public static function getTypeFromPelias($el){
+        $search = [
+            'venue',
+        ];
+        $replace = [
+            'poi',
+        ];
+
+        return str_replace($search, $replace, $el);
+
+    }
+
     public static function getTownByAdministrativeRegions($administrative_regions){
         foreach ($administrative_regions as $region) {
             if ($region->level == 8) {
@@ -207,7 +219,7 @@ class Functions
         return $array;
     }
 
-    public static function order_places($array) {
+    public static function orderPlaces($array) {
         usort ($array, function($a, $b){
             $a_modes = count($a["modes"]);
             $b_modes = count($b["modes"]);
@@ -254,6 +266,45 @@ class Functions
         return $array;
     }
 
+    public static function levenshteinDistance($str1, $str2) {
+        $len1 = strlen($str1);
+        $len2 = strlen($str2);
+
+        $matrix = array();
+
+        for ($i = 0; $i <= $len1; $i++) {
+            $matrix[$i] = array();
+            for ($j = 0; $j <= $len2; $j++) {
+                if ($i == 0) {
+                    $matrix[$i][$j] = $j;
+                } elseif ($j == 0) {
+                    $matrix[$i][$j] = $i;
+                } else {
+                    $cost = ($str1[$i - 1] != $str2[$j - 1]) ? 1 : 0;
+                    $matrix[$i][$j] = min(
+                        $matrix[$i - 1][$j] + 1,
+                        $matrix[$i][$j - 1] + 1,
+                        $matrix[$i - 1][$j - 1] + $cost
+                    );
+                }
+            }
+        }
+
+        return $matrix[$len1][$len2];
+    }
+
+
+    public static function orderWithLevenshtein($array, $text) {
+        usort($array, function($a, $b) use ($text) {
+            $levA = Functions::levenshteinDistance($text, $a['name']);
+            $levB = Functions::levenshteinDistance($text, $b['name']);
+    
+            return $levA - $levB;
+        });
+    
+        return $array;
+    }
+
     public static function orderDeparture($array) {
         usort ($array, function($a, $b) {
             
@@ -291,19 +342,19 @@ class Functions
     }
 
     public static function getDistanceBeetwenPoints($latitudeFrom, $longitudeFrom, $latitudeTo, $longitudeTo) {
-        $earthRadius = 6371000;
+        // Honetement, j'ai rien compris a cette fonction mais ça fonctionne :D
+        $earth = 6371000;
         
         $latFrom = deg2rad($latitudeFrom);
         $lonFrom = deg2rad($longitudeFrom);
         $latTo = deg2rad($latitudeTo);
         $lonTo = deg2rad($longitudeTo);
       
-        $latDelta = $latTo - $latFrom;
-        $lonDelta = $lonTo - $lonFrom;
+        $lat = $latTo - $latFrom;
+        $lon = $lonTo - $lonFrom;
       
-        $angle = 2 * asin(sqrt(pow(sin($latDelta / 2), 2) +
-          cos($latFrom) * cos($latTo) * pow(sin($lonDelta / 2), 2)));
-        return $angle * $earthRadius;
+        $angle = 2 * asin(sqrt(pow(sin($lat / 2), 2) + cos($latFrom) * cos($latTo) * pow(sin($lon / 2), 2)));
+        return $angle * $earth;
     }
 
     public static function getReportsMesageTitle($messages){
@@ -451,15 +502,20 @@ class Functions
         return $diffDays == 0;
     }
 
-    public static function addRealTime($stop_name, $dt, $id, $real_time) {
-        foreach($real_time as $el) {
-            if ($el['id'] == $id ) {
-                return $el['date_time'];
+    public static function addRealTime($el, $real_time) {
+        foreach($real_time as $real) {
+            if ($real['id'] == $el['id'] ) {
+                return $real['date_time'];
             } 
         }
-        foreach($real_time as $el) {
-            if ($el['stop_name'] == $stop_name && Functions::isSameTime($el['date_time']['base_departure_date_time'], $dt) ) {
-                return $el['date_time'];
+        foreach($real_time as $real) {
+            if ($real['stop_name'] == $el['stop_name'] && Functions::isSameTime($real['date_time']['base_departure_date_time'], $el['departure_date_time']) ) {
+                return $real['date_time'];
+            } 
+        }
+        foreach($real_time as $real) {
+            if ($real['trip_name'] == $el['trip_name'] && strlen($el['trip_name']) >= 6 ) {
+                return $real['date_time'];
             } 
         }
         return null;
@@ -1044,11 +1100,34 @@ class Functions
             }
         }
 
-        return '&forbidden_uris[]=' . implode('&forbidden_uris[]=', $uri);
+        return $uri;
         
     // physical_mode:Air
     // physical_mode:Boat
     // physical_mode:Ferry
 
+    }
+
+    public static function buildUrl($baseUrl, $params) {
+        $query = [];
+    
+        foreach ($params as $key => $value) {
+            if (is_array($value)) {
+                foreach ($value as $element) {
+                    $encodedElement = rawurlencode($element);
+    
+                    $query[] = $key . '[]=' . $encodedElement;
+                }
+            } else {
+                $encodedValue = rawurlencode($value);
+    
+                $query[] = "$key=$encodedValue";
+            }
+        }
+    
+        $uri = implode('&', $query);
+        $url = "$baseUrl?$uri";
+    
+        return $url;
     }
 }

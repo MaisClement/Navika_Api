@@ -45,6 +45,10 @@ services:
         autowire: true
         tags: ['controller.service_arguments']
 
+    App\Controller\Maps:
+        autowire: true
+        tags: ['controller.service_arguments']
+
     App\Controller\Journeys:
         autowire: true
         tags: ['controller.service_arguments']

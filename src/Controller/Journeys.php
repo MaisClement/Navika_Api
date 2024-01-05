@@ -127,10 +127,23 @@ class Journeys
         $traveler_type = $request->get('traveler_type') ?? 'standard';
 
         // forbidden_mode
+        $params = array(
+            'from' => $from,
+            'to' => $to,
+            'datetime' => $datetime,
+            'datetime_represents' => $datetime_represents,
+            'traveler_type' => $traveler_type,
+            'depth' => '3',
+            'data_freshness' => 'realtime',
+            'forbidden_uris' => Functions::getForbiddenModesURI( $request->get('forbidden_mode') ),
+        );
 
-        $url = $this->params->get('prim_url') . '/journeys?from=' . $from . '&to=' . $to . '&datetime=' . $datetime . '&datetime_represents=' . $datetime_represents . '&traveler_type=' . $traveler_type . '&depth=3&data_freshness=realtime' . Functions::getForbiddenModesURI( $request->get('forbidden_mode') );
-        
+        $url = Functions::buildUrl($this->params->get('prim_url') . '/journeys', $params);
+
         $json = $this->getJourneys($url, $request->get('flag'));
+        if (isset($json['error']['code'])) {
+            return new JsonResponse($json, $json['error']['code']); 
+        }
         return new JsonResponse($json);
     }
 
@@ -158,13 +171,13 @@ class Journeys
     public function getJourneysId($id, Request $request)
     {
         if (!isset($id) || $id == null) {
-            return new JsonResponse(Functions::ErrorMessage(400, 'Journey id seems to be invalid'), 400);
+            return Functions::ErrorMessage(400, 'Journey id seems to be invalid');
         }
 
         $url = Functions::base64url_decode($id);
 
         if ($url == false) {
-            return new JsonResponse(Functions::ErrorMessage(400, 'Journey id seems to be invalid'), 400);
+            return Functions::ErrorMessage(400, 'Journey id seems to be invalid');
         }
 
         // ------------
@@ -172,7 +185,7 @@ class Journeys
         $url = $this->params->get('prim_url') . '/' . $url;
         
         $json = $this->getJourneys($url, $request->get('flag'), $id);
-        return new JsonResponse(['journey' => $json['journeys'][0]]);
+        return (['journey' => $json['journeys'][0]]);
     }
 
     public function getJourneys($url, $flag, $uid = null)
@@ -186,7 +199,7 @@ class Journeys
         $status = $response->getStatusCode();
 
         if ($status != 200){
-            return new JsonResponse(Functions::ErrorMessage(500, 'Cannot get data from provider'), 500);
+            return Functions::ErrorMessage(500, 'Cannot get data from provider');
         }
 
         $content = $response->getContent();
@@ -196,8 +209,15 @@ class Journeys
         foreach ($results->journeys as $result) {
             $public_transport_distance = 0;
 
+            $ignore = false;
+
             $sections = [];
             foreach ($result->sections as $section) {
+
+                if (isset($section->mode) && ($section->mode == 'bike' || $section->mode == 'bss' || $section->mode == 'car')){
+                    $ignore = true;
+                }
+
                 $informations = [];
                 
                 if (isset($section->display_informations)) {
@@ -219,7 +239,7 @@ class Journeys
                 }
                 $sections[] = array(
                     "type"          =>  (string)    $section->type,
-                    "mode"          =>  (string)    isset($section->mode) !== '' && (string)    isset($section->mode) !== '0' ? $section->mode : $section->type,
+                    "mode"          =>  (string)    isset($section->mode) !== '' && (string) isset($section->mode) ? $section->mode : $section->type,
                     "arrival_date_time"     =>  (string)    $section->arrival_date_time,
                     "departure_date_time"   =>  (string)    $section->departure_date_time,
                     "duration"      =>  (int)       $section->duration,
@@ -261,25 +281,27 @@ class Journeys
                 }
             }
 
-            $journeys[] = array(
-                "type"                  =>  (string) $result->type,
-                "duration"              =>  (int) $result->duration,
-                "unique_id"             =>  (string) $uid != null ? $uid : Functions::getJourneyId($result->links),
-
-                "requested_date_time"   => $result->requested_date_time,
-                "departure_date_time"   => $result->departure_date_time,
-                "arrival_date_time"     => $result->arrival_date_time,
-
-                "nb_transfers"          =>  (int)    (float) $result->type,
-                "co2_emission"          => $result->co2_emission->value,
-                "car_co2_emission"      => $results->context->car_direct_path->co2_emission->value,
-                "fare"                  => $result->fare->total->value / 100,
-                "distances"             => array(
-                    "walking"                  => $result->distances->walking,
-                    "public_transport"         => $public_transport_distance
-                ),
-                "sections"              => $sections
-            );
+            if (!$ignore) {
+                $journeys[] = array(
+                    "type"                  =>  (string) $result->type,
+                    "duration"              =>  (int) $result->duration,
+                    "unique_id"             =>  (string) $uid != null ? $uid : ( isset($result->links) ? Functions::getJourneyId($result->links) : '' ),
+    
+                    "requested_date_time"   => $result->requested_date_time,
+                    "departure_date_time"   => $result->departure_date_time,
+                    "arrival_date_time"     => $result->arrival_date_time,
+    
+                    "nb_transfers"          =>  (int)    (float) $result->type,
+                    "co2_emission"          => $result->co2_emission->value,
+                    "car_co2_emission"      => $results->context->car_direct_path->co2_emission->value,
+                    "fare"                  => isset($result->fare->total->value) ? $result->fare->total->value / 100 : 0 ,
+                    "distances"             => array(
+                        "walking"                  => $result->distances->walking,
+                        "public_transport"         => $public_transport_distance
+                    ),
+                    "sections"              => $sections
+                );
+            }            
         }
 
         $json["journeys"] = $journeys;

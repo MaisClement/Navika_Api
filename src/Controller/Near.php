@@ -130,6 +130,11 @@ class Near
             $json["stops"][] = $place;
         }
 
+        // ------ On limite le nombre de point a afficher
+
+        // shuffle($json["stops"]);
+        // $json["stops"] = array_slice($json["stops"], 0, 500);
+
         // --- Velo
 
         if ($zoom <= 3000) {

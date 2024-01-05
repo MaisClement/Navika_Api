@@ -274,10 +274,10 @@ class StopRoute
         return $this;
     }
 
-    public function getStop($lat = null, $lon = null): ?array
+    public function getStop($lat = null, $lon = null, $isPlace = false): ?array
     {
         $stop = array(
-            'id' => $this->stop_id->getStopId(),
+            'id' => $isPlace ? 'stop_area:' . $this->stop_id->getStopId() : $this->stop_id->getStopId(),
             'name' => (string) $this->stop_id->getStopName(),
             'type' => (string) $this->stop_id->getParentStation() == null ? 'stop_area' : 'stop_point',
             'town' => (string) $this->town_name,

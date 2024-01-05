@@ -64,6 +64,7 @@ class Trafic_IDFM extends Command
         $status = $response->getStatusCode();
 
         if ($status != 200) {
+            echo '';
             return Command::FAILURE;
         }
 

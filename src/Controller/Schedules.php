@@ -315,28 +315,33 @@ class Schedules
 
                     if (($lines_data[$line_id]['mode'] == "rail" || $lines_data[$line_id]['mode'] == "nationalrail") && Functions::callIsFuture($call)) {
                         // Si c'est du ferré, l'affichage est different
-                        if (!in_array($line_id, $departures_lines)) {
-                            $departures_lines[] = $line_id;
-                        }
-                        $dep = array(
-                            "informations" => array(
-                                "direction" => array(
-                                    "id"         =>  (string)   $destination_ref,
-                                    "name"       =>  (string)   $direction[$destination_ref],
+
+                        if (!(isset($call->ExpectedArrivalTime) && isset($call->ExpectedDepartureTime) && $call->ExpectedArrivalTime == $call->ExpectedDepartureTime) ){
+                            // On vérifie que l'heure d'arrivé et de départ ne soit pas strictement la meme
+
+                            if (!in_array($line_id, $departures_lines)) {
+                                $departures_lines[] = $line_id;
+                            }
+                            $dep = array(
+                                "informations" => array(
+                                    "direction" => array(
+                                        "id"         =>  (string)   $destination_ref,
+                                        "name"       =>  (string)   $direction[$destination_ref],
+                                    ),
+                                    "id"            =>  (string)  isset($result->MonitoredVehicleJourney->TrainNumbers->TrainNumberRef[0]->value) !== '' && (string)  isset($result->MonitoredVehicleJourney->TrainNumbers->TrainNumberRef[0]->value) !== '0' ? $result->MonitoredVehicleJourney->TrainNumbers->TrainNumberRef[0]->value : ( $result->MonitoredVehicleJourney->VehicleJourneyName[0]->value ? $result->MonitoredVehicleJourney->VehicleJourneyName[0]->value : ''),
+                                    "name"          =>  (string)  isset($result->MonitoredVehicleJourney->TrainNumbers->TrainNumberRef[0]->value) !== '' && (string)  isset($result->MonitoredVehicleJourney->TrainNumbers->TrainNumberRef[0]->value) !== '0' ? $result->MonitoredVehicleJourney->TrainNumbers->TrainNumberRef[0]->value : ( $result->MonitoredVehicleJourney->VehicleJourneyName[0]->value ? $result->MonitoredVehicleJourney->VehicleJourneyName[0]->value : ''),
+                                    "mode"          =>  (string)  $lines_data[$line_id]['mode'],
+                                    "trip_name"     =>  (string)  isset($result->MonitoredVehicleJourney->TrainNumbers->TrainNumberRef[0]->value) !== '' && (string)  isset($result->MonitoredVehicleJourney->TrainNumbers->TrainNumberRef[0]->value) !== '0' ? $result->MonitoredVehicleJourney->TrainNumbers->TrainNumberRef[0]->value : ( $result->MonitoredVehicleJourney->VehicleJourneyName[0]->value ? $result->MonitoredVehicleJourney->VehicleJourneyName[0]->value : ''),
+                                    "headsign"      =>  (string)  isset($result->MonitoredVehicleJourney->JourneyNote[0]->value) !== '' && (string)  isset($result->MonitoredVehicleJourney->JourneyNote[0]->value) !== '0' ? $result->MonitoredVehicleJourney->JourneyNote[0]->value : '',
+                                    "description"   =>  (string)  '',
+                                    "message"       =>  (string)  Functions::getMessage($call),
                                 ),
-                                "id"            =>  (string)  isset($result->MonitoredVehicleJourney->TrainNumbers->TrainNumberRef[0]->value) !== '' && (string)  isset($result->MonitoredVehicleJourney->TrainNumbers->TrainNumberRef[0]->value) !== '0' ? $result->MonitoredVehicleJourney->TrainNumbers->TrainNumberRef[0]->value : ( $result->MonitoredVehicleJourney->VehicleJourneyName[0]->value ? $result->MonitoredVehicleJourney->VehicleJourneyName[0]->value : ''),
-                                "name"          =>  (string)  isset($result->MonitoredVehicleJourney->TrainNumbers->TrainNumberRef[0]->value) !== '' && (string)  isset($result->MonitoredVehicleJourney->TrainNumbers->TrainNumberRef[0]->value) !== '0' ? $result->MonitoredVehicleJourney->TrainNumbers->TrainNumberRef[0]->value : ( $result->MonitoredVehicleJourney->VehicleJourneyName[0]->value ? $result->MonitoredVehicleJourney->VehicleJourneyName[0]->value : ''),
-                                "mode"          =>  (string)  $lines_data[$line_id]['mode'],
-                                "trip_name"     =>  (string)  isset($result->MonitoredVehicleJourney->TrainNumbers->TrainNumberRef[0]->value) !== '' && (string)  isset($result->MonitoredVehicleJourney->TrainNumbers->TrainNumberRef[0]->value) !== '0' ? $result->MonitoredVehicleJourney->TrainNumbers->TrainNumberRef[0]->value : ( $result->MonitoredVehicleJourney->VehicleJourneyName[0]->value ? $result->MonitoredVehicleJourney->VehicleJourneyName[0]->value : ''),
-                                "headsign"      =>  (string)  isset($result->MonitoredVehicleJourney->JourneyNote[0]->value) !== '' && (string)  isset($result->MonitoredVehicleJourney->JourneyNote[0]->value) !== '0' ? $result->MonitoredVehicleJourney->JourneyNote[0]->value : '',
-                                "description"   =>  (string)  '',
-                                "message"       =>  (string)  Functions::getMessage($call),
-                            ),
-                            "stop_date_time" => Functions::getStopDateTime($call)
-                        );
-                        $departures[$line_id][] = $dep;
-                        $dep['informations']['line'] = $lines_data[$line_id];
-                        $ungrouped_departures[] = $dep;
+                                "stop_date_time" => Functions::getStopDateTime($call)
+                            );
+                            $departures[$line_id][] = $dep;
+                            $dep['informations']['line'] = $lines_data[$line_id];
+                            $ungrouped_departures[] = $dep;
+                        }
                     } elseif (Functions::callIsFuture($call)) {
                         // Affichage normal
                         if (!isset($terminus_data[$line_id][$destination_ref])) {
