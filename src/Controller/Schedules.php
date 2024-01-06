@@ -316,8 +316,8 @@ class Schedules
                     if (($lines_data[$line_id]['mode'] == "rail" || $lines_data[$line_id]['mode'] == "nationalrail") && Functions::callIsFuture($call)) {
                         // Si c'est du ferré, l'affichage est different
 
-                        // if (!(isset($call->ExpectedArrivalTime) && isset($call->ExpectedDepartureTime) && $call->ExpectedArrivalTime == $call->ExpectedDepartureTime) ){
-                        //     // On vérifie que l'heure d'arrivé et de départ ne soit pas strictement la meme
+                        if (!(isset($call->ExpectedArrivalTime) && isset($call->ExpectedDepartureTime) && ($call->ExpectedArrivalTime == $call->ExpectedDepartureTime && $result->MonitoredVehicleJourney->OperatorRef->value == "SNCF_ACCES_CLOUD:Operator::SNCF:")) ){
+                            // On vérifie que l'heure d'arrivé et de départ ne soit pas strictement la meme
 
                             if (!in_array($line_id, $departures_lines)) {
                                 $departures_lines[] = $line_id;
