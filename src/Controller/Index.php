@@ -57,39 +57,23 @@ class Index
 
         // --- Version
         $app_version = $request->get('v') ?? 'null';
-        $support = in_array( $app_version, $this->params->get('app.version.supported') );
+        // $support = in_array( $app_version, $this->params->get('app.version.supported') );
 
-        // if ($_SERVER['APP_ENV'] == "dev"){
-        //     $messages[] = array(
-        //         "id"            =>  (string)    "dev",
-        //         "status"        =>  (string)    "active",
-        //         "severity"      =>  (int)       0,
-        //         "effect"        =>  (string)    "OTHER",
-        //         "updated_at"    =>              date(DATE_ATOM),
-        //         "message"       =>  array(
-        //             "title"     =>      "Serveur de développement",
-        //             "text"      =>      "Serveur de développement, destiné uniquement à des fins de tests ou de développement.",
-        //             "button"      =>    null,
-        //             "link"      =>      null,
-        //         ),
-        //     );
-        // }
-
-        // if ($app_version != null && !$support) {
-        //     $messages[] = array(
-        //         "id"            =>  (string)    "update",
-        //         "status"        =>  (string)    "active",
-        //         "severity"      =>  (int)       1,
-        //         "effect"        =>  (string)    "OTHER",
-        //         "updated_at"    =>              date(DATE_ATOM),
-        //         "message"       =>  array(
-        //             "title"     =>      "Mise à jour disponible",
-        //             "text"      =>      "Une mise à jour de l'application est disponible, profitez des dernières amélioration dès maintenant.",
-        //             "button"      =>    'En savoir plus',
-        //             "link"      =>      'https://cloud.hackernwar.com/index.php/s/MbPb4pt4TJZZt8a',
-        //         ),
-        //     );
-        // }
+        if ($_SERVER['APP_ENV'] == "dev"){
+            $messages[] = array(
+                "id"            =>  (string)    "dev",
+                "status"        =>  (string)    "active",
+                "severity"      =>  (int)       0,
+                "effect"        =>  (string)    "OTHER",
+                "updated_at"    =>              date(DATE_ATOM),
+                "message"       =>  array(
+                    "title"     =>      "Serveur de développement",
+                    "text"      =>      "Serveur de développement, destiné uniquement à des fins de tests ou de développement.",
+                    "button"      =>    null,
+                    "link"      =>      null,
+                ),
+            );
+        }
 
         // --- Message de la base de données
         $_messages = $this->messagesRepository->findAll();

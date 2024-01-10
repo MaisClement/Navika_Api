@@ -504,7 +504,7 @@ class Functions
 
     public static function addRealTime($el, $real_time) {
         foreach($real_time as $real) {
-            if ($real['id'] == $el['id'] ) {
+            if ($real['id'] == $el['trip_id'] ) {
                 return $real['date_time'];
             } 
         }
@@ -514,19 +514,21 @@ class Functions
             } 
         }
         foreach($real_time as $real) {
-            if ($real['trip_name'] == $el['trip_name'] && strlen($el['trip_name']) >= 6 ) {
+            if ($real['id'] == $el['trip_name'] && strlen($el['trip_name']) >= 6 ) {
+                return $real['date_time'];
+            } 
+        }
+        foreach($real_time as $real) {
+            if ($real['trip_name'] == $el['trip_name']) {
                 return $real['date_time'];
             } 
         }
         return null;
     }
 
-    public static function isSameTime($timestamp1, $timestamp2) {
-        $timezone1 = new DateTimeZone('UTC');
-        $timezone2 = new DateTimeZone('Europe/Paris');
-      
-        $date1 = new DateTime($timestamp1, $timezone1);
-        $date2 = new DateTime($timestamp2, $timezone2);
+    public static function isSameTime($date1, $date2) {
+        $date1 = new DateTime($date1);
+        $date2 = new DateTime($date2);
       
         return $date1 == $date2;
       }
@@ -762,12 +764,25 @@ class Functions
     }
 
     public static function getIDFMID($id) {
-        $pattern = '/(?<=::)\d+(?=:)/';
+        $pattern1 = '/(?<=::)\d+(?=:)/';
+        $pattern2 = '/RATP\.(\w+):LOC/';
+    
+        if (preg_match($pattern1, $id, $matches)) {
+            return $matches[0];
+        } else if (preg_match($pattern2, $id, $matches)) {
+            return $matches[1];
+        } else {
+            return $id;
+        }
+    }
+
+    public static function getRATPName($id) {
+        $pattern = 'RATP\.(\w+):LOC';
     
         if (preg_match($pattern, $id, $matches)) {
             return $matches[0];
         } else {
-            return null;
+            return $id;
         }
     }
 

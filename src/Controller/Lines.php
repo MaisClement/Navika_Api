@@ -363,36 +363,41 @@ class Lines
             $content = $response->getContent();
             $results = json_decode($content);
             $results = $results->Siri->ServiceDelivery->StopMonitoringDelivery[0]->MonitoredStopVisit;
-            
+            $schedules = [];
+            $departures = [];
+            $ungrouped_departures = [];
+            $direction = [];
             foreach ($results as $result) {
                 if (!isset($result->MonitoredVehicleJourney->MonitoredCall)) {
                     return new JsonResponse(Functions::ErrorMessage(520, 'Invalid fetched data'), 520);
                 }
-        
-                $l = 'IDFM:' . Functions::idfmFormat( $result->MonitoredVehicleJourney->LineRef->value );
-                
-                
+
                 $call = $result->MonitoredVehicleJourney->MonitoredCall;
-                
-                if ($l == $line_id && Functions::callIsFuture($call)) {
+                $l = 'IDFM:' . Functions::idfmFormat( $result->MonitoredVehicleJourney->LineRef->value );
+
+                if ( $l == $line_id && Functions::callIsFuture($call) ) {
+                    // Direction
+                    $destination_ref = 'IDFM:' . Functions::idfmFormat( $result->MonitoredVehicleJourney->DestinationRef->value );
+                    if (!isset($direction[$destination_ref])) {
+
+                        $dir = Functions::getParentId($db, $destination_ref);
+                        $dir = $this->stopsRepository->findStopById( $dir );
+                        
+                        if ($dir != null && $dir->getStopName() != null) {
+                            $direction[$destination_ref] = Functions::gareFormat( $dir->getStopName() );
+                        } elseif (isset( $call->DestinationDisplay[0]->value )) {
+                            $direction[$destination_ref] = Functions::gareFormat( $call->DestinationDisplay[0]->value );
+                        }
+                    }
 
                     $trip_id = Functions::getIDFMID($result->MonitoredVehicleJourney->FramedVehicleJourneyRef->DatedVehicleJourneyRef);
-
-                    $destination_ref = 'IDFM:' . Functions::idfmFormat( $result->MonitoredVehicleJourney->DestinationRef->value );
-                    $dir = Functions::getParentId($db, $destination_ref);
-                    $dir = $this->stopsRepository->findStopById( $dir );
                     
-                    if ($dir != null) {
-                        $dir = Functions::gareFormat( $dir->getStopName() );
-                    
-                        $real_time[] = [
-                            "id" => $trip_id,
-                            "el" => $result->MonitoredVehicleJourney->FramedVehicleJourneyRef->DatedVehicleJourneyRef,
-                            "trip_name" => $result->trainNumber,
-                            "stop_name" => $dir,
-                            "date_time" => Functions::getStopDateTime($call)
-                        ];
-                    }
+                    $real_time[] = [
+                        "id" => Functions::getIDFMID($result->MonitoredVehicleJourney->FramedVehicleJourneyRef->DatedVehicleJourneyRef),
+                        "trip_name" => isset($result->MonitoredVehicleJourney->TrainNumbers) && isset($result->MonitoredVehicleJourney->TrainNumbers->TrainNumberRef[0]->value) ? $result->MonitoredVehicleJourney->TrainNumbers->TrainNumberRef[0]->value : '',
+                        "stop_name" => $direction[$destination_ref],
+                        "date_time" => Functions::getStopDateTime($call)
+                    ];
                 }
             }
         }
@@ -429,10 +434,9 @@ class Lines
                 "trip_id"             => (string) substr($obj['trip_id'], strrpos($obj['trip_id'], '-') + 1 ),
                 "trip_name"           => (string) $obj['trip_short_name'],
                 "id"                  => (string) $obj['trip_id'],
-                "date_time"           => $obj['trip_id'],
             );
 
-            $el['date_time'] = Functions::addRealTime($el['stop_name'], $el['departure_date_time'], $el['trip_id'], $el['trip_name'], $real_time);
+            $el['date_time'] = Functions::addRealTime($el, $real_time);
 
             $schedules[$obj['direction_id']][] = $el;
         }
@@ -440,6 +444,8 @@ class Lines
         foreach($schedules as $key => $s) {
             $json['line']['schedules'][] = $schedules[$key];
         }
+
+        // return new JsonResponse($real_time);
 
         return new JsonResponse($json);
     }
