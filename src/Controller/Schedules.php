@@ -375,6 +375,7 @@ class Schedules
                             $line['departures'][] = $departure;
                         }
                     }
+                    $line['departures'] = Functions::orderDeparture( $line['departures'] );
                     $json['departures'][] = $line;
                 }
             }
