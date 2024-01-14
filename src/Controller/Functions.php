@@ -503,16 +503,16 @@ class Functions
     }
 
     public static function addRealTime($el, $real_time) {
-        // foreach($real_time as $real) {
-        //     if ($real['id'] == $el['id'] ) {
-        //         return $real['date_time'];
-        //     } 
-        // }
         foreach($real_time as $real) {
-            if ($real['stop_name'] == $el['stop_name'] && Functions::isSameTime($real['date_time']['base_departure_date_time'], $el['departure_date_time']) ) {
+            if ($real['id'] == $el['id'] ) {
                 return $real['date_time'];
             } 
         }
+        // foreach($real_time as $real) {
+        //     if ($real['stop_name'] == $el['stop_name'] && Functions::isSameTime($real['date_time']['base_departure_date_time'], $el['departure_date_time']) ) {
+        //         return $real['date_time'];
+        //     } 
+        // }
         foreach($real_time as $real) {
             if ($real['id'] == $el['trip_name'] && strlen($el['trip_name']) >= 6 ) {
                 return $real['date_time'];
@@ -1074,7 +1074,7 @@ class Functions
 
     public static function getForbiddenModesURI($forbidden_modes) {
         if ($forbidden_modes == null) {
-            return '';
+            return [];
         }
         $uri = [];
         $all = [
@@ -1121,6 +1121,16 @@ class Functions
     // physical_mode:Boat
     // physical_mode:Ferry
 
+    }
+
+    public static function getForbiddenLines($forbidden_lines) {
+        if ($forbidden_lines == null) {
+            return [];
+        }
+        foreach ($forbidden_lines as $key => $value) {
+            $forbidden_lines[$key] = 'line:' . $value;
+        }
+        return $forbidden_lines;
     }
 
     public static function buildUrl($baseUrl, $params) {
