@@ -53,7 +53,7 @@ class Trafic_IDFM extends Command
         $progressIndicator = new ProgressIndicator($output, 'verbose', 100, ['⠏', '⠛', '⠹', '⢸', '⣰', '⣤', '⣆', '⡇']);
         $progressIndicator->start('Geting trafic...');
 
-        $url = $this->params->get('prim_url') . '/line_reports?count=10000';
+        $url = $this->params->get('prim_url_trafic') . '/line_reports?count=10000';
 
         $client = HttpClient::create();
         $response = $client->request('GET', $url, [
