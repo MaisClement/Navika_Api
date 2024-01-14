@@ -126,6 +126,7 @@ class Journeys
 
         $traveler_type = $request->get('traveler_type') ?? 'standard';
 
+
         // forbidden_mode
         $params = array(
             'from' => $from,
@@ -135,7 +136,7 @@ class Journeys
             'traveler_type' => $traveler_type,
             'depth' => '3',
             'data_freshness' => 'realtime',
-            'forbidden_uris' => Functions::getForbiddenModesURI( $request->get('forbidden_mode') ),
+            'forbidden_uris' => array_merge(Functions::getForbiddenLines( $request->get('forbidden_id') ), Functions::getForbiddenModesURI( $request->get('forbidden_mode') )),
         );
 
         $url = Functions::buildUrl($this->params->get('prim_url') . '/journeys', $params);
@@ -273,8 +274,9 @@ class Journeys
                         )
                         : array()
                     ,
-                    "stop_date_times"   => isset($section->stop_date_times) ? $section->stop_date_times : null,
-                    "geojson"           => isset($section->geojson)         ? $section->geojson : null,
+                    "stop_date_times"           => isset($section->stop_date_times)         ? $section->stop_date_times : null,
+                    "geojson"                   => isset($section->geojson)                 ? $section->geojson : null,
+                    "best_boarding_positions"   => isset($section->best_boarding_positions) ? $section->best_boarding_positions : null,
                 );
                 if ($section->type == "public_transport") {
                     $public_transport_distance += (int) $section->geojson->properties[0]->length;
