@@ -503,32 +503,27 @@ class Functions
     }
 
     public static function addRealTime($el, $real_time) {
-        foreach($real_time as $real) {
-            if ($real['id'] == $el['id'] ) {
-                return $real['date_time'];
-            } 
-        }
+        // foreach($real_time as $real) {
+        //     if ($real['id'] == $el['id'] ) {
+        //         return $real['date_time'];
+        //     } 
+        // }
         foreach($real_time as $real) {
             if ($real['stop_name'] == $el['stop_name'] && Functions::isSameTime($real['date_time']['base_departure_date_time'], $el['departure_date_time']) ) {
                 return $real['date_time'];
             } 
         }
         foreach($real_time as $real) {
-            if ($real['trip_name'] != null && $real['trip_name'] != '' && $el['trip_name'] != null && $el['trip_name'] != ''){
-                if ($real['trip_name'] == $el['trip_name'] && strlen($el['trip_name']) >= 6 ) {
-                    return $real['date_time'];
-                }
+            if ($real['trip_name'] == $el['trip_name'] && strlen($el['trip_name']) >= 6 ) {
+                return $real['date_time'];
             }
         }
         return null;
     }
 
-    public static function isSameTime($timestamp1, $timestamp2) {
-        $timezone1 = new DateTimeZone('UTC');
-        $timezone2 = new DateTimeZone('Europe/Paris');
-      
-        $date1 = new DateTime($timestamp1, $timezone1);
-        $date2 = new DateTime($timestamp2, $timezone2);
+    public static function isSameTime($date1, $date2) {
+        $date1 = new DateTime($date1);
+        $date2 = new DateTime($date2);
       
         return $date1 == $date2;
       }
