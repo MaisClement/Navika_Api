@@ -508,15 +508,17 @@ class Functions
                 return $real['date_time'];
             } 
         }
-        // foreach($real_time as $real) {
-        //     if ($real['stop_name'] == $el['stop_name'] && Functions::isSameTime($real['date_time']['base_departure_date_time'], $el['departure_date_time']) ) {
-        //         return $real['date_time'];
-        //     } 
-        // }
         foreach($real_time as $real) {
-            if ($real['trip_name'] == $el['trip_name'] && strlen($el['trip_name']) >= 6 ) {
+            if ($real['stop_name'] == $el['stop_name'] && Functions::isSameTime($real['date_time']['base_departure_date_time'], $el['departure_date_time']) ) {
                 return $real['date_time'];
             } 
+        }
+        foreach($real_time as $real) {
+            if ($real['trip_name'] != null && $real['trip_name'] != '' && $el['trip_name'] != null && $el['trip_name'] != ''){
+                if ($real['trip_name'] == $el['trip_name'] && strlen($el['trip_name']) >= 6 ) {
+                    return $real['date_time'];
+                }
+            }
         }
         return null;
     }

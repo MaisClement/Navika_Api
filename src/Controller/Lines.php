@@ -432,7 +432,7 @@ class Lines
                 "date_time"           => $obj['trip_id'],
             );
 
-            $el['date_time'] = Functions::addRealTime($el['stop_name'], $el['departure_date_time'], $el['trip_id'], $el['trip_name'], $real_time);
+            $el['date_time'] = Functions::addRealTime($el, $real_time);
 
             $schedules[$obj['direction_id']][] = $el;
         }
