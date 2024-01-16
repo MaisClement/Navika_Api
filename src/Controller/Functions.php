@@ -503,11 +503,11 @@ class Functions
     }
 
     public static function addRealTime($el, $real_time) {
-        // foreach($real_time as $real) {
-        //     if ($real['id'] == $el['id'] ) {
-        //         return $real['date_time'];
-        //     } 
-        // }
+        foreach($real_time as $real) {
+            if ($real['id'] != null && $el['id'] != null && $real['id'] == $el['id'] ) {
+                return $real['date_time'];
+            } 
+        }
         foreach($real_time as $real) {
             if ($real['id'] == $el['trip_name'] && strlen($el['trip_name']) >= 6 ) {
                 return $real['date_time'];
