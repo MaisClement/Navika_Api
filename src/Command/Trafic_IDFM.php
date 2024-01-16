@@ -89,8 +89,8 @@ class Trafic_IDFM extends Command
                 $itemsOnPage = $results->pagination->items_on_page;
                 $page++;
 
-            $disruptions = [...$results->disruptions];
-            $line_reports = [...$results->line_reports];
+            $disruptions = array_merge($disruptions, $results->disruptions);
+            $line_reports = array_merge($line_reports, $results->line_reports);
         }
 
         // On crée les messages
