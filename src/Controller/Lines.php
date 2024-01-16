@@ -429,7 +429,7 @@ class Lines
                 "trip_id"             => (string) substr($obj['trip_id'], strrpos($obj['trip_id'], '-') + 1 ),
                 "trip_name"           => (string) $obj['trip_short_name'],
                 "id"                  => (string) $obj['trip_id'],
-                "date_time"           => $obj['trip_id'],
+                "date_time"           => null,
             );
 
             $el['date_time'] = Functions::addRealTime($el, $real_time);

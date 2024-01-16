@@ -53,30 +53,49 @@ class Trafic_IDFM extends Command
         $progressIndicator = new ProgressIndicator($output, 'verbose', 100, ['⠏', '⠛', '⠹', '⢸', '⣰', '⣤', '⣆', '⡇']);
         $progressIndicator->start('Geting trafic...');
 
-        $url = $this->params->get('prim_url') . '/line_reports?count=10000';
+        $disruptions = [];
+        $line_reports = [];
 
-        $client = HttpClient::create();
-        $response = $client->request('GET', $url, [
-            'headers' => [
-                'apiKey' => $this->params->get('prim_api_key'),
-            ],
-        ]);
-        $status = $response->getStatusCode();
+        // Paramètres de pagination
+        $page = 0;
+        $itemsPerPage = 0;
+        $itemsOnPage = 1;
 
-        if ($status != 200) {
-            echo '';
-            return Command::FAILURE;
+        // Boucler à travers les pages jusqu'à ce que tous les résultats soient récupérés
+        while ($itemsOnPage >= $itemsPerPage) {
+            $url = $this->params->get('prim_url_trafic') . '/line_reports?count=10000&start_page=' . $page;
+
+            $client = HttpClient::create();
+            $response = $client->request('GET', $url, [
+                'headers' => [
+                    'apiKey' => $this->params->get('prim_api_key'),
+                ],
+            ]);
+            $status = $response->getStatusCode();
+
+            if ($status != 200) {
+                echo '';
+                return Command::FAILURE;
+            }
+
+            // Loader
+            $progressIndicator->advance();
+
+            $content = $response->getContent();
+            $results = json_decode($content);
+
+            // Pagination
+                $itemsPerPage = $results->pagination->items_per_page;
+                $itemsOnPage = $results->pagination->items_on_page;
+                $page++;
+
+            $disruptions = [...$results->disruptions];
+            $line_reports = [...$results->line_reports];
         }
-
-        // Loader
-        $progressIndicator->advance();
-
-        $content = $response->getContent();
-        $results = json_decode($content);
 
         // On crée les messages
         $reports = [];
-        foreach ($results->disruptions as $disruption) {
+        foreach ($disruptions as $disruption) {
             $progressIndicator->advance();
 
             if ($disruption->status != 'past') {
@@ -96,7 +115,7 @@ class Trafic_IDFM extends Command
         }
 
         // On assigne une ligne aux messages
-        foreach ($results->line_reports as $line) {
+        foreach ($line_reports as $line) {
             $progressIndicator->advance();
 
             foreach ($line->line->links as $link) {

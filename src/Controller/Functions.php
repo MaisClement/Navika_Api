@@ -503,11 +503,11 @@ class Functions
     }
 
     public static function addRealTime($el, $real_time) {
-        // foreach($real_time as $real) {
-        //     if ($real['id'] == $el['id'] ) {
-        //         return $real['date_time'];
-        //     } 
-        // }
+        foreach($real_time as $real) {
+            if ($real['id'] != null && $el['id'] != null && $real['id'] == $el['id'] ) {
+                return $real['date_time'];
+            } 
+        }
         foreach($real_time as $real) {
             if ($real['stop_name'] == $el['stop_name'] && Functions::isSameTime($real['date_time']['base_departure_date_time'], $el['departure_date_time']) ) {
                 return $real['date_time'];
