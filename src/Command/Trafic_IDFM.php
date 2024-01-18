@@ -63,7 +63,7 @@ class Trafic_IDFM extends Command
 
         // Boucler à travers les pages jusqu'à ce que tous les résultats soient récupérés
         while ($itemsOnPage >= $itemsPerPage) {
-            $url = $this->params->get('prim_url_trafic') . '/line_reports?count=10000&start_page=' . $page;
+            $url = $this->params->get('prim_url_trafic') . '/line_reports?count=1000&start_page=' . $page;
 
             $client = HttpClient::create();
             $response = $client->request('GET', $url, [
@@ -95,22 +95,12 @@ class Trafic_IDFM extends Command
 
         // On crée les messages
         $reports = [];
+        $r = [];
         foreach ($disruptions as $disruption) {
             $progressIndicator->advance();
 
             if ($disruption->status != 'past') {
-                $msg = new Trafic();
-                $msg->setReportId($disruption->id ?? '');
-                $msg->setStatus($disruption->status);
-                $msg->setCause($disruption->cause);
-                $msg->setCategory($disruption->category);
-                $msg->setSeverity(Functions::getSeverity($disruption->severity->effect, $disruption->cause, $disruption->status));
-                $msg->setEffect($disruption->severity->effect);
-                $msg->setUpdatedAt(DateTime::createFromFormat('Ymd\THis', $disruption->updated_at));
-                $msg->setTitle(Functions::getReportsMesageTitle($disruption->messages));
-                $msg->setText(Functions::getReportsMesageText($disruption->messages));
-
-                $reports[$disruption->id] = $msg;
+                $reports[$disruption->id] = $disruption;
             }
         }
 
@@ -126,9 +116,50 @@ class Trafic_IDFM extends Command
                         $route = $this->routesRepository->findOneBy(['route_id' => 'IDFM:' . Functions::idfmFormat($line->line->id)]);
 
                         if ($route != null) {
-                            $r = $reports[$id];
-                            $r->setRouteId($route);
-                            $this->entityManager->persist($r);
+                            $disruption = $reports[$id];
+
+                            $msg = new Trafic();
+                            $msg->setReportId($disruption->id ?? '');
+                            $msg->setStatus($disruption->status);
+                            $msg->setCause($disruption->cause);
+                            $msg->setCategory($disruption->category);
+                            $msg->setSeverity(Functions::getSeverity($disruption->severity->effect, $disruption->cause, $disruption->status));
+                            $msg->setEffect($disruption->severity->effect);
+                            $msg->setUpdatedAt(DateTime::createFromFormat('Ymd\THis', $disruption->updated_at));
+                            $msg->setTitle(Functions::getReportsMesageTitle($disruption->messages));
+                            $msg->setText(Functions::getReportsMesageText($disruption->messages));
+                            $msg->setRouteId($route);
+                            
+                            $this->entityManager->persist($msg);
+                            $r[$disruption->id] = $msg;
+                        }
+                    }
+                }
+            }
+            foreach ($line->line->network->links as $link) {
+                $id = $link->id;
+
+                if ($link->type == "disruption") {
+                    if (isset($reports[$id])) {
+                        $route = $this->routesRepository->findOneBy(['route_id' => 'IDFM:' . Functions::idfmFormat($line->line->id)]);
+
+                        if ($route != null) {
+                            $disruption = $reports[$id];
+
+                            $msg = new Trafic();
+                            $msg->setReportId($disruption->id ?? '');
+                            $msg->setStatus($disruption->status);
+                            $msg->setCause($disruption->cause);
+                            $msg->setCategory($disruption->category);
+                            $msg->setSeverity(Functions::getSeverity($disruption->severity->effect, $disruption->cause, $disruption->status));
+                            $msg->setEffect($disruption->severity->effect);
+                            $msg->setUpdatedAt(DateTime::createFromFormat('Ymd\THis', $disruption->updated_at));
+                            $msg->setTitle(Functions::getReportsMesageTitle($disruption->messages));
+                            $msg->setText(Functions::getReportsMesageText($disruption->messages));
+                            $msg->setRouteId($route);
+                            
+                            $this->entityManager->persist($msg);
+                            $r[$disruption->id] = $msg;
                         }
                     }
                 }
@@ -145,8 +176,8 @@ class Trafic_IDFM extends Command
             $progressIndicator->advance();
             $id = $old_message->getReportId();
 
-            if (isset($reports[$id])) {
-                unset($reports[$id]);
+            if (isset($r[$id])) {
+                unset($r[$id]);
             }
         }
 
@@ -154,7 +185,7 @@ class Trafic_IDFM extends Command
         $notif = new Notify($this->messaging);
 
         // On envoie les notification
-        foreach($reports as $report) {
+        foreach($r as $report) {
 
             //TOPIC  if ($report->getRouteId() != null) {
             //TOPIC      $topic = str_replace( ':' , '_', $report->getRouteId()->getRouteId() );
