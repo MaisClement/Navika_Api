@@ -392,12 +392,14 @@ class Lines
 
                     $trip_id = Functions::getIDFMID($result->MonitoredVehicleJourney->FramedVehicleJourneyRef->DatedVehicleJourneyRef);
                     
-                    $real_time[] = [
-                        "id" => Functions::getIDFMID($result->MonitoredVehicleJourney->FramedVehicleJourneyRef->DatedVehicleJourneyRef),
-                        "trip_name" => isset($result->MonitoredVehicleJourney->TrainNumbers) && isset($result->MonitoredVehicleJourney->TrainNumbers->TrainNumberRef[0]->value) ? $result->MonitoredVehicleJourney->TrainNumbers->TrainNumberRef[0]->value : '',
-                        "stop_name" => $direction[$destination_ref],
-                        "date_time" => Functions::getStopDateTime($call)
-                    ];
+                        $real_time[] = [
+                            "id" => $trip_id,
+                            "el" => $result->MonitoredVehicleJourney->FramedVehicleJourneyRef->DatedVehicleJourneyRef,
+                            "trip_name" => isset($result->trainNumber) ? $result->trainNumber : '',
+                            "stop_name" => $dir,
+                            "date_time" => Functions::getStopDateTime($call)
+                        ];
+                    }
                 }
             }
         }

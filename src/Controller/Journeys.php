@@ -186,7 +186,7 @@ class Journeys
         $url = $this->params->get('prim_url') . '/' . $url;
         
         $json = $this->getJourneys($url, $request->get('flag'), $id);
-        return (['journey' => $json['journeys'][0]]);
+        return new JsonResponse(['journey' => $json['journeys'][0]]);
     }
 
     public function getJourneys($url, $flag, $uid = null)
@@ -276,7 +276,8 @@ class Journeys
                     ,
                     "stop_date_times"           => isset($section->stop_date_times)         ? $section->stop_date_times : null,
                     "geojson"                   => isset($section->geojson)                 ? $section->geojson : null,
-                    "best_boarding_positions"   => isset($section->best_boarding_positions) ? $section->best_boarding_positions : null,
+                    "boarding_positions"        => isset($section->best_boarding_positions) ? $section->best_boarding_positions : null,
+                    "access_point"              => isset($section->vias[0]->access_point)   ? $section->vias[0]->access_point : null,
                 );
                 if ($section->type == "public_transport") {
                     $public_transport_distance += (int) $section->geojson->properties[0]->length;
@@ -293,7 +294,6 @@ class Journeys
                     "departure_date_time"   => $result->departure_date_time,
                     "arrival_date_time"     => $result->arrival_date_time,
     
-                    "nb_transfers"          =>  (int)    (float) $result->type,
                     "co2_emission"          => $result->co2_emission->value,
                     "car_co2_emission"      => $results->context->car_direct_path->co2_emission->value,
                     "fare"                  => isset($result->fare->total->value) ? $result->fare->total->value / 100 : 0 ,
