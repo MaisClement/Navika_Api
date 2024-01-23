@@ -363,34 +363,27 @@ class Lines
             $content = $response->getContent();
             $results = json_decode($content);
             $results = $results->Siri->ServiceDelivery->StopMonitoringDelivery[0]->MonitoredStopVisit;
-            $schedules = [];
-            $departures = [];
-            $ungrouped_departures = [];
-            $direction = [];
+            
             foreach ($results as $result) {
                 if (!isset($result->MonitoredVehicleJourney->MonitoredCall)) {
                     return new JsonResponse(Functions::ErrorMessage(520, 'Invalid fetched data'), 520);
                 }
-
-                $call = $result->MonitoredVehicleJourney->MonitoredCall;
+        
                 $l = 'IDFM:' . Functions::idfmFormat( $result->MonitoredVehicleJourney->LineRef->value );
-
-                if ( $l == $line_id && Functions::callIsFuture($call) ) {
-                    // Direction
-                    $destination_ref = 'IDFM:' . Functions::idfmFormat( $result->MonitoredVehicleJourney->DestinationRef->value );
-                    if (!isset($direction[$destination_ref])) {
-
-                        $dir = Functions::getParentId($db, $destination_ref);
-                        $dir = $this->stopsRepository->findStopById( $dir );
-                        
-                        if ($dir != null && $dir->getStopName() != null) {
-                            $direction[$destination_ref] = Functions::gareFormat( $dir->getStopName() );
-                        } elseif (isset( $call->DestinationDisplay[0]->value )) {
-                            $direction[$destination_ref] = Functions::gareFormat( $call->DestinationDisplay[0]->value );
-                        }
-                    }
+                
+                
+                $call = $result->MonitoredVehicleJourney->MonitoredCall;
+                
+                if ($l == $line_id && Functions::callIsFuture($call)) {
 
                     $trip_id = Functions::getIDFMID($result->MonitoredVehicleJourney->FramedVehicleJourneyRef->DatedVehicleJourneyRef);
+
+                    $destination_ref = 'IDFM:' . Functions::idfmFormat( $result->MonitoredVehicleJourney->DestinationRef->value );
+                    $dir = Functions::getParentId($db, $destination_ref);
+                    $dir = $this->stopsRepository->findStopById( $dir );
+                    
+                    if ($dir != null) {
+                        $dir = Functions::gareFormat( $dir->getStopName() );
                     
                         $real_time[] = [
                             "id" => $trip_id,
