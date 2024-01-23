@@ -162,8 +162,8 @@ class Stops
         // ------ Places
         //
         $places = [];
-        $lines[] = [];
-        $modes[] = [];
+        $lines = [];
+        $modes = [];
 
         foreach($stops as $stop) {
             try {

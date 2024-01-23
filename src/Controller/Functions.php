@@ -504,7 +504,7 @@ class Functions
 
     public static function addRealTime($el, $real_time) {
         foreach($real_time as $real) {
-            if ($real['id'] != null && $el['id'] != null && $real['id'] == $el['id'] ) {
+            if ($real['id'] != null && $el['trip_id'] != null && $real['id'] == $el['trip_id'] ) {
                 return $real['date_time'];
             } 
         }

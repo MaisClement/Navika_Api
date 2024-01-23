@@ -25,6 +25,10 @@ services:
         autowire: true
         tags: ['controller.service_arguments']
 
+    App\Controller\Address:
+        autowire: true
+        tags: ['controller.service_arguments']
+
     App\Controller\Bikes:
         autowire: true
         tags: ['controller.service_arguments']

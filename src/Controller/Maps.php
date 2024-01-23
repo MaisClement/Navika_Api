@@ -19,14 +19,9 @@ class Maps
     }
 
     /**
-     * Get bikes available in a station
+     * Get maps list
      * 
-     * Get bikes available in a station. 
-     * 
-     * **"id" must be defined.**
-     * 
-     * 
-     * Station id can be get using `/near`
+     * Get list of all PDF map available
      */
     #[Route('/maps', name: 'get_maps', methods: ['GET'])]
     #[OA\Tag(name: 'Maps')]

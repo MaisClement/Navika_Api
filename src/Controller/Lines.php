@@ -388,7 +388,7 @@ class Lines
                         $real_time[] = [
                             "id" => $trip_id,
                             "el" => $result->MonitoredVehicleJourney->FramedVehicleJourneyRef->DatedVehicleJourneyRef,
-                            "trip_name" => $result->trainNumber,
+                            "trip_name" => isset($result->trainNumber) ? $result->trainNumber : '',
                             "stop_name" => $dir,
                             "date_time" => Functions::getStopDateTime($call)
                         ];

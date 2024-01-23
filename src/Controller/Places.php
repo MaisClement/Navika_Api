@@ -86,7 +86,7 @@ class Places
             $stops1 = $this->stopRouteRepository->findByQueryName( $query );
             $stops2 = $this->stopRouteRepository->findByTownName( $query );
             $stops = array_merge($stops1, $stops2);
-            $url = $this->params->get('geosearch_url') . 'search?text=' . $q . '&focus.point.lon=' . $lon . '&focus.point.lat=' . $lat;
+            $url = $this->params->get('geosearch_url') . 'autocomplete?text=' . $q . '&focus.point.lon=' . $lon . '&focus.point.lat=' . $lat;
         
         } else if ( $lat != null && $lon != null ) {
             $search_type = 2;
@@ -98,7 +98,7 @@ class Places
             $stops1 = $this->stopRouteRepository->findByQueryName( $query );
             $stops2 = $this->stopRouteRepository->findByTownName( $query );
             $stops = array_merge($stops1, $stops2);
-            $url = $this->params->get('geosearch_url') . 'search?text=' . $q;
+            $url = $this->params->get('geosearch_url') . 'autocomplete?text=' . $q;
         
         } else if ( is_string($request->get('q')) ) {
             $json["places"] = [];
