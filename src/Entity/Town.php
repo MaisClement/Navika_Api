@@ -30,9 +30,6 @@ class Town
     #[ORM\OneToMany(mappedBy: 'town_id', targetEntity: StopRoute::class)]
     private Collection $stopRoutes;
 
-    #[ORM\OneToMany(mappedBy: 'town_id', targetEntity: StopTown::class)]
-    private Collection $stopTowns;
-
     public function __construct()
     {
         $this->stopRoutes = new ArrayCollection();
@@ -110,36 +107,6 @@ class Town
         // set the owning side to null (unless already changed)
         if ($this->stopRoutes->removeElement($stopRoute) && $stopRoute->getTownId() === $this) {
             $stopRoute->setTownId(null);
-        }
-
-        return $this;
-    }
-
-    /**
-     * @return Collection<int, StopTown>
-     */
-    public function getStopTowns(): Collection
-    {
-        return $this->stopTowns;
-    }
-
-    public function addStopTown(StopTown $stopTown): static
-    {
-        if (!$this->stopTowns->contains($stopTown)) {
-            $this->stopTowns->add($stopTown);
-            $stopTown->setTownId($this);
-        }
-
-        return $this;
-    }
-
-    public function removeStopTown(StopTown $stopTown): static
-    {
-        if ($this->stopTowns->removeElement($stopTown)) {
-            // set the owning side to null (unless already changed)
-            if ($stopTown->getTownId() === $this) {
-                $stopTown->setTownId(null);
-            }
         }
 
         return $this;

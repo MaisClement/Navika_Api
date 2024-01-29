@@ -8,9 +8,8 @@ php bin/console doctrine:migrations:migrate --no-interaction
 
 php bin/console make:migration
 
-php bin/console app:init:sncf
-php bin/console app:init:town /var/www/navika/data/file/communes.geojson /var/www/navika/data/file/zip_code.json
-php bin/console app:init:town /home/walnutlebg/navika_data/communes.geojson /home/walnutlebg/navika_data/zip_code.json
+php bin/console app:sncf:init
+php bin/console app:town:init /var/www/navika/data/file/communes.geojson /var/www/navika/data/file/zip_code.json
 
 php bin/console app:provider:add "tc" "IDFM"        "Île-de-France Mobilités" "Île-de-France"                   "6449c52caeceb71273a42dd3" 
 php bin/console app:provider:add "tc" "BIBUS"       "Bibus - Brest Métropole" "Brest"                           "55ffbe0888ee387348ccb97d" 
@@ -19,68 +18,45 @@ php bin/console app:provider:add "tc" "OURA"        "OURA - Agrégat AURA"     "
 php bin/console app:provider:add "tc" "SIBRA"       "Sibra - Annecy"          "CA du Grand Annecy"              "5bd9843e634f413220f7f04a" 
 php bin/console app:provider:add "tc" "SYNCHRO"     "Synchro - Chambéry"      "CA du Grand Chambéry"            "5bae8c2806e3e75b699dc606"
 php bin/console app:provider:add "tc" "CTS"         "CTS - Strasbourg"        "Eurométropole de Strasbourg"     "5ae1715488ee384c8ba0342b"
-
 php bin/console app:provider:add "tc" "IRIGO"	    "Irigo - Angers"	      "Angers Loire Métropole"	        "6178cee254e3b3f0744a1318"
 php bin/console app:provider:add "tc" "ILEVIA"	    "Ilévia - Lille"	      "Métropole Européenne de Lille"	"58b69b59a3a7295a7d8251db"
 php bin/console app:provider:add "tc" "CTRL"	    "CTRL - Lorient"           "CA Lorient Agglomération"	    "61c97dd9a3499a9c8e8b8ea0"
 php bin/console app:provider:add "tc" "ASTUCE"	    "Astuce - Rouen" 	      "Métropole Rouen Normandie"	    "5cd4321f8b4c4137d1244318"
-
 php bin/console app:provider:add "tc" "ZOU"	        "Zou - Région SUD"	      "Provence-Alpes-Côte d’Azur"	    "5ce8865306e3e760b2d57ec0"
 php bin/console app:provider:add "tc" "LIA"	        "LiA - Le Havre"	      "Le Havre Seine Métropole"	    "617c12b7f9aaa6853cf6d303"
 php bin/console app:provider:add "tc" "FILBLEU"	    "Fil Bleu - Tours"	      "Mobilités de Touraine"	        "638157af7f6b7cd00e2908e1"
 php bin/console app:provider:add "tc" "TBM"	        "TBM - Bordeaux"	      "Bordeaux Métropole"	            "61a025b3a95e6e49a64ed7a0"
-
 php bin/console app:provider:add "tc" "TISSEO"	    "Tisséo - Toulouse"	      "Toulouse Métropole"	            "56b0c2fba3a7294d39b88a86"
 
-php bin/console app:provider:add "bikes" "VELIB"     "Vélib‘"       "Paris"            "https://velib-metropole-opendata.smoove.pro/opendata/Velib_Metropole/" 
-php bin/console app:provider:add "bikes" "VELOV"     "Vélo‘v"       "Lyon"             "https://transport.data.gouv.fr/gbfs/lyon/" 
-php bin/console app:provider:add "bikes" "CVELO"     "C.Vélo"       "Clermont Ferrand" "https://clermontferrand.publicbikesystem.net/customer/gbfs/v2/" 
-php bin/console app:provider:add "bikes" "VELOMAGG"  "Vélomagg‘"    "Montpellier"      "https://montpellier-fr-smoove.klervi.net/gbfs/" 
-php bin/console app:provider:add "bikes" "BENSANC"   "Besançon"     "Besançon"         "https://transport.data.gouv.fr/gbfs/besancon/" 
-php bin/console app:provider:add "bikes" "VLILLE"    "V‘lille"      "Lille"            "https://transport.data.gouv.fr/gbfs/vlille/" 
-php bin/console app:provider:add "bikes" "CRISTOLIB" "Cristolib"    "Créteil"          "https://transport.data.gouv.fr/gbfs/creteil/" 
-php bin/console app:provider:add "bikes" "CYCLIC"    "Cy‘clic"      "Rouen"            "https://transport.data.gouv.fr/gbfs/rouen/" 
-php bin/console app:provider:add "bikes" "VELAM"     "Vélam"        "Amiens"           "https://transport.data.gouv.fr/gbfs/amiens/" 
-php bin/console app:provider:add "bikes" "VELOSTAN"  "vélOstan’lib" "Nancy"            "https://transport.data.gouv.fr/gbfs/nancy/" 
-php bin/console app:provider:add "bikes" "VELOCITE"  "Vélocité"     "Mulhouse"         "https://transport.data.gouv.fr/gbfs/mulhouse/" 
-php bin/console app:provider:add "bikes" "STAR"      "STAR"         "Rennes"           "https://eu.ftp.opendatasoft.com/star/gbfs/" 
-php bin/console app:provider:add "bikes" "VELIVERT"  "VéliVert"     "St Etienne"       "https://saint-etienne-fr-smoove.klervi.net/gbfs/" 
-php bin/console app:provider:add "bikes" "VELOTOUS"  "VélÔToulouse" "Toulouse"         "https://transport.data.gouv.fr/gbfs/toulouse/" 
-php bin/console app:provider:add "bikes" "VCUB"      "VCub"         "Bordeaux"         "https://transport.data.gouv.fr/gbfs/vcub/" 
-php bin/console app:provider:add "bikes" "VELOPOP"   "Velopop’"     "Avignon"          "https://avignon-gbfs.klervi.net/gbfs/" 
-php bin/console app:provider:add "bikes" "VELO2"     "Vélo²"        "Cergy"            "https://transport.data.gouv.fr/gbfs/cergy-pontoise/" 
-php bin/console app:provider:add "bikes" "BICLOO"    "Bicloo"       "Nantes"           "https://transport.data.gouv.fr/gbfs/nantes/" 
-php bin/console app:provider:add "bikes" "VELOCEO"   "Vélocéo"      "Vannes"           "https://vannes-gbfs.klervi.net/gbfs/" 
-php bin/console app:provider:add "bikes" "OPTYMO"    "Optymo"       "Belfort"          "https://belfort-gbfs.klervi.net/gbfs/"
+php bin/console app:provider:add "bikes" "VELIB"     "Vélib‘"        "Paris"            "5a4e60f2b595080ee8014056" 
+php bin/console app:provider:add "bikes" "VELOV"     "Vélo‘v"        "Lyon"             "5defcb1c634f413ad267d96d" 
+php bin/console app:provider:add "bikes" "CVELO"     "C.Vélo"        "Clermont Ferrand" "6397c0febc6459ee9ac8cd20" 
+php bin/console app:provider:add "bikes" "VELOMAGG"  "Vélomagg‘"     "Montpellier"      "6253e8fc6ed8eb554148b112" 
+php bin/console app:provider:add "bikes" "BENSANC"   "Besançon"      "Besançon"         "619216dea5f540a0bdf534a5" 
+php bin/console app:provider:add "bikes" "CRISTOLIB" "Cristolib"     "Créteil"          "5defc8f7634f41318eb5e239" 
+php bin/console app:provider:add "bikes" "LOVELO"    "Lovélo"        "Rouen"            "64919d2f03c6861c686e0e87" 
+php bin/console app:provider:add "bikes" "VELAM"     "Vélam"         "Amiens"           "5defc608634f4127aa13e6f4" 
+php bin/console app:provider:add "bikes" "VELOSTAN"  "vélOstan’lib"  "Nancy"            "5defcd0e634f4144046defdc" 
+php bin/console app:provider:add "bikes" "VELOCITE"  "Vélocité"      "Mulhouse"         "5defcbf3634f413f580ec0f0" 
+php bin/console app:provider:add "bikes" "STAR"      "STAR, le vélo" "Rennes"           "5dd4ba78dee7e7341e936949" 
+php bin/console app:provider:add "bikes" "VELIVERT"  "VéliVert"      "St Etienne"       "5d68f93d6f4441107ddce8e7" 
+php bin/console app:provider:add "bikes" "VELOTOUS"  "VélÔToulouse"  "Toulouse"         "5d63d89f634f41435baedd40" 
+php bin/console app:provider:add "bikes" "VCUB"      "VCub"          "Bordeaux"         "5d389cce634f416d93046739" 
+php bin/console app:provider:add "bikes" "VELOPOP"   "Velopop’"      "Avignon"          "5d317ef5634f41390c5e2d9c" 
+php bin/console app:provider:add "bikes" "VELO2"     "Vélo²"         "Cergy"            "5d2d98d46f44410ac513d7ad" 
+php bin/console app:provider:add "bikes" "BICLOO"    "Bicloo"        "Nantes"           "5d0b54e08b4c414d10e736e6"
+php bin/console app:provider:add "bikes" "OPTYMO"    "Optymo"        "Belfort"          "5c209625634f41616b51e726"
+php bin/console app:provider:add "bikes" "VELHOP"    "Vélhop"        "Strasbourg"       "65ab0d58c86e8597d65aa47f"
 
-php bin/console app:gbfs:update
-
-php bin/console app:gtfs:update
-
-php bin/console app:town:update
-
-php bin/console app:trafic:update:IDFM
-
-php bin/console app:timetables:update
-
-php bin/console app:provider:reset
-
-php bin/console app:provider:clear
-
-php bin/console app:provider:remove --all
+    // Unavailable
+    php bin/console app:provider:add "bikes" "LEVELO"    "levélo"        "Marseille"        "63c91087b1d439ee08239fc4"
+    php bin/console app:provider:add "bikes" "VLILLE"    "V‘lille"       "Lille"            "5f71dcd11bb82e9f1e748680" 
 
 // ------
-php bin/console app:provider:remove LIA
 */2 * * * * php /var/www/Navika/bin/console app:trafic:update
 0 2 * * * php /var/www/Navika/bin/console app:timetables:update
 0 2 * * * php /var/www/Navika/bin/console app:gbfs:update
 0 */1 * * * php /var/www/Navika/bin/console app:gtfs:update
-
-// Toutes les deux minutes  : app:trafic:update
-// A 2h                     : app:timetables:update
-// A 2h                     : app:gbfs:update
-//
-// Toutes les heures        : app:gtfs:update
 
 git checkout deploy
 git merge master

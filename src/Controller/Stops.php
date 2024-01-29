@@ -4,6 +4,7 @@ namespace App\Controller;
 
 use App\Controller\Functions;
 use App\Repository\StopRouteRepository;
+use App\Repository\TownRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use OpenApi\Attributes as OA;
 use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
@@ -14,10 +15,12 @@ use Symfony\Component\Routing\Annotation\Route;
 class Stops
 {    
     private StopRouteRepository $stopRouteRepository;
+    private TownRepository $townRepository;
     
-    public function __construct(StopRouteRepository $stopRouteRepository)
+    public function __construct(StopRouteRepository $stopRouteRepository, TownRepository $townRepository)
     {
         $this->stopRouteRepository = $stopRouteRepository;
+        $this->townRepository = $townRepository;
     }
     
     /**
@@ -217,6 +220,7 @@ class Stops
             $lines[$key] = Functions::order_line($lines[$key]);
             $place['lines'] = $lines[$key];
             $place['modes'] = $modes[$key];
+
             $echo[] = $place;
         }
 
@@ -227,6 +231,16 @@ class Stops
         }
 
         array_splice($echo, 15);
+
+        // foreach($echo as $key => $e) {
+        //     if ($e['distance'] == 0) {
+        //         $town = $this->townRepository->findTownByCoordinates($e['coord']['lon'], $e['coord']['lat']);
+        //         if ($town != null) {
+        //             $echo[$key]['town'] = $town->getTownName();
+        //             $echo[$key]['zip_code'] = $town->getZipCode();
+        //         }
+        //     }
+        // }
 
         $json = [];
         $json["places"] = $echo;

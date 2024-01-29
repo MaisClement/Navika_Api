@@ -3,6 +3,8 @@
 namespace App\Entity;
 
 use App\Repository\TraficRepository;
+use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\Common\Collections\Collection;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 
@@ -44,6 +46,14 @@ class Trafic
     #[ORM\ManyToOne(inversedBy: 'trafics')]
     #[ORM\JoinColumn(name: "route_id", referencedColumnName: "route_id", nullable: false, onDelete: "CASCADE")]
     private ?Routes $route_id = null;
+
+    #[ORM\OneToMany(mappedBy: 'trafic_id', targetEntity: TraficLinks::class, orphanRemoval: true)]
+    private Collection $traficLinks;
+
+    public function __construct()
+    {
+        $this->traficLinks = new ArrayCollection();
+    }
 
     public function getReport(): ?array
     {
@@ -200,6 +210,36 @@ class Trafic
     public function setRouteId(?Routes $route_id): static
     {
         $this->route_id = $route_id;
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, TraficLinks>
+     */
+    public function getTraficLinks(): Collection
+    {
+        return $this->traficLinks;
+    }
+
+    public function addTraficLink(TraficLinks $traficLink): static
+    {
+        if (!$this->traficLinks->contains($traficLink)) {
+            $this->traficLinks->add($traficLink);
+            $traficLink->setTraficId($this);
+        }
+
+        return $this;
+    }
+
+    public function removeTraficLink(TraficLinks $traficLink): static
+    {
+        if ($this->traficLinks->removeElement($traficLink)) {
+            // set the owning side to null (unless already changed)
+            if ($traficLink->getTraficId() === $this) {
+                $traficLink->setTraficId(null);
+            }
+        }
 
         return $this;
     }

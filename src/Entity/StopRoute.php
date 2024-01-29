@@ -274,25 +274,20 @@ class StopRoute
         return $this;
     }
 
-    public function getStop($lat = null, $lon = null, $isPlace = false): ?array
+    public function getStop($lat = null, $lon = null, $townRepository = null, $isPlace = false): ?array
     {
         $stop = array(
             'id' => $isPlace ? 'stop_area:' . $this->stop_id->getStopId() : $this->stop_id->getStopId(),
-            'name' => (string) $this->stop_id->getStopName(),
-            'type' => (string) $this->stop_id->getParentStation() == null ? 'stop_area' : 'stop_point',
-            'town' => (string) $this->town_name,
-            'zip_code' => (string) $this->zip_code,
+            'name' =>       (string) $this->stop_id->getStopName(),
+            'type' =>       (string) $this->stop_id->getParentStation() == null ? 'stop_area' : 'stop_point',
+            'town' =>       (string) '',
+            'zip_code' =>   (string) '',
             'coord' => array(
-                'lat' => (float) $this->stop_lat,
-                'lon' => (float) $this->stop_lon,
+                'lat' =>    (float) $this->stop_lat,
+                'lon' =>    (float) $this->stop_lon,
             ),
+            'distance' =>   (int)   ($lat != null && $lon != null) ? Functions::calculateDistance($this->stop_lat, $this->stop_lon, $lat, $lon) : 0
         );
-
-        if ($lat != null && $lon != null) {
-            $stop['distance'] = Functions::calculateDistance($this->stop_lat, $this->stop_lon, $lat, $lon);
-        } else {
-            $stop['distance'] = 0;
-        }
 
         return $stop;
     }

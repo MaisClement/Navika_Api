@@ -1,3 +1,4 @@
+!vendor/gtfs/*
 
 ###> symfony/framework-bundle ###
 .env
@@ -10,7 +11,7 @@
 /vendor/
 ###< symfony/framework-bundle ###
 
-
 config.yaml
 src/Command/add.txt
 config/key/
+
