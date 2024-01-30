@@ -271,7 +271,6 @@ class Routes
                 "id" => (string) $report->getReportId(),
                 "status" => (string) $report->getStatus(),
                 "cause" => (string) $report->getCause(),
-                "category" => (string) $report->getCategory(),
                 "severity" => (int) $report->getSeverity(),
                 "effect" => (string) $report->getEffect(),
                 "updated_at" => (string) $report->getUpdatedAt()->format("Y-m-d\TH:i:sP"),

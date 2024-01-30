@@ -122,7 +122,6 @@ class IDFM_Trafic extends Command
                             $msg->setReportId($disruption->id ?? '');
                             $msg->setStatus($disruption->status);
                             $msg->setCause($disruption->cause);
-                            $msg->setCategory($disruption->category);
                             $msg->setSeverity(Functions::getSeverity($disruption->severity->effect, $disruption->cause, $disruption->status));
                             $msg->setEffect($disruption->severity->effect);
                             $msg->setUpdatedAt(DateTime::createFromFormat('Ymd\THis', $disruption->updated_at));
@@ -148,9 +147,8 @@ class IDFM_Trafic extends Command
 
                             $msg = new Trafic();
                             $msg->setReportId(  $disruption->id ?? ''                                                                          );
-                            $msg->setStatus     (    $disruption->status                                                                            );
+                            $msg->setStatus     (    $disruption->status                                                                       );
                             $msg->setCause(     $disruption->cause                                                                             );
-                            $msg->setCategory(  $disruption->category                                                                          );
                             $msg->setSeverity(  Functions::getSeverity($disruption->severity->effect, $disruption->cause, $disruption->status) );
                             $msg->setEffect(    $disruption->severity->effect                                                                  );
                             $msg->setUpdatedAt( DateTime::createFromFormat('Ymd\THis', $disruption->updated_at)                                );

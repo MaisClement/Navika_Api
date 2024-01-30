@@ -25,9 +25,6 @@ class Trafic
     #[ORM\Column(length: 255, nullable: true)]
     private ?string $cause = null;
 
-    #[ORM\Column(length: 255, nullable: true)]
-    private ?string $category = null;
-
     #[ORM\Column]
     private ?int $severity = null;
 
@@ -61,7 +58,6 @@ class Trafic
             "id" =>         $this->getReportId(),
             "status" =>     $this->getStatus(),
             "cause" =>      $this->getCause(),
-            "category" =>   $this->getCategory(),
             "severity" =>   $this->getSeverity(),
             "effect" =>     $this->getEffect(),
             "updated_at" => $this->getUpdatedAt()->format("Y-m-d\TH:i:sP"),
@@ -80,7 +76,6 @@ class Trafic
             "line" =>       (string)    $this->getRouteId()->getRouteId(),
             "status" =>     (string)    $this->getStatus(),
             "cause" =>      (string)    $this->getCause(),
-            "category" =>   (string)    $this->getCategory(),
             "severity" =>   (int)       $this->getSeverity(),
             "effect" =>     (string)    $this->getEffect(),
             "updated_at" => $this->getUpdatedAt()->format("Y-m-d\TH:i:sP"),
@@ -126,18 +121,6 @@ class Trafic
     public function setCause(?string $cause): static
     {
         $this->cause = $cause;
-
-        return $this;
-    }
-
-    public function getCategory(): ?string
-    {
-        return $this->category;
-    }
-
-    public function setCategory(?string $category): static
-    {
-        $this->category = $category;
 
         return $this;
     }
