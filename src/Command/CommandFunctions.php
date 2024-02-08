@@ -38,4 +38,31 @@ class CommandFunctions
 
         return [];
     }
+
+    public static function getStatusFromActivePeriods($activePeriods)
+    {
+        $currentTime = time();
+        $isFuture = false;
+        $isPast = false;
+
+        foreach($activePeriods as $periods) {
+            $start =    (int)   $periods->start;
+            $end =      (int)   $periods->end;
+
+            if ($currentTime < $start) {
+                $isFuture = true;
+            } elseif ($currentTime > $end) {
+                $isPast = true;
+            } else {
+                return 'active';
+            }
+        }
+
+        if ($isFuture == true) {
+            return 'future';
+        }
+        if ($isFuture == true) {
+            return 'past';
+        }
+    }
 }

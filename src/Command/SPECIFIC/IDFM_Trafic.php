@@ -100,7 +100,7 @@ class IDFM_Trafic extends Command
             $progressIndicator->advance();
 
             if ($disruption->status != 'past') {
-                $reports[$disruption->id] = $disruption;
+                $reports['IDFM:' . $disruption->id] = $disruption;
             }
         }
 
@@ -119,18 +119,18 @@ class IDFM_Trafic extends Command
                             $disruption = $reports[$id];
 
                             $msg = new Trafic();
-                            $msg->setReportId($disruption->id ?? '');
-                            $msg->setStatus($disruption->status);
-                            $msg->setCause($disruption->cause);
-                            $msg->setSeverity(Functions::getSeverity($disruption->severity->effect, $disruption->cause, $disruption->status));
-                            $msg->setEffect($disruption->severity->effect);
-                            $msg->setUpdatedAt(DateTime::createFromFormat('Ymd\THis', $disruption->updated_at));
-                            $msg->setTitle(Functions::getReportsMesageTitle($disruption->messages));
-                            $msg->setText(Functions::getReportsMesageText($disruption->messages));
-                            $msg->setRouteId($route);
+                            $msg->setReportId   ( 'IDFM:' . $disruption->id                                                                      );
+                            $msg->setStatus     ( $disruption->status                                                                            );
+                            $msg->setCause      ( $disruption->cause                                                                             );
+                            $msg->setSeverity   ( Functions::getSeverity($disruption->severity->effect, $disruption->cause, $disruption->status) );
+                            $msg->setEffect     ( $disruption->severity->effect                                                                  );
+                            $msg->setUpdatedAt  ( DateTime::createFromFormat('Ymd\THis', $disruption->updated_at)                                );
+                            $msg->setTitle      ( Functions::getReportsMesageTitle($disruption->messages)                                        );
+                            $msg->setText       ( Functions::getReportsMesageText($disruption->messages)                                         );
+                            $msg->setRouteId    ( $route                                                                                         );
                             
                             $this->entityManager->persist($msg);
-                            $r[$disruption->id] = $msg;
+                            $r['IDFM:' . $disruption->id] = $msg;
                         }
                     }
                 }
@@ -146,18 +146,18 @@ class IDFM_Trafic extends Command
                             $disruption = $reports[$id];
 
                             $msg = new Trafic();
-                            $msg->setReportId(  $disruption->id ?? ''                                                                          );
-                            $msg->setStatus     (    $disruption->status                                                                       );
-                            $msg->setCause(     $disruption->cause                                                                             );
-                            $msg->setSeverity(  Functions::getSeverity($disruption->severity->effect, $disruption->cause, $disruption->status) );
-                            $msg->setEffect(    $disruption->severity->effect                                                                  );
-                            $msg->setUpdatedAt( DateTime::createFromFormat('Ymd\THis', $disruption->updated_at)                                );
-                            $msg->setTitle(     Functions::getReportsMesageTitle($disruption->messages)                                        );
-                            $msg->setText(      Functions::getReportsMesageText($disruption->messages)                                         );
-                            $msg->setRouteId(   $route);
+                            $msg->setReportId   ( 'IDFM:' . $disruption->id                                                                      );
+                            $msg->setStatus     ( $disruption->status                                                                            );
+                            $msg->setCause      ( $disruption->cause                                                                             );
+                            $msg->setSeverity   ( Functions::getSeverity($disruption->severity->effect, $disruption->cause, $disruption->status) );
+                            $msg->setEffect     ( $disruption->severity->effect                                                                  );
+                            $msg->setUpdatedAt  ( DateTime::createFromFormat('Ymd\THis', $disruption->updated_at)                                );
+                            $msg->setTitle      ( Functions::getReportsMesageTitle($disruption->messages)                                        );
+                            $msg->setText       ( Functions::getReportsMesageText($disruption->messages)                                         );
+                            $msg->setRouteId    ( $route                                                                                         );
                             
                             $this->entityManager->persist($msg);
-                            $r[$disruption->id] = $msg;
+                            $r['IDFM:' . $disruption->id] = $msg;
                         }
                     }
                 }
@@ -167,7 +167,7 @@ class IDFM_Trafic extends Command
         // On calcule les notifications
         $progressIndicator->setMessage('Looking for notification...');
 
-        $old_messages = $this->traficRepository->findAll();
+        $old_messages = $this->traficRepository->findByLikeField('id', 'IDFM:');
 
         // Pour tous les old_messages, si il existe deja un message avec le meme ReportId on supprime
         foreach ($old_messages as $old_message) {
@@ -183,33 +183,30 @@ class IDFM_Trafic extends Command
         $notif = new Notify($this->messaging);
 
         // On envoie les notification
-        foreach($r as $report) {
-
-            //TOPIC  if ($report->getRouteId() != null) {
-            //TOPIC      $topic = str_replace( ':' , '_', $report->getRouteId()->getRouteId() );
-            //TOPIC      $title = $report->getTitle();
-            //TOPIC      $body = $report->getText();
-            //TOPIC
-            //TOPIC      $notif->sendNotificationToTopic($topic, $title, $body);
-            //TOPIC  }
-            
+        foreach($r as $report) {            
             if ($report->getRouteId() != null) {
                 foreach ($report->getRouteId()->getRouteSubs() as $sub) {
                     $progressIndicator->advance();
 
                     // On vérifie que l'on soit ne soit pas un jour interdit
-                    $allow = true;  
+                    $allow = true;
+
+                    print_r($report->getReportMessage());
                    
                     if ($sub->getType() == 'all' && $report->getSeverity() < 3 ) {
                         $allow = false;
                     } else if ($sub->getType() == 'alert' && $report->getSeverity() < 4 ) {
                         $allow = false;
                     }
+
+                    print_r([$allow, 'ON ENVOI']);
     
                     if ($allow == true) {
                         $token = $sub->getSubscriberId()->getFcmToken();
                         $title = $report->getTitle();
                         $body = $report->getText();
+
+                        echo 'SEND NOTIFICATIONS !';
 
                         try {
                             $notif->sendMessage($token, $report->getReportMessage() );
@@ -234,7 +231,6 @@ class IDFM_Trafic extends Command
 
         // On sauvegarde
         $progressIndicator->setMessage('Saving...');
-
         $this->entityManager->flush();
 
         // Monitoring

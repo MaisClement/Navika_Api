@@ -58,6 +58,9 @@ class TempStopRoute
     #[ORM\Column(length: 255, nullable: true)]
     private ?string $zip_code = null;
 
+    #[ORM\Column(length: 255, nullable: true)]
+    private ?string $location_type = null;
+
     public function getRouteKey(): ?string
     {
         return $this->route_key;
@@ -246,6 +249,18 @@ class TempStopRoute
     public function setZipCode(?string $zip_code): static
     {
         $this->zip_code = $zip_code;
+
+        return $this;
+    }
+
+    public function getLocationType(): ?string
+    {
+        return $this->location_type;
+    }
+
+    public function setLocationType(?string $location_type): static
+    {
+        $this->location_type = $location_type;
 
         return $this;
     }

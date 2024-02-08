@@ -64,7 +64,7 @@ class Update extends Command
         $tc_providers = $this->providerRepository->FindBy(['type' => 'tc']);
 
         foreach ($tc_providers as $tc_provider) {
-            $output->writeln('  > ' . $tc_provider->getName());
+            $output->writeln('    > ' . $tc_provider->getName());
 
             $ressource = CommandFunctions::getGTFSDataFromApi($tc_provider);
 
@@ -126,7 +126,7 @@ class Update extends Command
             unset($zip);
 
             // ---
-            $output->writeln('    > Unzip gtfs...');
+            $output->writeln('      > Unzip gtfs...');
 
             $zip = new ZipArchive;
             if (!$zip->open($zip_name)) {
@@ -137,7 +137,7 @@ class Update extends Command
             $zip->extractTo($dir . '/' . $provider . '/');
             $zip->close();
 
-            $output->writeln('    > Format file...');
+            $output->writeln('      > Format file...');
 
             foreach ($ressource['filenames'] as $filename) {
                 $content = file_get_contents($dir . '/' . $provider . '/' . $filename);
@@ -156,7 +156,7 @@ class Update extends Command
             unlink($zip_name);
 
             // import gtfs
-            $output->writeln('    > Import new GTFS...');
+            $output->writeln('      > Import new GTFS...');
             $err = 0;
             $types = [
                 'agency' => ['agency_id'],

@@ -12,7 +12,6 @@
         "doctrine/doctrine-bundle": "^2.10",
         "doctrine/doctrine-migrations-bundle": "^3.2",
         "doctrine/orm": "^2.15",
-        "gtfs/realtime-php": "^1.0",
         "kreait/firebase-bundle": "^5.0",
         "kreait/firebase-php": "^7.0",
         "mjaschen/phpgeo": "^4.2",
@@ -32,7 +31,8 @@
         "symfony/serializer": "6.3.*",
         "symfony/stopwatch": "6.3.*",
         "symfony/twig-bundle": "6.3.*",
-        "symfony/yaml": "6.3.*"
+        "symfony/yaml": "6.3.*",
+        "lowa/gtfs-realtime-php": "^1.0"
     },
     "config": {
         "allow-plugins": {

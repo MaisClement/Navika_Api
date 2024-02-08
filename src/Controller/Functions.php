@@ -1135,4 +1135,20 @@ class Functions
     
         return $url;
     }
+
+    public static function getCentroidOfStops($points) {
+        $num = count($points);
+        $lat = 0;
+        $lon = 0;
+    
+        foreach ($points as $point) {
+            $lat += $point['coord']['lat'];
+            $lon += $point['coord']['lon'];
+        }
+    
+        return [
+            'lat' => $lat / $num,
+            'lon' => $lon / $num
+        ];
+    }
 }

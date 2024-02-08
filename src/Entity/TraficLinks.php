@@ -17,7 +17,7 @@ class TraficLinks
     private ?string $link = null;
 
     #[ORM\ManyToOne(inversedBy: 'traficLinks')]
-    #[ORM\JoinColumn(nullable: false)]
+    #[ORM\JoinColumn(nullable: false, onDelete: "CASCADE")]
     private ?Trafic $trafic_id = null;
 
     public function getId(): ?int

@@ -21,12 +21,16 @@ final class Version20240129180211 extends AbstractMigration
     {
         // this up() migration is auto-generated, please modify it to your needs
         $this->addSql('CREATE TABLE trafic_links (id INT AUTO_INCREMENT NOT NULL, trafic_id_id INT NOT NULL, link VARCHAR(255) NOT NULL, INDEX IDX_74090179DACF3E36 (trafic_id_id), PRIMARY KEY(id)) DEFAULT CHARACTER SET utf8mb4 COLLATE `utf8mb4_unicode_ci` ENGINE = InnoDB');
-        $this->addSql('ALTER TABLE trafic_links ADD CONSTRAINT FK_74090179DACF3E36 FOREIGN KEY (trafic_id_id) REFERENCES trafic (id)');
+        $this->addSql('ALTER TABLE trafic_links ADD CONSTRAINT FK_74090179DACF3E36 FOREIGN KEY (trafic_id_id) REFERENCES trafic (id) ON DELETE CASCADE');
         $this->addSql('ALTER TABLE stop_town DROP FOREIGN KEY FK_A60005BB3902063D');
         $this->addSql('ALTER TABLE stop_town DROP FOREIGN KEY FK_A60005BB75E23604');
         $this->addSql('DROP TABLE stop_town');
         $this->addSql('ALTER TABLE provider ADD gtfs_url VARCHAR(255) DEFAULT NULL, ADD gbfs_url VARCHAR(255) DEFAULT NULL, ADD gtfsrt_service_alerts VARCHAR(255) DEFAULT NULL, ADD gtfsrt_vehicle_positions VARCHAR(255) DEFAULT NULL, ADD gtfsrt_trip_updates VARCHAR(255) DEFAULT NULL, ADD siri VARCHAR(255) DEFAULT NULL, CHANGE flag flag ENUM("0", "1", "2")');
         $this->addSql('ALTER TABLE subscribers CHANGE created_at created_at DATETIME NOT NULL');
+        $this->addSql('ALTER TABLE trafic DROP category');
+        $this->addSql('ALTER TABLE trafic CHANGE updated_at updated_at DATETIME DEFAULT NULL');
+        $this->addSql('ALTER TABLE stop_route ADD location_type VARCHAR(255) DEFAULT NULL');
+        $this->addSql('ALTER TABLE temp_stop_route ADD location_type VARCHAR(255) DEFAULT NULL');
     }
 
     public function down(Schema $schema): void
@@ -39,5 +43,9 @@ final class Version20240129180211 extends AbstractMigration
         $this->addSql('DROP TABLE trafic_links');
         $this->addSql('ALTER TABLE subscribers CHANGE created_at created_at DATETIME NOT NULL COMMENT \'(DC2Type:datetime_immutable)\'');
         $this->addSql('ALTER TABLE provider DROP gtfs_url, DROP gbfs_url, DROP gtfsrt_service_alerts, DROP gtfsrt_vehicle_positions, DROP gtfsrt_trip_updates, DROP siri, CHANGE flag flag VARCHAR(255) DEFAULT NULL');
-        }
+        $this->addSql('ALTER TABLE trafic ADD category VARCHAR(255) DEFAULT NULL');
+        $this->addSql('ALTER TABLE trafic CHANGE updated_at updated_at DATETIME NOT NULL');
+        $this->addSql('ALTER TABLE stop_route DROP location_type');
+        $this->addSql('ALTER TABLE temp_stop_route DROP location_type');
+    }
 }

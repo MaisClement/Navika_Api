@@ -31,7 +31,7 @@ class Trafic
     #[ORM\Column(length: 255)]
     private ?string $effect = null;
 
-    #[ORM\Column]
+    #[ORM\Column(nullable: true)]
     private ?\DateTime $updated_at = null;
 
     #[ORM\Column(type: Types::TEXT, nullable: true)]
@@ -44,28 +44,12 @@ class Trafic
     #[ORM\JoinColumn(name: "route_id", referencedColumnName: "route_id", nullable: false, onDelete: "CASCADE")]
     private ?Routes $route_id = null;
 
-    #[ORM\OneToMany(mappedBy: 'trafic_id', targetEntity: TraficLinks::class, orphanRemoval: true)]
+    #[ORM\OneToMany(mappedBy: 'trafic_id', targetEntity: TraficLinks::class)]
     private Collection $traficLinks;
 
     public function __construct()
     {
         $this->traficLinks = new ArrayCollection();
-    }
-
-    public function getReport(): ?array
-    {
-        return array(
-            "id" =>         $this->getReportId(),
-            "status" =>     $this->getStatus(),
-            "cause" =>      $this->getCause(),
-            "severity" =>   $this->getSeverity(),
-            "effect" =>     $this->getEffect(),
-            "updated_at" => $this->getUpdatedAt()->format("Y-m-d\TH:i:sP"),
-            "message" =>    array(
-                "title" =>      $this->getTitle(),
-                "text" =>       $this->getText(),
-            ),
-        );
     }
 
     public function getReportMessage(): ?array
@@ -78,7 +62,7 @@ class Trafic
             "cause" =>      (string)    $this->getCause(),
             "severity" =>   (int)       $this->getSeverity(),
             "effect" =>     (string)    $this->getEffect(),
-            "updated_at" => $this->getUpdatedAt()->format("Y-m-d\TH:i:sP"),
+            "updated_at" =>             $this->getUpdatedAt() == null ? null : $this->getUpdatedAt()->format("Y-m-d\TH:i:sP"),
             "title" =>      (string)    $this->getTitle(),
             "body" =>       (string)    $this->getText(),
         );

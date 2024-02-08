@@ -1,5 +1,3 @@
-!vendor/gtfs/*
-
 ###> symfony/framework-bundle ###
 .env
 /.env.local

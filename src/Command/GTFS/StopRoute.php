@@ -36,11 +36,14 @@ class StopRoute extends Command
         $db = $this->entityManager->getConnection();
 
         // --
-
         $output->writeln('> Generate Temp Stop Route...');
-
         $this->dbServices->TruncateTable($db, 'temp_stop_route');
+
+        $output->writeln('> Generate Temp Stop Route 1/2...');
         $this->dbServices->generateTempStopRoute($db);
+
+        $output->writeln('> Generate Temp Stop Route 2/2...');
+        $this->dbServices->generateTempStopRoute2($db);
 
         // ---
         $output->writeln('> Updating Stop Route...');

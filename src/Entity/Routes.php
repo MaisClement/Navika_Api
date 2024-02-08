@@ -268,15 +268,15 @@ class Routes
             $route_id = $this->route_id;
 
             $r = array(
-                "id" => (string) $report->getReportId(),
-                "status" => (string) $report->getStatus(),
-                "cause" => (string) $report->getCause(),
-                "severity" => (int) $report->getSeverity(),
-                "effect" => (string) $report->getEffect(),
-                "updated_at" => (string) $report->getUpdatedAt()->format("Y-m-d\TH:i:sP"),
-                "message" => array(
-                    "title" => $report->getTitle(),
-                    "text" => $report->getText(),
+                "id" =>         (string) $report->getReportId(),
+                "status" =>     (string) $report->getStatus(),
+                "cause" =>      (string) $report->getCause(),
+                "severity" =>   (int)    $report->getSeverity(),
+                "effect" =>     (string) $report->getEffect(),
+                "updated_at" =>          $report->getUpdatedAt() == null ? null : $report->getUpdatedAt()->format("Y-m-d\TH:i:sP"),
+                "message" =>    array(
+                    "title" =>      $report->getTitle(),
+                    "text" =>       $report->getText(),
                 ),
             );
 
