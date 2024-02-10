@@ -164,7 +164,7 @@ class Places
             try {
                 if (!isset($stop_places[$stop->getStopId()->getStopId()])) {
 
-                    $stop_places[$stop->getStopId()->getStopId()] = $stop->getStop($lat, $lon);
+                    $stop_places[$stop->getStopId()->getStopId()] = $stop->getStop($lat, $lon, true);
                     
                     $lines[$stop->getStopId()->getStopId()] = [];
                     $modes[$stop->getStopId()->getStopId()] = [];
