@@ -109,7 +109,7 @@ class IDFM_Trafic extends Command
             $progressIndicator->advance();
 
             foreach ($line->line->links as $link) {
-                $id = $link->id;
+                $id = 'IDFM:' . $link->id;
 
                 if ($link->type == "disruption") {
                     if (isset($reports[$id])) {
