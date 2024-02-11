@@ -154,7 +154,7 @@ class Trafic_GTFS extends Command
                 // On calcule les notifications
                 $progressIndicator->setMessage('Looking for notification...');
         
-                $old_messages = $this->traficRepository->findByLikeField('id', $provider->getId() . ':');
+                $old_messages = $this->traficRepository->findByLikeField('report_id', $provider->getId() . ':');
         
                 // Pour tous les old_messages, si il existe deja un message avec le meme ReportId on supprime
                 foreach ($old_messages as $old_message) {
