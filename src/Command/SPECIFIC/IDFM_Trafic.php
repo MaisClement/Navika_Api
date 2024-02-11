@@ -109,7 +109,7 @@ class IDFM_Trafic extends Command
             $progressIndicator->advance();
 
             foreach ($line->line->links as $link) {
-                $id = 'IDFM:' . $link->id;
+                $id = $link->id;
 
                 if ($link->type == "disruption") {
                     if (isset($reports[$id])) {
@@ -167,7 +167,7 @@ class IDFM_Trafic extends Command
         // On calcule les notifications
         $progressIndicator->setMessage('Looking for notification...');
 
-        $old_messages = $this->traficRepository->findByLikeField('id', 'IDFM:');
+        $old_messages = $this->traficRepository->findByLikeField('report_id', 'IDFM:');
 
         // Pour tous les old_messages, si il existe deja un message avec le meme ReportId on supprime
         foreach ($old_messages as $old_message) {
