@@ -109,7 +109,7 @@ class IDFM_Trafic extends Command
             $progressIndicator->advance();
 
             foreach ($line->line->links as $link) {
-                $id = $link->id;
+                $id = 'IDFM:' . $link->id;
 
                 if ($link->type == "disruption") {
                     if (isset($reports[$id])) {
@@ -136,7 +136,7 @@ class IDFM_Trafic extends Command
                 }
             }
             foreach ($line->line->network->links as $link) {
-                $id = $link->id;
+                $id = 'IDFM:' . $link->id;
 
                 if ($link->type == "disruption") {
                     if (isset($reports[$id])) {
@@ -190,15 +190,12 @@ class IDFM_Trafic extends Command
 
                     // On vérifie que l'on soit ne soit pas un jour interdit
                     $allow = true;
-
-                    print_r($report->getReportMessage());
                    
                     if ($sub->getType() == 'all' && $report->getSeverity() < 3 ) {
                         $allow = false;
                     } else if ($sub->getType() == 'alert' && $report->getSeverity() < 4 ) {
                         $allow = false;
                     }
-
                     print_r([$allow, 'ON ENVOI']);
     
                     if ($allow == true) {
