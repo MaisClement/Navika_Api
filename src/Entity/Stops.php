@@ -73,16 +73,12 @@ class Stops
     #[ORM\OneToMany(mappedBy: 'origin_id', targetEntity: FareRules::class)]
     private Collection $fareRules;
 
-    #[ORM\OneToMany(mappedBy: 'stop_id', targetEntity: StopTown::class)]
-    private Collection $stopTowns;
-
     public function __construct()
     {
         $this->stopTimes = new ArrayCollection();
         $this->pathways = new ArrayCollection();
         $this->transfers = new ArrayCollection();
         $this->fareRules = new ArrayCollection();
-        $this->stopTowns = new ArrayCollection();
     }
 
     public function getProviderId(): ?Provider
@@ -384,36 +380,6 @@ class Stops
         // set the owning side to null (unless already changed)
         if ($this->fareRules->removeElement($fareRule) && $fareRule->getOriginId() === $this) {
             $fareRule->setOriginId(null);
-        }
-
-        return $this;
-    }
-
-    /**
-     * @return Collection<int, StopTown>
-     */
-    public function getStopTowns(): Collection
-    {
-        return $this->stopTowns;
-    }
-
-    public function addStopTown(StopTown $stopTown): static
-    {
-        if (!$this->stopTowns->contains($stopTown)) {
-            $this->stopTowns->add($stopTown);
-            $stopTown->setStopId($this);
-        }
-
-        return $this;
-    }
-
-    public function removeStopTown(StopTown $stopTown): static
-    {
-        if ($this->stopTowns->removeElement($stopTown)) {
-            // set the owning side to null (unless already changed)
-            if ($stopTown->getStopId() === $this) {
-                $stopTown->setStopId(null);
-            }
         }
 
         return $this;

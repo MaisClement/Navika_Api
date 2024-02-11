@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Command;
+namespace App\Command\SPECIFIC;
 
 use App\Controller\Functions;
 use App\Entity\StopRoute;
@@ -15,7 +15,7 @@ use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
 
-class SNCF_Stops extends Command
+class SNCF_Update extends Command
 {
     private $entityManager;
 

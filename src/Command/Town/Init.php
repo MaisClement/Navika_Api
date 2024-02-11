@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Command;
+namespace App\Command\Town;
 
 use App\Entity\Town;
 use CrEOF\Spatial\PHP\Types\Geography\Polygon;
@@ -12,7 +12,7 @@ use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Helper\ProgressIndicator;
 use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
 
-class Town_Init extends Command
+class Init extends Command
 {
     private $entityManager;
     
@@ -26,7 +26,7 @@ class Town_Init extends Command
     protected function configure(): void
     {
         $this
-            ->setName('app:init:town')
+            ->setName('app:town:init')
             ->setDescription('Import ZipCode from JSON file')
             ->addArgument('townfile', InputArgument::REQUIRED, 'JSON file to import')
             ->addArgument('zipcode', InputArgument::REQUIRED, 'JSON file to import');

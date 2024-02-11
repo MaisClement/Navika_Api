@@ -3,6 +3,8 @@
 namespace App\Command\GTFS;
 
 use App\Command\CommandFunctions;
+use App\Service\DBServices;
+use App\Service\FileSplitter;
 use App\Controller\Functions;
 use App\Repository\AgencyRepository;
 use App\Repository\ProviderRepository;
@@ -18,16 +20,20 @@ use Symfony\Component\HttpClient\HttpClient;
 use Symfony\Component\Console\Helper\ProgressBar;
 use ZipArchive;
 
-class GTFS_Update extends Command
+class Update extends Command
 {
     private $entityManager;
+    private DBServices $dbServices;
+    private FileSplitter $fileSplitter;
 
     private ProviderRepository $providerRepository;
     private AgencyRepository $agencyRepository;
 
-    public function __construct(EntityManagerInterface $entityManager, ProviderRepository $providerRepository, AgencyRepository $agencyRepository)
+    public function __construct(EntityManagerInterface $entityManager, DBServices $dbServices, FileSplitter $fileSplitter, ProviderRepository $providerRepository, AgencyRepository $agencyRepository)
     {
         $this->entityManager = $entityManager;
+        $this->dbServices = $dbServices;
+        $this->fileSplitter = $fileSplitter;
 
         $this->providerRepository = $providerRepository;
         $this->agencyRepository = $agencyRepository;
@@ -58,7 +64,7 @@ class GTFS_Update extends Command
         $tc_providers = $this->providerRepository->FindBy(['type' => 'tc']);
 
         foreach ($tc_providers as $tc_provider) {
-            $output->writeln('  > ' . $tc_provider->getName());
+            $output->writeln('    > ' . $tc_provider->getName());
 
             $ressource = CommandFunctions::getGTFSDataFromApi($tc_provider);
 
@@ -120,7 +126,7 @@ class GTFS_Update extends Command
             unset($zip);
 
             // ---
-            $output->writeln('    > Unzip gtfs...');
+            $output->writeln('      > Unzip gtfs...');
 
             $zip = new ZipArchive;
             if (!$zip->open($zip_name)) {
@@ -131,7 +137,7 @@ class GTFS_Update extends Command
             $zip->extractTo($dir . '/' . $provider . '/');
             $zip->close();
 
-            $output->writeln('    > Format file...');
+            $output->writeln('      > Format file...');
 
             foreach ($ressource['filenames'] as $filename) {
                 $content = file_get_contents($dir . '/' . $provider . '/' . $filename);
@@ -150,7 +156,7 @@ class GTFS_Update extends Command
             unlink($zip_name);
 
             // import gtfs
-            $output->writeln('    > Import new GTFS...');
+            $output->writeln('      > Import new GTFS...');
             $err = 0;
             $types = [
                 'agency' => ['agency_id'],
@@ -177,7 +183,6 @@ class GTFS_Update extends Command
                 'translations' => [],
                 'attributions' => []
             ];
-            $fast_delete = ['stop_times'];
 
             ProgressBar::setFormatDefinition('custom', '%percent%% [%bar%] %elapsed% - %remaining% | %message%');
             
@@ -195,7 +200,7 @@ class GTFS_Update extends Command
 
                     // Get field of the table in bd
                     $table_head = [];
-                    $results = CommandFunctions::getColumn($db, $type);
+                    $results = $this->dbServices->getColumns($db, $type);
                     foreach ($results as $obj) {
                         $table_head[] = $obj['COLUMN_NAME'];
                     }
@@ -235,58 +240,52 @@ class GTFS_Update extends Command
                         $progressBar->advance();
 
                         $table = 'temp_' . $type;
-                        CommandFunctions::perpareTempTable($db, $type, $table);
-                        //TY echo '1/5 ';
+                        $this->dbServices->perpareTempTable($db, $type, $table);
 
                         $progressBar->setMessage("Importing $type... (Spliting file...)");
                         $progressBar->advance();
 
-                        $count = CommandFunctions::splitFile($dir, $provider, $type);
+                        $count = $this->fileSplitter->exec($dir, $provider, $type);
+
+                        $progressBar->setMaxSteps( $progressBar->getMaxSteps() + ($count * 3) );
                         
                         for ($i = 1; $i <= $count; $i++) {
-                            $p = round(($i / $count) * 100);
-                            $progressBar->setMessage("Importing $type... (Importing file $p%...)");
-                            $progressBar->advance(0);
+                            $progressBar->setMessage("Importing $type... (Importing file $i / $count...)");
+                            $progressBar->advance();
 
                             $splited_file = $dir . '/' . $provider . '/' . $type . '_' . $i . '.txt';
-                            CommandFunctions::insertFile($db, $table, $splited_file, $header, $set, ',');
-                            //TY echo $i . ' ';
+                            $this->dbServices->insertFile($db, $table, $splited_file, $header, $set, ',');
                         }
-                        //TY echo '2/5 ';
 
                         $progressBar->setMessage("Importing $type... (Add prefix...)");
-                        $progressBar->advance();
+                        $progressBar->advance($count);
 
                         $prefix = $provider . ':';
                         foreach ($columns as $column) {
-                            CommandFunctions::prefixTable($db, $table, $column, $prefix);
+                            $this->dbServices->prefixTable($db, $table, $column, $prefix);
+                            $progressBar->advance(0);
                         }
 
                         $progressBar->setMessage("Importing $type... (Clearing data in table...)");
-                        $progressBar->advance();
-
-                        //TY echo '3/5 ';
+                        $progressBar->advance($count);
 
                         // On enleve la vérification des clé quand on supprime (on supprime toutes les tables de toute façon)
-                        CommandFunctions::initDBUpdate($db);
+                        $this->dbServices->initDBUpdate($db);
 
-                        CommandFunctions::clearProviderDataInTable($db, $type, $provider, in_array($type, $fast_delete));
-                        //TY echo '4/5 ';
+                        $this->dbServices->clearProviderDataInTable($db, $type, $provider);
 
                         $progressBar->setMessage("Importing $type... (Validating data...)");
                         $progressBar->advance();
 
-                        CommandFunctions::copyTable($db, $table, $type);
-                        //TY echo '5/5 ' . PHP_EOL;
+                        $this->dbServices->copyTable($db, $table, $type);
 
                         $progressBar->setMessage("Perfect 👌");
                         $progressBar->advance();
 
                         // On réactive la vérification
-                        CommandFunctions::endDBUpdate($db);
+                        $this->dbServices->endDBUpdate($db);
 
                     } catch (\Exception $e) {
-                        //TY echo PHP_EOL;
                         error_log($e->getMessage());
                         $err++;
                     }
@@ -318,7 +317,6 @@ class GTFS_Update extends Command
         // $this->entityManager->flush();
 
         // Stop Area
-
         $input = new ArrayInput([
             'command' => 'app:gtfs:stoparea'
         ]);
@@ -329,8 +327,6 @@ class GTFS_Update extends Command
             'command' => 'app:gtfs:stoproute'
         ]);
         $returnCode = $this->getApplication()->doRun($input, $output);
-
-        // ----
 
         // SNCF stop
         $input = new ArrayInput([
@@ -344,10 +340,10 @@ class GTFS_Update extends Command
         $output->writeln('<fg=white;bg=green> Ready ✅  </>');
         $output->writeln('<fg=white;bg=green>           </>');
 
-        CommandFunctions::prepareStopRoute($db);
+        $this->dbServices->prepareStopRoute($db);
 
         $output->writeln('> Preparing for query...');
-        CommandFunctions::generateQueryRoute($db);
+        $this->dbServices->generateQueryRoute($db);
 
         $output->writeln('Finished');
         

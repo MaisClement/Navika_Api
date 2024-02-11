@@ -65,9 +65,26 @@ class StopRouteRepository extends ServiceEntityRepository
 
         $qb->select('l')
             ->where("STDistanceSphere(POINT(l.stop_lat, l.stop_lon), POINT(:latitude, :longitude)) <= :distance")
+            ->andWhere('l.location_type = :location_type')
             ->setParameter('latitude', $latitude)
             ->setParameter('longitude', $longitude)
-            ->setParameter('distance', $distance);
+            ->setParameter('distance', $distance)
+            ->setParameter('location_type', '1');
+
+        return $qb->getQuery()->getResult();
+    }
+
+    public function findAllByNearbyLocation(float $latitude, float $longitude, float $distance): array
+    {
+        $qb = $this->createQueryBuilder('l');
+
+        $qb->select('l')
+            ->where("STDistanceSphere(POINT(l.stop_lat, l.stop_lon), POINT(:latitude, :longitude)) <= :distance")
+            ->andWhere('l.route_long_name != :route_long_name')
+            ->setParameter('latitude', $latitude)
+            ->setParameter('longitude', $longitude)
+            ->setParameter('distance', $distance)
+            ->setParameter('route_long_name', 'TER');
 
         return $qb->getQuery()->getResult();
     }

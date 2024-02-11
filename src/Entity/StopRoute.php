@@ -67,6 +67,9 @@ class StopRoute
     #[ORM\Column(length: 255, nullable: true)]
     private ?string $zip_code = null;
 
+    #[ORM\Column(length: 255, nullable: true)]
+    private ?string $location_type = null;
+
     public function getRouteKey(): ?string
     {
         return $this->route_key;
@@ -274,25 +277,32 @@ class StopRoute
         return $this;
     }
 
-    public function getStop($lat = null, $lon = null, $isPlace = false): ?array
+    public function getLocationType(): ?string
+    {
+        return $this->location_type;
+    }
+
+    public function setLocationType(?string $location_type): static
+    {
+        $this->location_type = $location_type;
+
+        return $this;
+    }
+
+    public function getStop($lat = null, $lon = null, $isArea = false): ?array
     {
         $stop = array(
-            'id' => $isPlace ? 'stop_area:' . $this->stop_id->getStopId() : $this->stop_id->getStopId(),
-            'name' => (string) $this->stop_id->getStopName(),
-            'type' => (string) $this->stop_id->getParentStation() == null ? 'stop_area' : 'stop_point',
-            'town' => (string) $this->town_name,
-            'zip_code' => (string) $this->zip_code,
+            'id'   =>       (string) $isArea ? 'stop_area:' . $this->stop_id->getStopId() : $this->stop_id->getStopId(),
+            'name' =>       (string) $this->stop_id->getStopName(),
+            'type' =>       (string) $this->stop_id->getParentStation() == null ? 'stop_area' : 'stop_point',
+            'town' =>       (string) '',
+            'zip_code' =>   (string) '',
             'coord' => array(
-                'lat' => (float) $this->stop_lat,
-                'lon' => (float) $this->stop_lon,
+                'lat' =>    (float) $this->stop_lat,
+                'lon' =>    (float) $this->stop_lon,
             ),
+            'distance' =>   (int)   ($lat != null && $lon != null) ? Functions::calculateDistance($this->stop_lat, $this->stop_lon, $lat, $lon) : 0
         );
-
-        if ($lat != null && $lon != null) {
-            $stop['distance'] = Functions::calculateDistance($this->stop_lat, $this->stop_lon, $lat, $lon);
-        } else {
-            $stop['distance'] = 0;
-        }
 
         return $stop;
     }

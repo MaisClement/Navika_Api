@@ -39,257 +39,30 @@ class CommandFunctions
         return [];
     }
 
-    public static function initDBUpdate($db)
+    public static function getStatusFromActivePeriods($activePeriods)
     {
-        $req = $db->prepare("
-            SET FOREIGN_KEY_CHECKS=0;
-        ");
-        $req->execute([]);
-        return $req;
-    }
+        $currentTime = time();
+        $isFuture = false;
+        $isPast = false;
 
-    public static function endDBUpdate($db)
-    {
-        $req = $db->prepare("
-        SET FOREIGN_KEY_CHECKS=1;
-        ");
-        $req->execute([]);
-        return $req;
-    }
+        foreach($activePeriods as $periods) {
+            $start =    (int)   $periods->start;
+            $end =      (int)   $periods->end;
 
-    public static function clearProviderDataInTable($db, $table, $provider_id, $fast)
-    {
-        if ($fast) {
-            $req = $db->prepare("
-                DELETE FROM $table
-                WHERE provider_id = ?
-                ORDER BY `id` DESC;
-            ");
-        } else {
-            $req = $db->prepare("
-                DELETE FROM $table
-                WHERE provider_id = ?;
-            ");
-        }
-        $req->execute(array($provider_id));
-        return $req;
-    }
-
-    public static function perpareTempTable($db, $table, $temp_table)
-    {
-        $req = $db->prepare("
-            DROP TABLE IF EXISTS $temp_table;
-            CREATE TEMPORARY TABLE $temp_table LIKE $table;
-
-            SELECT MAX(AUTO_INCREMENT + 1) INTO @AutoInc
-            FROM INFORMATION_SCHEMA.TABLES
-            WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = '$table';
-
-            SET @s:=CONCAT('ALTER TABLE $temp_table AUTO_INCREMENT=', @AutoInc);
-            PREPARE stmt FROM @s;
-            EXECUTE stmt;
-            DEALLOCATE PREPARE stmt;
-        ");
-        $req->execute();
-        return $req;
-    }
-
-    public static function splitFile($dir, $provider, $type)
-    {
-        $file = $dir . '/' . $provider . '/' . $type . '.txt';
-
-        // Read the CSV file
-        $csvData = file($file, FILE_IGNORE_NEW_LINES);
-
-        $linesPerFile = 30000;
-
-        $header = array_shift($csvData);
-
-        $splitCount = 1;
-        $currentSplit = [];
-
-        foreach ($csvData as $line) {
-            $currentSplit[] = $line;
-
-            if (count($currentSplit) === $linesPerFile) {
-                CommandFunctions::writeSplitFile($file, $type, $splitCount, $header, $currentSplit);
-                $currentSplit = [];
-                $splitCount++;
+            if ($currentTime < $start) {
+                $isFuture = true;
+            } elseif ($currentTime > $end) {
+                $isPast = true;
+            } else {
+                return 'active';
             }
         }
 
-        if (!empty($currentSplit)) {
-            CommandFunctions::writeSplitFile($file, $type, $splitCount, $header, $currentSplit);
+        if ($isFuture == true) {
+            return 'future';
         }
-
-        return $splitCount;
-    }
-
-    public static function writeSplitFile($originalFilePath, $type, $splitNumber, $header, $data)
-    {
-        $splitFilePath = pathinfo($originalFilePath, PATHINFO_DIRNAME) . '/' . $type . '_' . $splitNumber . '.txt';
-        file_put_contents($splitFilePath, $header . PHP_EOL . implode(PHP_EOL, $data));
-    }
-
-    public static function insertFile($db, $type, $path, $header, $set, $sep = ',')
-    {
-        $table = $type;
-        $path = realpath($path);
-
-        $req = $db->prepare("
-            LOAD DATA INFILE ? IGNORE
-            INTO TABLE $table
-            FIELDS
-                TERMINATED BY ?
-                ENCLOSED BY '\"'
-            LINES
-                TERMINATED BY  '\n'
-            IGNORE 1 ROWS
-            ($header)
-            SET $set
-        ");
-        $req->execute([$path, $sep]);
-        return $req;
-    }
-
-    public static function prefixTable($db, $table, $column, $prefix)
-    {
-        $prefix_ch = $prefix . '%';
-
-        $req = $db->prepare("
-            UPDATE $table
-            SET $column = CONCAT(?, $column)
-            WHERE $column NOT LIKE ?;
-        ");
-        $req->execute([$prefix, $prefix_ch]);
-        return $req;
-    }
-
-    public static function copyTable($db, $from, $to)
-    {
-        $req = $db->prepare("
-            INSERT INTO $to 
-            SELECT * 
-            FROM $from;
-    
-            DROP TABLE $from;
-        ");
-        $req->execute([]);
-        return $req;
-    }
-
-    public static function truncateTable($db, $table)
-    {
-        $req = $db->prepare("
-            TRUNCATE $table;
-        ");
-        $req->execute([]);
-        return $req;
-    }
-
-    public static function generateTempStopRoute($db)
-    {
-        $req = $db->prepare("
-            INSERT INTO temp_stop_route
-            (route_key, route_id, route_short_name, route_long_name, route_type, route_color, route_text_color, stop_id, stop_name, stop_query_name, stop_lat, stop_lon)
-            
-            SELECT DISTINCT 
-            CONCAT(R.route_id, '-', S2.stop_id) as route_key, R.route_id, R.route_short_name, R.route_long_name, R.route_type, R.route_color, R.route_text_color, S2.stop_id, S2.stop_name, S2.stop_name, S2.stop_lat, S2.stop_lon
-            FROM routes R
-            
-            INNER JOIN trips T
-            ON R.route_id = T.route_id
-            
-            INNER JOIN stop_times ST
-            ON T.trip_id = ST.trip_id
-            
-            INNER JOIN stops S
-            ON ST.stop_id = S.stop_id
-            
-            INNER JOIN stops S2
-            ON S.parent_station = S2.stop_id;
-        ");
-        $req->execute([]);
-        return $req;
-    }
-
-    public static function autoDeleteStopRoute($db)
-    {
-        $req = $db->prepare("
-            DELETE FROM stop_route 
-            WHERE route_key NOT IN (SELECT route_key FROM temp_stop_route);
-        ");
-        $req->execute([]);
-        return $req;
-    }
-
-    public static function autoInsertStopRoute($db)
-    {
-        $req = $db->prepare("
-            INSERT INTO stop_route (route_key, route_id, route_short_name, route_long_name, route_type, route_color, route_text_color, stop_id, stop_name, stop_query_name, stop_lat, stop_lon, town_id, town_name, town_query_name, zip_code)
-            
-            SELECT route_key, route_id, route_short_name, route_long_name, route_type, route_color, route_text_color, stop_id, stop_name, stop_query_name, stop_lat, stop_lon, town_id, town_name, town_query_name, zip_code
-            FROM temp_stop_route
-            WHERE route_key NOT IN (
-                SELECT route_key
-                FROM stop_route
-            );
-        ");
-        $req->execute([]);
-        return $req;
-    }
-
-    public static function prepareStopRoute($db)
-    {
-        $req = $db->prepare("
-            UPDATE stop_route SR 
-            SET SR.stop_lat = NULL,
-                SR.stop_lon = NULL
-            WHERE SR.stop_lat IS NULL;
-            
-            UPDATE stop_route SR 
-            SET SR.stop_lat = NULL,
-                SR.stop_lon = NULL
-            WHERE SR.stop_lon IS NULL;
-            
-            UPDATE stop_route SR 
-            SET SR.stop_lat = NULL,
-                SR.stop_lon = NULL
-            WHERE SR.stop_lat = '';
-            
-            UPDATE stop_route SR 
-            SET SR.stop_lat = NULL,
-                SR.stop_lon = NULL
-            WHERE SR.stop_lon = '';
-        ");
-        $req->execute(array());
-        return $req;
-    }
-
-    public static function generateQueryRoute($db)
-    {
-        $req = $db->prepare("
-            SET NAMES 'utf8' COLLATE 'utf8_unicode_ci';
-            UPDATE stop_route SET stop_query_name = REPLACE(stop_query_name, '-', '');
-            UPDATE stop_route SET stop_query_name = REPLACE(stop_query_name, ' ', '');
-            UPDATE stop_route SET stop_query_name = REPLACE(stop_query_name, '\'', '');
-            
-            UPDATE stop_route SET town_query_name = REPLACE(town_query_name, '-', '');
-            UPDATE stop_route SET town_query_name = REPLACE(town_query_name, ' ', '');
-            UPDATE stop_route SET town_query_name = REPLACE(town_query_name, '\'', '');
-        ");
-        $req->execute(array());
-        return $req;
-    }
-
-    public static function getColumn($db, $table)
-    {
-        $query = "
-            SELECT COLUMN_NAME
-            FROM INFORMATION_SCHEMA.COLUMNS
-            WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = '$table'
-        ";
-        $statement = $db->executeQuery($query);
-        return $statement->fetchAll();
+        if ($isFuture == true) {
+            return 'past';
+        }
     }
 }

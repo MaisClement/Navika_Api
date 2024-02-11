@@ -658,7 +658,6 @@ class Functions
                     "id"            => (string) $disruption->id,
                     "status"        => (string) $disruption->status,
                     "cause"         => (string) $disruption->cause,
-                    "category"      => "Incidents",
                     "severity"      => Functions::getSeverityByEffect($disruption->severity->effect),
                     "effect"        => (string) $disruption->severity->effect,
                     "updated_at"    => (string) $disruption->updated_at,
@@ -673,7 +672,6 @@ class Functions
                     "id"            => (string) $disruption->id,
                     "status"        => (string) $disruption->status,
                     "cause"         => (string) $disruption->cause,
-                    "category"      => "Incidents",
                     "severity"      => Functions::getSeverityByEffect($disruption->severity->effect),
                     "effect"        => (string) $disruption->severity->effect,
                     "updated_at"    => (string) $disruption->updated_at,
@@ -1149,5 +1147,21 @@ class Functions
         $url = "$baseUrl?$uri";
     
         return $url;
+    }
+
+    public static function getCentroidOfStops($points) {
+        $num = count($points);
+        $lat = 0;
+        $lon = 0;
+    
+        foreach ($points as $point) {
+            $lat += $point['coord']['lat'];
+            $lon += $point['coord']['lon'];
+        }
+    
+        return [
+            'lat' => $lat / $num,
+            'lon' => $lon / $num
+        ];
     }
 }

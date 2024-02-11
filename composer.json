@@ -31,7 +31,8 @@
         "symfony/serializer": "6.3.*",
         "symfony/stopwatch": "6.3.*",
         "symfony/twig-bundle": "6.3.*",
-        "symfony/yaml": "6.3.*"
+        "symfony/yaml": "6.3.*",
+        "lowa/gtfs-realtime-php": "^1.0"
     },
     "config": {
         "allow-plugins": {

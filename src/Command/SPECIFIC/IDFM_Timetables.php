@@ -1,11 +1,11 @@
 <?php
 
-namespace App\Command;
+namespace App\Command\SPECIFIC;
 
 use App\Controller\Functions;
-use App\Entity\Maps;
+use App\Entity\Timetables;
 use App\Repository\RoutesRepository;
-use App\Repository\MapsRepository;
+use App\Repository\TimetablesRepository;
 use DateTime;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\Console\Command\Command;
@@ -15,21 +15,21 @@ use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
 use Symfony\Component\HttpClient\HttpClient;
 use Symfony\Component\Console\Helper\ProgressIndicator;
 
-class Maps_Update extends Command
+class IDFM_Timetables extends Command
 {
     private $entityManager;
     private $params;
 
     private RoutesRepository $routesRepository;
-    private MapsRepository $mapsRepository;
+    private TimetablesRepository $timetablesRepository;
 
-    public function __construct(EntityManagerInterface $entityManager, ParameterBagInterface $params, MapsRepository $mapsRepository, RoutesRepository $routesRepository)
+    public function __construct(EntityManagerInterface $entityManager, ParameterBagInterface $params, TimetablesRepository $timetablesRepository, RoutesRepository $routesRepository)
     {
         $this->entityManager = $entityManager;
         $this->params = $params;
 
         $this->routesRepository = $routesRepository;
-        $this->mapsRepository = $mapsRepository;
+        $this->timetablesRepository = $timetablesRepository;
 
         parent::__construct();
     }
@@ -37,20 +37,20 @@ class Maps_Update extends Command
     protected function configure(): void
     {
         $this
-            ->setName('app:maps:update')
-            ->setDescription('Update maps data');
+            ->setName('app:timetables:update')
+            ->setDescription('Update timetables data');
     }
 
     function execute(InputInterface $input, OutputInterface $output): int
     {
         $dir = sys_get_temp_dir();
-        $file = $dir . '/maps.csv';
+        $file = $dir . '/timetables.csv';
 
         // Récupération du trafic
         $progressIndicator = new ProgressIndicator($output, 'verbose', 100, ['⠏', '⠛', '⠹', '⢸', '⣰', '⣤', '⣆', '⡇']);
         $progressIndicator->start('Geting timetable...');
 
-        $url = $this->params->get('prim_url_maps');
+        $url = $this->params->get('prim_url_timetables');
 
         $client = HttpClient::create();
         $response = $client->request('GET', $url);
@@ -66,29 +66,40 @@ class Maps_Update extends Command
         $content = Functions::readCsv($file);
 
         foreach ($content as $row) {
+
             // Loader
             $progressIndicator->advance();
 
-            if (!is_bool($row) && $row[0] != 'id') {
-                $maps = new Maps();
-                $maps->setName($row[2]);
-                $maps->setUrl($row[4]);
-                $maps->setNumber(intval($row[1]));
+            if (!is_bool($row) && $row[0] != 'ID_Line') {
 
-                $this->entityManager ->persist($maps);
+                $route_id = 'IDFM:' . $row[0];
+                $type = $row[3] == 'HORAIRE' ? 'timetables' : 'map';
+
+                $route = $this->routesRepository->findOneBy(['route_id' => $route_id]);
+
+                if ($route != null) {
+                    $timetables = new Timetables();
+                    $timetables->setRouteId($route);
+                    $timetables->setType($type);
+                    $timetables->setName($row[1]);
+                    $timetables->setUrl($row[2]);
+
+                    $this->entityManager->persist($timetables);
+                }
             }
         }
 
         // On efface les messages existant
-        $progressIndicator->setMessage('Removing old maps...');
+        $progressIndicator->setMessage('Removing old timetables...');
 
-        $old_maps = $this->mapsRepository->findAll();
+        $old_timetables = $this->timetablesRepository->findAll();
 
-        foreach ($old_maps as $old_maps) {
+        foreach ($old_timetables as $old_timetables) {
+
             // Loader
             $progressIndicator->advance();
 
-            $this->entityManager->remove($old_maps);
+            $this->entityManager->remove($old_timetables);
         }
 
         // On sauvegarde

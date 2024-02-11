@@ -187,7 +187,6 @@ class VehicleJourney
                         "id" => 'ADMIN:theorical',
                         "status" => 'active',
                         "cause" => 'theorical',
-                        "category" => 'theorical',
                         "severity" => 1,
                         "effect" => 'OTHER',
                         "message" => array(

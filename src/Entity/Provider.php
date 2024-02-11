@@ -30,8 +30,26 @@ class Provider
     #[ORM\Column(columnDefinition: 'ENUM("0", "1", "2")')]
     private ?string $flag = null;
 
-    #[ORM\Column(columnDefinition: 'ENUM("tc", "bikes")')]
+    #[ORM\Column(columnDefinition: 'ENUM("tc", "bikes", "other")')]
     private ?string $type = null;
+
+    #[ORM\Column(length: 255, nullable: true)]
+    private ?string $gtfs_url = null;
+
+    #[ORM\Column(length: 255, nullable: true)]
+    private ?string $gbfs_url = null;
+
+    #[ORM\Column(length: 255, nullable: true)]
+    private ?string $gtfsrt_service_alerts = null;
+
+    #[ORM\Column(length: 255, nullable: true)]
+    private ?string $gtfsrt_vehicle_positions = null;
+
+    #[ORM\Column(length: 255, nullable: true)]
+    private ?string $gtfsrt_trip_updates = null;
+
+    #[ORM\Column(length: 255, nullable: true)]
+    private ?string $siri = null;
 
     #[ORM\OneToMany(mappedBy: 'provider_id', targetEntity: Trips::class)]
     private Collection $trips;
@@ -193,6 +211,78 @@ class Provider
     public function setType(string $type): static
     {
         $this->type = $type;
+
+        return $this;
+    }
+
+    public function getGtfsUrl(): ?string
+    {
+        return $this->gtfs_url;
+    }
+
+    public function setGtfsUrl(?string $gtfs_url): static
+    {
+        $this->gtfs_url = $gtfs_url;
+
+        return $this;
+    }
+
+    public function getGbfsUrl(): ?string
+    {
+        return $this->gbfs_url;
+    }
+
+    public function setGbfsUrl(?string $gbfs_url): static
+    {
+        $this->gbfs_url = $gbfs_url;
+
+        return $this;
+    }
+
+    public function getGtfsRtServicesAlerts(): ?string
+    {
+        return $this->gtfsrt_service_alerts;
+    }
+
+    public function setGtfsRtServicesAlerts(?string $gtfsrt_service_alerts): static
+    {
+        $this->gtfsrt_service_alerts = $gtfsrt_service_alerts;
+
+        return $this;
+    }
+
+    public function getGtfsRtVehiclePositions(): ?string
+    {
+        return $this->gtfsrt_vehicle_positions;
+    }
+
+    public function setGtfsRtVehiclePositions(?string $gtfsrt_vehicle_positions): static
+    {
+        $this->gtfsrt_vehicle_positions = $gtfsrt_vehicle_positions;
+
+        return $this;
+    }
+
+    public function getGtfsRtTripUpdates(): ?string
+    {
+        return $this->gtfsrt_trip_updates;
+    }
+
+    public function setGtfsRtTripUpdates(?string $gtfsrt_trip_updates): static
+    {
+        $this->gtfsrt_trip_updates = $gtfsrt_trip_updates;
+
+        return $this;
+    }
+
+    public function getSiriUrl(): ?string
+    {
+        return $this->siri;
+    }
+
+    public function setSiriUrl(?string $siri): static
+    {
+        $this->siri = $siri;
 
         return $this;
     }

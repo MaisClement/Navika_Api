@@ -23,7 +23,7 @@ class Show extends Command
     protected function configure(): void
     {
         $this
-            ->setName('app:provider:show')
+            ->setName('app:provider:list')
             ->setDescription('List all provider');
     }
     

@@ -3,6 +3,8 @@
 namespace App\Entity;
 
 use App\Repository\TraficRepository;
+use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\Common\Collections\Collection;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 
@@ -23,16 +25,13 @@ class Trafic
     #[ORM\Column(length: 255, nullable: true)]
     private ?string $cause = null;
 
-    #[ORM\Column(length: 255, nullable: true)]
-    private ?string $category = null;
-
     #[ORM\Column]
     private ?int $severity = null;
 
     #[ORM\Column(length: 255)]
     private ?string $effect = null;
 
-    #[ORM\Column]
+    #[ORM\Column(nullable: true)]
     private ?\DateTime $updated_at = null;
 
     #[ORM\Column(type: Types::TEXT, nullable: true)]
@@ -45,21 +44,12 @@ class Trafic
     #[ORM\JoinColumn(name: "route_id", referencedColumnName: "route_id", nullable: false, onDelete: "CASCADE")]
     private ?Routes $route_id = null;
 
-    public function getReport(): ?array
+    #[ORM\OneToMany(mappedBy: 'trafic_id', targetEntity: TraficLinks::class)]
+    private Collection $traficLinks;
+
+    public function __construct()
     {
-        return array(
-            "id" =>         $this->getReportId(),
-            "status" =>     $this->getStatus(),
-            "cause" =>      $this->getCause(),
-            "category" =>   $this->getCategory(),
-            "severity" =>   $this->getSeverity(),
-            "effect" =>     $this->getEffect(),
-            "updated_at" => $this->getUpdatedAt()->format("Y-m-d\TH:i:sP"),
-            "message" =>    array(
-                "title" =>      $this->getTitle(),
-                "text" =>       $this->getText(),
-            ),
-        );
+        $this->traficLinks = new ArrayCollection();
     }
 
     public function getReportMessage(): ?array
@@ -70,10 +60,9 @@ class Trafic
             "line" =>       (string)    $this->getRouteId()->getRouteId(),
             "status" =>     (string)    $this->getStatus(),
             "cause" =>      (string)    $this->getCause(),
-            "category" =>   (string)    $this->getCategory(),
             "severity" =>   (int)       $this->getSeverity(),
             "effect" =>     (string)    $this->getEffect(),
-            "updated_at" => $this->getUpdatedAt()->format("Y-m-d\TH:i:sP"),
+            "updated_at" =>             $this->getUpdatedAt() == null ? null : $this->getUpdatedAt()->format("Y-m-d\TH:i:sP"),
             "title" =>      (string)    $this->getTitle(),
             "body" =>       (string)    $this->getText(),
         );
@@ -116,18 +105,6 @@ class Trafic
     public function setCause(?string $cause): static
     {
         $this->cause = $cause;
-
-        return $this;
-    }
-
-    public function getCategory(): ?string
-    {
-        return $this->category;
-    }
-
-    public function setCategory(?string $category): static
-    {
-        $this->category = $category;
 
         return $this;
     }
@@ -200,6 +177,36 @@ class Trafic
     public function setRouteId(?Routes $route_id): static
     {
         $this->route_id = $route_id;
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, TraficLinks>
+     */
+    public function getTraficLinks(): Collection
+    {
+        return $this->traficLinks;
+    }
+
+    public function addTraficLink(TraficLinks $traficLink): static
+    {
+        if (!$this->traficLinks->contains($traficLink)) {
+            $this->traficLinks->add($traficLink);
+            $traficLink->setTraficId($this);
+        }
+
+        return $this;
+    }
+
+    public function removeTraficLink(TraficLinks $traficLink): static
+    {
+        if ($this->traficLinks->removeElement($traficLink)) {
+            // set the owning side to null (unless already changed)
+            if ($traficLink->getTraficId() === $this) {
+                $traficLink->setTraficId(null);
+            }
+        }
 
         return $this;
     }

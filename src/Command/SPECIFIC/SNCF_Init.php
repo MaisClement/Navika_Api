@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Command;
+namespace App\Command\SPECIFIC;
 
 use App\Entity\Agency;
 use App\Entity\Provider;
@@ -24,7 +24,7 @@ class SNCF_Init extends Command
     protected function configure(): void
     {
         $this
-            ->setName('app:init:sncf')
+            ->setName('app:sncf:init')
             ->setDescription('Init for SNCF');
     }
     
@@ -34,7 +34,7 @@ class SNCF_Init extends Command
         
         $provider = new Provider();
         $provider->setId('SNCF');
-        $provider->setType('rail');
+        $provider->setType('other');
         $provider->setName('SNCF');
         $provider->setArea('France');
         $provider->setUrl('https://ressources.data.sncf.com/explore/dataset/referentiel-gares-voyageurs/download/?format=csv&timezone=Europe/Berlin&lang=fr');

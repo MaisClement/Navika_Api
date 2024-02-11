@@ -30,7 +30,7 @@ class Add extends Command
     {
         $this
             ->setName('app:provider:add')
-            ->setDescription('Add provider')
+            ->setDescription('Add a data provider (can be for GTFS or GTFS)')
             ->addArgument('type', InputArgument::REQUIRED, 'Type')
             ->addArgument('id', InputArgument::REQUIRED, 'Id')
             ->addArgument('name', InputArgument::REQUIRED, 'Name')

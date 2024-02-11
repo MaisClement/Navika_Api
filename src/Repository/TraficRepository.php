@@ -38,6 +38,16 @@ class TraficRepository extends ServiceEntityRepository
             $this->getEntityManager()->flush();
         }
     }
+    
+    public function findByLikeField($field, $value)
+    {
+        $qb = $this->createQueryBuilder('e');
+
+        return $qb->where($qb->expr()->like('e.'.$field, ':value'))
+                  ->setParameter('value', '%'.$value.'%')
+                  ->getQuery()
+                  ->getResult();
+    }
 
     //    /**
 //     * @return Trafic[] Returns an array of Trafic objects
