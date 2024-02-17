@@ -44,7 +44,9 @@ class StopRouteRepository extends ServiceEntityRepository
         $qb = $this->createQueryBuilder('sr');
 
         $qb->where($qb->expr()->like('LOWER(sr.stop_query_name)', ':query'))
-            ->setParameter('query', '%' . strtolower($query) . '%');
+            ->andWhere('sr.location_type = :location_type')
+            ->setParameter('query', '%' . strtolower($query) . '%')
+            ->setParameter('location_type', '1');
 
         return $qb->getQuery()->getResult();
     }
@@ -54,7 +56,9 @@ class StopRouteRepository extends ServiceEntityRepository
         $qb = $this->createQueryBuilder('sr');
 
         $qb->where($qb->expr()->like('LOWER(sr.town_name)', ':query'))
-            ->setParameter('query', '%' . strtolower($query) . '%');
+            ->andWhere('sr.location_type = :location_type')
+            ->setParameter('query', '%' . strtolower($query) . '%')
+            ->setParameter('location_type', '1');
 
         return $qb->getQuery()->getResult();
     }

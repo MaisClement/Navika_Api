@@ -24,15 +24,9 @@ class Notify
         $message = CloudMessage::withTarget('token', $fcm_token)
             ->withNotification($notification);
 
-        $message = $message->withData(['test' => 'test']);
+        $message = $message->withData($data);
 
-        try {
-            $this->messaging->send($message);
-        } catch (\Exception $e) {
-            print_r($e);
-            echo  "NotFound" ;
-            return 'NotFound';
-        }
+        $this->messaging->send($message);
     }
  
     public function sendMessage($token, $report)

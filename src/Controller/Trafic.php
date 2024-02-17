@@ -61,8 +61,9 @@ class Trafic
         foreach ($lines as $line) {
             $route = $this->routesRepository->findOneBy(['route_id' => $line]);
 
-            $json['trafic'][] = $route->getRouteAndTrafic();
-
+            if ($route != null) {
+                $json['trafic'][] = $route->getRouteAndTrafic();
+            }
         }
         
         return new JsonResponse($json);
