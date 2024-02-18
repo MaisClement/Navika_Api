@@ -1,21 +1,12 @@
-![Titre](https://app.navika.hackernwar.com/changelog/màj.png "Indications des sorties")
+![Titre](https://app.navika.hackernwar.com/changelog/màj.png "Titre")
 
 # Mise à jour v1.3.1
 > 🗓️ 18/02/2024 
 
 ---
 
-### 🧭 A la recherche de l'arrêt de bus perdu 
-Fatigué de jouer à l'archéologue ? En zoomant sur la carte, tu verras désormais la position précise de tes arrêts de bus. Tu n'es plus obligé de faire 3 fois le tour de la place de la Nation pour trouver ce fichu bus 71. 
-
-### 🎉 Quelles sont les nouveautés ?
-Les nouveautés et changements de l'application sont désormais affichés dans l'application.
-
-✨ Il y a également quelques modifications pour corriger des bugs et améliorer l'application.
-
----
----
-#  ⤵️ Précédentes mise à jour ⤵️
+### ✨ On peaufine l'application
+Cette mise à jour se focalise sur la correction de bugs. Plusieurs correctifs ont été mis en place pour rendre votre expérience sur l'application encore plus fluide et agréable.
 
 ---
 ---

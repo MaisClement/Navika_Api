@@ -1,4 +1,4 @@
-![Titre](https://app.navika.hackernwar.com/changelog/màj.png "Indications des sorties")
+![Titre](https://app.navika.hackernwar.com/changelog/màj.png "Titre")
 
 # Mise à jour v1.3.0
 > 🗓️ 11/02/2024 
