@@ -192,21 +192,55 @@ class IDFM_Trafic extends Command
                     $allow = true;
                    
                     if ($sub->getType() == 'all' && $report->getSeverity() < 3 ) {
-                        $allow = false;
+                        $allow = false; echo 'nope1';
                     } else if ($sub->getType() == 'alert' && $report->getSeverity() < 4 ) {
+                        $allow = false; echo 'nope2';
+                    }
+                    
+                    if (date('N') == "1" && $sub->getMonday() != "1") {
+                        $allow = false;
+                    } else if (date('N') == 2 && $sub->getTuesday() != "1") {
+                        $allow = false;
+                    } else if (date('N') == "3" && $sub->getWednesday() != "1") {
+                        $allow = false;
+                    } else if (date('N') == "4" && $sub->getThursday() != "1") {
+                        $allow = false;
+                    } else if (date('N') == "5" && $sub->getFriday() != "1") {
+                        $allow = false;
+                    } else if (date('N') == "6" && $sub->getSaturday() != "1") {
+                        $allow = false;
+                    } else if (date('N') == "7" && $sub->getSunday() != "1") {
                         $allow = false;
                     }
-                    print_r([$allow, 'ON ENVOI']);
+                    
+                    $startTime = DateTime::createFromFormat('H:i:s', $sub->getStartTime());
+                    $endTime = DateTime::createFromFormat('H:i:s', $sub->getEndTime());
+
+                    $now = new DateTime();
+                    if ($endTime < $startTime) {
+                        $endTime->modify('+1 day');
+                    }
+                    
+                    if ($startTime > $now || $endTime < $now) {
+                        $allow = false;
+                    }
     
                     if ($allow == true) {
                         $token = $sub->getSubscriberId()->getFcmToken();
                         $title = $report->getTitle();
                         $body = $report->getText();
+                        $data = [];
 
-                        echo 'SEND NOTIFICATIONS !';
+                        print_r(['SEND NOTIFICATIONS !']);
 
                         try {
-                            $notif->sendMessage($token, $report->getReportMessage() );
+                            // $notif->sendMessage($token, $report->getReportMessage() );
+                            $notif->sendNotificationToUser(
+                                $token,
+                                $title,
+                                $body,
+                                $data
+                            );
                         } catch (\Exception $e) {
                             if (get_class($e) == 'Kreait\Firebase\Exception\Messaging\NotFound') {
                                 $this->entityManager->remove($sub);

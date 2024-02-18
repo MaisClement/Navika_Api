@@ -75,21 +75,21 @@ class Index
         //     );
         // }
 
-        if ($app_version != '1.3.0') {
-            $messages[] = array(
-                "id"            =>  (string)    "update",
-                "status"        =>  (string)    "active",
-                "severity"      =>  (int)       1,
-                "effect"        =>  (string)    "OTHER",
-                "updated_at"    =>              date(DATE_ATOM),
-                "message"       =>  array(
-                    "title"     =>      "Mise à jour disponible",
-                    "text"      =>      "Navika n'est plus à jour. Mettez à jour l'application pour profiter des nouvelles fonctionnalités et améliorations dès maintenant.",
-                //     "button"      =>    'En savoir plus',
-                //     "link"      =>      'https://cloud.hackernwar.com/index.php/s/MbPb4pt4TJZZt8a',
-                ),
-            );
-        }
+        // if ($app_version != '1.3.0') {
+        //     $messages[] = array(
+        //         "id"            =>  (string)    "update",
+        //         "status"        =>  (string)    "active",
+        //         "severity"      =>  (int)       1,
+        //         "effect"        =>  (string)    "OTHER",
+        //         "updated_at"    =>              date(DATE_ATOM),
+        //         "message"       =>  array(
+        //             "title"     =>      "Mise à jour disponible",
+        //             "text"      =>      "Navika n'est plus à jour. Mettez à jour l'application pour profiter des nouvelles fonctionnalités et améliorations dès maintenant.",
+        //         //     "button"      =>    'En savoir plus',
+        //         //     "link"      =>      'https://cloud.hackernwar.com/index.php/s/MbPb4pt4TJZZt8a',
+        //         ),
+        //     );
+        // }
 
         // --- Message de la base de données
         $_messages = $this->messagesRepository->findAll();
