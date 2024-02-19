@@ -192,9 +192,9 @@ class IDFM_Trafic extends Command
                     $allow = true;
                    
                     if ($sub->getType() == 'all' && $report->getSeverity() < 3 ) {
-                        $allow = false; echo 'nope1';
+                        $allow = false;
                     } else if ($sub->getType() == 'alert' && $report->getSeverity() < 4 ) {
-                        $allow = false; echo 'nope2';
+                        $allow = false;
                     }
                     
                     if (date('N') == "1" && $sub->getMonday() != "1") {
@@ -213,8 +213,8 @@ class IDFM_Trafic extends Command
                         $allow = false;
                     }
                     
-                    $startTime = DateTime::createFromFormat('H:i:s', $sub->getStartTime());
-                    $endTime = DateTime::createFromFormat('H:i:s', $sub->getEndTime());
+                    $startTime = DateTime::createFromFormat('H:i:s', $sub->getStartTime()->format('H:i:s'));
+                    $endTime = DateTime::createFromFormat('H:i:s', $sub->getEndTime()->format('H:i:s'));
 
                     $now = new DateTime();
                     if ($endTime < $startTime) {
