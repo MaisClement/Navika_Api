@@ -234,13 +234,13 @@ class IDFM_Trafic extends Command
                         print_r(['SEND NOTIFICATIONS !']);
 
                         try {
-                            // $notif->sendMessage($token, $report->getReportMessage() );
-                            $notif->sendNotificationToUser(
-                                $token,
-                                $title,
-                                $body,
-                                $data
-                            );
+                            $notif->sendMessage($token, $report->getReportMessage() );
+                            // $notif->sendNotificationToUser(
+                            //    $token,
+                            //    $title,
+                            //    $body,
+                            //    $data
+                            // );
                         } catch (\Exception $e) {
                             if (get_class($e) == 'Kreait\Firebase\Exception\Messaging\NotFound') {
                                 $this->entityManager->remove($sub);
