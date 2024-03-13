@@ -618,17 +618,17 @@ class Functions
 
     public static function getApiDetails($api_results, $api_results2, $name){
         $departures = [];
-        
-        foreach ($api_results2->departures as $api_result) {
-            if ($api_result->display_informations->headsign == $name) {    
-                $departures = array(
-                    "id"                =>  (string)    Functions::getSNCFid($api_result->links),
-                    "name"              =>  (string)    $api_result->display_informations->headsign,
-                    "network"           =>  (string)    $api_result->display_informations->network,
-                    "to_id"             =>  (string)    'SNCF:' . Functions::idfmFormat( $api_result->route->direction->id ),
-                );
-            }
-        }
+
+        // foreach ($api_results2->departures as $api_result) {
+        //     if ($api_result->display_informations->headsign == $name) {    
+        //         $departures = array(
+        //             "id"                =>  (string)    Functions::getSNCFid($api_result->links),
+        //             "name"              =>  (string)    $api_result->display_informations->headsign,
+        //             "network"           =>  (string)    $api_result->display_informations->network,
+        //             "to_id"             =>  (string)    'SNCF:' . Functions::idfmFormat( $api_result->route->direction->id ),
+        //         );
+        //     }
+        // }
         foreach ($api_results->departures as $api_result) {
             if ($api_result->display_informations->headsign == $name) {
                 $departures = array(
