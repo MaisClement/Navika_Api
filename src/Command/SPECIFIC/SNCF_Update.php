@@ -130,7 +130,7 @@ class SNCF_Update extends Command
                                 $stop->setStopName($row[4]);
                                 $stop->setStopLat(isset($row[11]) ? $row[11] : '');
                                 $stop->setStopLon(isset($row[10]) ? $row[10] : '');
-                                $stop->setLocationType('0');
+                                $stop->setLocationType('1');
                                 $stop->setVehicleType('2');
                             }
 
@@ -147,6 +147,7 @@ class SNCF_Update extends Command
                             $stop_route->setStopQueryName($stop->getStopName());
                             $stop_route->setStopLat($stop->getStopLat());
                             $stop_route->setStopLon($stop->getStopLon());
+                            $stop_route->setLocationType('1');
 
                             $this->entityManager->persist($stop);
                             $this->entityManager->persist($stop_route);
