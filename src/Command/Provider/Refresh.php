@@ -102,7 +102,7 @@ class Refresh extends Command
                             break;
 
                         case "gbfs":
-                            $provider->setGbfsUrl($resource->original_url);
+                            $provider->setGbfsUrl( str_replace("gbfs.json", "", $resource->original_url) );
                             break;
                     }
                 }

@@ -3,7 +3,7 @@ nelmio_api_doc:
         info:
             title: Navika Api
             description: Documentation for Navika API
-            version: 1.0.3
+            version: 1.1.0
     areas: # to filter documented areas
         disable_default_routes: true
         path_patterns:

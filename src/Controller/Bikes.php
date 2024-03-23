@@ -56,7 +56,7 @@ class Bikes
         
         $json = array(
             'name'     => $station->getStationName(),
-            'url'      => $station->getProviderId()->getUrl(),
+            'url'      => $station->getProviderId()->getGbfsUrl(),
             'coord' => array(
                 'lat'      => (double) $station->getStationLat(),
                 'lon'      => (double) $station->getStationLon(),
@@ -64,7 +64,7 @@ class Bikes
             'capacity' => (int) $station->getStationCapacity(),
         );
 
-        $url = $station->getProviderId()->getUrl() . 'station_status.json';
+        $url = $station->getProviderId()->getGbfsUrl() . 'station_status.json';
 
         // --- Infos en temps réel
         $client = HttpClient::create();

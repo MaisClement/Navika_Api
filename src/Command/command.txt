@@ -46,11 +46,21 @@ php bin/console app:provider:add "bikes" "VELOPOP"   "Velopop’"      "Avignon"
 php bin/console app:provider:add "bikes" "VELO2"     "Vélo²"         "Cergy"            "5d2d98d46f44410ac513d7ad" 
 php bin/console app:provider:add "bikes" "BICLOO"    "Bicloo"        "Nantes"           "5d0b54e08b4c414d10e736e6"
 php bin/console app:provider:add "bikes" "OPTYMO"    "Optymo"        "Belfort"          "5c209625634f41616b51e726"
-php bin/console app:provider:add "bikes" "VELHOP"    "Vélhop"        "Strasbourg"       "65ab0d58c86e8597d65aa47f"
+php bin/console app:provider:add "bikes" "VELHOP"    "Vél’hop"       "Strasbourg"       "65ab0d58c86e8597d65aa47f"
 
     // Unavailable
     php bin/console app:provider:add "bikes" "LEVELO"    "levélo"        "Marseille"        "63c91087b1d439ee08239fc4"
     php bin/console app:provider:add "bikes" "VLILLE"    "V‘lille"       "Lille"            "5f71dcd11bb82e9f1e748680" 
+
+php bin/console app:provider:refresh
+php bin/console app:gbfs:update
+php bin/console app:gtfs:update
+php bin/console app:trafic:update
+php bin/console app:trafic:update:IDFM
+php bin/console app:timetables:update
+php bin/console app:maps:update
+
+php bin/console app:provider:reset
 
 // ------
 */2 * * * * php /var/www/Navika/bin/console app:trafic:update

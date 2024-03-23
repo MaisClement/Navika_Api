@@ -14,7 +14,7 @@ use Symfony\Component\Routing\Annotation\Route;
 class Trafic
 {
     private $params;
-    
+
     private RoutesRepository $routesRepository;
 
     public function __construct(ParameterBagInterface $params, RoutesRepository $routesRepository)
@@ -65,6 +65,49 @@ class Trafic
                 $json['trafic'][] = $route->getRouteAndTrafic();
             }
         }
+        
+        return new JsonResponse($json);
+    }
+
+    /**
+     * Get trafic
+     * 
+     * Get trafic reports by id
+    **/
+
+    #[Route('/trafic/{id}', name: 'get_trafic_by_id', methods: ['GET'])]
+    #[OA\Tag(name: 'Trafic')]
+    #[OA\Parameter(
+        name: "id",
+        in: "query",
+        description: "Line Id",
+        schema: new OA\Schema(
+            type: "array",
+            items: new OA\Items(type: "string")
+        )
+    )]
+
+    #[OA\Response(
+        response: 200,
+        description: 'OK'
+    )]
+    #[OA\Response(
+        response: 400,
+        description: 'Bad request'
+    )]
+
+    public function getTraficById(Request $request, $id): JsonResponse
+    {
+        $route = $this->routesRepository->findOneBy(['route_id' => $id]);
+
+        if ($route == null) {
+            return new JsonResponse(Functions::ErrorMessage(400, 'Nothing where found for this id'), 400);
+        }
+
+        // --- 
+
+        $json = [];
+        $json['trafic'] = $route->getRouteAndTrafic();
         
         return new JsonResponse($json);
     }

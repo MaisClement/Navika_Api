@@ -7,6 +7,7 @@ use App\Controller\Functions;
 use App\Entity\Trafic;
 use App\Repository\RoutesRepository;
 use App\Repository\TraficRepository;
+use App\Entity\TraficApplicationPeriods;
 use DateTime;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\Console\Command\Command;
@@ -129,6 +130,15 @@ class IDFM_Trafic extends Command
                             $msg->setText       ( Functions::getReportsMesageText($disruption->messages)                                         );
                             $msg->setRouteId    ( $route                                                                                         );
                             
+                            foreach($disruption->application_periods as $application_period) {
+                                $period = new TraficApplicationPeriods();
+                                $period->setBegin  ( DateTime::createFromFormat('Ymd\THis', $application_period->begin));
+                                $period->setEnd  ( DateTime::createFromFormat('Ymd\THis', $application_period->end));
+
+                                $msg->addApplicationPeriod($period);
+                                $this->entityManager->persist($period);
+                            }
+
                             $this->entityManager->persist($msg);
                             $r['IDFM:' . $disruption->id] = $msg;
                         }
@@ -156,6 +166,15 @@ class IDFM_Trafic extends Command
                             $msg->setText       ( Functions::getReportsMesageText($disruption->messages)                                         );
                             $msg->setRouteId    ( $route                                                                                         );
                             
+                            foreach($disruption->application_periods as $application_period) {
+                                $period = new TraficApplicationPeriods();
+                                $period->setBegin  ( DateTime::createFromFormat('Ymd\THis', $application_period->begin));
+                                $period->setEnd  ( DateTime::createFromFormat('Ymd\THis', $application_period->end));
+                                
+                                $msg->addApplicationPeriod($period);
+                                $this->entityManager->persist($period);
+                            }
+
                             $this->entityManager->persist($msg);
                             $r['IDFM:' . $disruption->id] = $msg;
                         }
@@ -231,16 +250,14 @@ class IDFM_Trafic extends Command
                         $body = $report->getText();
                         $data = [];
 
-                        print_r(['SEND NOTIFICATIONS !']);
-
                         try {
-                            $notif->sendMessage($token, $report->getReportMessage() );
-                            // $notif->sendNotificationToUser(
-                            //    $token,
-                            //    $title,
-                            //    $body,
-                            //    $data
-                            // );
+                            // $notif->sendMessage($token, $report->getReportMessage() );
+                            $notif->sendNotificationToUser(
+                               $token,
+                               $title,
+                               $body,
+                               $data
+                            );
                         } catch (\Exception $e) {
                             if (get_class($e) == 'Kreait\Firebase\Exception\Messaging\NotFound') {
                                 $this->entityManager->remove($sub);

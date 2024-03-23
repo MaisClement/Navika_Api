@@ -177,26 +177,27 @@ class Trafic_GTFS extends Command
         
                             // On vérifie que l'on soit ne soit pas un jour interdit
                             $allow = true;
-        
-                            print_r($report->getReportMessage());
                            
                             if ($sub->getType() == 'all' && $report->getSeverity() < 3 ) {
                                 $allow = false;
                             } else if ($sub->getType() == 'alert' && $report->getSeverity() < 4 ) {
                                 $allow = false;
                             }
-        
-                            print_r([$allow, 'ON ENVOI']);
             
                             if ($allow == true) {
                                 $token = $sub->getSubscriberId()->getFcmToken();
                                 $title = $report->getTitle();
                                 $body = $report->getText();
-        
-                                echo 'SEND NOTIFICATIONS !';
+                                $data = [];
         
                                 try {
-                                    $notif->sendMessage($token, $report->getReportMessage() );
+                                    // $notif->sendMessage($token, $report->getReportMessage() );
+                                    $notif->sendNotificationToUser(
+                                        $token,
+                                        $title,
+                                        $body,
+                                        $data
+                                    );
                                 } catch (\Exception $e) {
                                     if (get_class($e) == 'Kreait\Firebase\Exception\Messaging\NotFound') {
                                         $this->entityManager->remove($sub);
