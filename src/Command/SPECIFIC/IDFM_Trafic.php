@@ -130,8 +130,6 @@ class IDFM_Trafic extends Command
                             $msg->setText       ( Functions::getReportsMesageText($disruption->messages)                                         );
                             $msg->setRouteId    ( $route                                                                                         );
                             
-                            print_r($disruption->application_periods);
-
                             foreach($disruption->application_periods as $application_period) {
                                 $period = new TraficApplicationPeriods();
                                 $period->setBegin  ( DateTime::createFromFormat('Ymd\THis', $application_period->begin));
@@ -168,10 +166,7 @@ class IDFM_Trafic extends Command
                             $msg->setText       ( Functions::getReportsMesageText($disruption->messages)                                         );
                             $msg->setRouteId    ( $route                                                                                         );
                             
-                            print_r($disruption->application_periods);
-
                             foreach($disruption->application_periods as $application_period) {
-                                print($application_period);
                                 $period = new TraficApplicationPeriods();
                                 $period->setBegin  ( DateTime::createFromFormat('Ymd\THis', $application_period->begin));
                                 $period->setEnd  ( DateTime::createFromFormat('Ymd\THis', $application_period->end));
@@ -254,8 +249,6 @@ class IDFM_Trafic extends Command
                         $title = $report->getTitle();
                         $body = $report->getText();
                         $data = [];
-
-                        print_r(['SEND NOTIFICATIONS !']);
 
                         try {
                             // $notif->sendMessage($token, $report->getReportMessage() );

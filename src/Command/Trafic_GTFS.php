@@ -177,16 +177,12 @@ class Trafic_GTFS extends Command
         
                             // On vérifie que l'on soit ne soit pas un jour interdit
                             $allow = true;
-        
-                            print_r($report->getReportMessage());
                            
                             if ($sub->getType() == 'all' && $report->getSeverity() < 3 ) {
                                 $allow = false;
                             } else if ($sub->getType() == 'alert' && $report->getSeverity() < 4 ) {
                                 $allow = false;
                             }
-        
-                            print_r([$allow, 'ON ENVOI']);
             
                             if ($allow == true) {
                                 $token = $sub->getSubscriberId()->getFcmToken();
