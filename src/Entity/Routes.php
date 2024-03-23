@@ -270,6 +270,7 @@ class Routes
             $r = array(
                 "id" =>         (string) $report->getReportId(),
                 "status" =>     (string) $report->getStatus(),
+                "application_periods" => $report->getApplicationPeriods(),
                 "cause" =>      (string) $report->getCause(),
                 "severity" =>   (int)    $report->getSeverity(),
                 "effect" =>     (string) $report->getEffect(),

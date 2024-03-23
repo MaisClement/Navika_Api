@@ -44,12 +44,16 @@ class Trafic
     #[ORM\JoinColumn(name: "route_id", referencedColumnName: "route_id", nullable: false, onDelete: "CASCADE")]
     private ?Routes $route_id = null;
 
-    #[ORM\OneToMany(mappedBy: 'trafic_id', targetEntity: TraficLinks::class)]
+    #[ORM\OneToMany(mappedBy: 'report_id', targetEntity: TraficLinks::class)]
     private Collection $traficLinks;
+
+    #[ORM\OneToMany(mappedBy: 'report_id', targetEntity: TraficApplicationPeriods::class)]
+    private Collection $applicationPeriods;
 
     public function __construct()
     {
         $this->traficLinks = new ArrayCollection();
+        $this->applicationPeriods = new ArrayCollection();
     }
 
     public function getReportMessage(): ?array
@@ -66,6 +70,20 @@ class Trafic
             "title" =>      (string)    $this->getTitle(),
             "body" =>       (string)    $this->getText(),
         );
+    }
+
+    public function getApplicationPeriods(): ?array
+    {
+        $application_periods = [];
+
+        foreach($this->getTraficApplicationPeriods() as $periods) {
+            $application_periods[] = array(
+                "begin" => $periods->getBegin()->format("Y-m-d\TH:i:sP"),
+                "end"   => $periods->getEnd()->format("Y-m-d\TH:i:sP"),
+            );
+        }
+
+        return $application_periods;
     }
 
     public function getId(): ?int
@@ -203,8 +221,38 @@ class Trafic
     {
         if ($this->traficLinks->removeElement($traficLink)) {
             // set the owning side to null (unless already changed)
-            if ($traficLink->getTraficId() === $this) {
+            if ($traficLink->getReportId() === $this) {
                 $traficLink->setTraficId(null);
+            }
+        }
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, TraficApplicationPeriods>
+     */
+    public function getTraficApplicationPeriods(): Collection
+    {
+        return $this->applicationPeriods;
+    }
+
+    public function addApplicationPeriod(TraficApplicationPeriods $applicationPeriods): static
+    {
+        if (!$this->applicationPeriods->contains($applicationPeriods)) {
+            $this->applicationPeriods->add($applicationPeriods);
+            $applicationPeriods->setReportId($this);
+        }
+
+        return $this;
+    }
+
+    public function removeTraficApplicationPeriod(TraficApplicationPeriods $applicationPeriods): static
+    {
+        if ($this->applicationPeriods->removeElement($applicationPeriods)) {
+            // set the owning side to null (unless already changed)
+            if ($applicationPeriods->getReportId() === $this) {
+                $applicationPeriods->setReportId(null);
             }
         }
 

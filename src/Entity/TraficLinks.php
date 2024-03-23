@@ -18,7 +18,7 @@ class TraficLinks
 
     #[ORM\ManyToOne(inversedBy: 'traficLinks')]
     #[ORM\JoinColumn(nullable: false, onDelete: "CASCADE")]
-    private ?Trafic $trafic_id = null;
+    private ?Trafic $report_id = null;
 
     public function getId(): ?int
     {
@@ -37,14 +37,14 @@ class TraficLinks
         return $this;
     }
 
-    public function getTraficId(): ?Trafic
+    public function getReportId(): ?Trafic
     {
-        return $this->trafic_id;
+        return $this->report_id;
     }
 
-    public function setTraficId(?Trafic $trafic_id): static
+    public function setTraficId(?Trafic $report_id): static
     {
-        $this->trafic_id = $trafic_id;
+        $this->report_id = $report_id;
 
         return $this;
     }

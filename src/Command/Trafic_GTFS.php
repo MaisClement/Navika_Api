@@ -192,11 +192,16 @@ class Trafic_GTFS extends Command
                                 $token = $sub->getSubscriberId()->getFcmToken();
                                 $title = $report->getTitle();
                                 $body = $report->getText();
-        
-                                echo 'SEND NOTIFICATIONS !';
+                                $data = [];
         
                                 try {
-                                    $notif->sendMessage($token, $report->getReportMessage() );
+                                    // $notif->sendMessage($token, $report->getReportMessage() );
+                                    $notif->sendNotificationToUser(
+                                        $token,
+                                        $title,
+                                        $body,
+                                        $data
+                                    );
                                 } catch (\Exception $e) {
                                     if (get_class($e) == 'Kreait\Firebase\Exception\Messaging\NotFound') {
                                         $this->entityManager->remove($sub);
