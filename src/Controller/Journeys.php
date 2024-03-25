@@ -108,6 +108,13 @@ class Journeys
             return new JsonResponse(Functions::ErrorMessage(400, 'One or more parameters are missing or null, have you "from" and "to" ?'), 400);
         }
 
+        if (substr($from, 0, 5) === "IDFM:") {
+            $from = 'stop_area:' . $from;
+        }
+        if (substr($to, 0, 5) === "IDFM:") {
+            $to = 'stop_area:' . $to;
+        }
+
         // ------------
         
         $departure = $request->get('departure');
