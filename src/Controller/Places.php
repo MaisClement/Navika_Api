@@ -143,8 +143,8 @@ class Places
                     "department" =>  (string)    (isset($result->properties->region) ? $result->properties->region : ''),
                     "region"     =>  (string)    (isset($result->properties->macroregion) ? $result->properties->macroregion : ''),
                     "coord"      => array(
-                        "lat"       =>  (float) $result->geometry->coordinates[0],
-                        "lon"       =>  (float) $result->geometry->coordinates[1],
+                        "lat"       =>  (float) $result->geometry->coordinates[1],
+                        "lon"       =>  (float) $result->geometry->coordinates[0],
                     ),
                     "lines"     =>              [],
                     "modes"     =>              [],
@@ -163,7 +163,7 @@ class Places
             try {
                 if (!isset($stop_places[$stop->getStopId()->getStopId()])) {
 
-                    $stop_places[$stop->getStopId()->getStopId()] = $stop->getStop($lat, $lon, true);
+                    $stop_places[$stop->getStopId()->getStopId()] = $stop->getStop($lat, $lon);
                     
                     $lines[$stop->getStopId()->getStopId()] = [];
                     $modes[$stop->getStopId()->getStopId()] = [];
