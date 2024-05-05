@@ -65,48 +65,48 @@ class Refresh extends Command
             
             $url = $this->params->get('open_data_url') . $provider->getUrl();
 
-            // echo $provider->getUrl();
-
-            $client = HttpClient::create();
-            $response = $client->request('GET', $url);
-            $status = $response->getStatusCode();
-
-            if ($status == 200) {
-                $content = $response->getContent();
-                $results = json_decode($content);
-
-                foreach ($results->resources as $resource) {
-                    switch ($resource->format) {
-                        case "GTFS":
-                            $provider->setGtfsUrl($resource->original_url);
-                            break;
-
-                        case "SIRI":
-                            $provider->getSiriUrl($resource->original_url);
-                            break;
-
-                        case "gtfs-rt":
-                            switch ($resource->features[0]) {
-                                case "service_alerts":
-                                    $provider->setGtfsRtServicesAlerts($resource->original_url);
-                                    break;
-
-                                case "trip_updates":
-                                    $provider->setGtfsRtTripUpdates($resource->original_url);
-                                    break;
-
-                                case "vehicle_positions":
-                                    $provider->setGtfsRtVehiclePositions($resource->original_url);
-                                    break;
-                            }
-                            break;
-
-                        case "gbfs":
-                            $provider->setGbfsUrl( str_replace("gbfs.json", "", $resource->original_url) );
-                            break;
+            if ($provider->getUrl() != "" && $provider->getUrl() != null) {
+                $client = HttpClient::create();
+                $response = $client->request('GET', $url);
+                $status = $response->getStatusCode();
+    
+                if ($status == 200) {
+                    $content = $response->getContent();
+                    $results = json_decode($content);
+    
+                    foreach ($results->resources as $resource) {
+                        switch ($resource->format) {
+                            case "GTFS":
+                                $provider->setGtfsUrl($resource->original_url);
+                                break;
+    
+                            case "SIRI":
+                                $provider->getSiriUrl($resource->original_url);
+                                break;
+    
+                            case "gtfs-rt":
+                                switch ($resource->features[0]) {
+                                    case "service_alerts":
+                                        $provider->setGtfsRtServicesAlerts($resource->original_url);
+                                        break;
+    
+                                    case "trip_updates":
+                                        $provider->setGtfsRtTripUpdates($resource->original_url);
+                                        break;
+    
+                                    case "vehicle_positions":
+                                        $provider->setGtfsRtVehiclePositions($resource->original_url);
+                                        break;
+                                }
+                                break;
+    
+                            case "gbfs":
+                                $provider->setGbfsUrl( str_replace("gbfs.json", "", $resource->original_url) );
+                                break;
+                        }
                     }
+                    $this->entityManager->flush();
                 }
-                $this->entityManager->flush();
             }
         }
         $progressIndicator ->finish('  OK ✅');

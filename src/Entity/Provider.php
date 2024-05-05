@@ -108,6 +108,9 @@ class Provider
     #[ORM\OneToMany(mappedBy: 'provider_id', targetEntity: Trafic::class)]
     private Collection $trafics;
 
+    #[ORM\Column(length: 255, nullable: true)]
+    private ?string $parent_provider = null;
+
     public function __construct()
     {
         $this->trips = new ArrayCollection();
@@ -797,5 +800,17 @@ class Provider
     public function getTrafics(): Collection
     {
         return $this->trafics;
+    }
+
+    public function getParentProvider(): ?string
+    {
+        return $this->parent_provider;
+    }
+
+    public function setParentProvider(?string $parent_provider): static
+    {
+        $this->parent_provider = $parent_provider;
+
+        return $this;
     }
 }

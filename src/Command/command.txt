@@ -8,11 +8,16 @@ php bin/console doctrine:migrations:migrate --no-interaction
 
 php bin/console make:migration
 
-php bin/console app:sncf:init
 php bin/console app:town:init /var/www/navika/data/file/communes.geojson /var/www/navika/data/file/zip_code.json
+
+php bin/console app:provider:add "tc" "SNCF"        "Trains SNCF"             "France"                          "" 
+php bin/console app:provider:add "tc" "SNCF:IC"     "Intercités"              "France"                          "53835288a3a72906c7ec5c57" 
+php bin/console app:provider:add "tc" "SNCF:TER"    "TER"                     "France"                          "53835289a3a72906c7ec5c58" 
+php bin/console app:provider:add "tc" "SNCF:TGV"    "TGV"                     "France"                          "5dd4bba606e3e71a10832c58" 
 
 php bin/console app:provider:add "tc" "IDFM"        "Île-de-France Mobilités" "Île-de-France"                   "6449c52caeceb71273a42dd3" 
 php bin/console app:provider:add "tc" "BIBUS"       "Bibus - Brest Métropole" "Brest"                           "55ffbe0888ee387348ccb97d" 
+
 php bin/console app:provider:add "tc" "TAN"         "TAN - Nantes Métropole"  "Nantes Métropole"                "5b873d7206e3e76e5b2ffd32" 
 php bin/console app:provider:add "tc" "OURA"        "OURA - Agrégat AURA"     "Auvergne Rhône-Alpes"            "61f7b4f89e4131deaf48fe02" 
 php bin/console app:provider:add "tc" "SIBRA"       "Sibra - Annecy"          "CA du Grand Annecy"              "5bd9843e634f413220f7f04a" 
@@ -62,13 +67,22 @@ php bin/console app:maps:update
 
 php bin/console app:provider:reset
 
+
+php bin/console app:provider:remove "IDFM"
+php bin/console app:provider:clear "SNCF"
+php bin/console app:provider:clear "SNCF:IC"
+php bin/console app:provider:clear "SNCF:TGV"
+php bin/console app:provider:clear "SNCF:TER"
+php bin/console app:provider:reset
+php bin/console app:gtfs:update
+
 // ------
 */2 * * * * php /var/www/Navika/bin/console app:trafic:update
 0 2 * * * php /var/www/Navika/bin/console app:timetables:update
 0 2 * * * php /var/www/Navika/bin/console app:gbfs:update
 0 */1 * * * php /var/www/Navika/bin/console app:gtfs:update
 
-git checkout deploy
+git checkout dev
 git merge master
 git push --all origin
 git checkout master

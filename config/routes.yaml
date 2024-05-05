@@ -13,9 +13,3 @@ app.swagger:
     path: /doc.json
     methods: GET
     defaults: { _controller: nelmio_api_doc.controller.swagger }
-
-## For backcompatibility
-OLD_get_index:
-    path: /v0.1/index
-    methods: GET
-    controller: App\Controller\Index::getIndex

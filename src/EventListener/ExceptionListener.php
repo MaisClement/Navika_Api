@@ -2,6 +2,7 @@
 
 namespace App\EventListener;
 
+use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Event\ExceptionEvent;
 use Symfony\Component\HttpKernel\Exception\HttpExceptionInterface;
@@ -15,29 +16,31 @@ class ExceptionListener
         }
         
         $exception = $event->getThrowable();
-
-        $json = array(
-            "error" => array(
-                "code" => $exception->getStatusCode(),
-                "message" => "",
-                "details" => $exception->getMessage()
-            ),
-        );
-        $message = json_encode($json);
-
-        $headers = $exception->getHeaders();
-        $headers['Content-Type'] = 'application/json';
-        
-        $response = new Response();
-        $response->setContent($message);
         
         if ($exception instanceof HttpExceptionInterface) {
+            $response  = new JsonResponse([
+                "error" => array(
+                    "code" => $exception->getStatusCode(),
+                    "message" => "",
+                    "details" => $exception->getMessage()
+                ),
+            ]);
             $response->setStatusCode($exception->getStatusCode());
-            $response->headers->replace($headers);
+            $response->headers->replace($exception->getHeaders());
+            $response->headers->set('Content-Type', 'application/json');
         } else {
+            $response  = new JsonResponse([
+                "error" => array(
+                    "code" => 500,
+                    "message" => "",
+                    "details" => $exception->getMessage()
+                ),
+            ]);
             $response->setStatusCode(Response::HTTP_INTERNAL_SERVER_ERROR);
+            $response->headers->set('Content-Type', 'application/json');
         }
 
+        // sends the modified response object to the event
         $event->setResponse($response);
     }
 }

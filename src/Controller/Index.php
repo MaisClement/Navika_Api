@@ -28,8 +28,6 @@ class Index
      * Index
      * 
      * Get general message and support about the app and api
-     * 
-     * `/v0.1/index` is keep for backward compatibility
      */
     #[Route('/index', name: 'get_index', methods: ['GET'])]
     #[OA\Tag(name: 'Index')]

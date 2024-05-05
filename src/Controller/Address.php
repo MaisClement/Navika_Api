@@ -32,7 +32,7 @@ class Address
     /**
      * Get address
      * 
-     * Address is provided by PRIM API. It includes stops, POIs and address.
+     * Address is provided by Pelias and OSM data. It includes stops, POIs and address.
      * 
      * **At least "q" or "lat" and "lon" must be defined.**
      * 

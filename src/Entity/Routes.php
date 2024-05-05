@@ -232,15 +232,30 @@ class Routes
         return $this;
     }
 
-    public function getRoute(): ?array
+    public function getRoute($overide = false): ?array
     {
+        if (($this->provider_id->getId() == 'SNCF:TGV' || $this->provider_id->getId() == 'SNCF:IC') ) {
+            return array(
+                "id" => (string) $this->route_id,
+                "code" => (string) $this->provider_id->getId() == 'SNCF:TGV' ? 'TGV' : 'IC',
+                "name" => (string) $this->route_long_name,
+                "mode" => (string) Functions::getTransportMode($this->route_type),
+                "color" => (string) $this->route_color == null ? "888888" : substr($this->route_color, 0, 6),
+                "text_color" => (string) $this->route_text_color == null ? "888888" : substr($this->route_text_color, 0, 6),
+                "agency" => array(
+                    "id" => $this->agency_id->getAgencyId(),
+                    "name" => $this->agency_id->getAgencyName(),
+                    "area" => $this->provider_id->getArea(),
+                )
+            );
+        }
         return array(
             "id" => (string) $this->route_id,
             "code" => (string) $this->route_short_name,
             "name" => (string) $this->route_long_name,
             "mode" => (string) Functions::getTransportMode($this->route_type),
-            "color" => (string) $this->route_color == null ? "ffffff" : substr($this->route_color, 0, 6),
-            "text_color" => (string) $this->route_text_color == null ? "ffffff" : substr($this->route_text_color, 0, 6),
+            "color" => (string) $this->route_color == null ? "888888" : substr($this->route_color, 0, 6),
+            "text_color" => (string) $this->route_text_color == null ? "888888 " : substr($this->route_text_color, 0, 6),
             "agency" => array(
                 "id" => $this->agency_id->getAgencyId(),
                 "name" => $this->agency_id->getAgencyName(),
