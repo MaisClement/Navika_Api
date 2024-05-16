@@ -808,6 +808,8 @@ class Functions
                 "stop_time" => array(
                     "departure_time" =>  isset($stop->base_departure_time)    ? Functions::rPrepareTime($stop->base_departure_time, true) : '',
                     "arrival_time"   =>  isset($stop->base_arrival_time)      ? Functions::rPrepareTime($stop->base_arrival_time, true)   : '',
+                    "departure_date_time" =>  isset($stop->base_departure_time)    ? Functions::rPrepareTime($stop->base_departure_time, true) : '',
+                    "arrival_date_time"   =>  isset($stop->base_arrival_time)      ? Functions::rPrepareTime($stop->base_arrival_time, true)   : '',
                 ),
                 "disruption" => array(
                     "departure_state"       => (string) $stop->departure_status,
@@ -817,6 +819,10 @@ class Functions
                     "departure_time"        => (string) isset($stop->amended_departure_time) !== '' && isset($stop->amended_departure_time) !== '0' ? Functions::rPrepareTime($stop->amended_departure_time, true) : '',
                     "base_arrival_time"     => (string) isset($stop->base_arrival_time)      !== '' && isset($stop->base_arrival_time)      !== '0' ? Functions::rPrepareTime($stop->base_arrival_time, true)      : '',
                     "arrival_time"          => (string) isset($stop->amended_arrival_time)   !== '' && isset($stop->amended_arrival_time)   !== '0' ? Functions::rPrepareTime($stop->amended_arrival_time, true)   : '',
+                    "base_departure_date_time"   => (string) isset($stop->base_departure_time)    !== '' && isset($stop->base_departure_time)    !== '0' ? Functions::rPrepareTime($stop->base_departure_time, true)    : '',
+                    "departure_date_time"        => (string) isset($stop->amended_departure_time) !== '' && isset($stop->amended_departure_time) !== '0' ? Functions::rPrepareTime($stop->amended_departure_time, true) : '',
+                    "base_arrival_date_time"     => (string) isset($stop->base_arrival_time)      !== '' && isset($stop->base_arrival_time)      !== '0' ? Functions::rPrepareTime($stop->base_arrival_time, true)      : '',
+                    "arrival_date_time"          => (string) isset($stop->amended_arrival_time)   !== '' && isset($stop->amended_arrival_time)   !== '0' ? Functions::rPrepareTime($stop->amended_arrival_time, true)   : '',
                     "is-detour"             => $stop->is_detour,
                 ),
             );
