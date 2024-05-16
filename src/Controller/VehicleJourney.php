@@ -68,27 +68,29 @@ class VehicleJourney
         if ($len == 0) {
             return new JsonResponse(Functions::ErrorMessage(400, 'Nothing where found for this id'), 400);
         }
+        $trip_update = [];
+        $reports = [];
 
         $provider_id = $trip[0]['provider_id'];
-        $provider = $this->providerRepository->find($provider_id);
+        if ($provider_id != null){
+            $provider = $this->providerRepository->find($provider_id);
 
-        $trips_update = Functions::getRealtimeData($provider);
-        
-        $file_name = $dir . '/test_gtfsrt.pb';
-        file_put_contents($file_name, json_encode($trips_update, JSON_PRETTY_PRINT));
-        
-        $trip_update = Functions::getTripRealtime($trips_update, $trip[0]['trip_id']);
+            $trips_update = Functions::getRealtimeData($provider);
+            
+            $file_name = $dir . '/test_gtfsrt.pb';
+            file_put_contents($file_name, json_encode($trips_update, JSON_PRETTY_PRINT));
+            
+            $trip_update = Functions::getTripRealtime($trips_update, $trip[0]['trip_id'], null);
+            $reports = Functions::getTripRealtimeReports($trip_update, $trip[0]['trip_id']);
+        } 
         // -----
 
         $stops = [];
         $order = 0;
 
         foreach ($trip as $obj) {
-            $real_time = Functions::getTripRealtimeDateTime($trip_update, $obj['stop_id']);
-            
-            
-            $disruption = 
-            
+            $disruption = Functions::getDisruptionForStop($trip_update, $obj);
+
             $stops[] = array(
                 "name"          => (string) $obj['stop_name'],
                 "id"            => (string) $obj['parent_station'],
@@ -99,10 +101,12 @@ class VehicleJourney
                     "lon"       => $obj['stop_lon'],
                 ),
                 "stop_time" => array(
-                    "departure_time"    => Functions::prepareTime($obj['departure_time'], true),
-                    "arrival_time"      => Functions::prepareTime($obj['arrival_time'], true),
+                    "departure_date_time"    => Functions::prepareTime($obj['departure_time'], true),
+                    "arrival_date_time"      => Functions::prepareTime($obj['arrival_time'], true),
+                    "departure_time"    => Functions::prepareTime($obj['departure_time'], true),    // For backward compatibility, to remove in future update
+                    "arrival_time"      => Functions::prepareTime($obj['arrival_time'], true),      // For backward compatibility, to remove in future update
                 ),
-                "disruption"    => null,
+                "disruption"    => $disruption,
             );
             $trip_headsign = $obj['trip_headsign'];
             $trip_id = $obj['trip_id'];
@@ -114,7 +118,7 @@ class VehicleJourney
             "informations"  => array(
                 "id"            => $trip_id ?? '',
                 "mode"          => Functions::getTransportMode($route_type ?? ''),
-                "name"          => $id,
+                "name"          => $trip_id != $id ? $id : $trip_headsign,
                 "headsign"      => $trip_headsign ?? '',
                 "description"   => '',
                 "message"       => '',
@@ -127,9 +131,13 @@ class VehicleJourney
                     "name"      => $stops[count($stops) - 1]['name'],
                 ),
             ),
+            "reports" => [],
+            "stop_times" => $stops,
+        );
 
-            // Info théorique
-            "reports" => array(
+        // Info théorique
+        if ($trip_update == null) {
+            $vehicle_journey["reports"] = array(
                 array(
                     "id" => 'ADMIN:theorical',
                     "status" => 'active',
@@ -141,9 +149,11 @@ class VehicleJourney
                         "name" => "",
                     ),
                 ),
-            ),
-            "stop_times" => $stops,
-        );
+            );
+        }
+
+        $vehicle_journey["reports"] = $reports;
+
         $json['vehicle_journey'] = $vehicle_journey;
 
         if ($request->get('flag') != null) {
