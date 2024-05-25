@@ -4,18 +4,27 @@ namespace App\Controller;
 
 use App\Controller\Functions;
 use App\Repository\StationsRepository;
+use App\Repository\TownRepository;
 use OpenApi\Attributes as OA;
+use Doctrine\ORM\EntityManagerInterface;
+use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
 use Symfony\Component\HttpClient\HttpClient;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\Routing\Annotation\Route;
 
 class Bikes
 {
+    private $entityManager;
+    private $params;
     private StationsRepository $stationsRepository;
+    private TownRepository $townRepository;
     
-    public function __construct(StationsRepository $stationsRepository)
+    public function __construct(EntityManagerInterface $entityManager, ParameterBagInterface $params, TownRepository $townRepository, StationsRepository $stationsRepository)
     {
+        $this->entityManager = $entityManager;
+        $this->params = $params;
         $this->stationsRepository = $stationsRepository;
+        $this->townRepository = $townRepository;
     }
 
     /**
@@ -53,20 +62,37 @@ class Bikes
         if (!($station = $this->stationsRepository->findOneBy( ['station_id' => $id] )) instanceof \App\Entity\Stations) {
             return new JsonResponse(Functions::ErrorMessage(400, 'Nothing where found for this station'), 400);
         }
-        
+
+        $lat = $station->getStationLat();
+        $lon = $station->getStationLon();
+
+        // --- Adresse, ville et position
+        $town = $this->townRepository->findTownByCoordinates($lat, $lon);
+
         $json = array(
-            'name'     => $station->getStationName(),
-            'url'      => $station->getProviderId()->getGbfsUrl(),
-            'coord' => array(
-                'lat'      => (double) $station->getStationLat(),
-                'lon'      => (double) $station->getStationLon(),
+            "bike_station" => array(
+                "id"         =>  (string)    $station->getStationId(),
+                "name"       =>  (string)    $station->getStationName(),
+                "type"       =>  (string)    'bike_station',
+                'distance'  =>  (int)       0,
+                'town'      =>  (string)    isset($town) ? $town->getTownName() : '',
+                'zip_code'  =>  (string)    isset($town) ? $town->getZipCode() : '',
+                "coord"      => array(
+                    'lat'      => (double) $station->getStationLat(),
+                    'lon'      => (double) $station->getStationLon(),
+                ),
             ),
-            'capacity' => (int) $station->getStationCapacity(),
+            'capacity' => array(
+                'total' => (int) $station->getStationCapacity()
+            ),
         );
 
-        $url = $station->getProviderId()->getGbfsUrl() . 'station_status.json';
 
         // --- Infos en temps réel
+        $url = $station->getProviderId()->getGbfsUrl() . 'station_status.json';
+
+
+        
         $client = HttpClient::create();
         
         $response = $client->request('GET', $url);
@@ -84,11 +110,11 @@ class Bikes
                     if (isset($station->num_bikes_available_types)) {
                         foreach ($station->num_bikes_available_types as $types) {
                             foreach ($types as $key => $nb) {
-                                $json[$key] = $nb;
+                                $json['capacity'][$key] = $nb;
                             }
                         }
                     } elseif (isset($station->num_bikes_available)) {
-                        $json['bike'] = $station->num_bikes_available;
+                        $json['capacity']['bike'] = $station->num_bikes_available;
                     }
             
                     break;

@@ -2,8 +2,11 @@
 
 namespace App\Controller;
 
+use App\Entity\Stats;
+use DateTime;
 use App\Repository\MessagesRepository;
 use OpenApi\Attributes as OA;
+use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
 use Symfony\Component\HttpClient\HttpClient;
 use Symfony\Component\HttpFoundation\JsonResponse;
@@ -13,13 +16,15 @@ use Symfony\Component\Routing\Annotation\Route;
 class Index
 {
     private $params;
+    private $entityManager;
 
     private MessagesRepository $messagesRepository;
 
 
-    public function __construct(ParameterBagInterface $params, MessagesRepository $messagesRepository)
+    public function __construct(ParameterBagInterface $params, EntityManagerInterface $entityManager, MessagesRepository $messagesRepository)
     {
         $this->params = $params;
+        $this->entityManager = $entityManager;
 
         $this->messagesRepository = $messagesRepository;
     }
@@ -55,24 +60,8 @@ class Index
 
         // --- Version
         $app_version = $request->get('v') ?? 'null';
-        $support = in_array( $app_version, $this->params->get('app.version.supported') );
 
-        // if ($_SERVER['APP_ENV'] == "dev"){
-        //     $messages[] = array(
-        //         "id"            =>  (string)    "dev",
-        //         "status"        =>  (string)    "active",
-        //         "severity"      =>  (int)       0,
-        //         "effect"        =>  (string)    "OTHER",
-        //         "updated_at"    =>              date(DATE_ATOM),
-        //         "message"       =>  array(
-        //             "title"     =>      "Serveur de développement",
-        //             "text"      =>      "Serveur de développement, destiné uniquement à des fins de tests ou de développement.",
-        //             "button"      =>    null,
-        //             "link"      =>      null,
-        //         ),
-        //     );
-        // }
-
+        // $support = in_array( $app_version, $this->params->get('app.version.supported') );
         // if ($app_version != '1.3.0') {
         //     $messages[] = array(
         //         "id"            =>  (string)    "update",
@@ -88,6 +77,17 @@ class Index
         //         ),
         //     );
         // }
+
+        // --- Stats
+
+        $stats = new Stats();
+        $stats->setDatetime( new DateTime());
+        $stats->setUuid( $request->get('uuid') ?? '' );
+        $stats->setVersion( $request->get('v') ?? '' );
+        $stats->setPlatform( $request->get('platform') ?? '' );
+
+        $this->entityManager->persist($stats);
+        $this->entityManager->flush();
 
         // --- Message de la base de données
         $_messages = $this->messagesRepository->findAll();
@@ -146,11 +146,11 @@ class Index
             "api"         => array(
                 "version"              =>  (string)       $this->params->get('api.version.current'),
             ),
-            "app"         => array(
-                "current_version"      =>  (string)       $app_version,
-                "lastest_version"      =>  (string)       $this->params->get('app.version.lastest'),
-                "support"              =>  (bool)         $support != '' && $support != '0' ? true : false,
-            ),
+            // "app"         => array(
+            //     "current_version"      =>  (string)       $app_version,
+            //     "lastest_version"      =>  (string)       $this->params->get('app.version.lastest'),
+            //     "support"              =>  (bool)         $support != '' && $support != '0' ? true : false,
+            // ),
             "message"     => $messages,
         );
 

@@ -84,11 +84,9 @@ class StopRouteRepository extends ServiceEntityRepository
 
         $qb->select('l')
             ->where("STDistanceSphere(POINT(l.stop_lat, l.stop_lon), POINT(:latitude, :longitude)) <= :distance")
-            ->andWhere('l.route_long_name != :route_long_name')
             ->setParameter('latitude', $latitude)
             ->setParameter('longitude', $longitude)
-            ->setParameter('distance', $distance)
-            ->setParameter('route_long_name', 'TER');
+            ->setParameter('distance', $distance);
 
         return $qb->getQuery()->getResult();
     }

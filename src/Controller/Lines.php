@@ -234,30 +234,7 @@ class Lines
                 "id"      =>  (String)    $terminu['stop_id'],
                 "name"    =>  (String)    $terminu['stop_name'],
             );
-        }
-
-        // ---
-        $timetables = [];
-        $timetables['map'] = [];
-        $timetables['timetables'] = [];
-
-        $_timetables = $route->getTimetables();
-        foreach( $_timetables as $timetable) {
-            if ( $timetable->getType() == 'map') {
-                $timetables['map'][] = array(
-                    "name"      => (String)     $timetable->getName(),
-                    "url"       => (String)     $timetable->getUrl(),
-                );
-            }
-            if ( $timetable->getType() == 'timetables' && str_ends_with($timetable->getUrl(), '.pdf')) {
-                $timetables['timetables'][] = array(
-                    "name"      => (String)     $timetable->getName(),
-                    "url"       => (String)     $timetable->getUrl(),
-                );
-            }
-        }             
-
-        // ----
+        }// ----
         $json = [];
         $json['line'] = $route->getRouteAndTrafic();
 
@@ -283,7 +260,6 @@ class Lines
 
         // ---        
         $json['line']['terminus'] = $terminus;
-        $json['line']['timetables'] = $timetables;
 
         if ($request->get('flag') != null) {
             $json["flag"] = (int) $request->get('flag');

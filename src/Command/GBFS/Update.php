@@ -63,7 +63,7 @@ class Update extends Command
             $progressIndicator->advance();
 
             // ---
-            $url = $gbfs->getGbfsUrl();
+            $url = $gbfs->getGbfsUrl() . "gbfs.json";
 
             if ($url != null) {
                 try {

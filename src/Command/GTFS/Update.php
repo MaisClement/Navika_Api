@@ -276,6 +276,10 @@ class Update extends Command
                         $this->dbServices->initDBUpdate($db);
 
                         $this->dbServices->clearProviderDataInTable($db, $type, $provider);
+                        
+                        if ($tc_provider->getParentProvider() != null) {
+                            $this->dbServices->clearProviderDataInTable($db, $type, $tc_provider->getParentProvider());
+                        }
 
                         $progressBar->setMessage("Importing $type... (Validating data...)");
                         $progressBar->advance();

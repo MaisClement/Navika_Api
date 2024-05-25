@@ -260,7 +260,10 @@ class Routes
                 "id" => $this->agency_id->getAgencyId(),
                 "name" => $this->agency_id->getAgencyName(),
                 "area" => $this->provider_id->getArea(),
-            )
+            ),
+            "timetables" => $this->getTimetables(),
+            "maps" => $this->getMaps(),
+            
         );
     }
 
@@ -296,7 +299,27 @@ class Routes
                 ),
             );
 
-            $severity = $trafic['severity'] > $report->getSeverity() ? $trafic['severity'] : $report->getSeverity();
+
+            if ($report->getSeverity() == 2) {  // Si travaux a venir, on le prend en compte que si on a rien
+                if ($trafic['severity'] == 0) {
+                    $severity = $report->getSeverity();
+                }
+            }
+            else if ($report->getSeverity() == 1 && ($trafic['severity'] == 0 || $trafic['severity'] == 1 || $trafic['severity'] == 2)) {
+                $severity = $report->getSeverity();
+            }
+            else if ($report->getSeverity() > $trafic['severity']) { // Si la severité du report est supérieur a ce qu'on a déja
+                $severity = $report->getSeverity();
+            }
+
+            // if ($report->getSeverity() == 2 && $trafic['severity'] == 0) {
+            //     $severity = $report->getSeverity();
+            // } else if ($report->getSeverity() == 1 && $trafic['severity'] == 2) {
+            //     $severity = $report->getSeverity();
+            // } else {
+            //     $severity = $trafic['severity'] > $report->getSeverity() ? $trafic['severity'] : $report->getSeverity();
+            // }
+            
 
             $trafic['severity'] = $severity;
 
@@ -430,11 +453,41 @@ class Routes
     }
 
     /**
-     * @return Collection<int, Timetables>
+     * @return array
      */
-    public function getTimetables(): Collection
+    public function getTimetables(): array
     {
-        return $this->timetables;
+        $_timetables = $this->timetables;
+        $timetables = [];
+
+        foreach( $_timetables as $timetable) {
+            if ( $timetable->getType() == 'map') {
+                $timetables[] = array(
+                    "name"      => (String)     $timetable->getName(),
+                    "url"       => (String)     $timetable->getUrl(),
+                );
+            }
+        }
+        return $timetables; 
+    }
+
+    /**
+     * @return array
+     */
+    public function getMaps(): array
+    {
+        $_maps = $this->timetables;
+        $maps = [];
+
+        foreach( $_maps as $map) {
+            if ( $map->getType() == 'map') {
+                $_maps[] = array(
+                    "name"      => (String)     $map->getName(),
+                    "url"       => (String)     $map->getUrl(),
+                );
+            }
+        }
+        return $maps;  
     }
 
     public function addTimetables(Timetables $timetables): static

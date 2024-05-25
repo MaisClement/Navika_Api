@@ -74,7 +74,7 @@ class Address
         $lon = $request->get('lon');
 
         if ($lat != null && $lon != null) {
-            $url = $this->params->get('geosearch_url') . 'reverse?layers=address&point.lon=' . $lon . '&point.lat=' . $lat;
+            $url = $this->params->get('geosearch_url') . 'reverse?layers=address&lang=fr&point.lon=' . $lon . '&point.lat=' . $lat;
         
         } else {
             return new JsonResponse(Functions::ErrorMessage(400, 'One or more parameters are missing or null, have you "lat" and "lon" ?'), 400);
@@ -154,8 +154,8 @@ class Address
                 "department" =>  (string)    (isset($results[0]->properties->region) ? $results[0]->properties->region : ''),
                 "region"     =>  (string)    (isset($results[0]->properties->macroregion) ? $results[0]->properties->macroregion : ''),
                 "coord"      => array(
-                    "lat"       =>  (float) $results[0]->geometry->coordinates[0],
-                    "lon"       =>  (float) $results[0]->geometry->coordinates[1],
+                    "lat"       =>  (float) $results[0]->geometry->coordinates[1],
+                    "lon"       =>  (float) $results[0]->geometry->coordinates[0],
                 ),
             ),
             "near_stops" => $echo,
