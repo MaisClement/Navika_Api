@@ -3,15 +3,22 @@
 # Mise à jour v1.5.0
 > 🗓️ 31/05/2024 
 
----
+### ✨ Une expérience amélioré
+La navigation sur la carte a été améliorée. L'affichage de votre position est désormais bien plus rapide et les détails des lieux et stations à été retravaillée
 
-### 🔎 Rechercher !
-Il est désormais possible de rechercher n'importe quel lieu directement dans la carte !
+![Détails](https://navika.hackernwar.com/changelog/150_map_enchancement.png "Détails")
 
-### 🗺️ Ouvrir avec
-Navika peut désormais être utilisé pour ouvrir les liens ou adresse. 
+### 🚧 Plus de détails sur le trafic
+Les informations trafic affiché avec vos horaires sont désormais plus complet et plus détaillé :
+
+![Détails](https://navika.hackernwar.com/changelog/150_trafic_change.png "Détails")
+
+### 🗺️ In english please !
+Navika est désormais également disponible en Anglais (en)
 
 ✨ Il y a également quelques modifications pour corriger des bugs et améliorer l'application.
+
+*💖 Un grand merci a @benjamin-voisin et @filau pour leur contribution a cette mise à jour ! 💖*
 
 ---
 ---
