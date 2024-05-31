@@ -44,62 +44,68 @@ class StopIndex extends Command
         $dir = sys_get_temp_dir();
         $db = $this->entityManager->getConnection();
 
-        $client = ClientBuilder::create()
+        try {
+            $client = ClientBuilder::create()
             ->setHosts($this->params->get('elastic_hosts'))
             ->setBasicAuthentication($this->params->get('elastic_user'), $this->params->get('elastic_pswd'))
             ->setCABundle($this->params->get('elastic_cert'))
             ->build();
 
-        // --
-       
-        // Remove all
-        $params = [
-            'index' => 'stops',
-            'body' => [
-                'query' => [
-                    'match_all' => new \stdClass()
+            // --
+        
+            // Remove all
+            $params = [
+                'index' => 'stops',
+                'body' => [
+                    'query' => [
+                        'match_all' => new \stdClass()
+                    ]
                 ]
-            ]
-        ];
-
-        $response = $this->client->deleteByQuery($params);
-        return $response;
-
-        // Add by batch
-
-        $stops_to_add = $this->stopsRepository->findAllByLocationType(1);
-        
-        $params = ['body' => []];
-
-        $i = 1;
-        foreach ($stops_to_add as $stop) {
-            print( $stop->getStopId());
-            $params['body'][] = [
-                'index' => [
-                    '_index' => 'stops',
-                    '_id'    => $stop->getStopId(),
-                ],
-            ];
-            $params['body'][] = [
-                'name' => $stop->getStopName(),
             ];
 
-            if ($i % 1000 == 0) {
-                $responses = $client->bulk($params);
+            $response = $this->client->deleteByQuery($params);
+            return $response;
 
-                $params = ['body' => []];
+            // Add by batch
 
-                unset($responses);
+            $stops_to_add = $this->stopsRepository->findAllByLocationType(1);
+            
+            $params = ['body' => []];
+
+            $i = 1;
+            foreach ($stops_to_add as $stop) {
+                print( $stop->getStopId());
+                $params['body'][] = [
+                    'index' => [
+                        '_index' => 'stops',
+                        '_id'    => $stop->getStopId(),
+                    ],
+                ];
+                $params['body'][] = [
+                    'name' => $stop->getStopName(),
+                ];
+
+                if ($i % 1000 == 0) {
+                    $responses = $client->bulk($params);
+
+                    $params = ['body' => []];
+
+                    unset($responses);
+                }
+                $i++;
             }
-            $i++;
-        }
 
-        // Send the last batch if it exists
-        if (!empty($params['body'])) {
-            $responses = $client->bulk($params);
+            // Send the last batch if it exists
+            if (!empty($params['body'])) {
+                $responses = $client->bulk($params);
+            }
+            
+            $progressBar->clear();
+            
+        } catch (\Exception $e) {
+            // Elastic not working
+            // Pas content
         }
-        
-        $progressBar->clear();
 
         return Command::SUCCESS;
     }

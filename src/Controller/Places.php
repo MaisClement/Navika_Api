@@ -75,14 +75,19 @@ class Places
 
     public function searchPlaces(Request $request)
     {
-        $client = ClientBuilder::create()
+        try {
+            $client = ClientBuilder::create()
             ->setHosts($this->params->get('elastic_hosts'))
             ->setBasicAuthentication($this->params->get('elastic_user'), $this->params->get('elastic_pswd'))
             ->setCABundle($this->params->get('elastic_cert'))
             ->build();
+       } catch (\Exception $e) {
+            // Elastic not working
+            // Pas content
+       }
 
         $search = ['-', ' ', "'"];
-        $replace =['', '', ''];
+        $replace = ['', '', ''];
 
         $q = $request->get('q');
         $q = urldecode( trim( $q ) );
@@ -109,25 +114,30 @@ class Places
             // $stops2 = $this->stopRouteRepository->findByTownName( $query );
             // $stops = array_merge($stops1, $stops2);
 
-            $params = [
-                'index' => 'stops',
-                'size'   => 50,
-                'body'  => [
-                    'query' => [
-                        'fuzzy' => [
-                            'name' => [
-                                'value' => $query,
-                                'fuzziness' => 'AUTO',
+            try {
+                $params = [
+                    'index' => 'stops',
+                    'size'   => 50,
+                    'body'  => [
+                        'query' => [
+                            'fuzzy' => [
+                                'name' => [
+                                    'value' => $query,
+                                    'fuzziness' => 'AUTO',
+                                ],
                             ],
                         ],
                     ],
-                ],
-            ];
-            $results = $client->search($params);
+                ];
+                $results = $client->search($params);
 
-            foreach($results['hits']['hits'] as $result) {
-                $s = $this->stopRouteRepository->findById( $result['_id'] );
-                $stops = array_merge($stops, $s);
+                foreach($results['hits']['hits'] as $result) {
+                    $s = $this->stopRouteRepository->findById( $result['_id'] );
+                    $stops = array_merge($stops, $s);
+                }
+            } catch (\Exception $e) {
+                // Elastic not working
+                $stops = $this->stopRouteRepository->findByQueryName( $query );
             }
         
         } else if ( $lat != null && $lon != null ) {
