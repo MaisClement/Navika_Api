@@ -46,7 +46,7 @@ class Add extends Command
         $area = $input->getArgument('area');
         $url = $input->getArgument('url');
         $flag = '0';
-
+        
         // Check if provider is not already registered
         $providers = $this->providerRepository->Find($id);
         if ($providers instanceof \App\Entity\Provider) {
@@ -63,6 +63,18 @@ class Add extends Command
         $provider->setArea($area);
         $provider->setUrl($url);
         $provider->setFlag($flag);
+
+        // if it's a sub provider, check if parent provider exist
+        if (strpos($id, ":") !== false) {
+            $parent_id = substr($id, 0, strpos($id, ":"));
+            $providers = $this->providerRepository->Find($parent_id);
+            if ($providers instanceof \App\Entity\Provider) {
+                $provider->setParentProvider($parent_id);
+            } else {
+                $output->writeln('<fg=red>❌ Couldn’t find ' . $parent_id . ' parent provider</>');
+                return Command::SUCCESS;
+            }
+        }
 
         $this->entityManager->persist($provider);
 

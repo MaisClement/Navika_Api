@@ -93,9 +93,6 @@ class Trafic_GTFS extends Command
         
                 $service_alerts = json_decode($feed->serializeToJsonString());
         
-                $file_name = $dir . '/test_gtfsrt.pb';
-                file_put_contents($file_name, json_encode($service_alerts, JSON_PRETTY_PRINT));
-                
                 //---
                 $cause = array(
                     'UNKNOWN_CAUSE' => 'perturbation',

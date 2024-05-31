@@ -11,14 +11,21 @@ use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Routing\Annotation\Route;
+use Elastic\Elasticsearch\ClientBuilder;
 
 class Stops
 {    
+    private $entityManager;
+    private $params;
+
     private StopRouteRepository $stopRouteRepository;
     private TownRepository $townRepository;
     
-    public function __construct(StopRouteRepository $stopRouteRepository, TownRepository $townRepository)
+    public function __construct(EntityManagerInterface $entityManager, ParameterBagInterface $params, StopRouteRepository $stopRouteRepository, TownRepository $townRepository)
     {
+        $this->entityManager = $entityManager;
+        $this->params = $params;
+
         $this->stopRouteRepository = $stopRouteRepository;
         $this->townRepository = $townRepository;
     }
@@ -125,6 +132,17 @@ class Stops
 
     public function searchStops(Request $request): JsonResponse 
     {
+        try {
+            $client = ClientBuilder::create()
+            ->setHosts($this->params->get('elastic_hosts'))
+            ->setBasicAuthentication($this->params->get('elastic_user'), $this->params->get('elastic_pswd'))
+            ->setCABundle($this->params->get('elastic_cert'))
+            ->build();
+        } catch (\Exception $e) {
+            // Elastic not working
+            // Pas content
+        }
+
         $search = ['-', ' ', "'"];
         $replace =['', '', ''];;
   
@@ -135,21 +153,50 @@ class Stops
         $lat = $request->get('lat');
         $lon = $request->get('lon');
 
-        if ( ( is_string($request->get('q')) && $query != "" ) && $lat != null && $lon != null ) {
-            $search_type = 3;
-            $stops1 = $this->stopRouteRepository->findByQueryName( $query );
-            $stops2 = $this->stopRouteRepository->findByTownName( $query );
-            $stops = array_merge($stops1, $stops2);
+        if ( ( is_string($request->get('q')) && $query != "" ) ) {
+            if ($lat != null && $lon != null) {
+                $search_type = 3;
+            } else {
+                $search_type = 1;
+            }
+
+            $stops = [];
+            if (strlen($q) >= 3) {
+                $stops = $this->stopRouteRepository->findByQueryName( $query );
+            }
+            
+            // $stops2 = $this->stopRouteRepository->findByTownName( $query );
+            // $stops = array_merge($stops1, $stops2);
+
+            try {
+                $params = [
+                    'index' => 'stops',
+                    'size'   => 50,
+                    'body'  => [
+                        'query' => [
+                            'fuzzy' => [
+                                'name' => [
+                                    'value' => $query,
+                                    'fuzziness' => 'AUTO',
+                                ],
+                            ],
+                        ],
+                    ],
+                ];
+                $results = $client->search($params);
+
+                foreach($results['hits']['hits'] as $result) {
+                    $s = $this->stopRouteRepository->findById( $result['_id'] );
+                    $stops = array_merge($stops, $s);
+                }
+            } catch (\Exception $e) {
+                // Elastic not working
+                $stops = $this->stopRouteRepository->findByQueryName( $query );
+            }
         
         } else if ( $lat != null && $lon != null ) {
             $search_type = 2;
             $stops = $this->stopRouteRepository->findByNearbyLocation($lat, $lon, 5000);
-        
-        } else if ( is_string($request->get('q')) && $query != "" ) {
-            $search_type = 1;
-            $stops1 = $this->stopRouteRepository->findByQueryName( $query );
-            $stops2 = $this->stopRouteRepository->findByTownName( $query );
-            $stops = array_merge($stops1, $stops2);
         
         } else if ( is_string($request->get('q')) ) {
             $json["places"] = [];
@@ -202,7 +249,7 @@ class Stops
                         $modes[$stop->getStopId()->getStopId()] = [];
                     }
     
-                    if (!in_array($stop->getRouteId()->getTransportMode(), $lines[$stop->getStopId()->getStopId()])) {
+                    if (!in_array($stop->getRouteId()->getRoute(), $lines[$stop->getStopId()->getStopId()])) {
                         $lines[$stop->getStopId()->getStopId()][] = $stop->getRouteId()->getRoute();
                     }
     

@@ -8,12 +8,15 @@
         "ext-ctype": "*",
         "ext-iconv": "*",
         "creof/doctrine2-spatial": "^1.2",
+        "doctrine/annotations": "^2.0",
         "doctrine/dbal": "^3.6",
         "doctrine/doctrine-bundle": "^2.10",
         "doctrine/doctrine-migrations-bundle": "^3.2",
         "doctrine/orm": "^2.15",
+        "elasticsearch/elasticsearch": "^8.13",
         "kreait/firebase-bundle": "^5.0",
         "kreait/firebase-php": "^7.0",
+        "lowa/gtfs-realtime-php": "^1.0",
         "mjaschen/phpgeo": "^4.2",
         "nelmio/api-doc-bundle": "^4.12",
         "phpdocumentor/reflection-docblock": "^5.3",
@@ -31,8 +34,7 @@
         "symfony/serializer": "6.3.*",
         "symfony/stopwatch": "6.3.*",
         "symfony/twig-bundle": "6.3.*",
-        "symfony/yaml": "6.3.*",
-        "lowa/gtfs-realtime-php": "^1.0"
+        "symfony/yaml": "6.3.*"
     },
     "config": {
         "allow-plugins": {
@@ -82,6 +84,7 @@
         }
     },
     "require-dev": {
+        "phpmd/phpmd": "^2.15",
         "phpstan/phpstan": "^1.10",
         "rector/rector": "^0.17.12"
     }

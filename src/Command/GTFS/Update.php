@@ -64,26 +64,28 @@ class Update extends Command
         $tc_providers = $this->providerRepository->FindBy(['type' => 'tc']);
 
         foreach ($tc_providers as $tc_provider) {
-            $output->writeln('    > ' . $tc_provider->getName());
+            if ($tc_provider->getUrl() != "" && $tc_provider->getUrl() != null){
+                $output->writeln('    > ' . $tc_provider->getName());
 
-            $ressource = CommandFunctions::getGTFSDataFromApi($tc_provider);
+                $ressource = CommandFunctions::getGTFSDataFromApi($tc_provider);
 
-            if ($tc_provider->getFlag() == 1) {
-                $output->writeln('    i Not fully updated, ignored');
+                if ($tc_provider->getFlag() == 1) {
+                    $output->writeln('    i Not fully updated, ignored');
 
-            } else if ($tc_provider->getFlag() == 0 || $tc_provider->getUpdatedAt() == null) {
-                $output->writeln('    i New file');
-                $to_update[] = array(
-                    'provider' => $tc_provider,
-                    'ressource' => $ressource
-                );
+                } else if ($tc_provider->getFlag() == 0 || $tc_provider->getUpdatedAt() == null) {
+                    $output->writeln('    i New file');
+                    $to_update[] = array(
+                        'provider' => $tc_provider,
+                        'ressource' => $ressource
+                    );
 
-            } else if (strtotime($ressource['updated']) > strtotime($tc_provider->getUpdatedAt()->format('Y-m-d H:i:s'))) {
-                $output->writeln('    i ' . $ressource['updated'] . ' - ' . $tc_provider->getUpdatedAt()->format('Y-m-d H:i:s'));
-                $to_update[] = array(
-                    'provider' => $tc_provider,
-                    'ressource' => $ressource
-                );
+                } else if (strtotime($ressource['updated']) > strtotime($tc_provider->getUpdatedAt()->format('Y-m-d H:i:s'))) {
+                    $output->writeln('    i ' . $ressource['updated'] . ' - ' . $tc_provider->getUpdatedAt()->format('Y-m-d H:i:s'));
+                    $to_update[] = array(
+                        'provider' => $tc_provider,
+                        'ressource' => $ressource
+                    );
+                }
             }
         }
 
@@ -169,7 +171,7 @@ class Update extends Command
 
                 'levels' => ['level_id'],
                 'stops' => ['stop_id', 'level_id', 'parent_station'],
-                'transfers' => ['from_stop_id', 'to_stop_id'],
+            //    'transfers' => ['from_stop_id', 'to_stop_id'],
                 'pathways' => ['pathway_id', 'from_stop_id', 'to_stop_id'],
 
                 'stop_times' => ['trip_id', 'stop_id'],
@@ -180,7 +182,7 @@ class Update extends Command
                 'frequencies' => ['trip_id'],
 
                 'feed_info' => [],
-                'translations' => [],
+            //    'translations' => [],
                 'attributions' => []
             ];
 
@@ -261,6 +263,7 @@ class Update extends Command
                         $progressBar->advance($count);
 
                         $prefix = $provider . ':';
+
                         foreach ($columns as $column) {
                             $this->dbServices->prefixTable($db, $table, $column, $prefix);
                             $progressBar->advance(0);
@@ -273,6 +276,10 @@ class Update extends Command
                         $this->dbServices->initDBUpdate($db);
 
                         $this->dbServices->clearProviderDataInTable($db, $type, $provider);
+                        
+                        if ($tc_provider->getParentProvider() != null) {
+                            $this->dbServices->clearProviderDataInTable($db, $type, $tc_provider->getParentProvider());
+                        }
 
                         $progressBar->setMessage("Importing $type... (Validating data...)");
                         $progressBar->advance();
@@ -286,6 +293,7 @@ class Update extends Command
                         $this->dbServices->endDBUpdate($db);
 
                     } catch (\Exception $e) {
+                        print_r($e);
                         error_log($e->getMessage());
                         $err++;
                     }
@@ -304,17 +312,11 @@ class Update extends Command
             $this->entityManager->flush();
         }
 
-        // Format TER
-        // $routes = $this->routesRepository->FindBy(['route_short_name' => 'TER']);
-
-        // foreach ($routes as $route) {
-        //     $route->setRouteShortName('TER');
-        //     $route->setRouteLongName('TER');
-        //     $route->setRouteType('99');
-        //     $route->setRouteColor("000000");
-        //     $route->setRouteTextColor("aaaaaa");
-        // }
-        // $this->entityManager->flush();
+        // Concat stops area
+        $input = new ArrayInput([
+            'command' => 'app:gtfs:concatstoparea'
+        ]);
+        $returnCode = $this->getApplication()->doRun($input, $output);
 
         // Stop Area
         $input = new ArrayInput([
@@ -325,12 +327,6 @@ class Update extends Command
         // Stop Route
         $input = new ArrayInput([
             'command' => 'app:gtfs:stoproute'
-        ]);
-        $returnCode = $this->getApplication()->doRun($input, $output);
-
-        // SNCF stop
-        $input = new ArrayInput([
-            'command' => 'app:sncf:update'
         ]);
         $returnCode = $this->getApplication()->doRun($input, $output);
 

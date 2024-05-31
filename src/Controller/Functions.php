@@ -1,6 +1,8 @@
 <?php
 
 namespace App\Controller;
+use Symfony\Component\HttpClient\HttpClient;
+use Google\Transit\Realtime\FeedMessage;
 use DateTime;
 use DateTimeZone;
 
@@ -293,7 +295,6 @@ class Functions
         return $matrix[$len1][$len2];
     }
 
-
     public static function orderWithLevenshtein($array, $text) {
         usort($array, function($a, $b) use ($text) {
             $levA = Functions::levenshteinDistance($text, $a['name']);
@@ -305,20 +306,31 @@ class Functions
         return $array;
     }
 
+    public static function filterStopsWithLevenshtein($array, $text, $limit = 3) {
+        $res = [];
+        foreach($array as $element) {
+            $d = levenshtein($element->getStopId()->getStopName(), $text);
+            if ($d <= 3) {
+                $res[] = $element;
+            }
+        }
+    
+        return $res;
+    }
+
     public static function orderDeparture($array) {
         usort ($array, function($a, $b) {
             
-            if ( $a['stop_date_time']['arrival_date_time'] != "" ) {
-                $a = $a['stop_date_time']['arrival_date_time'];
-            } else if ( $a['stop_date_time']['departure_date_time'] != "" ) {
-                $a = $a['stop_date_time']['departure_date_time'];
+            if ( $a['stop_date_time']['departure_date_time'] != "" ) {
+                $a = new DateTime($a['stop_date_time']['departure_date_time']);
+            } else if ( $a['stop_date_time']['arrival_date_time'] != "" ) {
+                $a = new DateTime($a['stop_date_time']['arrival_date_time']);
             }
-
             
-            if ( $b['stop_date_time']['arrival_date_time'] != "" ) {
-                $b = $b['stop_date_time']['arrival_date_time'];
-            } else if ( $b['stop_date_time']['departure_date_time'] != "" ) {
-                $b = $b['stop_date_time']['departure_date_time'];
+            if ( $b['stop_date_time']['departure_date_time'] != "" ) {
+                $b = new DateTime($b['stop_date_time']['departure_date_time']);
+            } else if ( $b['stop_date_time']['arrival_date_time'] != "" ) {
+                $b = new DateTime($b['stop_date_time']['arrival_date_time']);
             }
         
             if ($a == $b) {
@@ -485,18 +497,18 @@ class Functions
 
     public static function isValidDateYMD($date) {
         $format = 'Y-m-d';
-        $dateTime = DateTime::createFromFormat($format, $date);
-        return $dateTime && $dateTime->format($format) === $date;
+        $date_time = DateTime::createFromFormat($format, $date);
+        return $date_time && $date_time->format($format) === $date;
     }
 
     public static function isToday($date) {
         $today = new DateTime("today");
         
         $format = 'Y-m-d';
-        $dateTime = DateTime::createFromFormat($format, $date);
-        $dateTime->setTime( 0, 0, 0 );
+        $date_time = DateTime::createFromFormat($format, $date);
+        $date_time->setTime( 0, 0, 0 );
 
-        $interval = $today->diff($dateTime);
+        $interval = $today->diff($date_time);
         $diffDays = $interval->days;
 
         return $diffDays == 0;
@@ -531,9 +543,9 @@ class Functions
     public static function prepareTime($dt, $i = false){
         if ($dt == '') return '';
 
-        $datetime = $i == true ? date_create($dt, timezone_open('Europe/Paris')) : date_create($dt, timezone_open('UTC'));
+        $date_time = $i == true ? date_create($dt, timezone_open('Europe/Paris')) : date_create($dt, timezone_open('UTC'));
         
-        if (is_bool($datetime)) {
+        if (is_bool($date_time)) {
             $timeArray = explode(':', $dt);
     
             $hours = (int) $timeArray[0];
@@ -545,20 +557,15 @@ class Functions
             $minutes %= 60;
             $seconds %= 60;
     
-            $datetime = new DateTime();
-            $datetime->setTime($hours, $minutes, $seconds);
-            $datetime->setTimezone(new DateTimeZone('Europe/Paris'));
+            $date_time = new DateTime();
+            $date_time->setTime($hours, $minutes, $seconds);
+            $date_time->setTimezone(new DateTimeZone('Europe/Paris'));
     
             if ($timeArray[0] >= 24) {
-                $datetime->modify('+1 day');
+                $date_time->modify('+1 day');
             }
         }
-        return date_format($datetime, DATE_ATOM);
-    }
-
-    public static function rPrepareTime($dt, $i = false) {
-        $time = substr($dt, 0, 2) . ':' . substr($dt, 2, 2) . ':' .substr($dt, 4, 2);
-        return Functions::prepareTime($time, $i);
+        return date_format($date_time, DATE_ATOM);
     }
 
     public static function getState($call){
@@ -583,177 +590,6 @@ class Functions
             return "origin";
         } else
             return "";
-    }
-
-    public static function getPhysicalModes($physical_modes){
-        $list = [];
-        foreach ($physical_modes as $modes) {
-            $list[] = $modes->id;
-        }
-        return $list;
-    }
-    public static function getAllLines($lines){
-        $list = [];
-    
-        foreach ($lines as $line) {
-            $list[] = array(
-                "id"         =>  (string)    'IDFM:' . Functions::idfmFormat($line->id),
-                "code"       =>  (string)    $line->code,
-                "name"       =>  (string)    $line->name,
-                "mode"       =>  (string)    $line->commercial_mode->id,
-                "color"      =>  (string)    $line->color,
-                "text_color" =>  (string)    $line->text_color,
-            );
-        }
-        return Functions::order_line($list);
-    }
-
-    public static function getSNCFid($links){
-        foreach ($links as $link) {
-            if ($link->type == 'vehicle_journey') {
-                return $link->id;
-            }
-        }
-    }
-
-    public static function getApiDetails($api_results, $api_results2, $name){
-        $departures = [];
-
-        // foreach ($api_results2->departures as $api_result) {
-        //     if ($api_result->display_informations->headsign == $name) {    
-        //         $departures = array(
-        //             "id"                =>  (string)    Functions::getSNCFid($api_result->links),
-        //             "name"              =>  (string)    $api_result->display_informations->headsign,
-        //             "network"           =>  (string)    $api_result->display_informations->network,
-        //             "to_id"             =>  (string)    'SNCF:' . Functions::idfmFormat( $api_result->route->direction->id ),
-        //         );
-        //     }
-        // }
-        foreach ($api_results->departures as $api_result) {
-            if ($api_result->display_informations->headsign == $name) {
-                $departures = array(
-                    "id"                =>  (string)    Functions::getSNCFid($api_result->links),
-                    "name"              =>  (string)    $api_result->display_informations->headsign,
-                    "network"           =>  (string)    $api_result->display_informations->network,
-                    "to_id"             =>  (string)    'SNCF:' . Functions::idfmFormat( $api_result->route->direction->id ),
-                );
-            }
-        }
-        return $departures;
-    }
-
-    public static function getReports($disruptions){    
-        $echo = [];    
-        foreach ($disruptions as $disruption) {    
-            $causes = [];
-    
-            foreach ($disruption->impacted_objects[0]->impacted_stops as $stop) {    
-                $cause = $stop->cause;
-                if ( $cause != '' && !in_array( $cause, $causes ) ) {
-                    $causes[] = $cause;
-                }
-            }
-            foreach($causes as $cause) {
-                $echo[] = array(
-                    "id"            => (string) $disruption->id,
-                    "status"        => (string) $disruption->status,
-                    "cause"         => (string) $disruption->cause,
-                    "severity"      => Functions::getSeverityByEffect($disruption->severity->effect),
-                    "effect"        => (string) $disruption->severity->effect,
-                    "updated_at"    => (string) $disruption->updated_at,
-                    "message"       => array(
-                        "title"         => Functions::getTitleByEffect($disruption->severity->effect),
-                        "text"          => $cause,
-                    ),
-                );
-            }
-            if ($causes == []) {
-                $echo[] = array(
-                    "id"            => (string) $disruption->id,
-                    "status"        => (string) $disruption->status,
-                    "cause"         => (string) $disruption->cause,
-                    "severity"      => Functions::getSeverityByEffect($disruption->severity->effect),
-                    "effect"        => (string) $disruption->severity->effect,
-                    "updated_at"    => (string) $disruption->updated_at,
-                    "message"       => array(
-                        "title"         => Functions::getTitleByEffect($disruption->severity->effect),
-                        "text"          => '',
-                    ),
-                );
-            }
-        }
-        return $echo;
-    }
-
-    public static function getTitleByEffect($effect){
-        switch ($effect) {
-            case 'SIGNIFICANT_DELAYS':
-                return 'Retardé';
-            case 'REDUCED_SERVICE':
-                return 'Trajet modifié';
-            case 'NO_SERVICE':
-                return 'Supprimé';
-            case 'MODIFIED_SERVICE':
-                return 'Trajet modifié';
-            case 'ADDITIONAL_SERVICE':
-                return 'Train supplémentaire';
-            case 'DETOUR':
-                return 'Trajet modifié';
-            default: // UNKNOWN_EFFECT et OTHER_EFFECT
-                return "Trajet Perturbé";
-        }
-    }
-
-    public static function getSeverityByEffect($effect){
-        switch ($effect) {
-            case 'SIGNIFICANT_DELAYS':
-                return 4;
-            case 'REDUCED_SERVICE':
-                return 4;
-            case 'NO_SERVICE':
-                return 5;
-            case 'MODIFIED_SERVICE':
-                return 1;
-            case 'ADDITIONAL_SERVICE':
-                return 1;
-            case 'DETOUR':
-                return 4;
-            default: // UNKNOWN_EFFECT et OTHER_EFFECT
-                return 4;
-        }
-    }
-
-    public static function getSNCFState($status, $level, $traffic){
-        if ($level == "Normal") {
-            return "ontime";
-        }
-    
-        switch($status) {
-            case "RETARD": 
-            case "RETARD_OBSERVE": 
-                return 'delayed';
-    
-            case "MODIFICATION": 
-            case "MODIFICATION_LIMITATION": 
-            case "MODIFICATION_DESSERTE_SUPPRIMEE": 
-            case "MODIFICATION_DETOURNEMENT": 
-            case "MODIFICATION_PROLONGATION":
-                return "modified";
-        
-            case "SUPPRESSION" :
-            case "SUPPRESSION_TOTALE": 
-            case "SUPPRESSION_PARTIELLE": 
-            case "SUPPRESSION_DETOURNEMENT":
-                return "cancelled";
-                
-            case "MODIFICATION_DESSERTE_AJOUTEE":
-                return "added";
-    
-            case "OnTime":
-                return 'ontime';
-        }
-    
-        return "theorical";
     }
 
     public static function getIDFMID($id) {
@@ -792,43 +628,18 @@ class Functions
         );
     }
 
-    public static function getDisruptionForStop($disruptions){    
-        $stops = [];
-        $order = 0;    
-        foreach ($disruptions[0]->impacted_objects[0]->impacted_stops as $stop) {            
-            $stops[] = array(
-                "name"              => (string) $stop->stop_point->name,
-                "id"                => (string) $stop->stop_point->id,
-                "order"             => (int)    $order,
-                "type"              => (int)    count($disruptions[0]->impacted_objects[0]->impacted_stops) - 1 == $order ? 'terminus' : ($order == 0 ? 'origin' : ''),
-                "coords" => array(
-                    "lat"           => $stop->stop_point->coord->lat,
-                    "lon"           => $stop->stop_point->coord->lon,
-                ),
-                "stop_time" => array(
-                    "departure_time" =>  isset($stop->base_departure_time)    ? Functions::rPrepareTime($stop->base_departure_time, true) : '',
-                    "arrival_time"   =>  isset($stop->base_arrival_time)      ? Functions::rPrepareTime($stop->base_arrival_time, true)   : '',
-                    "departure_date_time" =>  isset($stop->base_departure_time)    ? Functions::rPrepareTime($stop->base_departure_time, true) : '',
-                    "arrival_date_time"   =>  isset($stop->base_arrival_time)      ? Functions::rPrepareTime($stop->base_arrival_time, true)   : '',
-                ),
-                "disruption" => array(
-                    "departure_state"       => (string) $stop->departure_status,
-                    "arrival_state"         => (string) $stop->arrival_status,
-                    "message"               => (string) "",
-                    "base_departure_time"   => (string) isset($stop->base_departure_time)    !== '' && isset($stop->base_departure_time)    !== '0' ? Functions::rPrepareTime($stop->base_departure_time, true)    : '',
-                    "departure_time"        => (string) isset($stop->amended_departure_time) !== '' && isset($stop->amended_departure_time) !== '0' ? Functions::rPrepareTime($stop->amended_departure_time, true) : '',
-                    "base_arrival_time"     => (string) isset($stop->base_arrival_time)      !== '' && isset($stop->base_arrival_time)      !== '0' ? Functions::rPrepareTime($stop->base_arrival_time, true)      : '',
-                    "arrival_time"          => (string) isset($stop->amended_arrival_time)   !== '' && isset($stop->amended_arrival_time)   !== '0' ? Functions::rPrepareTime($stop->amended_arrival_time, true)   : '',
-                    "base_departure_date_time"   => (string) isset($stop->base_departure_time)    !== '' && isset($stop->base_departure_time)    !== '0' ? Functions::rPrepareTime($stop->base_departure_time, true)    : '',
-                    "departure_date_time"        => (string) isset($stop->amended_departure_time) !== '' && isset($stop->amended_departure_time) !== '0' ? Functions::rPrepareTime($stop->amended_departure_time, true) : '',
-                    "base_arrival_date_time"     => (string) isset($stop->base_arrival_time)      !== '' && isset($stop->base_arrival_time)      !== '0' ? Functions::rPrepareTime($stop->base_arrival_time, true)      : '',
-                    "arrival_date_time"          => (string) isset($stop->amended_arrival_time)   !== '' && isset($stop->amended_arrival_time)   !== '0' ? Functions::rPrepareTime($stop->amended_arrival_time, true)   : '',
-                    "is-detour"             => $stop->is_detour,
-                ),
-            );
-            $order++;
-        }
-        return $stops;
+    public static function getDisruptionForStop($trip_update, $obj){            
+        $real_time = Functions::getTripRealtimeDateTime($trip_update, $obj['stop_id']);
+        
+        return array(
+            "departure_state"       => (string) $real_time['departure_state'] != null ? $real_time['departure_state'] : 'unchanged',
+            "arrival_state"         => (string) $real_time['arrival_state'] != null ? $real_time['arrival_state'] : 'unchanged',
+            "message"               => (string) $real_time['message'] != null ? $real_time['message'] : '',
+            "base_departure_date_time"  =>  (string)  Functions::prepareTime($obj['departure_time'], true),
+            "departure_date_time"       =>  (string)  $real_time['departure_date_time'] != null ? Functions::prepareTime($real_time['departure_date_time'], true) : Functions::prepareTime($obj['departure_time'], true),
+            "base_arrival_date_time"    =>  (string)  Functions::prepareTime($obj['arrival_time'], true),
+            "arrival_date_time"         =>  (string)  $real_time['arrival_date_time'] != null ? Functions::prepareTime($real_time['arrival_date_time'], true) : Functions::prepareTime($obj['arrival_time'], true),
+        );
     }
 
     public static function callIsFuture($call){
@@ -863,6 +674,255 @@ class Functions
         return $id;
     }
 
+    public static function getRealtimeData($provider) {
+        $url = $provider->getGtfsRtTripUpdates();
+
+        if ($url != null) {
+            $client = HttpClient::create();
+            $response = $client->request('GET', $url);
+            $status = $response->getStatusCode();
+            
+            if ($status == 200){
+                $feed = new FeedMessage();
+                $feed->mergeFromString($response->getContent());
+
+                $content = $feed->serializeToJsonString();
+
+                ## We add the provider id before
+                $search = [
+                    '"tripId":"',
+                    '"stopId":"',
+                ];
+                $replace = [
+                    '"tripId":"' . $provider->getId() . ':',
+                    '"stopId":"' . $provider->getId() . ':',
+                ];
+                $content = str_replace($search, $replace, $content);
+
+                # Remove timestamp if added
+                $regex = "/:\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}Z/";
+                $content = preg_replace($regex, '', $content);
+        
+                return json_decode($content)->entity;
+            }
+        }
+        return [];
+    }
+
+    public static function getTripRealtime($trip_update, $trip_id, $stop_id = null) {
+        $regex = "/:\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}Z/";
+        $trip_id = preg_replace($regex, '', $trip_id);
+
+        $is_cancelled = false;
+        $is_modified = false;
+        $has_exceptional_terminus = false;
+        $is_added = false;
+
+        foreach($trip_update as $trip) {
+            if (substr($trip->tripUpdate->trip->tripId, 0, -8) == substr($trip_id, 0, -8)) {
+
+                // Check if fully canceled
+                if ( isset($trip->tripUpdate->trip->scheduleRelationship) ) {
+                    $schedule_relationship = $trip->tripUpdate->trip->scheduleRelationship;
+
+                    // Check if fully canceled
+                    if ( $schedule_relationship == "CANCELED") {
+                        $is_cancelled = true;
+                    }
+                    // Check if fully canceled
+                    if ( $schedule_relationship == "ADDED") {
+                        $is_added = true;
+                    }
+                }
+                $l = count($trip->tripUpdate->stopTimeUpdate);
+                for ($i = 0; $i < $l; $i++) {
+                    if ( isset($trip->tripUpdate->stopTimeUpdate[$i]->scheduleRelationship) ) {
+
+                        // if modified
+                        if ($trip->tripUpdate->stopTimeUpdate[$i]->scheduleRelationship == "SKIPPED")
+                            $is_modified = true;
+
+                        if ($stop_id != null){
+                            // Check if cancelled at stop
+                            if ($trip->tripUpdate->stopTimeUpdate[$i]->stopId == $stop_id && $trip->tripUpdate->stopTimeUpdate[$i]->scheduleRelationship == "SKIPPED")
+                                $is_cancelled = true;
+                        }
+                        
+                        // Check if cancelled at last stop
+                        if ( ($i == ($l-1)) && $trip->tripUpdate->stopTimeUpdate[$i]->scheduleRelationship == "SKIPPED")
+                            $has_exceptional_terminus = true;
+                    }
+                }
+
+                $state = "ontime";
+                if ($is_cancelled) {
+                    $state = "cancelled";
+                } else if ($has_exceptional_terminus) {
+                    $state = "exceptional_terminus";
+                } else if ($is_modified) {
+                    $state = "modified";
+                } else if ($is_added) {
+                    $state = "added";
+                } else if ($is_modified) {
+                    $state = "ontime";
+                }
+                
+                return array(
+                    "trip_update"  => $trip->tripUpdate,
+                    "state"  => $state
+                );
+            }
+        }
+        return null;
+    }
+
+    public static function getTripRealtimeReports($trip_update, $trip_id) {
+        $message = array(
+            "canceled" => array(
+                "id" => 'ADMIN:canceled',
+                "status" => 'active',
+                "cause" => 'canceled',
+                "severity" => 5,
+                "effect" => 'OTHER',
+                "message" => array(
+                    "title" => "Supprimé",
+                    "name" => "",
+                ),
+            ),
+            "modified" => array(
+                "id" => 'ADMIN:modified',
+                "status" => 'active',
+                "cause" => 'modified',
+                "severity" => 4,
+                "effect" => 'OTHER',
+                "message" => array(
+                "title" => "Desserte modifié",
+                "name" => "",
+                ),
+            ),
+            "delayed" => array(
+                "id" => 'ADMIN:delayed',
+                "status" => 'active',
+                "cause" => 'delayed',
+                "severity" => 4,
+                "effect" => 'OTHER',
+                "message" => array(
+                "title" => "Retardé",
+                "name" => "",
+                ),
+            ),
+            "added" => array(
+                "id" => 'ADMIN:added',
+                "status" => 'active',
+                "cause" => 'added',
+                "severity" => 1,
+                "effect" => 'OTHER',
+                "message" => array(
+                    "title" => "Trajet supplémentaire",
+                ),
+            ),
+        );
+        
+        $is_delayed = false;
+        $is_modified = false;
+
+        $reports = [];
+
+        if($trip_update != null && $trip_update['trip_update'] != null) {
+            // Check if fully canceled
+            if ( isset($trip_update['trip_update']->trip->scheduleRelationship) ) {
+                $schedule_relationship = $trip_update['trip_update']->trip->scheduleRelationship;
+
+                // Check if fully canceled
+                if ( $schedule_relationship == "CANCELED") {
+                    $reports[] = $message['canceled'];
+                }
+                // Check if fully canceled
+                if ( $schedule_relationship == "ADDED") {
+                    $reports[] = $message['added'];
+                }
+            }
+            
+            foreach($trip_update['trip_update']->stopTimeUpdate as $stop_time) {
+                if (isset($stop_time->scheduleRelationship) && $stop_time->scheduleRelationship == "SKIPPED"){
+                    $is_modified = true;
+                }
+                if (isset($stop_time->arrival) && isset($stop_time->arrival->delay)){
+                    $is_delayed = true;
+                }
+                if (isset($stop_time->departure) && isset($stop_time->departure->delay)){
+                    $is_delayed = true;
+                }
+            }
+            
+            if ($is_modified) {
+                $reports[] = $message['modified'];
+            }
+            if ($is_delayed) {
+                $reports[] = $message['delayed'];
+            }
+        }
+            
+        return $reports;
+    }
+
+    public static function getTripRealtimeDateTime($trip_update, $stop_id) {
+        $res = array(
+            "departure_date_time" => null,
+            "departure_state" => null,
+            "arrival_date_time"   => null,
+            "arrival_state" => null,
+            "message" => null,
+        );
+
+        if ($trip_update != null && $trip_update['trip_update'] != null){
+            $len = count($trip_update['trip_update']->stopTimeUpdate);
+            for ($i = 0; $i < $len; $i++) {
+                $stop_time = $trip_update['trip_update']->stopTimeUpdate[$i];
+                if ($stop_time->stopId == $stop_id) {
+                    if (isset($stop_time->departure)) {
+                        $date_time = new \DateTime();
+                        $date_time->setTimestamp($stop_time->departure->time);
+                        $res["departure_date_time"] = $date_time->format(DATE_ATOM);
+                    }
+
+                    if (isset($stop_time->arrival)) {
+                        $date_time = new \DateTime();
+                        $date_time->setTimestamp($stop_time->arrival->time);
+                        $res["arrival_date_time"] = $date_time->format(DATE_ATOM);
+                    }
+
+                    if (isset($stop_time->departure) && isset($stop_time->departure->delay)) {
+                        $res["departure_state"] = "delayed";
+                    }
+                    if (isset($stop_time->arrival) && isset($stop_time->arrival->delay)) {
+                        $res["arrival_state"] = "delayed";
+                    }
+
+                    if ($i != $len-1 && !isset($stop_time->departure)) {
+                        $res["departure_state"] = "deleted";
+                        $res["departure_date_time"] = null;
+                    }
+                    if ($i > 0 && !isset($stop_time->arrival)) {
+                        $res["arrival_state"] = "deleted";
+                        $res["arrival_date_time"] = null;
+                    }
+
+                    if (isset($stop_time->scheduleRelationship) && $stop_time->scheduleRelationship == "SKIPPED") {
+                        $res["departure_state"] = "deleted";
+                        $res["departure_date_time"] = null;
+                        $res["arrival_state"] = "deleted";
+                        $res["arrival_date_time"] = null;
+                    }
+                    
+                    return $res;
+                }
+            }
+
+        }
+        return $res;
+    }
+
     public static function getTerminusForLine($em, \App\Entity\Routes $route){    
         $req = $em->prepare("
             SELECT DISTINCT S2.stop_name, S2.stop_id
@@ -883,7 +943,7 @@ class Functions
 
     public static function getSchedulesByStop($em, $stop_id, $route_id, $date, $departure_time){    
         $req = $em->prepare("
-            SELECT DISTINCT ST.trip_id, ST.departure_time, ST.arrival_time, T.*
+            SELECT DISTINCT ST.trip_id, ST.*, T.*
             FROM stops S
             
             INNER JOIN stop_times ST 
@@ -922,51 +982,6 @@ class Functions
         ");
         $req->bindValue("date", $date);
         $req->bindValue("route_id", $route_id);
-        $req->bindValue("stop_id", $stop_id);
-        $req->bindValue("departure_time", $departure_time);
-        $results = $req->executeQuery();
-        return $results->fetchAll();
-    }
-
-    public static function getSchedules($em, $stop_id, $date, $departure_time){    
-        $req = $em->prepare("
-            SELECT DISTINCT ST.trip_id, ST.departure_time, ST.arrival_time, T.*
-            FROM stops S
-            
-            INNER JOIN stop_times ST 
-            ON S.stop_id = ST.stop_id
-            
-            INNER JOIN trips T 
-            ON ST.trip_id = T.trip_id
-            
-            LEFT JOIN calendar C 
-            ON T.service_id = C.service_id
-            
-            LEFT JOIN calendar_dates CD 
-            ON (T.service_id = CD.service_id AND CD.date = :date)
-            
-            WHERE S.parent_station = :stop_id
-                AND ST.departure_time >= :departure_time
-                AND ST.pickup_type != '1'
-                AND (
-                    (C.start_date <= :date
-                        AND C.end_date >= :date
-                        AND (
-                            DATE_FORMAT(:date, '%w') = '1' AND C.monday = '1'
-                            OR DATE_FORMAT(:date, '%w') = '2' AND C.tuesday = '1'
-                            OR DATE_FORMAT(:date, '%w') = '3' AND C.wednesday = '1'
-                            OR DATE_FORMAT(:date, '%w') = '4' AND C.thursday = '1'
-                            OR DATE_FORMAT(:date, '%w') = '5' AND C.friday = '1'
-                            OR DATE_FORMAT(:date, '%w') = '6' AND C.saturday = '1'
-                            OR DATE_FORMAT(:date, '%w') = '0' AND C.sunday = '1'
-                        ) 
-                        AND (CD.exception_type <> '2' OR CD.exception_type IS NULL)
-                    )
-                    OR CD.exception_type = '1' 
-                )
-            ORDER BY ST.departure_time
-        ");
-        $req->bindValue("date", $date);
         $req->bindValue("stop_id", $stop_id);
         $req->bindValue("departure_time", $departure_time);
         $results = $req->executeQuery();
@@ -1116,10 +1131,9 @@ class Functions
 
         return $uri;
         
-    // physical_mode:Air
-    // physical_mode:Boat
-    // physical_mode:Ferry
-
+        // physical_mode:Air
+        // physical_mode:Boat
+        // physical_mode:Ferry
     }
 
     public static function getForbiddenLines($forbidden_lines) {

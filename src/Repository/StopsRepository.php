@@ -54,6 +54,17 @@ class StopsRepository extends ServiceEntityRepository
 
         return $qb->getQuery()->getOneOrNullResult();
     }
+    
+    public function findAllByLocationType($locationType): array
+    {
+        $qb = $this->createQueryBuilder('l');
+
+        $qb->select('l')
+            ->where('l.location_type = :location_type')
+            ->setParameter('location_type', '1');
+
+        return $qb->getQuery()->getResult();
+    }
 
     //    /**
 //     * @return Stops[] Returns an array of Stops objects

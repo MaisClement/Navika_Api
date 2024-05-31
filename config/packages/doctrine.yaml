@@ -33,12 +33,12 @@ doctrine:
                 DATE_FORMAT: DoctrineExtensions\Query\Mysql\DateFormat
                 
             numeric_functions:
-                stcontains: CrEOF\Spatial\ORM\Query\AST\Functions\MySql\STContains
-                stdistance: CrEOF\Spatial\ORM\Query\AST\Functions\MySql\STDistance
-                stdistancesphere: CrEOF\Spatial\ORM\Query\AST\Functions\MySql\STDistanceSphere
-                distance:               CrEOF\Spatial\ORM\Query\AST\Functions\MySql\Distance
-                geometrytype:           CrEOF\Spatial\ORM\Query\AST\Functions\MySql\GeometryType
-                point:                  CrEOF\Spatial\ORM\Query\AST\Functions\MySql\Point
+                stcontains:                 CrEOF\Spatial\ORM\Query\AST\Functions\MySql\STContains
+                stdistance:                 CrEOF\Spatial\ORM\Query\AST\Functions\MySql\STDistance
+                stdistancesphere:           CrEOF\Spatial\ORM\Query\AST\Functions\MySql\STDistanceSphere
+                distance:                   CrEOF\Spatial\ORM\Query\AST\Functions\MySql\Distance
+                geometrytype:               CrEOF\Spatial\ORM\Query\AST\Functions\MySql\GeometryType
+                point:                      CrEOF\Spatial\ORM\Query\AST\Functions\MySql\Point
 
 when@test:
     doctrine:
