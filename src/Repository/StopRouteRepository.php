@@ -39,6 +39,18 @@ class StopRouteRepository extends ServiceEntityRepository
         }
     }
 
+    public function findById(string $id): array
+    {
+        $qb = $this->createQueryBuilder('sr');
+
+        $qb->where('sr.stop_id = :id')
+            ->andWhere('sr.location_type = :location_type')
+            ->setParameter('id', $id)
+            ->setParameter('location_type', '1');
+
+        return $qb->getQuery()->getResult();
+    }
+
     public function findByQueryName(string $query): array
     {
         $qb = $this->createQueryBuilder('sr');

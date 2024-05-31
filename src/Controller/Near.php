@@ -101,7 +101,7 @@ class Near
                         $places[$stop->getStopId()->getStopId()] = array(
                             'id'        =>              $stop->getStopId()->getStopId(),
                             'name'      =>  (string)    $stop->getStopName(),
-                            'type'      =>  (string)    $stop->getLocationType() == '0' ? 'stop_zone' : 'stop_area',
+                            'type'      =>  (string)    $stop->getLocationType() == 0 ? 'stop_point' : 'stop_area',
                             'distance'  =>  (int)       0,
                             'town'      =>  (string)    $stop->getTownName(),
                             'zip_code'  =>  (string)    '',
@@ -160,7 +160,7 @@ class Near
                             $area_place[$place['parent']] = array(
                                 'id'        =>              $stop->getStopId()->getStopId(),
                                 'name'      =>  (string)    $stop->getStopName(),
-                                'type'      =>  (string)    'stop_area',
+                                'type'      =>  (string)    $stop->getLocationType() == 0 ? 'stop_point' : 'stop_area',
                                 'distance'  =>  (int)       0,
                                 'radius'    =>  (int)       0,
                                 // 'coord'     => array(

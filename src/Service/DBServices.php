@@ -115,7 +115,7 @@ class DBServices
             (route_key, route_id, route_short_name, route_long_name, route_type, route_color, route_text_color, stop_id, stop_name, stop_query_name, stop_lat, stop_lon, location_type)
             
             SELECT DISTINCT 
-            CONCAT(R.route_id, '-', S2.stop_id, '-', S2.route_short_name, '-', S2.route_long_name, '-', S2.route_color, '-', S2.route_text_color) as route_key, R.route_id, R.route_short_name, R.route_long_name, R.route_type, R.route_color, R.route_text_color, S2.stop_id, S2.stop_name, S2.stop_name, S2.stop_lat, S2.stop_lon, S2.location_type
+            CONCAT(R.route_id, '-', S2.stop_id) as route_key, R.route_id, R.route_short_name, R.route_long_name, R.route_type, R.route_color, R.route_text_color, S2.stop_id, S2.stop_name, S2.stop_name, S2.stop_lat, S2.stop_lon, S2.location_type
             FROM routes R
             
             INNER JOIN trips T
@@ -141,7 +141,7 @@ class DBServices
             (route_key, route_id, route_short_name, route_long_name, route_type, route_color, route_text_color, stop_id, stop_name, stop_query_name, stop_lat, stop_lon, location_type)
             
             SELECT DISTINCT 
-            CONCAT(R.route_id, '-', S.stop_id, '-', S.route_short_name, '-', S.route_long_name, '-', S.route_color, '-', S.route_text_color) as route_key, R.route_id, R.route_short_name, R.route_long_name, R.route_type, R.route_color, R.route_text_color, S.stop_id, S.stop_name, S.stop_name, S.stop_lat, S.stop_lon, S.location_type
+            CONCAT(R.route_id, '-', S.stop_id) as route_key, R.route_id, R.route_short_name, R.route_long_name, R.route_type, R.route_color, R.route_text_color, S.stop_id, S.stop_name, S.stop_name, S.stop_lat, S.stop_lon, S.location_type
             FROM routes R
             
             INNER JOIN trips T

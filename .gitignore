@@ -13,3 +13,4 @@ config.yaml
 src/Command/add.txt
 config/key/
 
+http_ca.crt

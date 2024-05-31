@@ -236,7 +236,7 @@ class Lines
             );
         }// ----
         $json = [];
-        $json['line'] = $route->getRouteAndTrafic();
+        $json['line'] = $route->getRouteAndTrafic(true);
 
         // ----
         $stops = Functions::getStopsOfRoutes($db, $id);
@@ -247,7 +247,7 @@ class Lines
             $json['line']['stops'][] = array(
                 'id'        =>              $stop['stop_id'],
                 'name'      =>  (string)    $stop['stop_name'],
-                'type'      =>  (string)    'stop_area',
+                'type'      =>  (string)    $stop['location_type'] == 0 ? 'stop_point' : 'stop_area',
                 'distance'  =>  (float)     0,
                 'town'      =>  (string)    isset($stop['town_name']) ? $stop['town_name'] : '',
                 'zip_code'  =>  (string)    isset($stop['zip_code'])  ? $stop['zip_code']  : '',
@@ -386,7 +386,7 @@ class Lines
         $objs = Functions::getSchedulesByStop($db, $stop_id, $line_id, $date, "00:00:00");
 
         $json = [];
-        $json['line'] = $routes->getRouteId()->getRoute();
+        $json['line'] = $routes->getRouteId()->getRoute(true);
         $json['line']['terminus'] = $terminus;
         $json['line']['schedules'] = [];
         $schedules = [];

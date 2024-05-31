@@ -294,7 +294,7 @@ class StopRoute
         $stop = array(
             'id'   =>       (string) $this->stop_id->getStopId(),
             'name' =>       (string) $this->stop_id->getStopName(),
-            'type' =>       (string) $this->stop_id->getParentStation() == null ? 'stop_area' : 'stop_point',
+            'type' =>       (string) $this->stop_id->getLocationType() == 0 ? 'stop_point' : 'stop_area',
             'town' =>       (string) '',
             'zip_code' =>   (string) '',
             'coord' => array(

@@ -5,6 +5,7 @@ namespace App\Controller;
 use App\Controller\Functions;
 use App\Repository\RoutesRepository;
 use App\Repository\StopRouteRepository;
+use App\Repository\TownRepository;
 use App\Repository\StopsRepository;
 use Google\Transit\Realtime\FeedMessage;
 use Doctrine\ORM\EntityManagerInterface;
@@ -23,8 +24,9 @@ class Schedules
     private StopRouteRepository $stopRouteRepository;
     private StopsRepository $stopsRepository;
     private RoutesRepository $routesRepository;
-    
-    public function __construct(EntityManagerInterface $entityManager, StopRouteRepository $stopRouteRepository, StopsRepository $stopsRepository, ParameterBagInterface $params, RoutesRepository $routesRepository)
+    private TownRepository $townRepository;
+
+    public function __construct(EntityManagerInterface $entityManager, StopRouteRepository $stopRouteRepository, StopsRepository $stopsRepository, TownRepository $townRepository, ParameterBagInterface $params, RoutesRepository $routesRepository)
     {        
         $this->entityManager = $entityManager;
         $this->params = $params;
@@ -32,6 +34,7 @@ class Schedules
         $this->stopRouteRepository = $stopRouteRepository;
         $this->routesRepository = $routesRepository;
         $this->stopsRepository = $stopsRepository;
+        $this->townRepository = $townRepository;
     }
  
     /**
@@ -96,13 +99,15 @@ class Schedules
             return new JsonResponse(Functions::ErrorMessage(400, 'Nothing where found for this stop'), 400);
         }
 
+        $town = $this->townRepository->findTownByCoordinates($routes[0]->getStopLat(), $routes[0]->getStopLon());
+
         $json['place'] = array(
             'id'        =>              $routes[0]->getStopId()->getStopId(),
             'name'      =>  (string)    $routes[0]->getStopName(),
-            'type'      =>  (string)    'stop_area',
+            'type'      =>  (string)    $routes[0]->getLocationType() == 0 ? 'stop_point' : 'stop_area',
             'distance'  =>  (int)       0,
-            'town'      =>  (string)    $routes[0]->getTownName(),
-            'zip_code'  =>  (string)    '',
+            'town'      =>  (string)    isset($town) ? $town->getTownName() : '',
+            'zip_code'  =>  (string)    isset($town) ? $town->getZipCode() : '',
             'coord'     => array(
                 'lat'       =>      (float) $routes[0]->getStopLat(),
                 'lon'       =>      (float) $routes[0]->getStopLon(),
@@ -185,7 +190,7 @@ class Schedules
                     if (!isset($lines[$line_id])) {
                         $route = $this->routesRepository->findOneBy( ['route_id' => $line_id] );
                         if ( $route != null ) {
-                            $lines[$line_id] = $route->getRoute(true);
+                            $lines[$line_id] = $route->getRoute();
 
                             //modes
                             if ( !in_array( $route->getTransportMode(), $json['place']['modes'] ) ) {

@@ -232,7 +232,7 @@ class Routes
         return $this;
     }
 
-    public function getRoute($overide = false): ?array
+    public function getRoute($details = false): ?array
     {
         if (($this->provider_id->getId() == 'SNCF:TGV' || $this->provider_id->getId() == 'SNCF:IC') ) {
             return array(
@@ -248,28 +248,34 @@ class Routes
                     "area" => $this->provider_id->getArea(),
                 )
             );
+        } else {
+            $route = array(
+                "id" => (string) $this->route_id,
+                "code" => (string) $this->route_short_name,
+                "name" => (string) $this->route_long_name,
+                "mode" => (string) Functions::getTransportMode($this->route_type),
+                "color" => (string) $this->route_color == null ? "888888" : substr($this->route_color, 0, 6),
+                "text_color" => (string) $this->route_text_color == null ? "888888" : substr($this->route_text_color, 0, 6),
+                "agency" => array(
+                    "id" => $this->agency_id->getAgencyId(),
+                    "name" => $this->agency_id->getAgencyName(),
+                    "area" => $this->provider_id->getArea(),
+                ),
+            );
         }
-        return array(
-            "id" => (string) $this->route_id,
-            "code" => (string) $this->route_short_name,
-            "name" => (string) $this->route_long_name,
-            "mode" => (string) Functions::getTransportMode($this->route_type),
-            "color" => (string) $this->route_color == null ? "888888" : substr($this->route_color, 0, 6),
-            "text_color" => (string) $this->route_text_color == null ? "888888 " : substr($this->route_text_color, 0, 6),
-            "agency" => array(
-                "id" => $this->agency_id->getAgencyId(),
-                "name" => $this->agency_id->getAgencyName(),
-                "area" => $this->provider_id->getArea(),
-            ),
-            "timetables" => $this->getTimetables(),
-            "maps" => $this->getMaps(),
-            
-        );
+
+        if ($details == true) {
+            $route["timetables"] = $this->getTimetables();
+            $route["maps"] = $this->getMaps();
+        }
+
+        return $route;
+
     }
 
-    public function getRouteAndTrafic(): ?array
+    public function getRouteAndTrafic($details = false): ?array
     {
-        return array_merge($this->getRoute(), $this->getTrafic());
+        return array_merge($this->getRoute($details), $this->getTrafic());
     }
 
     public function getTrafic(): ?array
@@ -311,16 +317,6 @@ class Routes
             else if ($report->getSeverity() > $trafic['severity']) { // Si la severité du report est supérieur a ce qu'on a déja
                 $severity = $report->getSeverity();
             }
-
-            // if ($report->getSeverity() == 2 && $trafic['severity'] == 0) {
-            //     $severity = $report->getSeverity();
-            // } else if ($report->getSeverity() == 1 && $trafic['severity'] == 2) {
-            //     $severity = $report->getSeverity();
-            // } else {
-            //     $severity = $trafic['severity'] > $report->getSeverity() ? $trafic['severity'] : $report->getSeverity();
-            // }
-            
-
             $trafic['severity'] = $severity;
 
             if ($report->getCause() == 'future') {

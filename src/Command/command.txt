@@ -1,14 +1,42 @@
+wget -qO - https://artifacts.elastic.co/GPG-KEY-elasticsearch | sudo gpg --dearmor -o /usr/share/keyrings/elasticsearch-keyring.gpg
+sudo apt install apt-transport-https
+sudo apt update && sudo apt install elasticsearch
+
+sudo /bin/systemctl daemon-reload
+sudo /bin/systemctl enable elasticsearch.service
+sudo systemctl start elasticsearch.service
+sudo systemctl status elasticsearch.service
+
+sudo /usr/share/elasticsearch/bin/elasticsearch-reset-password -u elastic
+
+export ELASTIC_PASSWORD="XXX"
+
+sudo curl --cacert /etc/elasticsearch/certs/http_ca.crt -u elastic:$ELASTIC_PASSWORD https://localhost:9200 
+
+sudo cp /etc/elasticsearch/certs/http_ca.crt /var/www/navika_api
+sudo chmod -R 777 /var/www/navika_api
+
+mysqldump -u root -p navika > navika_20210531.sql
+
+
+------
+
+
 php bin/console cache:clear
 
 php bin/console doctrine:database:drop --force
+
+php bin/console app:index:remove
 
 php bin/console doctrine:database:create
 
 php bin/console doctrine:migrations:migrate --no-interaction
 
+php bin/console app:index:create
+
 php bin/console make:migration
 
-php bin/console app:town:init /var/www/navika/data/file/communes.geojson /var/www/navika/data/file/zip_code.json
+php bin/console app:town:init data/communes.geojson data/zip_code.json
 
 php bin/console app:provider:add "tc" "SNCF"        "Trains SNCF"             "France"                          "" 
 php bin/console app:provider:add "tc" "SNCF:IC"     "Intercités"              "France"                          "53835288a3a72906c7ec5c57" 

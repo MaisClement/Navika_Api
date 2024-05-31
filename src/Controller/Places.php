@@ -12,6 +12,7 @@ use Symfony\Component\HttpClient\HttpClient;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Routing\Annotation\Route;
+use Elastic\Elasticsearch\ClientBuilder;
 
 class Places
 {
@@ -74,6 +75,12 @@ class Places
 
     public function searchPlaces(Request $request)
     {
+        $client = ClientBuilder::create()
+            ->setHosts($this->params->get('elastic_hosts'))
+            ->setBasicAuthentication($this->params->get('elastic_user'), $this->params->get('elastic_pswd'))
+            ->setCABundle($this->params->get('elastic_cert'))
+            ->build();
+
         $search = ['-', ' ', "'"];
         $replace =['', '', ''];
 
@@ -84,24 +91,49 @@ class Places
         $lat = $request->get('lat');
         $lon = $request->get('lon');
 
-        if ( ( is_string($request->get('q')) && $q != "" ) && $lat != null && $lon != null ) {
-            $search_type = 3;
-            $stops1 = $this->stopRouteRepository->findByQueryName( $query );
-            $stops2 = $this->stopRouteRepository->findByTownName( $query );
-            $stops = array_merge($stops1, $stops2);
-            $url = $this->params->get('geosearch_url') . 'autocomplete?lang=fr&text=' . $q . '&focus.point.lon=' . $lon . '&focus.point.lat=' . $lat;
+        if ( ( is_string($request->get('q')) && $query != "" ) ) {
+            if ($lat != null && $lon != null) {
+                $search_type = 3;
+                $url = $this->params->get('geosearch_url') . 'autocomplete?lang=fr&text=' . $q . '&focus.point.lon=' . $lon . '&focus.point.lat=' . $lat;
+            } else {
+                $search_type = 1;
+                $url = $this->params->get('geosearch_url') . 'autocomplete?lang=fr&text=' . $q;
+        
+            }
+
+            $stops = [];
+            if (strlen($q) >= 3) {
+                $stops = $this->stopRouteRepository->findByQueryName( $query );
+            }
+            
+            // $stops2 = $this->stopRouteRepository->findByTownName( $query );
+            // $stops = array_merge($stops1, $stops2);
+
+            $params = [
+                'index' => 'stops',
+                'size'   => 50,
+                'body'  => [
+                    'query' => [
+                        'fuzzy' => [
+                            'name' => [
+                                'value' => $query,
+                                'fuzziness' => 'AUTO',
+                            ],
+                        ],
+                    ],
+                ],
+            ];
+            $results = $client->search($params);
+
+            foreach($results['hits']['hits'] as $result) {
+                $s = $this->stopRouteRepository->findById( $result['_id'] );
+                $stops = array_merge($stops, $s);
+            }
         
         } else if ( $lat != null && $lon != null ) {
             $search_type = 2;
             $stops = $this->stopRouteRepository->findByNearbyLocation($lat, $lon, 5000);
             $url = $this->params->get('geosearch_url') . 'reverse?lang=fr&point.lat=' . $lat . '&point.lon=' . $lon;
-        
-        } else if ( is_string($request->get('q')) && $q != "" ) {
-            $search_type = 1;
-            $stops1 = $this->stopRouteRepository->findByQueryName( $query );
-            $stops2 = $this->stopRouteRepository->findByTownName( $query );
-            $stops = array_merge($stops1, $stops2);
-            $url = $this->params->get('geosearch_url') . 'autocomplete?lang=fr&text=' . $q;
         
         } else if ( is_string($request->get('q')) ) {
             $json["places"] = [];
@@ -195,7 +227,7 @@ class Places
             $stop_echo = Functions::orderPlaces($stop_echo);
         }
 
-        array_splice($stop_echo, 15);
+        // array_splice($stop_echo, 15);
 
         // foreach($echo as $key => $e) {
         //     if ($e['distance'] == 0) {

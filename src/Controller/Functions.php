@@ -295,7 +295,6 @@ class Functions
         return $matrix[$len1][$len2];
     }
 
-
     public static function orderWithLevenshtein($array, $text) {
         usort($array, function($a, $b) use ($text) {
             $levA = Functions::levenshteinDistance($text, $a['name']);
@@ -305,6 +304,18 @@ class Functions
         });
     
         return $array;
+    }
+
+    public static function filterStopsWithLevenshtein($array, $text, $limit = 3) {
+        $res = [];
+        foreach($array as $element) {
+            $d = levenshtein($element->getStopId()->getStopName(), $text);
+            if ($d <= 3) {
+                $res[] = $element;
+            }
+        }
+    
+        return $res;
     }
 
     public static function orderDeparture($array) {
