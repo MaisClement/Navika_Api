@@ -476,7 +476,7 @@ class Routes
         $maps = [];
 
         foreach( $_maps as $map) {
-            if ( $map->getType() == 'maps') {
+            if ( $map->getType() == 'map') {
                 $maps[] = array(
                     "name"      => (String)     $map->getName(),
                     "url"       => (String)     $map->getUrl(),
