@@ -457,7 +457,7 @@ class Routes
         $timetables = [];
 
         foreach( $_timetables as $timetable) {
-            if ( $timetable->getType() == 'map') {
+            if ( $timetable->getType() == 'timetables') {
                 $timetables[] = array(
                     "name"      => (String)     $timetable->getName(),
                     "url"       => (String)     $timetable->getUrl(),
@@ -476,8 +476,8 @@ class Routes
         $maps = [];
 
         foreach( $_maps as $map) {
-            if ( $map->getType() == 'map') {
-                $_maps[] = array(
+            if ( $map->getType() == 'maps') {
+                $maps[] = array(
                     "name"      => (String)     $map->getName(),
                     "url"       => (String)     $map->getUrl(),
                 );
