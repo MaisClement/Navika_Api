@@ -73,6 +73,9 @@ class Routes
     #[ORM\OneToMany(mappedBy: 'route_id', targetEntity: RouteSub::class)]
     private Collection $routeSubs;
 
+    #[ORM\OneToMany(mappedBy: 'route_id', targetEntity: RouteDetails::class, orphanRemoval: true)]
+    private Collection $routeDetails;
+
     public function __construct()
     {
         $this->stopRoutes = new ArrayCollection();
@@ -81,6 +84,7 @@ class Routes
         $this->fareRules = new ArrayCollection();
         $this->timetables = new ArrayCollection();
         $this->routeSubs = new ArrayCollection();
+        $this->routeDetails = new ArrayCollection();
     }
 
     public function getProviderId(): ?Provider
@@ -250,7 +254,7 @@ class Routes
             );
         } else {
             $route = array(
-                "id" => (string) $this->route_id,
+                "id" => (string)   $this->route_id,
                 "code" => (string) $this->route_short_name,
                 "name" => (string) $this->route_long_name,
                 "mode" => (string) Functions::getTransportMode($this->route_type),
@@ -262,6 +266,10 @@ class Routes
                     "area" => $this->provider_id->getArea(),
                 ),
             );
+        }
+
+        if ($this->routeDetails[0] != null) {
+            $route["details"] = $this->routeDetails[0]->getDetails();
         }
 
         if ($details == true) {
@@ -529,6 +537,36 @@ class Routes
         // set the owning side to null (unless already changed)
         if ($this->routeSubs->removeElement($routeSub) && $routeSub->getRouteId() === $this) {
             $routeSub->setRouteId(null);
+        }
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, RouteDetails>
+     */
+    public function getDetails()
+    {
+        return $this->routeDetails;
+    }
+
+    public function addDetails(RouteDetails $routeDetail): static
+    {
+        if (!$this->routeDetails->contains($routeDetail)) {
+            $this->routeDetails->add($routeDetail);
+            $routeDetail->setRouteId($this);
+        }
+
+        return $this;
+    }
+
+    public function removeDetails(RouteDetails $routeDetails): static
+    {
+        if ($this->routeDetails->removeElement($routeDetail)) {
+            // set the owning side to null (unless already changed)
+            if ($routeDetail->getRouteId() === $this) {
+                $routeDetail->setRouteId(null);
+            }
         }
 
         return $this;

@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Command;
+namespace App\Command\GTFS;
 
 use App\Controller\Notify;
 use App\Controller\Functions;

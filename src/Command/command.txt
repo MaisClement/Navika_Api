@@ -57,6 +57,7 @@ php bin/console app:provider:add "bikes" "BICLOO"    "Bicloo"        "Nantes"   
 php bin/console app:provider:add "bikes" "OPTYMO"    "Optymo"        "Belfort"          "5c209625634f41616b51e726"
 php bin/console app:provider:add "bikes" "VELHOP"    "Vél’hop"       "Strasbourg"       "65ab0d58c86e8597d65aa47f"
 
+
     // Unavailable
     php bin/console app:provider:add "bikes" "LEVELO"    "levélo"        "Marseille"        "63c91087b1d439ee08239fc4"
     php bin/console app:provider:add "bikes" "VLILLE"    "V‘lille"       "Lille"            "5f71dcd11bb82e9f1e748680" 
@@ -80,7 +81,7 @@ php bin/console app:provider:clear "SNCF:TER"
 php bin/console app:provider:reset
 php bin/console app:gtfs:update
 
-// ------
+// -----
 */2 * * * * php /var/www/Navika/bin/console app:trafic:update
 0 2 * * * php /var/www/Navika/bin/console app:timetables:update
 0 2 * * * php /var/www/Navika/bin/console app:gbfs:update
@@ -90,3 +91,16 @@ git checkout dev
 git merge master
 git push --all origin
 git checkout master
+
+// -----
+
+
+php bin/console app:provider:add "IDFM:C01736" "Train Regio 2N" "/img/vehicule/r2n.png" 1 1 0 1
+php bin/console app:provider:add "IDFM:C01731" "Train Regio 2N" "/img/vehicule/r2n.png" 1 1 0 1
+
+php bin/console app:provider:add "IDFM:C01737" "Train Francilien" "/img/vehicule/nat.png" 1 1 1 1
+php bin/console app:provider:add "IDFM:C01738" "Train Francilien" "/img/vehicule/nat.png" 1 1 1 1
+php bin/console app:provider:add "IDFM:C01740" "Train Francilien" "/img/vehicule/nat.png" 1 1 1 1
+C01737
+C01738
+C01740

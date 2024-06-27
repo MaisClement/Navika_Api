@@ -3,6 +3,7 @@
 namespace App\Controller;
 
 use App\Repository\ProviderRepository;
+use App\Repository\RoutesRepository;
 use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\Routing\Annotation\Route;
@@ -16,13 +17,15 @@ class VehicleJourney
 {
     private $entityManager;
     private ProviderRepository $providerRepository;
+    private RoutesRepository $routesRepository;
     private $params;
 
-    public function __construct(EntityManagerInterface $entityManager, ProviderRepository $providerRepository, ParameterBagInterface $params)
+    public function __construct(EntityManagerInterface $entityManager, ProviderRepository $providerRepository, RoutesRepository $routesRepository, ParameterBagInterface $params)
     {
         $this->entityManager = $entityManager;
 
         $this->providerRepository = $providerRepository;
+        $this->routesRepository = $routesRepository;
 
         $this->params = $params;
     }
@@ -82,7 +85,8 @@ class VehicleJourney
             
             $trip_update = Functions::getTripRealtime($trips_update, $trip[0]['trip_id'], null);
             $reports = Functions::getTripRealtimeReports($trip_update, $trip[0]['trip_id']);
-        } 
+        }
+
         // -----
 
         $stops = [];
@@ -111,7 +115,14 @@ class VehicleJourney
             $trip_headsign = $obj['trip_headsign'];
             $trip_id = $obj['trip_id'];
             $route_type = $obj['route_type'];
+            $route_id = $obj['route_id'];
             $order++;
+        }
+
+        // get route details
+        $route = $this->routesRepository->findOneBy( ['route_id' => $route_id] );
+        if ( $route != null ) {
+            $route = $route->getRoute(true);
         }
 
         $vehicle_journey = array(
@@ -130,11 +141,14 @@ class VehicleJourney
                     "id"        => $stops[count($stops) - 1]['id'],
                     "name"      => $stops[count($stops) - 1]['name'],
                 ),
+                "line"         => $route,
             ),
             "reports" => [],
             "stop_times" => $stops,
         );
 
+        $vehicle_journey["reports"] = $reports;
+        
         // Info théorique
         if ($trip_update == null) {
             $vehicle_journey["reports"] = array(
@@ -151,8 +165,6 @@ class VehicleJourney
                 ),
             );
         }
-
-        $vehicle_journey["reports"] = $reports;
 
         $json['vehicle_journey'] = $vehicle_journey;
 
