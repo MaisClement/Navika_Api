@@ -617,11 +617,10 @@ class Functions
 
     public static function getStopDateTime($call){
         return array(
-            // Si l'horaire est present               On affiche l'horaire est                    Sinon, si l'autre est present                           On affiche l'autre                    Ou rien  
-            "base_departure_date_time"  =>  (string)  isset($call->AimedDepartureTime) !== '' && (string)  isset($call->AimedDepartureTime) !== '0'          ? Functions::prepareTime($call->AimedDepartureTime)    : (isset($call->ExpectedDepartureTime) ? Functions::prepareTime($call->ExpectedDepartureTime) : ""),
-            "departure_date_time"       =>  (string)  isset($call->ExpectedDepartureTime) !== '' && (string)  isset($call->ExpectedDepartureTime) !== '0'       ? Functions::prepareTime($call->ExpectedDepartureTime) : (isset($call->AimedDepartureTime)    ? Functions::prepareTime($call->AimedDepartureTime)    : ""),
-            "base_arrival_date_time"    =>  (string)  isset($call->AimedArrivalTime) !== '' && (string)  isset($call->AimedArrivalTime) !== '0'            ? Functions::prepareTime($call->AimedArrivalTime)      : (isset($call->ExpectedArrivalTime)   ? Functions::prepareTime($call->ExpectedArrivalTime)   : ""),
-            "arrival_date_time"         =>  (string)  isset($call->ExpectedArrivalTime) !== '' && (string)  isset($call->ExpectedArrivalTime) !== '0'         ? Functions::prepareTime($call->ExpectedArrivalTime)   : (isset($call->AimedArrivalTime)      ? Functions::prepareTime($call->AimedArrivalTime)      : ""),
+            "base_departure_date_time"  =>  (string)  isset($call->AimedDepartureTime)      ? $call->AimedDepartureTime     :  ( isset($call->ExpectedDepartureTime) ? $call->ExpectedDepartureTime     : '' ),
+            "departure_date_time"       =>  (string)  isset($call->ExpectedDepartureTime)   ? $call->ExpectedDepartureTime  :  ( isset($call->AimedDepartureTime)    ? $call->AimedDepartureTime        : '' ),
+            "base_arrival_date_time"    =>  (string)  isset($call->AimedArrivalTime)        ? $call->AimedArrivalTime       :  ( isset($call->ExpectedArrivalTime)   ? $call->ExpectedArrivalTime       : '' ),
+            "arrival_date_time"         =>  (string)  isset($call->ExpectedArrivalTime)     ? $call->ExpectedArrivalTime    :  ( isset($call->AimedArrivalTime)      ? $call->AimedArrivalTime          : '' ),
             "state"                     =>  (string)  Functions::getState($call),
             "atStop"                    =>  (string)  isset($call->VehicleAtStop) !== '' && (string)  isset($call->VehicleAtStop) !== '0'               ? ($call->VehicleAtStop ? 'true' : 'false') : 'false',
             "platform"                  =>  (string)  isset($call->ArrivalPlatformName->value) !== '' && (string)  isset($call->ArrivalPlatformName->value) !== '0'  ? $call->ArrivalPlatformName->value : '-'
@@ -640,6 +639,21 @@ class Functions
             "base_arrival_date_time"    =>  (string)  Functions::prepareTime($obj['arrival_time'], true),
             "arrival_date_time"         =>  (string)  $real_time['arrival_date_time'] != null ? Functions::prepareTime($real_time['arrival_date_time'], true) : Functions::prepareTime($obj['arrival_time'], true),
         );
+    }
+
+    public static function isFuture($real_time_departure, $departure, $real_time_arrival, $arrival){
+        if ( isset($real_time_departure) ) {
+            return date_create($real_time_departure) >= date_create();
+        }
+        if ( isset($departure) ) {
+            return date_create($departure) >= date_create();
+        }
+        if ( isset($real_time_arrival) ) {
+            return date_create($real_time_arrival) >= date_create();
+        }
+        if ( isset($arrival) ) {
+            return date_create($arrival) >= date_create();
+        }
     }
 
     public static function callIsFuture($call){
@@ -914,11 +928,9 @@ class Functions
                         $res["arrival_state"] = "deleted";
                         $res["arrival_date_time"] = null;
                     }
-                    
                     return $res;
                 }
             }
-
         }
         return $res;
     }
@@ -960,7 +972,6 @@ class Functions
             
             WHERE S.parent_station = :stop_id
                 AND T.route_id = :route_id
-                AND ST.departure_time >= :departure_time
                 AND ST.pickup_type != '1'
                 AND (
                     (C.start_date <= :date
@@ -983,7 +994,6 @@ class Functions
         $req->bindValue("date", $date);
         $req->bindValue("route_id", $route_id);
         $req->bindValue("stop_id", $stop_id);
-        $req->bindValue("departure_time", $departure_time);
         $results = $req->executeQuery();
         return $results->fetchAll();
     }

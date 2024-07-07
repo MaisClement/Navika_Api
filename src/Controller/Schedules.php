@@ -211,6 +211,7 @@ class Schedules
                                         "id"         =>  (string)   $direction_id,
                                         "name"       =>  (string)   $direction[$direction_id],
                                     ),
+                                    // "id"            =>  (string)  isset($result->MonitoredVehicleJourney->FramedVehicleJourneyRef->DatedVehicleJourneyRef) ? 'IDFM:' . $result->MonitoredVehicleJourney->FramedVehicleJourneyRef->DatedVehicleJourneyRef : '',
                                     "id"            =>  (string)  isset($result->MonitoredVehicleJourney->TrainNumbers->TrainNumberRef[0]->value) !== '' && (string)  isset($result->MonitoredVehicleJourney->TrainNumbers->TrainNumberRef[0]->value) !== '0' ? $result->MonitoredVehicleJourney->TrainNumbers->TrainNumberRef[0]->value : ( $result->MonitoredVehicleJourney->VehicleJourneyName[0]->value ? $result->MonitoredVehicleJourney->VehicleJourneyName[0]->value : ''),
                                     "name"          =>  (string)  isset($result->MonitoredVehicleJourney->TrainNumbers->TrainNumberRef[0]->value) !== '' && (string)  isset($result->MonitoredVehicleJourney->TrainNumbers->TrainNumberRef[0]->value) !== '0' ? $result->MonitoredVehicleJourney->TrainNumbers->TrainNumberRef[0]->value : ( $result->MonitoredVehicleJourney->VehicleJourneyName[0]->value ? $result->MonitoredVehicleJourney->VehicleJourneyName[0]->value : ''),
                                     "mode"          =>  (string)  $lines[$line_id]['mode'],
@@ -238,7 +239,9 @@ class Schedules
                                 "schedules"  =>  array()
                             );
                         }
-                        $terminus_schedules[$line_id][$direction_id]['schedules'][] = Functions::getStopDateTime($call);
+                        $s = Functions::getStopDateTime($call);
+                        $s['id'] = isset($result->MonitoredVehicleJourney->FramedVehicleJourneyRef->DatedVehicleJourneyRef) ? 'IDFM:' . $result->MonitoredVehicleJourney->FramedVehicleJourneyRef->DatedVehicleJourneyRef : '';
+                        $terminus_schedules[$line_id][$direction_id]['schedules'][] = $s;
                     }
                 }
             }
@@ -260,7 +263,8 @@ class Schedules
                         */
                         $trip_update = Functions::getTripRealtime($trips_update, $obj['trip_id'], $obj['stop_id']);
                         $real_time = Functions::getTripRealtimeDateTime($trip_update, $obj['stop_id']);
-                        $dep = array(
+                        if (Functions::isFuture($real_time['departure_date_time'], $real_time['arrival_date_time'], $obj['departure_time'], $obj['arrival_time'])) {
+                            $dep = array(
                             "informations" => array(
                                 "direction" => array(
                                     "id"        =>  (string)  $direction['stop_id'],
@@ -291,6 +295,7 @@ class Schedules
         
                         $departures[ $line['id'] ][] = $dep;
                         $ungrouped_departures[] = $dep;
+                        }
                     }
                 }
                
@@ -314,15 +319,19 @@ class Schedules
 
                         $trip_update = Functions::getTripRealtime($trips_update, $obj['trip_id'], $obj['stop_id']);
                         $real_time = Functions::getTripRealtimeDateTime($trip_update, $obj['stop_id']);
-                        $terminus_schedules[$line['id']][$direction_id]['schedules'][] = [
-                            "base_departure_date_time"  =>  Functions::prepareTime($obj['departure_time'], true),
-                            "departure_date_time"       =>  $real_time['departure_date_time'] != null ? Functions::prepareTime($real_time['departure_date_time'], true) : Functions::prepareTime($obj['departure_time'], true),
-                            "base_arrival_date_time"    =>  Functions::prepareTime($obj['arrival_time'], true),
-                            "arrival_date_time"         =>  $real_time['arrival_date_time'] != null ? Functions::prepareTime($real_time['arrival_date_time'], true) : Functions::prepareTime($obj['arrival_time'], true),
-                            "state"                     =>  isset($trip_update) && $trip_update['state'] != null ? $trip_update['state'] : 'theorical',
-                            "atStop"                    =>  "false",
-                            "platform"                  =>  "-",
-                        ];
+                        
+                        if (Functions::isFuture($real_time['departure_date_time'], $real_time['arrival_date_time'], $obj['departure_time'], $obj['arrival_time'])) {
+                            $terminus_schedules[$line['id']][$direction_id]['schedules'][] = [
+                                "id"                        =>  $obj['trip_id'],
+                                "base_departure_date_time"  =>  Functions::prepareTime($obj['departure_time'], true),
+                                "departure_date_time"       =>  $real_time['departure_date_time'] != null ? Functions::prepareTime($real_time['departure_date_time'], true) : Functions::prepareTime($obj['departure_time'], true),
+                                "base_arrival_date_time"    =>  Functions::prepareTime($obj['arrival_time'], true),
+                                "arrival_date_time"         =>  $real_time['arrival_date_time'] != null ? Functions::prepareTime($real_time['arrival_date_time'], true) : Functions::prepareTime($obj['arrival_time'], true),
+                                "state"                     =>  isset($trip_update) && $trip_update['state'] != null ? $trip_update['state'] : 'theorical',
+                                "atStop"                    =>  "false",
+                                "platform"                  =>  "-",
+                            ];
+                        }
                     }
                 }
             }

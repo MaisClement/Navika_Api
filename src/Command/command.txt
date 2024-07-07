@@ -95,12 +95,14 @@ git checkout master
 // -----
 
 
-php bin/console app:provider:add "IDFM:C01736" "Train Regio 2N" "/img/vehicule/r2n.png" 1 1 0 1
-php bin/console app:provider:add "IDFM:C01731" "Train Regio 2N" "/img/vehicule/r2n.png" 1 1 0 1
+php bin/console app:routedetails:add "IDFM:C01736" "Train Regio 2N" "/img/vehicule/r2n.png" 1 1 0 1
+php bin/console app:routedetails:add "IDFM:C01731" "Train Regio 2N" "/img/vehicule/r2n.png" 1 1 0 1
 
-php bin/console app:provider:add "IDFM:C01737" "Train Francilien" "/img/vehicule/nat.png" 1 1 1 1
-php bin/console app:provider:add "IDFM:C01738" "Train Francilien" "/img/vehicule/nat.png" 1 1 1 1
-php bin/console app:provider:add "IDFM:C01740" "Train Francilien" "/img/vehicule/nat.png" 1 1 1 1
-C01737
-C01738
-C01740
+php bin/console app:routedetails:add "IDFM:C01737" "Train Francilien" "/img/vehicule/nat.png" 1 1 1 1
+php bin/console app:routedetails:add "IDFM:C01738" "Train Francilien" "/img/vehicule/nat.png" 1 1 1 1
+php bin/console app:routedetails:add "IDFM:C01740" "Train Francilien" "/img/vehicule/nat.png" 1 1 1 1
+
+php bin/console app:routedetails:add "IDFM:C01843" "Tram-Train Dualis" "/img/vehicule/dualis.png" 1 1 1 1
+php bin/console app:routedetails:add "IDFM:C01999" "Tram-Train Dualis" "/img/vehicule/dualis.png" 1 1 1 1
+php bin/console app:routedetails:add "IDFM:C02529" "Tram-Train Dualis" "/img/vehicule/dualis.png" 1 1 1 1
+php bin/console app:routedetails:add "IDFM:C02344" "Tram-Train Dualis" "/img/vehicule/dualis.png" 1 1 1 1

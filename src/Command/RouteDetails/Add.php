@@ -29,7 +29,7 @@ class Add extends Command
     protected function configure(): void
     {
         $this
-            ->setName('app:provider:add')
+            ->setName('app:routedetails:add')
             ->setDescription('Add a data provider (can be for GTFS or GTFS)')
             ->addArgument('route_id',           InputArgument::REQUIRED, 'routeId'          )
             ->addArgument('vehicule_name',           InputArgument::REQUIRED, 'vehiculeName'          )
@@ -78,7 +78,7 @@ class Add extends Command
         $this->entityManager->persist($route_details);
         $this->entityManager->flush();
 
-        $output->writeln('<info>✅ New provider added successfully</info>');
+        $output->writeln('<info>✅ Details added successfully</info>');
 
         return Command::SUCCESS;
     }
