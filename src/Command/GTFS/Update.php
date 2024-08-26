@@ -103,8 +103,6 @@ class Update extends Command
                 }
             }
         }
-
-        $this->logger->log(['event_id' => $event_id,'message' => sprintf("[$event_id] %s GTFS have to be updated : %s - %s", count($to_update))], 'INFO');
                     
         if (count($to_update) == 0) {
             $output->writeln('<info>Nothing to do ✅</info>');
