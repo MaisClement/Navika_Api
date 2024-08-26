@@ -5,7 +5,7 @@ namespace App\Command\Index;
 use Elastic\Elasticsearch\ClientBuilder;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
-use  Symfony\Component\Console\Command\Command;
+use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 
@@ -22,7 +22,7 @@ class Remove extends Command
         $this->entityManager = $entityManager;
         $this->params = $params;
 
-        parent::__construct(); 
+        parent::__construct();
     }
 
     protected function execute(InputInterface $input, OutputInterface $output)
@@ -36,8 +36,13 @@ class Remove extends Command
         $params = [
             'index' => 'stops'
         ];
-
         $response = $client->indices()->delete($params);
+
+        $params = [
+            'index' => 'logs'
+        ];
+        $response = $client->indices()->delete($params);
+
 
         return Command::SUCCESS;
     }

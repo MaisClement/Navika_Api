@@ -17,7 +17,7 @@ use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
 use Symfony\Component\HttpClient\HttpClient;
 use Kreait\Firebase\Contract\Messaging;
 use App\Repository\SubscribersRepository;
-
+use App\Service\Logger;
 use Symfony\Component\Console\Helper\ProgressIndicator;
 
 class IDFM_Trafic extends Command
@@ -25,14 +25,18 @@ class IDFM_Trafic extends Command
     private $entityManager;
     private $params;
 
+    private Logger $logger;
+
     private Messaging $messaging;
     private RoutesRepository $routesRepository;
     private TraficRepository $traficRepository;
 
-    public function __construct(EntityManagerInterface $entityManager, ParameterBagInterface $params, Messaging $messaging, RoutesRepository $routesRepository, TraficRepository $traficRepository)
+    public function __construct(EntityManagerInterface $entityManager, ParameterBagInterface $params, Logger $logger, Messaging $messaging, RoutesRepository $routesRepository, TraficRepository $traficRepository)
     {
         $this->entityManager = $entityManager;
         $this->params = $params;
+
+        $this->logger = $logger;
         
         $this->messaging = $messaging;
         $this->routesRepository = $routesRepository;
@@ -50,6 +54,10 @@ class IDFM_Trafic extends Command
 
     function execute(InputInterface $input, OutputInterface $output): int
     {
+        $event_id = uniqid();
+
+        $this->logger->log(['event_id' => $event_id,'message' => "[app:trafic:update:IDFM][$event_id] Task began"], 'INFO');
+
         // Récupération du trafic
         $progressIndicator = new ProgressIndicator($output, 'verbose', 100, ['⠏', '⠛', '⠹', '⢸', '⣰', '⣤', '⣆', '⡇']);
         $progressIndicator->start('Geting trafic...');
@@ -65,7 +73,8 @@ class IDFM_Trafic extends Command
         // Boucler à travers les pages jusqu'à ce que tous les résultats soient récupérés
         while ($itemsOnPage >= $itemsPerPage) {
             $url = $this->params->get('prim_url_trafic') . '/line_reports?count=1000&start_page=' . $page;
-
+            $this->logger->log(['event_id' => $event_id,'message' => "[$event_id] Getting IDFM trafic reports from $url"], 'INFO');
+            
             $client = HttpClient::create();
             $response = $client->request('GET', $url, [
                 'headers' => [
@@ -75,7 +84,7 @@ class IDFM_Trafic extends Command
             $status = $response->getStatusCode();
 
             if ($status != 200) {
-                echo '';
+                $this->logger->log(['event_id' => $event_id,'message' => "[$event_id][$id] $url return HTTP $status error"], 'ERROR');
                 return Command::FAILURE;
             }
 
@@ -105,6 +114,7 @@ class IDFM_Trafic extends Command
             }
         }
 
+        $count = 0;
         // On assigne une ligne aux messages
         foreach ($line_reports as $line) {
             $progressIndicator->advance();
@@ -141,6 +151,7 @@ class IDFM_Trafic extends Command
 
                             $this->entityManager->persist($msg);
                             $r['IDFM:' . $disruption->id] = $msg;
+                            $count++;
                         }
                     }
                 }
@@ -177,11 +188,14 @@ class IDFM_Trafic extends Command
 
                             $this->entityManager->persist($msg);
                             $r['IDFM:' . $disruption->id] = $msg;
+                            $count++;
                         }
                     }
                 }
             }
         }
+
+        $this->logger->log(['event_id' => $event_id,'message' => "[$event_id] Saving $count trafic reports"], 'INFO');
 
         // On calcule les notifications
         $progressIndicator->setMessage('Looking for notification...');
@@ -258,9 +272,14 @@ class IDFM_Trafic extends Command
                                $body,
                                $data
                             );
+                            $this->logger->log(['event_id' => $event_id,'message' => "[$event_id] Trafic report notification sent to $token"], 'INFO');
+
                         } catch (\Exception $e) {
                             if (get_class($e) == 'Kreait\Firebase\Exception\Messaging\NotFound') {
                                 $this->entityManager->remove($sub);
+                                $this->logger->log(['event_id' => $event_id,'message' => "[$event_id] Subscriber $token no longer exists and was removed"], 'INFO');
+                            } else {
+                                $this->logger->error($e);
                             }
                         }
                     }
@@ -295,6 +314,7 @@ class IDFM_Trafic extends Command
         }
 
         $progressIndicator->finish('<info>✅ OK</info>');
+        $this->logger->log(['event_id' => $event_id,'message' => "[$event_id] Task ended succesfully"], 'INFO');
 
         return Command::SUCCESS;
     }

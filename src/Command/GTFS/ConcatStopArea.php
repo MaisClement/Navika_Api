@@ -11,17 +11,22 @@ use Symfony\Component\Console\Helper\ProgressIndicator;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
+use App\Service\Logger;
 
 class ConcatStopArea extends Command
 {
     private $entityManager;
 
+    private Logger $logger;
+
     private StopsRepository $stopsRepository;
     private ProviderRepository $providerRepository;
 
-    public function __construct(EntityManagerInterface $entityManager, ProviderRepository $providerRepository, StopsRepository $stopsRepository)
+    public function __construct(EntityManagerInterface $entityManager, Logger $logger, ProviderRepository $providerRepository, StopsRepository $stopsRepository)
     {
         $this->entityManager = $entityManager;
+
+        $this->logger = $logger;
 
         $this->stopsRepository = $stopsRepository;
         $this->providerRepository = $providerRepository;
@@ -40,6 +45,10 @@ class ConcatStopArea extends Command
     {
         $dir = sys_get_temp_dir();
         $db = $this->entityManager->getConnection();
+        $event_id = uniqid();
+
+        $this->logger->log(['event_id' => $event_id,'message' => "[app:gtfs:concatstoparea][$event_id] Task began"], 'INFO');
+
 
         // --
         $progressIndicator = new ProgressIndicator($output, 'verbose', 100, ['⠏', '⠛', '⠹', '⢸', '⣰', '⣤', '⣆', '⡇']);
@@ -87,6 +96,7 @@ class ConcatStopArea extends Command
 
         // Loader
         $progressIndicator->finish('✅ OK');
+        $this->logger->log(['event_id' => $event_id,'message' => "[$event_id] Task ended succesfully"], 'INFO');
 
         return Command::SUCCESS;
     }

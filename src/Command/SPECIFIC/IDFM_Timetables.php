@@ -13,6 +13,7 @@ use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
 use Symfony\Component\HttpClient\HttpClient;
+use App\Service\Logger;
 use Symfony\Component\Console\Helper\ProgressIndicator;
 
 class IDFM_Timetables extends Command
@@ -20,13 +21,17 @@ class IDFM_Timetables extends Command
     private $entityManager;
     private $params;
 
+    private Logger $logger;
+
     private RoutesRepository $routesRepository;
     private TimetablesRepository $timetablesRepository;
 
-    public function __construct(EntityManagerInterface $entityManager, ParameterBagInterface $params, TimetablesRepository $timetablesRepository, RoutesRepository $routesRepository)
+    public function __construct(EntityManagerInterface $entityManager, ParameterBagInterface $params, Logger $logger, TimetablesRepository $timetablesRepository, RoutesRepository $routesRepository)
     {
         $this->entityManager = $entityManager;
         $this->params = $params;
+
+        $this->logger = $logger;
 
         $this->routesRepository = $routesRepository;
         $this->timetablesRepository = $timetablesRepository;
@@ -45,18 +50,24 @@ class IDFM_Timetables extends Command
     {
         $dir = sys_get_temp_dir();
         $file = $dir . '/timetables.csv';
+        $event_id = uniqid();
+
+        $this->logger->log(['event_id' => $event_id,'message' => "[app:timetables:update][$event_id] Task began"], 'INFO');
+
 
         // Récupération du trafic
         $progressIndicator = new ProgressIndicator($output, 'verbose', 100, ['⠏', '⠛', '⠹', '⢸', '⣰', '⣤', '⣆', '⡇']);
         $progressIndicator->start('Geting timetable...');
-
+        
         $url = $this->params->get('prim_url_timetables');
-
+        $this->logger->log(['event_id' => $event_id,'message' => "[$event_id] Getting IDFM timetables from $url"], 'INFO');
+        
         $client = HttpClient::create();
         $response = $client->request('GET', $url);
         $status = $response->getStatusCode();
 
         if ($status != 200) {
+            $this->logger->log(['event_id' => $event_id,'message' => "[$event_id] $url return HTTP $status error"], 'ERROR');
             return Command::FAILURE;
         }
 
@@ -65,8 +76,8 @@ class IDFM_Timetables extends Command
 
         $content = Functions::readCsv($file);
 
+        $count = 0;
         foreach ($content as $row) {
-
             // Loader
             $progressIndicator->advance();
 
@@ -85,10 +96,13 @@ class IDFM_Timetables extends Command
                     $timetables->setUrl($row[2]);
 
                     $this->entityManager->persist($timetables);
+                    $count++;
                 }
             }
         }
 
+        $this->logger->log(['event_id' => $event_id,'message' => "[$event_id] Saving $count timetables"], 'INFO');
+        
         // On efface les messages existant
         $progressIndicator->setMessage('Removing old timetables...');
 
@@ -108,6 +122,7 @@ class IDFM_Timetables extends Command
         $this->entityManager->flush();
 
         $progressIndicator->finish('<info>✅ OK</info>');
+        $this->logger->log(['event_id' => $event_id,'message' => "[$event_id] Task ended succesfully"], 'INFO');
 
         return Command::SUCCESS;
     }

@@ -546,8 +546,13 @@ class Functions
         $date_time = $i == true ? date_create($dt, timezone_open('Europe/Paris')) : date_create($dt, timezone_open('UTC'));
         
         if (is_bool($date_time)) {
-            $timeArray = explode(':', $dt);
-    
+            $dt = explode(' ', $dt);
+            $dateArray = explode('-', $dt[0]);
+            $year = (int) $dateArray[0];
+            $month = (int) $dateArray[1];
+            $day = (int) $dateArray[2];
+
+            $timeArray = explode(':', $dt[1]);
             $hours = (int) $timeArray[0];
             $minutes = (int) $timeArray[1];
             $seconds = (int) $timeArray[2];
@@ -558,6 +563,7 @@ class Functions
             $seconds %= 60;
     
             $date_time = new DateTime();
+            $date_time->setDate($year, $month, $day);
             $date_time->setTime($hours, $minutes, $seconds);
             $date_time->setTimezone(new DateTimeZone('Europe/Paris'));
     
@@ -639,6 +645,15 @@ class Functions
             "base_arrival_date_time"    =>  (string)  Functions::prepareTime($obj['arrival_time'], true),
             "arrival_date_time"         =>  (string)  $real_time['arrival_date_time'] != null ? Functions::prepareTime($real_time['arrival_date_time'], true) : Functions::prepareTime($obj['arrival_time'], true),
         );
+    }
+
+    public static function shouldAddRealTime($departure, $arrival){
+        if ( isset($departure) ) {
+            return date_create($departure) >= date_create('+12 hours');
+        }
+        if ( isset($arrival) ) {
+            return date_create($arrival) >= date_create('+12 hours');
+        }
     }
 
     public static function isFuture($real_time_departure, $departure, $real_time_arrival, $arrival){
@@ -953,9 +968,9 @@ class Functions
         return $results->fetchAll();
     }
 
-    public static function getSchedulesByStop($em, $stop_id, $route_id, $date, $departure_time){    
+    public static function getSchedulesByStop($em, $stop_id, $route_id, $date){    
         $req = $em->prepare("
-            SELECT DISTINCT ST.trip_id, ST.*, T.*
+            SELECT DISTINCT ST.*, CONCAT(:date, ' ', ST.departure_time), CONCAT(:date, ' ', ST.arrival_time) as arrival_time, T.*
             FROM stops S
             
             INNER JOIN stop_times ST 

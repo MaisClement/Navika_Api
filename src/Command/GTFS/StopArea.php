@@ -10,16 +10,21 @@ use Symfony\Component\Console\Helper\ProgressIndicator;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
+use App\Service\Logger;
 
 class StopArea extends Command
 {
     private $entityManager;
 
+    private Logger $logger;
+
     private StopsRepository $stopsRepository;
 
-    public function __construct(EntityManagerInterface $entityManager, StopsRepository $stopsRepository)
+    public function __construct(EntityManagerInterface $entityManager, Logger $logger, StopsRepository $stopsRepository)
     {
         $this->entityManager = $entityManager;
+
+        $this->logger = $logger;
 
         $this->stopsRepository = $stopsRepository;
 
@@ -37,7 +42,11 @@ class StopArea extends Command
     {
         $dir = sys_get_temp_dir();
         $db = $this->entityManager->getConnection();
+        $event_id = uniqid();
 
+        $this->logger->log(['event_id' => $event_id,'message' => "[app:gtfs:stoparea][$event_id] Task began"], 'INFO');
+
+        
         // --
         $progressIndicator = new ProgressIndicator($output, 'verbose', 100, ['⠏', '⠛', '⠹', '⢸', '⣰', '⣤', '⣆', '⡇']);
         $progressIndicator->start('Generate Stop Area...');
@@ -90,6 +99,7 @@ class StopArea extends Command
 
         // Loader
         $progressIndicator->finish('✅ OK');
+        $this->logger->log(['event_id' => $event_id,'message' => "[$event_id] Task ended succesfully"], 'INFO');
 
         return Command::SUCCESS;
     }

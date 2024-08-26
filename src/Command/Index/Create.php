@@ -32,7 +32,6 @@ class Create extends Command
             ->setBasicAuthentication($this->params->get('elastic_user'), $this->params->get('elastic_pswd'))
             ->setCABundle($this->params->get('elastic_cert'))
             ->build();
-            
         $params = [
             'index' => 'stops',
             'body'  => [
@@ -47,6 +46,33 @@ class Create extends Command
             ],
         ];
 
+        $response = $client->indices()->create($params);
+        $output->writeln('Index created: ' . json_encode($response));
+
+        $params = [
+            'index' => 'logs',
+            'body'  => [
+                'mappings' => [
+                    'properties' => [
+                        '@timestamp' => [
+                            'type' => 'date'
+                        ],
+                        'level' => [
+                            'type' => 'keyword'
+                        ],
+                        'message' => [
+                            'type' => 'text'
+                        ],
+                        'trace' => [
+                            'type' => 'text'
+                        ],
+                        'context' => [
+                            'type' => 'object'
+                        ]
+                    ]
+                ]
+            ]
+        ];
         $response = $client->indices()->create($params);
         $output->writeln('Index created: ' . json_encode($response));
 

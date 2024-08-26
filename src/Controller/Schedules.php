@@ -250,7 +250,9 @@ class Schedules
         foreach ($lines as $line) {
             if ($line['mode'] == 'rail' || $line['mode'] == 'nationalrail') {
                 if ( !isset($departures[ $line['id'] ]) ) {
-                    $objs = Functions::getSchedulesByStop($db, $id, $line['id'], date("Y-m-d"), date("G:i:s"));
+                    $objs = Functions::getSchedulesByStop($db, $id, $line['id'], date("Y-m-d"), true);
+                    $objs_1 = Functions::getSchedulesByStop($db, $id, $line['id'], date("Y-m-d", strtotime('+1 day')));
+                    $objs = array_merge($objs, $objs_1);
                     foreach ($objs as $obj) {
     
                         $direction = Functions::getLastStopOfTrip($db, $obj['trip_id'])[0];
@@ -261,47 +263,51 @@ class Schedules
                         ['departure_date_time']
                         ['arrival_date_time']
                         */
-                        $trip_update = Functions::getTripRealtime($trips_update, $obj['trip_id'], $obj['stop_id']);
-                        $real_time = Functions::getTripRealtimeDateTime($trip_update, $obj['stop_id']);
+                        if (shouldAddRealTime($obj['departure_time'], $obj['arrival_time'])){
+                            $trip_update = Functions::getTripRealtime($trips_update, $obj['trip_id'], $obj['stop_id']);
+                            $real_time = Functions::getTripRealtimeDateTime($trip_update, $obj['stop_id']);
+                        }
                         if (Functions::isFuture($real_time['departure_date_time'], $real_time['arrival_date_time'], $obj['departure_time'], $obj['arrival_time'])) {
                             $dep = array(
-                            "informations" => array(
-                                "direction" => array(
-                                    "id"        =>  (string)  $direction['stop_id'],
-                                    "name"      =>  (string)  $direction['stop_name'],
+                                "informations" => array(
+                                    "direction" => array(
+                                        "id"        =>  (string)  $direction['stop_id'],
+                                        "name"      =>  (string)  $direction['stop_name'],
+                                    ),
+                                    "id"            =>  (string)  $obj['trip_id'],
+                                    "name"          =>  (string)  $obj['trip_short_name'],
+                                    "mode"          =>  (string)  $line['mode'],
+                                    "trip_name"     =>  (string)  $obj['trip_short_name'],
+                                    "headsign"      =>  (string)  $obj['trip_headsign'],
+                                    "description"   =>  (string)  '',
+                                    //"message"       =>  (string)  Functions::getMessage($call),
                                 ),
-                                "id"            =>  (string)  $obj['trip_id'],
-                                "name"          =>  (string)  $obj['trip_short_name'],
-                                "mode"          =>  (string)  $line['mode'],
-                                "trip_name"     =>  (string)  $obj['trip_short_name'],
-                                "headsign"      =>  (string)  $obj['trip_headsign'],
-                                "description"   =>  (string)  '',
-                                //"message"       =>  (string)  Functions::getMessage($call),
-                            ),
-                            "stop_date_time" => array(
-                                "base_departure_date_time"  =>  (string)  Functions::prepareTime($obj['departure_time'], true),
-                                "departure_date_time"       =>  (string)  $real_time['departure_date_time'] != null ? Functions::prepareTime($real_time['departure_date_time'], true) : Functions::prepareTime($obj['departure_time'], true),
-                                "base_arrival_date_time"    =>  (string)  Functions::prepareTime($obj['arrival_time'], true),
-                                "arrival_date_time"         =>  (string)  $real_time['arrival_date_time'] != null ? Functions::prepareTime($real_time['arrival_date_time'], true) : Functions::prepareTime($obj['arrival_time'], true),
-                                "state"                     =>  (string)  isset($trip_update) && $trip_update['state'] != null ? $trip_update['state'] : 'theorical',
-                                "atStop"                    =>  (string)  'false',
-                                "platform"                  =>  (string)  '-'
-                            )
-                        );
-        
-                        if (isset($ungroupDepartures) && $ungroupDepartures == 'true') {
-                            $dep['informations']['line'] = $line;
-                        }
-        
-                        $departures[ $line['id'] ][] = $dep;
-                        $ungrouped_departures[] = $dep;
+                                "stop_date_time" => array(
+                                    "base_departure_date_time"  =>  (string)  Functions::prepareTime($obj['departure_time'], true),
+                                    "departure_date_time"       =>  (string)  $real_time['departure_date_time'] != null ? Functions::prepareTime($real_time['departure_date_time'], true) : Functions::prepareTime($obj['departure_time'], true),
+                                    "base_arrival_date_time"    =>  (string)  Functions::prepareTime($obj['arrival_time'], true),
+                                    "arrival_date_time"         =>  (string)  $real_time['arrival_date_time'] != null ? Functions::prepareTime($real_time['arrival_date_time'], true) : Functions::prepareTime($obj['arrival_time'], true),
+                                    "state"                     =>  (string)  isset($trip_update) && $trip_update['state'] != null ? $trip_update['state'] : 'theorical',
+                                    "atStop"                    =>  (string)  'false',
+                                    "platform"                  =>  (string)  '-'
+                                )
+                            );
+            
+                            if (isset($ungroupDepartures) && $ungroupDepartures == 'true') {
+                                $dep['informations']['line'] = $line;
+                            }
+            
+                            $departures[ $line['id'] ][] = $dep;
+                            $ungrouped_departures[] = $dep;
                         }
                     }
                 }
                
             } else {
                 if ( !isset( $terminus_schedules[$line['id']] ) ) {
-                    $objs = Functions::getSchedulesByStop($db, $id, $line['id'], date("Y-m-d"), date("G:i:s"));
+                    $objs = Functions::getSchedulesByStop($db, $id, $line['id'], date("Y-m-d"));
+                    $objs_1 = Functions::getSchedulesByStop($db, $id, $line['id'], date("Y-m-d", strtotime(' +1 day')));
+                    $objs = array_merge($objs, $objs_1);
 
                     $terminus_schedules[$line['id']] = [];
                     foreach ($objs as $obj) {
