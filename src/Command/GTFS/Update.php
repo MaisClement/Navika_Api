@@ -148,7 +148,7 @@ class Update extends Command
             file_put_contents($zip_name, $zip);
             $this->logger->log(['event_id' => $event_id,'message' => sprintf("[$event_id][$step] GTFS saved to $zip_name - size : %s", filesize($zip_name))], 'INFO');
             
-            $otp_zip_name = $this->params->get('otp_gtfs_path') . 'GTFS/' . $provider . '_gtfs.zip';
+            $otp_zip_name = $this->params->get('otp_path') . 'GTFS/' . $provider . '_gtfs.zip';
             file_put_contents($otp_zip_name, $zip);
             $this->logger->log(['event_id' => $event_id,'message' => sprintf("[$event_id][$step] GTFS saved to $otp_zip_name - size : %s", filesize($otp_zip_name))], 'INFO');
         
