@@ -95,37 +95,6 @@ class Index
             );
         }
         
-        $messages[] = array(
-            "id"            =>  (string)    "ADMIN:JO",
-            "status"        =>  (string)    "active",
-            "severity"      =>  (int)       1,
-            "effect"        =>  (string)    "OTHER",
-            "updated_at"    =>  (string)    '2024-07-14T13:00:00Z',
-            "message"       =>  array(
-                "title"     =>      'Paris 2024 : Anticiper vos déplacements',
-                "text"      =>      'Anticiper vos déplacements',
-                // "icon"      =>      '',
-                "img"       =>      'https://app.navika.hackernwar.com/img/JO2.jpg',
-                "is_reduced"=>       true,
-                "button"    =>      'En savoir plus',
-                "link"      =>      'https://anticiperlesjeux.gouv.fr/je-minforme/anticiper-ses-deplacements#jeminforme',
-            ),
-        );
-
-        $messages[] = array(
-            "id"            =>  (string)    "ADMIN:JO",
-            "status"        =>  (string)    "active",
-            "severity"      =>  (int)       4,
-            "effect"        =>  (string)    "OTHER",
-            "updated_at"    =>  (string)    '2024-07-14T13:00:00Z',
-            "message"       =>  array(
-                "title"     =>      'Paris 2024 : Modification des lignes de bus pendant les Jeux',
-                "text"      =>      'Durant les Jeux Olympiques et Paralympiques de Paris 2024, certaines lignes de bus franciliennes vont être modifiées. Nouveaux itinéraires, horaires, infos trafic, ...',
-                "button"      =>    'En savoir plus',
-                "link"      =>      'https://www.iledefrance-mobilites.fr/modification-trafic-bus-jeux-paris-2024-infos-trafic',
-            ),
-        );
-
         // --- Message de IDFM
         // $client = HttpClient::create();
         // 

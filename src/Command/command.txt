@@ -81,11 +81,12 @@ php bin/console app:provider:clear "SNCF:TER"
 php bin/console app:provider:reset
 php bin/console app:gtfs:update
 
-
-
 php bin/console app:index:remove
 php bin/console app:index:create
-php bin/console app:gbfs:update
+
+https://download.geofabrik.de/europe/france-latest.osm.pbf
+
+java -Xmx16G -jar otp-2.5.0-shaded.jar --build --serve /var/www/OTP/GTFS/
 
 // -----
 */2 * * * * php /var/www/Navika/bin/console app:trafic:update

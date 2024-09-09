@@ -263,7 +263,11 @@ class Schedules
                         ['departure_date_time']
                         ['arrival_date_time']
                         */
-                        if (shouldAddRealTime($obj['departure_time'], $obj['arrival_time'])){
+                        $real_time = array(
+                            'departure_date_time' => $obj['departure_time'],
+                            'arrival_date_time' => $obj['arrival_time']
+                        );
+                        if (Functions::shouldAddRealTime($obj['departure_time'], $obj['arrival_time'])){
                             $trip_update = Functions::getTripRealtime($trips_update, $obj['trip_id'], $obj['stop_id']);
                             $real_time = Functions::getTripRealtimeDateTime($trip_update, $obj['stop_id']);
                         }
