@@ -15,8 +15,8 @@ use Elastic\Elasticsearch\ClientBuilder;
 
 class StopIndex extends Command
 {
-    private $entityManager;
-    private $params;
+    private EntityManagerInterface $entityManager;
+    private ParameterBagInterface $params;
 
     private StopsRepository $stopsRepository;
     private DBServices $dbServices;
@@ -45,13 +45,13 @@ class StopIndex extends Command
         $db = $this->entityManager->getConnection();
 
         $client = ClientBuilder::create()
-        ->setHosts($this->params->get('elastic_hosts'))
-        ->setBasicAuthentication($this->params->get('elastic_user'), $this->params->get('elastic_pswd'))
-        ->setCABundle($this->params->get('elastic_cert'))
-        ->build();
+            ->setHosts($this->params->get('elastic_hosts'))
+            ->setBasicAuthentication($this->params->get('elastic_user'), $this->params->get('elastic_pswd'))
+            ->setCABundle($this->params->get('elastic_cert'))
+            ->build();
 
         // --
-    
+
         // Remove all
         $params = [
             'index' => 'stops',
@@ -68,16 +68,16 @@ class StopIndex extends Command
         // Add by batch
 
         $stops_to_add = $this->stopsRepository->findAllByLocationType(1);
-        
+
         $params = ['body' => []];
 
         $i = 1;
         foreach ($stops_to_add as $stop) {
-            print( $stop->getStopId());
+            print ($stop->getStopId());
             $params['body'][] = [
                 'index' => [
                     '_index' => 'stops',
-                    '_id'    => $stop->getStopId(),
+                    '_id' => $stop->getStopId(),
                 ],
             ];
             $params['body'][] = [

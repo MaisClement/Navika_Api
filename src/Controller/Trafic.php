@@ -10,16 +10,22 @@ use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Routing\Annotation\Route;
+use App\Service\Logger;
 
 class Trafic
 {
-    private $params;
+    private EntityManagerInterface $entityManager;
+    private ParameterBagInterface $params;
+    private Logger $logger;
 
     private RoutesRepository $routesRepository;
 
-    public function __construct(ParameterBagInterface $params, RoutesRepository $routesRepository)
+    public function __construct(EntityManagerInterface $entityManager, ParameterBagInterface $params, Logger $logger, RoutesRepository $routesRepository)
     {
+        $this->entityManager = $entityManager;
         $this->params = $params;
+
+        $this->logger = $logger;
 
         $this->routesRepository = $routesRepository;
     }
@@ -65,7 +71,7 @@ class Trafic
                 $json['trafic'][] = $route->getRouteAndTrafic();
             }
         }
-        
+
         return new JsonResponse($json);
     }
 
@@ -73,7 +79,7 @@ class Trafic
      * Get trafic
      * 
      * Get trafic reports by id
-    **/
+     **/
 
     #[Route('/trafic/{id}', name: 'get_trafic_by_id', methods: ['GET'])]
     #[OA\Tag(name: 'Trafic')]
@@ -101,14 +107,15 @@ class Trafic
         $route = $this->routesRepository->findOneBy(['route_id' => $id]);
 
         if ($route == null) {
-            return new JsonResponse(Functions::ErrorMessage(400, 'Nothing where found for this id'), 400);
+            $this->logger->logHttpErrorMessage($request, 'Nothing where found for this id', 'WARN');
+            return new JsonResponse(Functions::httpErrorMessage(400, 'Nothing where found for this id'), 400);
         }
 
         // --- 
 
         $json = [];
         $json['trafic'] = $route->getRouteAndTrafic();
-        
+
         return new JsonResponse($json);
     }
 }

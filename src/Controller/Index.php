@@ -15,8 +15,8 @@ use Symfony\Component\Routing\Annotation\Route;
 
 class Index
 {
-    private $params;
-    private $entityManager;
+    private ParameterBagInterface $params;
+    private EntityManagerInterface $entityManager;
 
     private Logger $logger;
 
@@ -27,12 +27,12 @@ class Index
     {
         $this->params = $params;
         $this->entityManager = $entityManager;
-        
+
         $this->logger = $logger;
 
         $this->messagesRepository = $messagesRepository;
     }
- 
+
     /**
      * Index
      * 
@@ -41,9 +41,9 @@ class Index
     #[Route('/index', name: 'get_index', methods: ['GET'])]
     #[OA\Tag(name: 'Index')]
     #[OA\Parameter(
-        name:"v",
-        in:"query",
-        description:"App version",
+        name: "v",
+        in: "query",
+        description: "App version",
         required: true,
         schema: new OA\Schema(type: 'string', default: '0.5')
     )]
@@ -51,8 +51,8 @@ class Index
     #[OA\Response(
         response: 200,
         description: 'OK'
-    )] 
-    
+    )]
+
     public function getIndex(Request $request)
     {
         $messages = [];
@@ -68,10 +68,10 @@ class Index
         // --- Stats
 
         $stats = new Stats();
-        $stats->setDatetime( new DateTime());
-        $stats->setUuid( $request->get('uuid') ?? '' );
-        $stats->setVersion( $request->get('v') ?? '' );
-        $stats->setPlatform( $request->get('platform') ?? '' );
+        $stats->setDatetime(new DateTime());
+        $stats->setUuid($request->get('uuid') ?? '');
+        $stats->setVersion($request->get('v') ?? '');
+        $stats->setPlatform($request->get('platform') ?? '');
 
         $this->entityManager->persist($stats);
         $this->entityManager->flush();
@@ -81,20 +81,20 @@ class Index
 
         foreach ($_messages as $message) {
             $messages[] = array(
-                "id"            =>  (string)    $message->getId(),
-                "status"        =>  (string)    $message->getStatus(),
-                "severity"      =>  (int)       $message->getSeverity(),
-                "effect"        =>  (string)    $message->getEffect(),
-                "updated_at"    =>              $message->getUpdatedAt()->format('Y-m-d\TH:i:sO'),
-                "message"       =>  array(
-                    "title"     =>      $message->getTitle(),
-                    "text"      =>      $message->getText(),
-                    "button"      =>    $message->getButton(),
-                    "link"      =>      $message->getLink(),
+                "id" => (string) $message->getId(),
+                "status" => (string) $message->getStatus(),
+                "severity" => (int) $message->getSeverity(),
+                "effect" => (string) $message->getEffect(),
+                "updated_at" => $message->getUpdatedAt()->format('Y-m-d\TH:i:sO'),
+                "message" => array(
+                    "title" => $message->getTitle(),
+                    "text" => $message->getText(),
+                    "button" => $message->getButton(),
+                    "link" => $message->getLink(),
                 ),
             );
         }
-        
+
         // --- Message de IDFM
         // $client = HttpClient::create();
         // 
@@ -130,10 +130,10 @@ class Index
         // ---
 
         $json = array(
-            "api"         => array(
-                "version"              =>  (string)       $this->params->get('api.version.current'),
+            "api" => array(
+                "version" => (string) $this->params->get('api.version.current'),
             ),
-            "message"     => $messages,
+            "message" => $messages,
         );
 
         return new JsonResponse($json);

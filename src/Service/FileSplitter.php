@@ -4,7 +4,7 @@ namespace App\Service;
 
 class FileSplitter
 {
-    public static function exec($dir, $provider, $type)
+    public static function exec($dir, $provider, $type): int
     {
         $file = $dir . '/' . $provider . '/' . $type . '.txt';
 
@@ -33,7 +33,7 @@ class FileSplitter
         return $splitCount;
     }
 
-    public static function writeSplitFile($originalFilePath, $type, $splitNumber, $header, $data)
+    public static function writeSplitFile($originalFilePath, $type, $splitNumber, $header, $data): void
     {
         $splitFilePath = pathinfo($originalFilePath, PATHINFO_DIRNAME) . '/' . $type . '_' . $splitNumber . '.txt';
         file_put_contents($splitFilePath, $header . PHP_EOL . implode(PHP_EOL, $data));

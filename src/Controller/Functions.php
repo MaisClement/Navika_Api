@@ -8,27 +8,30 @@ use DateTimeZone;
 
 class Functions
 {
-    public static function ErrorMessage($http_code, $details = ''){
+    public static function httpErrorMessage($http_code, $details = ''): array
+    {
         return array(
             'error' => array(
-                'code'      =>  (int)       $http_code,
-                'message'   =>  (string)    null, // isset($config->http_code->$http_code) ? $config->http_code->$http_code : "",
-                'details'   =>  (string)    $details == ''               ? "" : $details,
+                'code' => (int) $http_code,
+                'message' => (string) null,
+                'details' => (string) $details ?? '',
             )
         );
     }
 
-    public static function SuccessMessage($http_code, $details = ''){
+    public static function httpSuccesMessage($http_code, $details = ''): array
+    {
         return array(
             'succes' => array(
-                'code'      =>  (int)       $http_code,
-                'message'   =>  (string)    null, // isset($config->http_code->$http_code) ? $config->http_code->$http_code : "",
-                'details'   =>  (string)    $details == ''               ? "" : $details,
+                'code' => (int) $http_code,
+                'message' => (string) null,
+                'details' => (string) $details ?? '',
             )
         );
     }
 
-    public static function getTransportMode($l){
+    public static function getTransportMode($mode): string
+    {
         $modes = array(
             0 => 'tram',
             1 => 'metro',
@@ -40,7 +43,7 @@ class Functions
             7 => 'funicular',
             11 => 'bus',
             12 => 'monorail',
-    
+
             99 => 'nationalrail',
             100 => 'rail',
             400 => 'metro',
@@ -48,11 +51,12 @@ class Functions
             900 => 'tram',
             1400 => 'funicular',
         );
-    
-        return $modes[$l];
+
+        return $modes[$mode];
     }
 
-    public static function getTypeFromPelias($el){
+    public static function getTypeFromPelias($el): string
+    {
         $search = [
             'venue',
         ];
@@ -64,7 +68,8 @@ class Functions
 
     }
 
-    public static function getTownByAdministrativeRegions($administrative_regions){
+    public static function getTownByAdministrativeRegions($administrative_regions): string
+    {
         foreach ($administrative_regions as $region) {
             if ($region->level == 8) {
                 return $region->name;
@@ -73,7 +78,8 @@ class Functions
         return "";
     }
 
-    public static function getZipByAdministrativeRegions($administrative_regions){
+    public static function getZipByAdministrativeRegions($administrative_regions): string
+    {
         foreach ($administrative_regions as $region) {
             if ($region->level == 8) {
                 return substr($region->insee, 0, 2);
@@ -82,7 +88,8 @@ class Functions
         return "";
     }
 
-    public static function getLineId($links){
+    public static function getLineId($links): mixed
+    {
         foreach ($links as $link) {
             if ($link->type == 'line') {
                 return $link->id;
@@ -90,36 +97,41 @@ class Functions
         }
     }
 
-    public static function getJourneyId($links){
+    public static function getJourneyId($links): string
+    {
         foreach ($links as $link) {
             if ($link->rel == 'this_journey') {
-                return Functions::base64url_encode(substr( $link->href , strpos( $link->href , 'journeys')));
+                return Functions::base64url_encode(substr($link->href, strpos($link->href, 'journeys')));
             }
         }
     }
 
-    public static function base64url_encode($s) {
+    public static function base64url_encode($s): string
+    {
         return str_replace(array('+', '/'), array('-', '_'), base64_encode($s));
     }
-    
-    public static function base64url_decode($s) {
+
+    public static function base64url_decode($s): string
+    {
         return base64_decode(str_replace(array('-', '_'), array('+', '/'), $s));
     }
 
-    public static function order_reports($array) {
-        usort ($array, function($a, $b) {
+    public static function order_reports($array): array
+    {
+        usort($array, function ($a, $b) {
 
             if ($a["severity"] != $b["severity"]) {
                 return ($a["severity"] < $b["severity"]) ? 1 : -1;
             }
-            
+
             return ($a["updated_at"] < $b["updated_at"]) ? 1 : -1;
         });
         return $array;
     }
 
-    public static function order_line($array) {
-        usort ($array, function($a, $b) {
+    public static function order_line($array): array
+    {
+        usort($array, function ($a, $b) {
             $type_list = [
                 'nationalrail',
                 'commercial_mode:Train',
@@ -137,40 +149,41 @@ class Functions
                 'commercial_mode:Bus',
                 'bus',
             ];
-        
+
             $ta = array_search($a['mode'], $type_list);
             $tb = array_search($b['mode'], $type_list);
-        
+
             if ($a['code'] == 'SNCF') {
                 return -1;
             } elseif ($b['code'] == 'SNCF') {
                 return +1;
             }
-        
+
             if ($a['name'] == 'TER') {
                 return +1;
             } elseif ($b['name'] == 'TER') {
                 return -1;
             }
-        
+
             if ($ta != $tb) {
                 return ($ta < $tb) ? -1 : 1;
             }
-        
+
             $a = $a['code'];
             $b = $b['code'];
-        
+
             if ($a == $b) {
                 return 0;
             }
-        
+
             return ($a < $b) ? -1 : 1;
         });
         return $array;
     }
 
-    public static function order_routes($array, $query) {
-        usort ($array, function($a, $b) use ($query) {
+    public static function order_routes($array, $query): array
+    {
+        usort($array, function ($a, $b) use ($query) {
             $type_list = [
                 'nationalrail',
                 'commercial_mode:Train',
@@ -188,7 +201,7 @@ class Functions
                 'commercial_mode:Bus',
                 'bus',
             ];
-        
+
             $ta = array_search($a['mode'], $type_list);
             $tb = array_search($b['mode'], $type_list);
 
@@ -197,46 +210,47 @@ class Functions
 
             similar_text($query, $b['code'], $b_perc_code);
             similar_text($query, $b['name'], $b_perc_name);
-    
-        
+
+
             if ($a['code'] == 'SNCF') {
                 return -1;
             } elseif ($b['code'] == 'SNCF') {
                 return +1;
             }
-        
+
             if ($ta != $tb) {
                 return ($ta < $tb) ? -1 : 1;
             }
-        
+
             $a = $a['code'];
             $b = $b['code'];
-        
+
             if ($a_perc_code == $b_perc_code) {
                 return 0;
             }
-        
+
             return ($a_perc_code > $b_perc_code) ? -1 : 1;
         });
         return $array;
     }
 
-    public static function orderPlaces($array) {
-        usort ($array, function($a, $b){
+    public static function orderPlaces($array): array
+    {
+        usort($array, function ($a, $b): int {
             $a_modes = count($a["modes"]);
             $b_modes = count($b["modes"]);
-        
+
             if (in_array('nationalrail', $a["modes"])) {
                 $a_modes++;
             }
             if (in_array('nationalrail', $b["modes"])) {
                 $b_modes++;
             }
-        
+
             if ($a_modes === $b_modes) {
                 $a_lines = count($a["lines"]);
                 $b_lines = count($b["lines"]);
-        
+
                 if ($a_lines === $b_lines) {
                     return 0;
                 }
@@ -247,28 +261,30 @@ class Functions
         return $array;
     }
 
-    public static function orderByDistance($array, $latitudeTo, $longitudeTo) {
-        usort ($array, function($a, $b) use ($latitudeTo, $longitudeTo) {
-            
+    public static function orderByDistance($array, $latitudeTo, $longitudeTo): array
+    {
+        usort($array, function ($a, $b) use ($latitudeTo, $longitudeTo): int {
+
             $a = Functions::getDistanceBeetwenPoints(
-                (float) $a["coord"]['lat'], 
-                (float) $a["coord"]['lon'], 
-                (float) $latitudeTo, 
+                (float) $a["coord"]['lat'],
+                (float) $a["coord"]['lon'],
+                (float) $latitudeTo,
                 (float) $longitudeTo
             );
             $b = Functions::getDistanceBeetwenPoints(
-                (float) $b["coord"]['lat'], 
-                (float) $b["coord"]['lon'], 
-                (float) $latitudeTo, 
+                (float) $b["coord"]['lat'],
+                (float) $b["coord"]['lon'],
+                (float) $latitudeTo,
                 (float) $longitudeTo
             );
-        
+
             return ($a > $b) ? 1 : -1;
         });
         return $array;
     }
 
-    public static function levenshteinDistance($str1, $str2) {
+    public static function levenshteinDistance($str1, $str2): mixed
+    {
         $len1 = strlen($str1);
         $len2 = strlen($str2);
 
@@ -295,44 +311,47 @@ class Functions
         return $matrix[$len1][$len2];
     }
 
-    public static function orderWithLevenshtein($array, $text) {
-        usort($array, function($a, $b) use ($text) {
+    public static function orderWithLevenshtein($array, $text): array
+    {
+        usort($array, function ($a, $b) use ($text) {
             $levA = Functions::levenshteinDistance($text, $a['name']);
             $levB = Functions::levenshteinDistance($text, $b['name']);
-    
+
             return $levA - $levB;
         });
-    
+
         return $array;
     }
 
-    public static function filterStopsWithLevenshtein($array, $text, $limit = 3) {
+    public static function filterStopsWithLevenshtein($array, $text, $limit = 3): array
+    {
         $res = [];
-        foreach($array as $element) {
+        foreach ($array as $element) {
             $d = levenshtein($element->getStopId()->getStopName(), $text);
             if ($d <= 3) {
                 $res[] = $element;
             }
         }
-    
+
         return $res;
     }
 
-    public static function orderDeparture($array) {
-        usort ($array, function($a, $b) {
-            
-            if ( $a['stop_date_time']['departure_date_time'] != "" ) {
+    public static function orderDeparture($array): array
+    {
+        usort($array, function ($a, $b): int {
+
+            if ($a['stop_date_time']['departure_date_time'] != "") {
                 $a = new DateTime($a['stop_date_time']['departure_date_time']);
-            } else if ( $a['stop_date_time']['arrival_date_time'] != "" ) {
+            } else if ($a['stop_date_time']['arrival_date_time'] != "") {
                 $a = new DateTime($a['stop_date_time']['arrival_date_time']);
             }
-            
-            if ( $b['stop_date_time']['departure_date_time'] != "" ) {
+
+            if ($b['stop_date_time']['departure_date_time'] != "") {
                 $b = new DateTime($b['stop_date_time']['departure_date_time']);
-            } else if ( $b['stop_date_time']['arrival_date_time'] != "" ) {
+            } else if ($b['stop_date_time']['arrival_date_time'] != "") {
                 $b = new DateTime($b['stop_date_time']['arrival_date_time']);
             }
-        
+
             if ($a == $b) {
                 return 0;
             }
@@ -341,35 +360,38 @@ class Functions
         return $array;
     }
 
-    public static function calculateDistance( $latitudeFrom, $longitudeFrom, $latitudeTo, $longitudeTo) {
+    public static function calculateDistance($latitudeFrom, $longitudeFrom, $latitudeTo, $longitudeTo): float|int
+    {
         $distance = Functions::getDistanceBeetwenPoints(
-            (float) $latitudeFrom, 
-            (float) $longitudeFrom, 
-            (float) $latitudeTo, 
+            (float) $latitudeFrom,
+            (float) $longitudeFrom,
+            (float) $latitudeTo,
             (float) $longitudeTo
         );
-        $distance = ceil( $distance );
-        
+        $distance = ceil($distance);
+
         return $distance > 1000 ? 0 : $distance;
     }
 
-    public static function getDistanceBeetwenPoints($latitudeFrom, $longitudeFrom, $latitudeTo, $longitudeTo) {
+    public static function getDistanceBeetwenPoints($latitudeFrom, $longitudeFrom, $latitudeTo, $longitudeTo): float
+    {
         // Honetement, j'ai rien compris a cette fonction mais ça fonctionne :D
         $earth = 6371000;
-        
+
         $latFrom = deg2rad($latitudeFrom);
         $lonFrom = deg2rad($longitudeFrom);
         $latTo = deg2rad($latitudeTo);
         $lonTo = deg2rad($longitudeTo);
-      
+
         $lat = $latTo - $latFrom;
         $lon = $lonTo - $lonFrom;
-      
+
         $angle = 2 * asin(sqrt(pow(sin($lat / 2), 2) + cos($latFrom) * cos($latTo) * pow(sin($lon / 2), 2)));
         return $angle * $earth;
     }
 
-    public static function getReportsMesageTitle($messages){
+    public static function getReportsMesageTitle($messages): mixed
+    {
         foreach ($messages as $message) {
             if ($message->channel->name == 'titre') {
                 return $message->text;
@@ -378,10 +400,11 @@ class Functions
         return '';
     }
 
-    public static function getReportsMesageText($messages){
+    public static function getReportsMesageText($messages): string
+    {
         $search = ['<br>', '</p>', "  "];
         $replace = [PHP_EOL, PHP_EOL, '', ' '];
-    
+
         foreach ($messages as $message) {
             if ($message->channel->name == 'moteur') {
                 $msg = str_replace($search, $replace, $message->text);
@@ -408,7 +431,8 @@ class Functions
         }
     }
 
-    public static function getSeverity($effect, $cause, $status){
+    public static function getSeverity($effect, $cause, $status): int
+    {
         if ($status == 'past') {
             return 0;
         } elseif ($cause == 'information') {
@@ -430,7 +454,8 @@ class Functions
         }
     }
 
-    public static function idfmFormat($str){
+    public static function idfmFormat($str): string
+    {
         $search = [
             'stop_area',
             'stop_point',
@@ -451,13 +476,14 @@ class Functions
         return str_replace($search, $replace, $str);
     }
 
-    public static function gareFormat($id){
+    public static function gareFormat($id): mixed
+    {
         // return $id;
         $allowed_name = [
             "Gare de l'Est",
             "Gare de Lyon"
         ];
-    
+
         if (in_array($id, $allowed_name))
             return $id;
 
@@ -470,11 +496,12 @@ class Functions
         $id = preg_replace('/\([^)]+\)/', '', $id);
         $id = str_replace('Gare des', 'Les', $id);
         $id = str_replace($search, '', $id);
-        $id = trim( $id );
+        $id = trim($id);
         return ucfirst($id);
     }
 
-    public static function getCSVHeader($csv, $sep = ';'){
+    public static function getCSVHeader($csv, $sep = ';'): array
+    {
         $line = [];
         $file = fopen($csv, 'r');
         while (!feof($file)) {
@@ -485,7 +512,8 @@ class Functions
         return $line;
     }
 
-    public static function readCsv($csv, $sep = ';'){
+    public static function readCsv($csv, $sep = ';'): array
+    {
         $line = [];
         $file = fopen($csv, 'r');
         while (!feof($file)) {
@@ -495,18 +523,20 @@ class Functions
         return $line;
     }
 
-    public static function isValidDateYMD($date) {
+    public static function isValidDateYMD($date): bool
+    {
         $format = 'Y-m-d';
         $date_time = DateTime::createFromFormat($format, $date);
         return $date_time && $date_time->format($format) === $date;
     }
 
-    public static function isToday($date) {
+    public static function isToday($date): bool
+    {
         $today = new DateTime("today");
-        
+
         $format = 'Y-m-d';
         $date_time = DateTime::createFromFormat($format, $date);
-        $date_time->setTime( 0, 0, 0 );
+        $date_time->setTime(0, 0, 0);
 
         $interval = $today->diff($date_time);
         $diffDays = $interval->days;
@@ -514,37 +544,41 @@ class Functions
         return $diffDays == 0;
     }
 
-    public static function addRealTime($el, $real_time) {
-        foreach($real_time as $real) {
-            if ($real['id'] != null && $el['trip_id'] != null && $real['id'] == $el['trip_id'] ) {
+    public static function addRealTime($el, $real_time): mixed
+    {
+        foreach ($real_time as $real) {
+            if ($real['id'] != null && $el['trip_id'] != null && $real['id'] == $el['trip_id']) {
                 return $real['date_time'];
-            } 
+            }
         }
-        foreach($real_time as $real) {
-            if ($real['id'] == $el['trip_name'] && strlen($el['trip_name']) >= 6 ) {
+        foreach ($real_time as $real) {
+            if ($real['id'] == $el['trip_name'] && strlen($el['trip_name']) >= 6) {
                 return $real['date_time'];
-            } 
+            }
         }
-        foreach($real_time as $real) {
-            if ($real['trip_name'] == $el['trip_name'] && strlen($el['trip_name']) >= 6 ) {
+        foreach ($real_time as $real) {
+            if ($real['trip_name'] == $el['trip_name'] && strlen($el['trip_name']) >= 6) {
                 return $real['date_time'];
             }
         }
         return null;
     }
 
-    public static function isSameTime($date1, $date2) {
+    public static function isSameTime($date1, $date2): bool
+    {
         $date1 = new DateTime($date1);
         $date2 = new DateTime($date2);
-      
-        return $date1 == $date2;
-      }
 
-    public static function prepareTime($dt, $i = false){
-        if ($dt == '') return '';
+        return $date1 == $date2;
+    }
+
+    public static function prepareTime($dt, $i = false): string
+    {
+        if ($dt == '')
+            return '';
 
         $date_time = $i == true ? date_create($dt, timezone_open('Europe/Paris')) : date_create($dt, timezone_open('UTC'));
-        
+
         if (is_bool($date_time)) {
             $dt = explode(' ', $dt);
             $dateArray = explode('-', $dt[0]);
@@ -556,17 +590,17 @@ class Functions
             $hours = (int) $timeArray[0];
             $minutes = (int) $timeArray[1];
             $seconds = (int) $timeArray[2];
-    
+
             // 'cause GTFS time can be 25:00:00
             $hours %= 24;
             $minutes %= 60;
             $seconds %= 60;
-    
+
             $date_time = new DateTime();
             $date_time->setDate($year, $month, $day);
             $date_time->setTime($hours, $minutes, $seconds);
             $date_time->setTimezone(new DateTimeZone('Europe/Paris'));
-    
+
             if ($timeArray[0] >= 24) {
                 $date_time->modify('+1 day');
             }
@@ -574,21 +608,23 @@ class Functions
         return date_format($date_time, DATE_ATOM);
     }
 
-    public static function getState($call){
+    public static function getState($call): mixed
+    {
         // theorical - ontime - delayed - cancelled - modified
         if (isset($call->DepartureStatus) && ($call->DepartureStatus == "cancelled" || $call->DepartureStatus == "delayed"))
             return $call->DepartureStatus;
-    
+
         if (isset($call->ArrivalStatus) && ($call->ArrivalStatus == "cancelled" || $call->ArrivalStatus == "delayed"))
             return $call->ArrivalStatus;
-    
+
         if ((isset($call->DepartureStatus) && $call->DepartureStatus == "onTime") || (isset($call->ArrivalStatus) && $call->ArrivalStatus == "onTime"))
             return "ontime";
-    
+
         return "theorical";
     }
 
-    public static function getMessage($call){
+    public static function getMessage($call): string
+    {
         // terminus - origin
         if (!isset($call->ExpectedDepartureTime) && !isset($call->AimedDepartureTime)) {
             return "terminus";
@@ -598,10 +634,11 @@ class Functions
             return "";
     }
 
-    public static function getIDFMID($id) {
+    public static function getIDFMID($id): mixed
+    {
         $pattern1 = '/(?<=::)\d+(?=:)/';
         $pattern2 = '/RATP\.(\w+):LOC/';
-    
+
         if (preg_match($pattern1, $id, $matches)) {
             return $matches[0];
         } else if (preg_match($pattern2, $id, $matches)) {
@@ -611,9 +648,10 @@ class Functions
         }
     }
 
-    public static function getRATPName($id) {
+    public static function getRATPName($id): mixed
+    {
         $pattern = 'RATP\.(\w+):LOC';
-    
+
         if (preg_match($pattern, $id, $matches)) {
             return $matches[0];
         } else {
@@ -621,97 +659,110 @@ class Functions
         }
     }
 
-    public static function getStopDateTime($call){
+    public static function getStopDateTime($call): array
+    {
         return array(
-            "base_departure_date_time"  =>  (string)  isset($call->AimedDepartureTime)      ? $call->AimedDepartureTime     :  ( isset($call->ExpectedDepartureTime) ? $call->ExpectedDepartureTime     : '' ),
-            "departure_date_time"       =>  (string)  isset($call->ExpectedDepartureTime)   ? $call->ExpectedDepartureTime  :  ( isset($call->AimedDepartureTime)    ? $call->AimedDepartureTime        : '' ),
-            "base_arrival_date_time"    =>  (string)  isset($call->AimedArrivalTime)        ? $call->AimedArrivalTime       :  ( isset($call->ExpectedArrivalTime)   ? $call->ExpectedArrivalTime       : '' ),
-            "arrival_date_time"         =>  (string)  isset($call->ExpectedArrivalTime)     ? $call->ExpectedArrivalTime    :  ( isset($call->AimedArrivalTime)      ? $call->AimedArrivalTime          : '' ),
-            "state"                     =>  (string)  Functions::getState($call),
-            "atStop"                    =>  (string)  isset($call->VehicleAtStop) !== '' && (string)  isset($call->VehicleAtStop) !== '0'               ? ($call->VehicleAtStop ? 'true' : 'false') : 'false',
-            "platform"                  =>  (string)  isset($call->ArrivalPlatformName->value) !== '' && (string)  isset($call->ArrivalPlatformName->value) !== '0'  ? $call->ArrivalPlatformName->value : '-'
+            "base_departure_date_time" => (string) isset($call->AimedDepartureTime) ? $call->AimedDepartureTime : (isset($call->ExpectedDepartureTime) ? $call->ExpectedDepartureTime : ''),
+            "departure_date_time" => (string) isset($call->ExpectedDepartureTime) ? $call->ExpectedDepartureTime : (isset($call->AimedDepartureTime) ? $call->AimedDepartureTime : ''),
+            "base_arrival_date_time" => (string) isset($call->AimedArrivalTime) ? $call->AimedArrivalTime : (isset($call->ExpectedArrivalTime) ? $call->ExpectedArrivalTime : ''),
+            "arrival_date_time" => (string) isset($call->ExpectedArrivalTime) ? $call->ExpectedArrivalTime : (isset($call->AimedArrivalTime) ? $call->AimedArrivalTime : ''),
+            "state" => (string) Functions::getState($call),
+            "atStop" => (string) isset($call->VehicleAtStop) !== '' && (string) isset($call->VehicleAtStop) !== '0' ? ($call->VehicleAtStop ? 'true' : 'false') : 'false',
+            "platform" => (string) isset($call->ArrivalPlatformName->value) !== '' && (string) isset($call->ArrivalPlatformName->value) !== '0' ? $call->ArrivalPlatformName->value : '-'
         );
     }
 
-    public static function getDisruptionForStop($trip_update, $obj){            
+    public static function getDisruptionForStop($trip_update, $obj): array
+    {
         $real_time = Functions::getTripRealtimeDateTime($trip_update, $obj['stop_id']);
-        
+
         return array(
-            "departure_state"       => (string) $real_time['departure_state'] != null ? $real_time['departure_state'] : 'unchanged',
-            "arrival_state"         => (string) $real_time['arrival_state'] != null ? $real_time['arrival_state'] : 'unchanged',
-            "message"               => (string) $real_time['message'] != null ? $real_time['message'] : '',
-            "base_departure_date_time"  =>  (string)  Functions::prepareTime($obj['departure_time'], true),
-            "departure_date_time"       =>  (string)  $real_time['departure_date_time'] != null ? Functions::prepareTime($real_time['departure_date_time'], true) : Functions::prepareTime($obj['departure_time'], true),
-            "base_arrival_date_time"    =>  (string)  Functions::prepareTime($obj['arrival_time'], true),
-            "arrival_date_time"         =>  (string)  $real_time['arrival_date_time'] != null ? Functions::prepareTime($real_time['arrival_date_time'], true) : Functions::prepareTime($obj['arrival_time'], true),
+            "departure_state" => (string) $real_time['departure_state'] != null ? $real_time['departure_state'] : 'unchanged',
+            "arrival_state" => (string) $real_time['arrival_state'] != null ? $real_time['arrival_state'] : 'unchanged',
+            "message" => (string) $real_time['message'] != null ? $real_time['message'] : '',
+            "base_departure_date_time" => (string) Functions::prepareTime($obj['departure_time'], true),
+            "departure_date_time" => (string) $real_time['departure_date_time'] != null ? Functions::prepareTime($real_time['departure_date_time'], true) : Functions::prepareTime($obj['departure_time'], true),
+            "base_arrival_date_time" => (string) Functions::prepareTime($obj['arrival_time'], true),
+            "arrival_date_time" => (string) $real_time['arrival_date_time'] != null ? Functions::prepareTime($real_time['arrival_date_time'], true) : Functions::prepareTime($obj['arrival_time'], true),
         );
     }
 
-    public static function shouldAddRealTime($departure, $arrival){
-        if ( isset($departure) ) {
-            return date_create($departure) >= date_create('+12 hours');
+    public static function isInNext12Hours($departure, $arrival): bool
+    {
+        if (isset($departure)) {
+            return date_create($departure) <= date_create('+12 hours');
         }
-        if ( isset($arrival) ) {
-            return date_create($arrival) >= date_create('+12 hours');
+        if (isset($arrival)) {
+            return date_create($arrival) <= date_create('+12 hours');
         }
     }
 
-    public static function isFuture($real_time_departure, $departure, $real_time_arrival, $arrival){
-        if ( isset($real_time_departure) ) {
+    public static function isFuture($real_time_departure, $departure, $real_time_arrival, $arrival): bool
+    {
+        if (isset($real_time_departure)) {
             return date_create($real_time_departure) >= date_create();
         }
-        if ( isset($departure) ) {
+        if (isset($departure)) {
             return date_create($departure) >= date_create();
         }
-        if ( isset($real_time_arrival) ) {
+        if (isset($real_time_arrival)) {
             return date_create($real_time_arrival) >= date_create();
         }
-        if ( isset($arrival) ) {
+        if (isset($arrival)) {
             return date_create($arrival) >= date_create();
         }
     }
 
-    public static function callIsFuture($call){
-        if ( isset($call->ExpectedDepartureTime) ) {
+    public static function callIsFuture($call): bool
+    {
+        if (isset($call->ExpectedDepartureTime)) {
             return date_create($call->ExpectedDepartureTime) >= date_create();
         }
-        if ( isset($call->ExpectedArrivalTime) ) {
+        if (isset($call->ExpectedArrivalTime)) {
             return date_create($call->ExpectedArrivalTime) >= date_create();
         }
-        if ( isset($call->AimedDepartureTime) ) {
+        if (isset($call->AimedDepartureTime)) {
             return date_create($call->AimedDepartureTime) >= date_create();
         }
-        if ( isset($call->AimedArrivalTime) ) {
+        if (isset($call->AimedArrivalTime)) {
             return date_create($call->AimedArrivalTime) >= date_create();
         }
     }
 
-    public static function getParentId($em, $id) {
+    public static function getParentId($em, $id): mixed
+    {
         $req = $em->prepare("
             SELECT parent_station
             FROM stops
             WHERE stop_id = :stop_id;
         ");
-        $req->bindValue( "stop_id", $id );
+        $req->bindValue("stop_id", $id);
         $results = $req->executeQuery();
 
         $res = $results->fetchAll();
 
-        if ( array_key_exists(0, $res) ) {
+        if (array_key_exists(0, $res)) {
             return $res[0]['parent_station'];
         }
         return $id;
     }
 
-    public static function getRealtimeData($provider) {
+    /**
+     * Retrieves the realtime data from the specified provider.
+     *
+     * @param mixed $provider The provider from which to retrieve the data.
+     * @return mixed The realtime data.
+     */
+    public static function getRealtimeData($provider): mixed
+    {
         $url = $provider->getGtfsRtTripUpdates();
 
         if ($url != null) {
             $client = HttpClient::create();
             $response = $client->request('GET', $url);
             $status = $response->getStatusCode();
-            
-            if ($status == 200){
+
+            if ($status == 200) {
                 $feed = new FeedMessage();
                 $feed->mergeFromString($response->getContent());
 
@@ -731,14 +782,15 @@ class Functions
                 # Remove timestamp if added
                 $regex = "/:\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}Z/";
                 $content = preg_replace($regex, '', $content);
-        
+
                 return json_decode($content)->entity;
             }
         }
         return [];
     }
 
-    public static function getTripRealtime($trip_update, $trip_id, $stop_id = null) {
+    public static function getTripRealtime($trip_update, $trip_id, $stop_id = null): array|null
+    {
         $regex = "/:\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}Z/";
         $trip_id = preg_replace($regex, '', $trip_id);
 
@@ -747,38 +799,38 @@ class Functions
         $has_exceptional_terminus = false;
         $is_added = false;
 
-        foreach($trip_update as $trip) {
+        foreach ($trip_update as $trip) {
             if (substr($trip->tripUpdate->trip->tripId, 0, -8) == substr($trip_id, 0, -8)) {
 
                 // Check if fully canceled
-                if ( isset($trip->tripUpdate->trip->scheduleRelationship) ) {
+                if (isset($trip->tripUpdate->trip->scheduleRelationship)) {
                     $schedule_relationship = $trip->tripUpdate->trip->scheduleRelationship;
 
                     // Check if fully canceled
-                    if ( $schedule_relationship == "CANCELED") {
+                    if ($schedule_relationship == "CANCELED") {
                         $is_cancelled = true;
                     }
                     // Check if fully canceled
-                    if ( $schedule_relationship == "ADDED") {
+                    if ($schedule_relationship == "ADDED") {
                         $is_added = true;
                     }
                 }
                 $l = count($trip->tripUpdate->stopTimeUpdate);
                 for ($i = 0; $i < $l; $i++) {
-                    if ( isset($trip->tripUpdate->stopTimeUpdate[$i]->scheduleRelationship) ) {
+                    if (isset($trip->tripUpdate->stopTimeUpdate[$i]->scheduleRelationship)) {
 
                         // if modified
                         if ($trip->tripUpdate->stopTimeUpdate[$i]->scheduleRelationship == "SKIPPED")
                             $is_modified = true;
 
-                        if ($stop_id != null){
+                        if ($stop_id != null) {
                             // Check if cancelled at stop
                             if ($trip->tripUpdate->stopTimeUpdate[$i]->stopId == $stop_id && $trip->tripUpdate->stopTimeUpdate[$i]->scheduleRelationship == "SKIPPED")
                                 $is_cancelled = true;
                         }
-                        
+
                         // Check if cancelled at last stop
-                        if ( ($i == ($l-1)) && $trip->tripUpdate->stopTimeUpdate[$i]->scheduleRelationship == "SKIPPED")
+                        if (($i == ($l - 1)) && $trip->tripUpdate->stopTimeUpdate[$i]->scheduleRelationship == "SKIPPED")
                             $has_exceptional_terminus = true;
                     }
                 }
@@ -795,17 +847,24 @@ class Functions
                 } else if ($is_modified) {
                     $state = "ontime";
                 }
-                
+
                 return array(
-                    "trip_update"  => $trip->tripUpdate,
-                    "state"  => $state
+                    "trip_update" => $trip->tripUpdate,
+                    "state" => $state
                 );
             }
         }
         return null;
     }
 
-    public static function getTripRealtimeReports($trip_update, $trip_id) {
+    /**
+     * Retrieves the realtime reports for a trip.
+     *
+     * @param mixed $trip_update The trip update data.
+     * @return array The array of realtime reports for the trip.
+     */
+    public static function getTripRealtimeReports($trip_update): array
+    {
         $message = array(
             "canceled" => array(
                 "id" => 'ADMIN:canceled',
@@ -825,8 +884,8 @@ class Functions
                 "severity" => 4,
                 "effect" => 'OTHER',
                 "message" => array(
-                "title" => "Desserte modifié",
-                "name" => "",
+                    "title" => "Desserte modifié",
+                    "name" => "",
                 ),
             ),
             "delayed" => array(
@@ -836,8 +895,8 @@ class Functions
                 "severity" => 4,
                 "effect" => 'OTHER',
                 "message" => array(
-                "title" => "Retardé",
-                "name" => "",
+                    "title" => "Retardé",
+                    "name" => "",
                 ),
             ),
             "added" => array(
@@ -851,39 +910,39 @@ class Functions
                 ),
             ),
         );
-        
+
         $is_delayed = false;
         $is_modified = false;
 
         $reports = [];
 
-        if($trip_update != null && $trip_update['trip_update'] != null) {
+        if ($trip_update != null && $trip_update['trip_update'] != null) {
             // Check if fully canceled
-            if ( isset($trip_update['trip_update']->trip->scheduleRelationship) ) {
+            if (isset($trip_update['trip_update']->trip->scheduleRelationship)) {
                 $schedule_relationship = $trip_update['trip_update']->trip->scheduleRelationship;
 
                 // Check if fully canceled
-                if ( $schedule_relationship == "CANCELED") {
+                if ($schedule_relationship == "CANCELED") {
                     $reports[] = $message['canceled'];
                 }
                 // Check if fully canceled
-                if ( $schedule_relationship == "ADDED") {
+                if ($schedule_relationship == "ADDED") {
                     $reports[] = $message['added'];
                 }
             }
-            
-            foreach($trip_update['trip_update']->stopTimeUpdate as $stop_time) {
-                if (isset($stop_time->scheduleRelationship) && $stop_time->scheduleRelationship == "SKIPPED"){
+
+            foreach ($trip_update['trip_update']->stopTimeUpdate as $stop_time) {
+                if (isset($stop_time->scheduleRelationship) && $stop_time->scheduleRelationship == "SKIPPED") {
                     $is_modified = true;
                 }
-                if (isset($stop_time->arrival) && isset($stop_time->arrival->delay)){
+                if (isset($stop_time->arrival) && isset($stop_time->arrival->delay)) {
                     $is_delayed = true;
                 }
-                if (isset($stop_time->departure) && isset($stop_time->departure->delay)){
+                if (isset($stop_time->departure) && isset($stop_time->departure->delay)) {
                     $is_delayed = true;
                 }
             }
-            
+
             if ($is_modified) {
                 $reports[] = $message['modified'];
             }
@@ -891,32 +950,40 @@ class Functions
                 $reports[] = $message['delayed'];
             }
         }
-            
+
         return $reports;
     }
 
-    public static function getTripRealtimeDateTime($trip_update, $stop_id) {
+    /**
+     * Retrieves the real-time date and time for a specific trip update and stop ID.
+     *
+     * @param mixed $trip_update The trip update object.
+     * @param mixed $stop_id The ID of the stop.
+     * @return array An array containing the real-time date and time.
+     */
+    public static function getTripRealtimeDateTime($trip_update, $stop_id): array
+    {
         $res = array(
             "departure_date_time" => null,
             "departure_state" => null,
-            "arrival_date_time"   => null,
+            "arrival_date_time" => null,
             "arrival_state" => null,
             "message" => null,
         );
 
-        if ($trip_update != null && $trip_update['trip_update'] != null){
+        if ($trip_update != null && $trip_update['trip_update'] != null) {
             $len = count($trip_update['trip_update']->stopTimeUpdate);
             for ($i = 0; $i < $len; $i++) {
                 $stop_time = $trip_update['trip_update']->stopTimeUpdate[$i];
                 if ($stop_time->stopId == $stop_id) {
                     if (isset($stop_time->departure)) {
-                        $date_time = new \DateTime();
+                        $date_time = new DateTime();
                         $date_time->setTimestamp($stop_time->departure->time);
                         $res["departure_date_time"] = $date_time->format(DATE_ATOM);
                     }
 
                     if (isset($stop_time->arrival)) {
-                        $date_time = new \DateTime();
+                        $date_time = new DateTime();
                         $date_time->setTimestamp($stop_time->arrival->time);
                         $res["arrival_date_time"] = $date_time->format(DATE_ATOM);
                     }
@@ -928,7 +995,7 @@ class Functions
                         $res["arrival_state"] = "delayed";
                     }
 
-                    if ($i != $len-1 && !isset($stop_time->departure)) {
+                    if ($i != $len - 1 && !isset($stop_time->departure)) {
                         $res["departure_state"] = "deleted";
                         $res["departure_date_time"] = null;
                     }
@@ -950,7 +1017,8 @@ class Functions
         return $res;
     }
 
-    public static function getTerminusForLine($em, \App\Entity\Routes $route){    
+    public static function getTerminusOfALine($em, $route): mixed
+    {
         $req = $em->prepare("
             SELECT DISTINCT S2.stop_name, S2.stop_id
             FROM stops S2
@@ -963,12 +1031,22 @@ class Functions
             WHERE T.route_id = :route_id
             AND (ST.stop_sequence = 0 OR ST.stop_sequence = (SELECT MAX(stop_sequence) FROM stop_times WHERE trip_id = T.trip_id));
         ");
-        $req->bindValue( "route_id", $route->getRouteId() );
+        $req->bindValue("route_id", $route->getRouteId());
         $results = $req->executeQuery();
         return $results->fetchAll();
     }
 
-    public static function getSchedulesByStop($em, $stop_id, $route_id, $date){    
+    /**
+     * Retrieves schedules by stop.
+     *
+     * @param mixed $em The entity manager.
+     * @param mixed $stop_id The stop ID.
+     * @param mixed $route_id The route ID.
+     * @param mixed $date The date.
+     * @return mixed The schedules.
+     */
+    public static function getSchedulesByStop($em, $stop_id, $route_id, $date): mixed
+    {
         $req = $em->prepare("
             SELECT DISTINCT ST.*, CONCAT(:date, ' ', ST.departure_time), CONCAT(:date, ' ', ST.arrival_time) as arrival_time, T.*
             FROM stops S
@@ -1013,32 +1091,14 @@ class Functions
         return $results->fetchAll();
     }
 
-    public static function getLastStopOfTrip($em, $trip_id){    
-        $req = $em->prepare("
-            SELECT S2.*
-            FROM trips T
-
-            JOIN stop_times ST 
-            ON T.trip_id = ST.trip_id
-
-            JOIN stops S
-            ON ST.stop_id = S.stop_id
-
-            JOIN stops S2
-            ON S.parent_station = S2.stop_id
-
-            WHERE T.trip_id = :trip_id
-
-            ORDER BY ST.stop_sequence DESC
-            LIMIT 1;
-      
-        ");
-        $req->bindValue("trip_id", $trip_id);
-        $results = $req->executeQuery();
-        return $results->fetchAll();
-    }
-
-    public static function getTripStopsByNameOrId($em, $trip_id, $date)
+    /**
+     * Retrieves the last stop of a trip.
+     *
+     * @param EntityManagerInterface $em The entity manager.
+     * @param int $trip_id The ID of the trip.
+     * @return mixed The last stop of the trip.
+     */
+    public static function getTripStopsById($em, $trip_id, $date): mixed
     {
         $req = $em->prepare("
             SELECT *
@@ -1085,7 +1145,14 @@ class Functions
         return $results->fetchAll();
     }
 
-    public static function getStopsOfRoutes($em, $route_id)
+    /**
+     * Retrieves the stops of a specific route.
+     *
+     * @param EntityManager $em The entity manager.
+     * @param mixed $route_id The ID of the route.
+     * @return mixed The stops of the specified route.
+     */
+    public static function getStopsOfRoutes($em, $route_id): mixed
     {
         $req = $em->prepare("
             SELECT DISTINCT S2.*
@@ -1111,8 +1178,15 @@ class Functions
         return $results->fetchAll();
     }
 
-    public static function getForbiddenModesURI($forbidden_modes) {
-        if ($forbidden_modes == null) {
+    /**
+     * Retrieves the URI list for the given modes.
+     *
+     * @param array $modes The modes for which to retrieve the URI list.
+     * @return array The URI list for the given modes.
+     */
+    public static function getModesURIList($modes): array
+    {
+        if ($modes == null) {
             return [];
         }
         $uri = [];
@@ -1148,20 +1222,27 @@ class Functions
             ]
         ];
 
-        foreach($forbidden_modes as $forbidden_mode) {
-            foreach( $all[$forbidden_mode] as $el) {
+        foreach ($modes as $mode) {
+            foreach ($all[$mode] as $el) {
                 $uri[] = $el;
             }
         }
 
         return $uri;
-        
+
         // physical_mode:Air
         // physical_mode:Boat
         // physical_mode:Ferry
     }
 
-    public static function getForbiddenLines($forbidden_lines) {
+    /**
+     * Retrieves a list of lines.
+     *
+     * @param array $forbidden_lines The list of forbidden lines.
+     * @return array The list of lines.
+     */
+    public static function getLinesList($forbidden_lines): array
+    {
         if ($forbidden_lines == null) {
             return [];
         }
@@ -1171,39 +1252,54 @@ class Functions
         return $forbidden_lines;
     }
 
-    public static function buildUrl($baseUrl, $params) {
+    /**
+     * Builds a URL using the provided base URL and parameters.
+     *
+     * @param string $baseUrl The base URL to build upon.
+     * @param array $params An associative array of parameters to append to the URL.
+     * @return string The built URL.
+     */
+    public static function buildUrl($baseUrl, $params)
+    {
         $query = [];
-    
+
         foreach ($params as $key => $value) {
             if (is_array($value)) {
                 foreach ($value as $element) {
                     $encodedElement = rawurlencode($element);
-    
+
                     $query[] = $key . '[]=' . $encodedElement;
                 }
             } else {
                 $encodedValue = rawurlencode($value);
-    
+
                 $query[] = "$key=$encodedValue";
             }
         }
-    
+
         $uri = implode('&', $query);
         $url = "$baseUrl?$uri";
-    
+
         return $url;
     }
 
-    public static function getCentroidOfStops($points) {
+    /**
+     * Calculates the centroid of a set of points.
+     *
+     * @param array $points An array of points.
+     * @return array The centroid coordinates as an array.
+     */
+    public static function getCentroidOfStops($points): array
+    {
         $num = count($points);
         $lat = 0;
         $lon = 0;
-    
+
         foreach ($points as $point) {
             $lat += $point['coord']['lat'];
             $lon += $point['coord']['lon'];
         }
-    
+
         return [
             'lat' => $lat / $num,
             'lon' => $lon / $num

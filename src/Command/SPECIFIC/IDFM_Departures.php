@@ -22,8 +22,8 @@ use Symfony\Component\Console\Helper\ProgressIndicator;
 
 class IDFM_Departures extends Command
 {
-    private $entityManager;
-    private $params;
+    private EntityManagerInterface $entityManager;
+    private ParameterBagInterface $params;
 
     private StopsRepository $stopsRepository;
 
@@ -47,7 +47,7 @@ class IDFM_Departures extends Command
     function execute(InputInterface $input, OutputInterface $output): int
     {
         $dir = sys_get_temp_dir();
-        
+
         // Récupération du trafic
         $url = $this->params->get('prim_url_all_departures');
         $client = HttpClient::create();
@@ -67,28 +67,28 @@ class IDFM_Departures extends Command
         $json = json_decode($content);
 
         $json = $json->Siri->ServiceDelivery->EstimatedTimetableDelivery[0]->EstimatedJourneyVersionFrame[0]->EstimatedVehicleJourney;
-        
+
         $data = [];
-        foreach($json as $el)  {
+        foreach ($json as $el) {
 
             $order = 0;
             $len = count($el->EstimatedCalls->EstimatedCall);
             $stop_times = [];
-            
-            foreach($el->EstimatedCalls->EstimatedCall as $stops) {
+
+            foreach ($el->EstimatedCalls->EstimatedCall as $stops) {
                 $call = $stops;
-                
+
                 $_stop_id = 'IDFM:' . Functions::idfmFormat($stops->StopPointRef->value);
-                if ( count($stops->DestinationDisplay) > 0 ) {
+                if (count($stops->DestinationDisplay) > 0) {
                     $_stop_name = Functions::gareFormat($stops->DestinationDisplay[0]->value);
                 } else {
                     $_stop_name = '';
                 }
                 $_stops = null;
 
-                $_stops =  $this->stopsRepository->findStopById($_stop_id);
+                $_stops = $this->stopsRepository->findStopById($_stop_id);
                 if ($_stops == null) {
-                   echo $_stop_id;
+                    echo $_stop_id;
                 }
 
                 $state = array(
@@ -102,26 +102,26 @@ class IDFM_Departures extends Command
                 );
 
                 $stop_times[] = array(
-                    "name"          => $_stops != null ? $_stops->getStopName() : "uh?",
-                    "id"            => $_stops != null ? $_stops->getStopId()   : $_stop_id,
-                    "order"         => (int) $order,
-                    "type"          => (int) $len - 1 === $order ? 'terminus' : ($order == 0 ? 'origin' : ''),
+                    "name" => $_stops != null ? $_stops->getStopName() : "uh?",
+                    "id" => $_stops != null ? $_stops->getStopId() : $_stop_id,
+                    "order" => (int) $order,
+                    "type" => (int) $len - 1 === $order ? 'terminus' : ($order == 0 ? 'origin' : ''),
                     "coords" => array(
-                        "lat"       => $_stops != null ? $_stops->getStopLat() : '',
-                        "lon"       => $_stops != null ? $_stops->getStopLon() : '',
+                        "lat" => $_stops != null ? $_stops->getStopLat() : '',
+                        "lon" => $_stops != null ? $_stops->getStopLon() : '',
                     ),
                     "stop_time" => array(
-                        "departure_date_time"       =>  (string)  isset($call->ExpectedDepartureTime)   ? $call->ExpectedDepartureTime  :  ( isset($call->AimedDepartureTime)    ? $call->AimedDepartureTime        : '' ),
-                        "arrival_date_time"         =>  (string)  isset($call->ExpectedArrivalTime)     ? $call->ExpectedArrivalTime    :  ( isset($call->AimedArrivalTime)      ? $call->AimedArrivalTime          : '' ),
+                        "departure_date_time" => (string) isset($call->ExpectedDepartureTime) ? $call->ExpectedDepartureTime : (isset($call->AimedDepartureTime) ? $call->AimedDepartureTime : ''),
+                        "arrival_date_time" => (string) isset($call->ExpectedArrivalTime) ? $call->ExpectedArrivalTime : (isset($call->AimedArrivalTime) ? $call->AimedArrivalTime : ''),
                     ),
-                    "disruption"    => array(
-                        "departure_state"           =>  (string)  isset($call->DepartureStatus) ? $state[$call->DepartureStatus] : 'theorical',
-                        "arrival_state"             =>  (string)  isset($call->ArrivalStatus) ? $state[$call->ArrivalStatus] : 'theorical',
-                        "message"                   =>  (string)  '',
-                        "base_departure_date_time"  =>  (string)  isset($call->AimedDepartureTime)      ? $call->AimedDepartureTime     :  ( isset($call->ExpectedDepartureTime) ? $call->ExpectedDepartureTime     : '' ),
-                        "departure_date_time"       =>  (string)  isset($call->ExpectedDepartureTime)   ? $call->ExpectedDepartureTime  :  ( isset($call->AimedDepartureTime)    ? $call->AimedDepartureTime        : '' ),
-                        "base_arrival_date_time"    =>  (string)  isset($call->AimedArrivalTime)        ? $call->AimedArrivalTime       :  ( isset($call->ExpectedArrivalTime)   ? $call->ExpectedArrivalTime       : '' ),
-                        "arrival_date_time"         =>  (string)  isset($call->ExpectedArrivalTime)     ? $call->ExpectedArrivalTime    :  ( isset($call->AimedArrivalTime)      ? $call->AimedArrivalTime          : '' ),
+                    "disruption" => array(
+                        "departure_state" => (string) isset($call->DepartureStatus) ? $state[$call->DepartureStatus] : 'theorical',
+                        "arrival_state" => (string) isset($call->ArrivalStatus) ? $state[$call->ArrivalStatus] : 'theorical',
+                        "message" => (string) '',
+                        "base_departure_date_time" => (string) isset($call->AimedDepartureTime) ? $call->AimedDepartureTime : (isset($call->ExpectedDepartureTime) ? $call->ExpectedDepartureTime : ''),
+                        "departure_date_time" => (string) isset($call->ExpectedDepartureTime) ? $call->ExpectedDepartureTime : (isset($call->AimedDepartureTime) ? $call->AimedDepartureTime : ''),
+                        "base_arrival_date_time" => (string) isset($call->AimedArrivalTime) ? $call->AimedArrivalTime : (isset($call->ExpectedArrivalTime) ? $call->ExpectedArrivalTime : ''),
+                        "arrival_date_time" => (string) isset($call->ExpectedArrivalTime) ? $call->ExpectedArrivalTime : (isset($call->AimedArrivalTime) ? $call->AimedArrivalTime : ''),
                     ),
                 );
                 $route_type = $_stops != null ? $_stops->getVehicleType() : '';
@@ -130,22 +130,22 @@ class IDFM_Departures extends Command
             $_vehicle_journey_id = 'IDFM:' . $el->DatedVehicleJourneyRef->value;
 
             $data[$_vehicle_journey_id] = array(
-                "informations"  => array(
-                    "id"            => $_vehicle_journey_id,
-                    "mode"          => $route_type,
-                    "name"          => '',// $el->JourneyNote[0]->JourneyNote,
-                    "headsign"      => '',// $el->JourneyNote[0]->JourneyNote,
-                    "description"   => '',
-                    "message"       => '',
-                    "origin"        => array(
-                        "id"        => $stop_times[0]['id'],
-                        "name"      => $stop_times[0]['name'],
+                "informations" => array(
+                    "id" => $_vehicle_journey_id,
+                    "mode" => $route_type,
+                    "name" => '',// $el->JourneyNote[0]->JourneyNote,
+                    "headsign" => '',// $el->JourneyNote[0]->JourneyNote,
+                    "description" => '',
+                    "message" => '',
+                    "origin" => array(
+                        "id" => $stop_times[0]['id'],
+                        "name" => $stop_times[0]['name'],
                     ),
-                    "direction"     => array(
-                        "id"        => $stop_times[count($stop_times) - 1]['id'],
-                        "name"      => $stop_times[count($stop_times) - 1]['name'],
+                    "direction" => array(
+                        "id" => $stop_times[count($stop_times) - 1]['id'],
+                        "name" => $stop_times[count($stop_times) - 1]['name'],
                     ),
-                    "line"         => 'IDFM:' . Functions::idfmFormat($el->LineRef->value),
+                    "line" => 'IDFM:' . Functions::idfmFormat($el->LineRef->value),
                 ),
                 "stop_times" => $stop_times,
             );

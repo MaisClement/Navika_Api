@@ -14,7 +14,7 @@ use App\Service\Logger;
 
 class StopArea extends Command
 {
-    private $entityManager;
+    private EntityManagerInterface $entityManager;
 
     private Logger $logger;
 
@@ -44,16 +44,16 @@ class StopArea extends Command
         $db = $this->entityManager->getConnection();
         $event_id = uniqid();
 
-        $this->logger->log(['event_id' => $event_id,'message' => "[app:gtfs:stoparea][$event_id] Task began"], 'INFO');
+        $this->logger->log(['event_id' => $event_id, 'message' => "[app:gtfs:stoparea][$event_id] Task began"], 'INFO');
 
-        
+
         // --
         $progressIndicator = new ProgressIndicator($output, 'verbose', 100, ['⠏', '⠛', '⠹', '⢸', '⣰', '⣤', '⣆', '⡇']);
         $progressIndicator->start('Generate Stop Area...');
         // ----
 
         $s = [];
-        $stops = $this->stopsRepository->FindBy(['location_type' => '0', 'parent_station' => null]);
+        $stops = $this->stopsRepository->findBy(['location_type' => '0', 'parent_station' => null]);
 
         foreach ($stops as $stop) {
             $progressIndicator->advance();
@@ -88,7 +88,7 @@ class StopArea extends Command
             $this->entityManager->persist($stp);
 
             foreach ($stop['stops'] as $child_stop) {
-                $el = $this->stopsRepository->FindOneBy(['stop_id' => $child_stop]);
+                $el = $this->stopsRepository->findOneBy(['stop_id' => $child_stop]);
 
                 $el->setParentStation($stop['stop_id']);
 
@@ -99,7 +99,7 @@ class StopArea extends Command
 
         // Loader
         $progressIndicator->finish('✅ OK');
-        $this->logger->log(['event_id' => $event_id,'message' => "[$event_id] Task ended succesfully"], 'INFO');
+        $this->logger->log(['event_id' => $event_id, 'message' => "[$event_id] Task ended succesfully"], 'INFO');
 
         return Command::SUCCESS;
     }

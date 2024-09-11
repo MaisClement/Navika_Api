@@ -13,7 +13,7 @@ use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
 
 class Add extends Command
 {
-    private $entityManager;
+    private EntityManagerInterface $entityManager;
 
     private RoutesRepository $routesRepository;
 
@@ -31,33 +31,33 @@ class Add extends Command
         $this
             ->setName('app:routedetails:add')
             ->setDescription('Add a data provider (can be for GTFS or GTFS)')
-            ->addArgument('route_id',           InputArgument::REQUIRED, 'routeId'          )
-            ->addArgument('vehicule_name',           InputArgument::REQUIRED, 'vehiculeName'          )
-            ->addArgument('vehicule_img',            InputArgument::REQUIRED, 'vehiculeImg'           )
-            ->addArgument('is_air_conditioned',      InputArgument::REQUIRED, 'isAirConditioned'      )
-            ->addArgument('has_power_sockets',       InputArgument::REQUIRED, 'hasPowerSockets'       )
-            ->addArgument('is_bike_accesible',       InputArgument::REQUIRED, 'isBikeAccesible'       )
-            ->addArgument('is_wheelchair_accesible', InputArgument::REQUIRED, 'isWheelchairAccesible' );
+            ->addArgument('route_id', InputArgument::REQUIRED, 'routeId')
+            ->addArgument('vehicule_name', InputArgument::REQUIRED, 'vehiculeName')
+            ->addArgument('vehicule_img', InputArgument::REQUIRED, 'vehiculeImg')
+            ->addArgument('is_air_conditioned', InputArgument::REQUIRED, 'isAirConditioned')
+            ->addArgument('has_power_sockets', InputArgument::REQUIRED, 'hasPowerSockets')
+            ->addArgument('is_bike_accesible', InputArgument::REQUIRED, 'isBikeAccesible')
+            ->addArgument('is_wheelchair_accesible', InputArgument::REQUIRED, 'isWheelchairAccesible');
     }
 
     function execute(InputInterface $input, OutputInterface $output): int
     {
-        $route_id  = $input->getArgument('route_id');
-        $vehicule_name  = $input->getArgument('vehicule_name');
-        $vehicule_img  = $input->getArgument('vehicule_img');
-        $is_air_conditioned  = $input->getArgument('is_air_conditioned');
-        $has_power_sockets  = $input->getArgument('has_power_sockets');
-        $is_bike_accesible  = $input->getArgument('is_bike_accesible');
-        $is_wheelchair_accesible  = $input->getArgument('is_wheelchair_accesible');
-        
-        
+        $route_id = $input->getArgument('route_id');
+        $vehicule_name = $input->getArgument('vehicule_name');
+        $vehicule_img = $input->getArgument('vehicule_img');
+        $is_air_conditioned = $input->getArgument('is_air_conditioned');
+        $has_power_sockets = $input->getArgument('has_power_sockets');
+        $is_bike_accesible = $input->getArgument('is_bike_accesible');
+        $is_wheelchair_accesible = $input->getArgument('is_wheelchair_accesible');
+
+
         $route = $this->routesRepository->findOneBy(['route_id' => $route_id]);
 
         if ($route == null) {
             $output->writeln('<info>The given route canot be found in database</info>');
             return Command::SUCCESS;
         }
-        
+
         $details = $route->getDetails();
 
         if (count($details) > 0) {

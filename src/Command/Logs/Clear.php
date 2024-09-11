@@ -1,20 +1,20 @@
 <?php
 
-namespace App\Command\Index;
+namespace App\Command\Logs;
 
-use Elastic\Elasticsearch\ClientBuilder;
 use Doctrine\ORM\EntityManagerInterface;
+use Elastic\Elasticsearch\ClientBuilder;
 use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 
-class Remove extends Command
+class Clear extends Command
 {
     private EntityManagerInterface $entityManager;
     private ParameterBagInterface $params;
 
-    protected static $defaultName = 'app:index:remove';
+    protected static $defaultName = 'app:logs:clear';
     private $client;
 
     public function __construct(EntityManagerInterface $entityManager, ParameterBagInterface $params)
@@ -33,16 +33,26 @@ class Remove extends Command
             ->setCABundle($this->params->get('elastic_cert'))
             ->build();
 
-        $params = [
-            'index' => 'stops'
-        ];
-        $response = $client->indices()->delete($params);
+        // Calculate the date one month ago
+        $oneMonthAgo = date('c', strtotime('-1 month'));
 
+        // Construct the query to delete logs older than one month
         $params = [
-            'index' => 'logs'
+            'index' => 'logs',
+            'body' => [
+                'query' => [
+                    'range' => [
+                        '@timestamp' => [
+                            'lt' => $oneMonthAgo
+                        ]
+                    ]
+                ]
+            ]
         ];
-        $response = $client->indices()->delete($params);
 
+        // Execute the delete by query
+        $this->client->deleteByQuery($params);
+        $output->writeln('Old logs deleted');
 
         return Command::SUCCESS;
     }

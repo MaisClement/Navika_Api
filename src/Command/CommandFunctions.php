@@ -6,7 +6,7 @@ use Symfony\Component\HttpClient\HttpClient;
 
 class CommandFunctions
 {
-    public static function getGTFSDataFromApi($gtfs)
+    public static function getGTFSDataFromApi($gtfs): array
     {
         $url = 'https://transport.data.gouv.fr/api/datasets/' . $gtfs->getUrl();
 
@@ -15,7 +15,7 @@ class CommandFunctions
         $status = $response->getStatusCode();
 
         if ($status != 200) {
-            return;
+            return [];
         }
 
         $content = $response->getContent();
@@ -39,15 +39,15 @@ class CommandFunctions
         return [];
     }
 
-    public static function getStatusFromActivePeriods($activePeriods)
+    public static function getStatusFromActivePeriods($activePeriods): string
     {
         $currentTime = time();
         $isFuture = false;
         $isPast = false;
 
-        foreach($activePeriods as $periods) {
-            $start =    (int)   $periods->start;
-            $end =      (int)   $periods->end;
+        foreach ($activePeriods as $periods) {
+            $start = (int) $periods->start;
+            $end = (int) $periods->end;
 
             if ($currentTime < $start) {
                 $isFuture = true;
@@ -61,8 +61,10 @@ class CommandFunctions
         if ($isFuture == true) {
             return 'future';
         }
-        if ($isFuture == true) {
+        if ($isPast == true) {
             return 'past';
         }
+
+        return 'active';
     }
 }

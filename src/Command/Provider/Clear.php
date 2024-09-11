@@ -16,7 +16,7 @@ use Symfony\Component\Console\Helper\ProgressIndicator;
 
 class Clear extends Command
 {
-    private $entityManager;
+    private EntityManagerInterface $entityManager;
     private DBServices $dbServices;
 
     private ProviderRepository $providerRepository;
@@ -92,7 +92,7 @@ class Clear extends Command
             'agency'
         ];
 
-        foreach($providers as $provider) {
+        foreach ($providers as $provider) {
             foreach ($tables as $table) {
                 $progressIndicator->advance();
                 $progressIndicator->setMessage("Clearing $table...");
@@ -102,7 +102,7 @@ class Clear extends Command
             $output->writeln('<info>✅ Provider data cleared successfully</info>');
         }
         $progressIndicator->finish('Finished');
-        
+
         return Command::SUCCESS;
     }
 }

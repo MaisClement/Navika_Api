@@ -11,8 +11,8 @@ use Symfony\Component\Console\Output\OutputInterface;
 
 class Create extends Command
 {
-    private $entityManager;
-    private $params;
+    private EntityManagerInterface $entityManager;
+    private ParameterBagInterface $params;
 
     protected static $defaultName = 'app:index:create';
     private $client;
@@ -22,7 +22,7 @@ class Create extends Command
         $this->entityManager = $entityManager;
         $this->params = $params;
 
-        parent::__construct(); 
+        parent::__construct();
     }
 
     protected function execute(InputInterface $input, OutputInterface $output)
@@ -34,7 +34,7 @@ class Create extends Command
             ->build();
         $params = [
             'index' => 'stops',
-            'body'  => [
+            'body' => [
                 'mappings' => [
                     'properties' => [
                         'name' => [
@@ -51,7 +51,7 @@ class Create extends Command
 
         $params = [
             'index' => 'logs',
-            'body'  => [
+            'body' => [
                 'mappings' => [
                     'properties' => [
                         '@timestamp' => [

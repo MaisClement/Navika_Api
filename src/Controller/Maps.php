@@ -12,7 +12,7 @@ use Symfony\Component\Routing\Annotation\Route;
 class Maps
 {
     private MapsRepository $mapsRepository;
-    
+
     public function __construct(MapsRepository $mapsRepository)
     {
         $this->mapsRepository = $mapsRepository;
@@ -29,7 +29,7 @@ class Maps
     #[OA\Response(
         response: 200,
         description: 'Return maps'
-    )]    
+    )]
     #[OA\Response(
         response: 400,
         description: 'Bad request'
@@ -45,9 +45,9 @@ class Maps
 
         foreach ($maps as $map) {
             $json['maps'][] = array(
-                'name'  => $map->getName(),
-                'url'   => $map->getUrl(),
-                'icon'   => $map->getIconUrl(),
+                'name' => $map->getName(),
+                'url' => $map->getUrl(),
+                'icon' => $map->getIconUrl(),
             );
         }
 

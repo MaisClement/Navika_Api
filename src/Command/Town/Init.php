@@ -14,15 +14,15 @@ use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
 
 class Init extends Command
 {
-    private $entityManager;
-    
+    private EntityManagerInterface $entityManager;
+
     public function __construct(EntityManagerInterface $entityManager)
     {
         $this->entityManager = $entityManager;
 
         parent::__construct();
     }
- 
+
     protected function configure(): void
     {
         $this
@@ -31,7 +31,7 @@ class Init extends Command
             ->addArgument('townfile', InputArgument::REQUIRED, 'JSON file to import')
             ->addArgument('zipcode', InputArgument::REQUIRED, 'JSON file to import');
     }
-    
+
     function execute(InputInterface $input, OutputInterface $output): int
     {
         $file = $input->getArgument('townfile');
@@ -58,33 +58,33 @@ class Init extends Command
                     $progressIndicator->advance();
 
                     $polygon = new Polygon($feature['geometry']['coordinates']);
-    
-                    foreach($zip_codes as $code) {
-                        if($code['id'] == $id) {
+
+                    foreach ($zip_codes as $code) {
+                        if ($code['id'] == $id) {
                             $zip_code = $code['zip_code'];
                             break;
                         }
                     }
-        
+
                     $town = new Town();
                     $town->setTownId($id);
                     $town->setTownName($name);
                     $town->setTownPolygon($polygon);
                     $town->setZipCode($zip_code ?? '');
-        
+
                     $this->entityManager->persist($town);
                 }
             } catch (\Exception $e) {
                 echo $name;
-            }      
+            }
         }
-        
+
         $progressIndicator->setMessage('Saving data...');
-        
+
         $this->entityManager->flush();
-        
+
         $progressIndicator->finish('  OK ✅');
-        
+
         return Command::SUCCESS;
     }
 }
