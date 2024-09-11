@@ -38,27 +38,27 @@ php bin/console app:provider:add "tc" "TBM"	        "TBM - Bordeaux"	      "Bord
 php bin/console app:provider:add "tc" "TISSEO"	    "Tisséo - Toulouse"	      "Toulouse Métropole"	            "56b0c2fba3a7294d39b88a86"
 
 php bin/console app:provider:add "bikes" "VELIB"     "Vélib‘"        "Paris"            "5a4e60f2b595080ee8014056" 
-php bin/console app:provider:add "bikes" "VELOV"     "Vélo‘v"        "Lyon"             "5defcb1c634f413ad267d96d" 
+php bin/console app:provider:add "bikes" "VELOV"     "Vélo‘v"        "Lyon"             "56ec0a73c751df73c4cc7169" 
 php bin/console app:provider:add "bikes" "CVELO"     "C.Vélo"        "Clermont Ferrand" "6397c0febc6459ee9ac8cd20" 
 php bin/console app:provider:add "bikes" "VELOMAGG"  "Vélomagg‘"     "Montpellier"      "6253e8fc6ed8eb554148b112" 
-php bin/console app:provider:add "bikes" "BENSANC"   "Besançon"      "Besançon"         "619216dea5f540a0bdf534a5" 
-php bin/console app:provider:add "bikes" "CRISTOLIB" "Cristolib"     "Créteil"          "5defc8f7634f41318eb5e239" 
+php bin/console app:provider:add "bikes" "BENSANC"   "VéloCité"      "Besançon"         "619216dea5f540a0bdf534a5" 
 php bin/console app:provider:add "bikes" "LOVELO"    "Lovélo"        "Rouen"            "64919d2f03c6861c686e0e87" 
-php bin/console app:provider:add "bikes" "VELAM"     "Vélam"         "Amiens"           "5defc608634f4127aa13e6f4" 
-php bin/console app:provider:add "bikes" "VELOSTAN"  "vélOstan’lib"  "Nancy"            "5defcd0e634f4144046defdc" 
-php bin/console app:provider:add "bikes" "VELOCITE"  "Vélocité"      "Mulhouse"         "5defcbf3634f413f580ec0f0" 
+php bin/console app:provider:add "bikes" "VELAM"     "Vélam"         "Amiens"           "669ef40c1acd6245ea444b63" 
+php bin/console app:provider:add "bikes" "VELOSTAN"  "vélOstan’lib"  "Nancy"            "65d5b9f71f672b6c776a9c37" 
+php bin/console app:provider:add "bikes" "VELOCITE"  "Vélocité"      "Mulhouse"         "664e89bbc9bc93d487e5a98b" 
 php bin/console app:provider:add "bikes" "STAR"      "STAR, le vélo" "Rennes"           "5dd4ba78dee7e7341e936949" 
 php bin/console app:provider:add "bikes" "VELIVERT"  "VéliVert"      "St Etienne"       "5d68f93d6f4441107ddce8e7" 
 php bin/console app:provider:add "bikes" "VELOTOUS"  "VélÔToulouse"  "Toulouse"         "5d63d89f634f41435baedd40" 
-php bin/console app:provider:add "bikes" "VCUB"      "VCub"          "Bordeaux"         "5d389cce634f416d93046739" 
+php bin/console app:provider:add "bikes" "TBMVELO"   "TBM Le Vélo"   "Bordeaux"         "61a025bf3d555aa1a24ed7ac" 
 php bin/console app:provider:add "bikes" "VELOPOP"   "Velopop’"      "Avignon"          "5d317ef5634f41390c5e2d9c" 
 php bin/console app:provider:add "bikes" "VELO2"     "Vélo²"         "Cergy"            "5d2d98d46f44410ac513d7ad" 
-php bin/console app:provider:add "bikes" "BICLOO"    "Bicloo"        "Nantes"           "5d0b54e08b4c414d10e736e6"
+php bin/console app:provider:add "bikes" "NAOLIBV"   "Naolib"        "Nantes"           "666b88b8f3d0ad620ec4be28"
 php bin/console app:provider:add "bikes" "OPTYMO"    "Optymo"        "Belfort"          "5c209625634f41616b51e726"
 php bin/console app:provider:add "bikes" "VELHOP"    "Vél’hop"       "Strasbourg"       "65ab0d58c86e8597d65aa47f"
 
 
     // Unavailable
+    php bin/console app:provider:add "bikes" "CRISTOLIB" "Cristolib"     "Créteil"          "5defc8f7634f41318eb5e239" 
     php bin/console app:provider:add "bikes" "LEVELO"    "levélo"        "Marseille"        "63c91087b1d439ee08239fc4"
     php bin/console app:provider:add "bikes" "VLILLE"    "V‘lille"       "Lille"            "5f71dcd11bb82e9f1e748680" 
 
@@ -73,13 +73,20 @@ php bin/console app:maps:update
 php bin/console app:provider:reset
 
 
-php bin/console app:provider:remove "IDFM"
+php bin/console app:provider:remove "SNCF"
 php bin/console app:provider:clear "SNCF"
 php bin/console app:provider:clear "SNCF:IC"
 php bin/console app:provider:clear "SNCF:TGV"
 php bin/console app:provider:clear "SNCF:TER"
 php bin/console app:provider:reset
 php bin/console app:gtfs:update
+
+php bin/console app:index:remove
+php bin/console app:index:create
+
+https://download.geofabrik.de/europe/france-latest.osm.pbf
+
+java -Xmx16G -jar otp-2.5.0-shaded.jar --build --serve /var/www/OTP/GTFS/
 
 // -----
 */2 * * * * php /var/www/Navika/bin/console app:trafic:update
@@ -94,7 +101,6 @@ git checkout master
 
 // -----
 
-
 php bin/console app:routedetails:add "IDFM:C01736" "Train Regio 2N" "/img/vehicule/r2n.png" 1 1 0 1
 php bin/console app:routedetails:add "IDFM:C01731" "Train Regio 2N" "/img/vehicule/r2n.png" 1 1 0 1
 
@@ -106,3 +112,8 @@ php bin/console app:routedetails:add "IDFM:C01843" "Tram-Train Dualis" "/img/veh
 php bin/console app:routedetails:add "IDFM:C01999" "Tram-Train Dualis" "/img/vehicule/dualis.png" 1 1 1 1
 php bin/console app:routedetails:add "IDFM:C02529" "Tram-Train Dualis" "/img/vehicule/dualis.png" 1 1 1 1
 php bin/console app:routedetails:add "IDFM:C02344" "Tram-Train Dualis" "/img/vehicule/dualis.png" 1 1 1 1
+
+// -----
+
+java -Xmx10G -jar otp-2.5.0-shaded.jar --build /var/www/OTP/GTFS --save .
+java -Xmx10G -jar otp-2.5.0-shaded.jar --load .
