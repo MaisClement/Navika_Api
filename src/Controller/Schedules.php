@@ -310,8 +310,8 @@ class Schedules
             } else {
                 if (!isset($terminus_schedules[$line['id']])) {
                     $objs = Functions::getSchedulesByStop($db, $id, $line['id'], date("Y-m-d"));
-                    $objs_1 = Functions::getSchedulesByStop($db, $id, $line['id'], date("Y-m-d", strtotime(' +1 day')));
-                    $objs = array_merge($objs, $objs_1);
+                    // $objs_1 = Functions::getSchedulesByStop($db, $id, $line['id'], date("Y-m-d", strtotime(' +1 day')));
+                    // $objs = array_merge($objs, $objs_1);
 
                     $terminus_schedules[$line['id']] = [];
                     foreach ($objs as $obj) {
