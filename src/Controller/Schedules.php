@@ -261,8 +261,8 @@ class Schedules
             if ($line['mode'] == 'rail' || $line['mode'] == 'nationalrail') {
                 if (!isset($departures[$line['id']])) {
                     $objs = Functions::getSchedulesByStop($db, $id, $line['id'], date("Y-m-d"));
-                    $objs_1 = Functions::getSchedulesByStop($db, $id, $line['id'], date("Y-m-d", strtotime('+1 day')));
-                    $objs = array_merge($objs, $objs_1);
+                    //$objs_1 = Functions::getSchedulesByStop($db, $id, $line['id'], date("Y-m-d", strtotime('+1 day')));
+                    // $objs = array_merge($objs, $objs_1);
                     foreach ($objs as $obj) {
                         if (Functions::isInNext12Hours($obj['departure_time'], $obj['arrival_time'])) {
                             $direction = Functions::getLastStopOfTrip($db, $obj['trip_id'])[0];
