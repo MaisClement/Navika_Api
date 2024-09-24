@@ -8,7 +8,7 @@ use Elastic\Elasticsearch\ClientBuilder;
 
 class Logger
 {
-    private $params;
+    private ParameterBagInterface $params;
     private $client;
 
     public function __construct(ParameterBagInterface $params)
@@ -26,6 +26,31 @@ class Logger
     {
         $data['@timestamp'] = date('c');
         $data['level']      = $level;
+
+        $params = [
+            'index' => 'logs',
+            'body'  => $data
+        ];
+
+        $this->client->index($params);
+    }
+
+    public function logHttpErrorMessage($request, $message, $level = 'ERROR'): void
+    {
+        $data = [
+            'message' => 
+                sprintf( 'HTTP REJECTION : [%s] %s. %s',
+                    $request->getMethod(),
+                    $request->getUri(),
+                    $message
+                ),
+            'query_parameters' => $request->query->all(),
+            'request_body' => $request->getContent(),
+            'client_ip' => $request->getClientIp(),
+            '@timestamp' => date('c'),
+        ];
+
+        $data['level'] = $level;
 
         $params = [
             'index' => 'logs',

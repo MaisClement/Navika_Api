@@ -17,8 +17,8 @@ use Symfony\Component\Console\Helper\ProgressIndicator;
 
 class IDFM_Maps extends Command
 {
-    private $entityManager;
-    private $params;
+    private EntityManagerInterface $entityManager;
+    private ParameterBagInterface $params;
 
     private RoutesRepository $routesRepository;
     private MapsRepository $mapsRepository;
@@ -75,7 +75,7 @@ class IDFM_Maps extends Command
                 $maps->setUrl($row[4]);
                 $maps->setNumber(intval($row[1]));
 
-                $this->entityManager ->persist($maps);
+                $this->entityManager->persist($maps);
             }
         }
 

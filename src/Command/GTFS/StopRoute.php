@@ -12,7 +12,7 @@ use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
 
 class StopRoute extends Command
 {
-    private $entityManager;
+    private EntityManagerInterface $entityManager;
     private DBServices $dbServices;
 
     public function __construct(EntityManagerInterface $entityManager, DBServices $dbServices)

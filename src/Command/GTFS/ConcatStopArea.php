@@ -15,7 +15,7 @@ use App\Service\Logger;
 
 class ConcatStopArea extends Command
 {
-    private $entityManager;
+    private EntityManagerInterface $entityManager;
 
     private Logger $logger;
 
@@ -47,7 +47,7 @@ class ConcatStopArea extends Command
         $db = $this->entityManager->getConnection();
         $event_id = uniqid();
 
-        $this->logger->log(['event_id' => $event_id,'message' => "[app:gtfs:concatstoparea][$event_id] Task began"], 'INFO');
+        $this->logger->log(['event_id' => $event_id, 'message' => "[app:gtfs:concatstoparea][$event_id] Task began"], 'INFO');
 
 
         // --
@@ -56,39 +56,38 @@ class ConcatStopArea extends Command
         // ----
 
         $new_stops = [];
-        $providers = $this->providerRepository->FindBy(['type' => 'tc']);
+        $providers = $this->providerRepository->findBy(['type' => 'tc']);
 
-        foreach($providers as $provider) {
+        foreach ($providers as $provider) {
             if ($provider->getParentProvider() != "" && $provider->getParentProvider() != null) {
 
-                $parent_provider = $this->providerRepository->FindOneBy(['id' => $provider->getParentProvider()]);
-                
-                $stops = $this->stopsRepository->FindBy(['location_type' => '1', 'provider_id' => $provider->getId()]);
-                
-                foreach($stops as $stop) {
+                $parent_provider = $this->providerRepository->findOneBy(['id' => $provider->getParentProvider()]);
+
+                $stops = $this->stopsRepository->findBy(['location_type' => '1', 'provider_id' => $provider->getId()]);
+
+                foreach ($stops as $stop) {
                     $progressIndicator->advance();
 
                     $id = $stop->getStopId();
-                    $id = str_replace( $provider->getId(), $parent_provider->getId(), $id );
+                    $id = str_replace($provider->getId(), $parent_provider->getId(), $id);
 
-                    if ( !isset($new_stops[$id]) ) {
+                    if (!isset($new_stops[$id])) {
                         $new_stop = clone $stop;
-                        $new_stop->setStopId( $id );
-                        $new_stop->setProviderId( $parent_provider );
-                        
+                        $new_stop->setStopId($id);
+                        $new_stop->setProviderId($parent_provider);
+
                         $this->entityManager->persist($new_stop);
 
                         $new_stops[$id] = $new_stop;
                     }
-                    $stop->setLocationType( '0' );
-                    $stop->setParentStation( $id );
+                    $stop->setLocationType('0');
+                    $stop->setParentStation($id);
 
-                    $sub_stops = $this->stopsRepository->FindBy(['parent_station' => $stop->getStopId()]);
-                    foreach($sub_stops as $sub_stop) {
-                        $sub_stop->setParentStation( $id );
+                    $sub_stops = $this->stopsRepository->findBy(['parent_station' => $stop->getStopId()]);
+                    foreach ($sub_stops as $sub_stop) {
+                        $sub_stop->setParentStation($id);
                     }
                 }
-
             }
         }
 
@@ -96,7 +95,7 @@ class ConcatStopArea extends Command
 
         // Loader
         $progressIndicator->finish('✅ OK');
-        $this->logger->log(['event_id' => $event_id,'message' => "[$event_id] Task ended succesfully"], 'INFO');
+        $this->logger->log(['event_id' => $event_id, 'message' => "[$event_id] Task ended succesfully"], 'INFO');
 
         return Command::SUCCESS;
     }

@@ -14,7 +14,7 @@ use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
 
 class Remove extends Command
 {
-    private $entityManager;
+    private EntityManagerInterface $entityManager;
 
     private ProviderRepository $providerRepository;
 
@@ -72,7 +72,7 @@ class Remove extends Command
             return Command::FAILURE;
         }
 
-        foreach($providers as $provider) {
+        foreach ($providers as $provider) {
             if ($i == true) {
                 $input = new ArrayInput([
                     'command' => 'app:provider:clear',

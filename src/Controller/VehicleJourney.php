@@ -12,15 +12,18 @@ use Symfony\Component\HttpFoundation\Request;
 use Doctrine\ORM\EntityManagerInterface;
 use App\Controller\Functions;
 use OpenApi\Attributes as OA;
+use App\Service\Logger;
 
 class VehicleJourney
 {
-    private $entityManager;
+    private EntityManagerInterface $entityManager;
+    private ParameterBagInterface $params;
+    private Logger $logger;
+
     private ProviderRepository $providerRepository;
     private RoutesRepository $routesRepository;
-    private $params;
 
-    public function __construct(EntityManagerInterface $entityManager, ProviderRepository $providerRepository, RoutesRepository $routesRepository, ParameterBagInterface $params)
+    public function __construct(EntityManagerInterface $entityManager, ProviderRepository $providerRepository, Logger $logger, RoutesRepository $routesRepository, ParameterBagInterface $params)
     {
         $this->entityManager = $entityManager;
 
@@ -56,7 +59,8 @@ class VehicleJourney
         $db = $this->entityManager->getConnection();
 
         if (!isset($id)) {
-            return new JsonResponse(Functions::ErrorMessage(400, 'One or more parameters are missing or null, have you "id" ?'), 400);
+            $this->logger->logHttpErrorMessage($request, 'At least one required parameter is missing or null, have you "id" ?', 'WARN');
+            return new JsonResponse(Functions::httpErrorMessage(400, 'At least one required parameter is missing or null, have you "id" ?'), 400);
         }
 
         if (str_contains($id, 'IDFM:')) {
@@ -90,104 +94,105 @@ class VehicleJourney
         //     }
         // }
         // if ($provider == 'ADMIN') {
-            $trip = Functions::getTripStopsByNameOrId($db, $id, date("Y-m-d"));
+        $trip = Functions::getTripStopsById($db, $id, date("Y-m-d"));
 
-            $len = count($trip);
-            if ($len == 0) {
-                return new JsonResponse(Functions::ErrorMessage(400, 'Nothing where found for this id'), 400);
-            }
-            $trip_update = [];
-            $reports = [];
+        $len = count($trip);
+        if ($len == 0) {
+            $this->logger->logHttpErrorMessage($request, "Nothing where found for this id", 'WARN');
+            return new JsonResponse(Functions::httpErrorMessage(400, 'Nothing where found for this id'), 400);
+        }
+        $trip_update = [];
+        $reports = [];
 
-            $provider_id = $trip[0]['provider_id'];
-            if ($provider_id != null){
-                $provider = $this->providerRepository->find($provider_id);
+        $provider_id = $trip[0]['provider_id'];
+        if ($provider_id != null) {
+            $provider = $this->providerRepository->find($provider_id);
 
-                $trips_update = Functions::getRealtimeData($provider);
-                
-                $file_name = $dir . '/test_gtfsrt.pb';
-                file_put_contents($file_name, json_encode($trips_update, JSON_PRETTY_PRINT));
-                
-                $trip_update = Functions::getTripRealtime($trips_update, $trip[0]['trip_id'], null);
-                $reports = Functions::getTripRealtimeReports($trip_update, $trip[0]['trip_id']);
-            }
+            $trips_update = Functions::getRealtimeData($provider);
 
-            // -----
+            $file_name = $dir . '/test_gtfsrt.pb';
+            file_put_contents($file_name, json_encode($trips_update, JSON_PRETTY_PRINT));
 
-            $stops = [];
-            $order = 0;
+            $trip_update = Functions::getTripRealtime($trips_update, $trip[0]['trip_id'], null);
+            $reports = Functions::getTripRealtimeReports($trip_update);
+        }
 
-            foreach ($trip as $obj) {
-                $disruption = Functions::getDisruptionForStop($trip_update, $obj);
+        // -----
 
-                $stops[] = array(
-                    "name"          => (string) $obj['stop_name'],
-                    "id"            => (string) $obj['parent_station'],
-                    "order"         => (int) $order,
-                    "type"          => (int) $len - 1 === $order ? 'terminus' : ($order == 0 ? 'origin' : ''),
-                    "coords" => array(
-                        "lat"       => $obj['stop_lat'],
-                        "lon"       => $obj['stop_lon'],
-                    ),
-                    "stop_time" => array(
-                        "departure_date_time"    => Functions::prepareTime($obj['departure_time'], true),
-                        "arrival_date_time"      => Functions::prepareTime($obj['arrival_time'], true),
-                    ),
-                    "disruption"    => $disruption,
-                );
-                $trip_headsign = $obj['trip_headsign'];
-                $trip_id = $obj['trip_id'];
-                $route_type = $obj['route_type'];
-                $route_id = $obj['route_id'];
-                $order++;
-            }
+        $stops = [];
+        $order = 0;
 
-            // get route details
-            $route = $this->routesRepository->findOneBy( ['route_id' => $route_id] );
-            if ( $route != null ) {
-                $route = $route->getRoute(true);
-            }
+        foreach ($trip as $obj) {
+            $disruption = Functions::getDisruptionForStop($trip_update, $obj);
 
-            $vehicle_journey = array(
-                "informations"  => array(
-                    "id"            => $trip_id ?? '',
-                    "mode"          => Functions::getTransportMode($route_type ?? ''),
-                    "name"          => $trip_id != $id ? $id : $trip_headsign,
-                    "headsign"      => $trip_headsign ?? '',
-                    "description"   => '',
-                    "message"       => '',
-                    "origin"        => array(
-                        "id"        => $stops[0]['id'],
-                        "name"      => $stops[0]['name'],
-                    ),
-                    "direction"     => array(
-                        "id"        => $stops[count($stops) - 1]['id'],
-                        "name"      => $stops[count($stops) - 1]['name'],
-                    ),
-                    "line"         => $route,
+            $stops[] = array(
+                "name" => (string) $obj['stop_name'],
+                "id" => (string) $obj['parent_station'],
+                "order" => (int) $order,
+                "type" => (int) $len - 1 === $order ? 'terminus' : ($order == 0 ? 'origin' : ''),
+                "coords" => array(
+                    "lat" => $obj['stop_lat'],
+                    "lon" => $obj['stop_lon'],
                 ),
-                "reports" => [],
-                "stop_times" => $stops,
+                "stop_time" => array(
+                    "departure_date_time" => Functions::prepareTime($obj['departure_time'], true),
+                    "arrival_date_time" => Functions::prepareTime($obj['arrival_time'], true),
+                ),
+                "disruption" => $disruption,
             );
+            $trip_headsign = $obj['trip_headsign'];
+            $trip_id = $obj['trip_id'];
+            $route_type = $obj['route_type'];
+            $route_id = $obj['route_id'];
+            $order++;
+        }
 
-            $vehicle_journey["reports"] = $reports;
-            
-            // Info théorique
-            if ($trip_update == null) {
-                $vehicle_journey["reports"] = array(
-                    array(
-                        "id" => 'ADMIN:theorical',
-                        "status" => 'active',
-                        "cause" => 'theorical',
-                        "severity" => 1,
-                        "effect" => 'OTHER',
-                        "message" => array(
-                            "title" => "Horaires théorique",
-                            "name" => "",
-                        ),
+        // get route details
+        $route = $this->routesRepository->findOneBy(['route_id' => $route_id]);
+        if ($route != null) {
+            $route = $route->getRoute(true);
+        }
+
+        $vehicle_journey = array(
+            "informations" => array(
+                "id" => $trip_id ?? '',
+                "mode" => Functions::getTransportMode($route_type ?? ''),
+                "name" => $trip_id != $id ? $id : $trip_headsign,
+                "headsign" => $trip_headsign ?? '',
+                "description" => '',
+                "message" => '',
+                "origin" => array(
+                    "id" => $stops[0]['id'],
+                    "name" => $stops[0]['name'],
+                ),
+                "direction" => array(
+                    "id" => $stops[count($stops) - 1]['id'],
+                    "name" => $stops[count($stops) - 1]['name'],
+                ),
+                "line" => $route,
+            ),
+            "reports" => [],
+            "stop_times" => $stops,
+        );
+
+        $vehicle_journey["reports"] = $reports;
+
+        // Info théorique
+        if ($trip_update == null) {
+            $vehicle_journey["reports"] = array(
+                array(
+                    "id" => 'ADMIN:theorical',
+                    "status" => 'active',
+                    "cause" => 'theorical',
+                    "severity" => 1,
+                    "effect" => 'OTHER',
+                    "message" => array(
+                        "title" => "Horaires théorique",
+                        "name" => "",
                     ),
-                );
-            }
+                ),
+            );
+        }
         // }
 
         $json['vehicle_journey'] = $vehicle_journey;

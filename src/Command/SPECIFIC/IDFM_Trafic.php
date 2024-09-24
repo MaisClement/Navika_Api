@@ -95,9 +95,9 @@ class IDFM_Trafic extends Command
             $results = json_decode($content);
 
             // Pagination
-                $itemsPerPage = $results->pagination->items_per_page;
-                $itemsOnPage = $results->pagination->items_on_page;
-                $page++;
+            $itemsPerPage = $results->pagination->items_per_page;
+            $itemsOnPage = $results->pagination->items_on_page;
+            $page++;
 
             $disruptions = array_merge($disruptions, $results->disruptions);
             $line_reports = array_merge($line_reports, $results->line_reports);
@@ -130,20 +130,20 @@ class IDFM_Trafic extends Command
                             $disruption = $reports[$id];
 
                             $msg = new Trafic();
-                            $msg->setReportId   ( 'IDFM:' . $disruption->id                                                                      );
-                            $msg->setStatus     ( $disruption->status                                                                            );
-                            $msg->setCause      ( $disruption->cause                                                                             );
-                            $msg->setSeverity   ( Functions::getSeverity($disruption->severity->effect, $disruption->cause, $disruption->status) );
-                            $msg->setEffect     ( $disruption->severity->effect                                                                  );
-                            $msg->setUpdatedAt  ( DateTime::createFromFormat('Ymd\THis', $disruption->updated_at)                                );
-                            $msg->setTitle      ( Functions::getReportsMesageTitle($disruption->messages)                                        );
-                            $msg->setText       ( Functions::getReportsMesageText($disruption->messages)                                         );
-                            $msg->setRouteId    ( $route                                                                                         );
-                            
-                            foreach($disruption->application_periods as $application_period) {
+                            $msg->setReportId('IDFM:' . $disruption->id);
+                            $msg->setStatus($disruption->status);
+                            $msg->setCause($disruption->cause);
+                            $msg->setSeverity(Functions::getSeverity($disruption->severity->effect, $disruption->cause, $disruption->status));
+                            $msg->setEffect($disruption->severity->effect);
+                            $msg->setUpdatedAt(DateTime::createFromFormat('Ymd\THis', $disruption->updated_at));
+                            $msg->setTitle(Functions::getReportsMesageTitle($disruption->messages));
+                            $msg->setText(Functions::getReportsMesageText($disruption->messages));
+                            $msg->setRouteId($route);
+
+                            foreach ($disruption->application_periods as $application_period) {
                                 $period = new TraficApplicationPeriods();
-                                $period->setBegin  ( DateTime::createFromFormat('Ymd\THis', $application_period->begin));
-                                $period->setEnd  ( DateTime::createFromFormat('Ymd\THis', $application_period->end));
+                                $period->setBegin(DateTime::createFromFormat('Ymd\THis', $application_period->begin));
+                                $period->setEnd(DateTime::createFromFormat('Ymd\THis', $application_period->end));
 
                                 $msg->addApplicationPeriod($period);
                                 $this->entityManager->persist($period);
@@ -167,21 +167,21 @@ class IDFM_Trafic extends Command
                             $disruption = $reports[$id];
 
                             $msg = new Trafic();
-                            $msg->setReportId   ( 'IDFM:' . $disruption->id                                                                      );
-                            $msg->setStatus     ( $disruption->status                                                                            );
-                            $msg->setCause      ( $disruption->cause                                                                             );
-                            $msg->setSeverity   ( Functions::getSeverity($disruption->severity->effect, $disruption->cause, $disruption->status) );
-                            $msg->setEffect     ( $disruption->severity->effect                                                                  );
-                            $msg->setUpdatedAt  ( DateTime::createFromFormat('Ymd\THis', $disruption->updated_at)                                );
-                            $msg->setTitle      ( Functions::getReportsMesageTitle($disruption->messages)                                        );
-                            $msg->setText       ( Functions::getReportsMesageText($disruption->messages)                                         );
-                            $msg->setRouteId    ( $route                                                                                         );
-                            
-                            foreach($disruption->application_periods as $application_period) {
+                            $msg->setReportId('IDFM:' . $disruption->id);
+                            $msg->setStatus($disruption->status);
+                            $msg->setCause($disruption->cause);
+                            $msg->setSeverity(Functions::getSeverity($disruption->severity->effect, $disruption->cause, $disruption->status));
+                            $msg->setEffect($disruption->severity->effect);
+                            $msg->setUpdatedAt(DateTime::createFromFormat('Ymd\THis', $disruption->updated_at));
+                            $msg->setTitle(Functions::getReportsMesageTitle($disruption->messages));
+                            $msg->setText(Functions::getReportsMesageText($disruption->messages));
+                            $msg->setRouteId($route);
+
+                            foreach ($disruption->application_periods as $application_period) {
                                 $period = new TraficApplicationPeriods();
-                                $period->setBegin  ( DateTime::createFromFormat('Ymd\THis', $application_period->begin));
-                                $period->setEnd  ( DateTime::createFromFormat('Ymd\THis', $application_period->end));
-                                
+                                $period->setBegin(DateTime::createFromFormat('Ymd\THis', $application_period->begin));
+                                $period->setEnd(DateTime::createFromFormat('Ymd\THis', $application_period->end));
+
                                 $msg->addApplicationPeriod($period);
                                 $this->entityManager->persist($period);
                             }
@@ -216,20 +216,20 @@ class IDFM_Trafic extends Command
         $notif = new Notify($this->messaging);
 
         // On envoie les notification
-        foreach($r as $report) {            
+        foreach ($r as $report) {
             if ($report->getRouteId() != null) {
                 foreach ($report->getRouteId()->getRouteSubs() as $sub) {
                     $progressIndicator->advance();
 
                     // On vérifie que l'on soit ne soit pas un jour interdit
                     $allow = true;
-                   
-                    if ($sub->getType() == 'all' && $report->getSeverity() < 3 ) {
+
+                    if ($sub->getType() == 'all' && $report->getSeverity() < 3) {
                         $allow = false;
-                    } else if ($sub->getType() == 'alert' && $report->getSeverity() < 4 ) {
+                    } else if ($sub->getType() == 'alert' && $report->getSeverity() < 4) {
                         $allow = false;
                     }
-                    
+
                     if (date('N') == "1" && $sub->getMonday() != "1") {
                         $allow = false;
                     } else if (date('N') == 2 && $sub->getTuesday() != "1") {
@@ -245,7 +245,7 @@ class IDFM_Trafic extends Command
                     } else if (date('N') == "7" && $sub->getSunday() != "1") {
                         $allow = false;
                     }
-                    
+
                     $startTime = DateTime::createFromFormat('H:i:s', $sub->getStartTime()->format('H:i:s'));
                     $endTime = DateTime::createFromFormat('H:i:s', $sub->getEndTime()->format('H:i:s'));
 
@@ -253,11 +253,11 @@ class IDFM_Trafic extends Command
                     if ($endTime < $startTime) {
                         $endTime->modify('+1 day');
                     }
-                    
+
                     if ($startTime > $now || $endTime < $now) {
                         $allow = false;
                     }
-    
+
                     if ($allow == true) {
                         $token = $sub->getSubscriberId()->getFcmToken();
                         $title = $report->getTitle();
@@ -267,10 +267,11 @@ class IDFM_Trafic extends Command
                         try {
                             // $notif->sendMessage($token, $report->getReportMessage() );
                             $notif->sendNotificationToUser(
-                               $token,
-                               $title,
-                               $body,
-                               $data
+                                $this->logger,
+                                $token,
+                                $title,
+                                $body,
+                                $data
                             );
                             $this->logger->log(['event_id' => $event_id,'message' => "[$event_id] Trafic report notification sent to $token"], 'INFO');
 

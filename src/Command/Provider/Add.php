@@ -13,7 +13,7 @@ use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
 
 class Add extends Command
 {
-    private $entityManager;
+    private EntityManagerInterface $entityManager;
 
     private ProviderRepository $providerRepository;
 
@@ -46,7 +46,7 @@ class Add extends Command
         $area = $input->getArgument('area');
         $url = $input->getArgument('url');
         $flag = '0';
-        
+
         // Check if provider is not already registered
         $providers = $this->providerRepository->Find($id);
         if ($providers instanceof \App\Entity\Provider) {

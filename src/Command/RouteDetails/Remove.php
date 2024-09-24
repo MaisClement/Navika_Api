@@ -14,7 +14,7 @@ use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
 
 class Remove extends Command
 {
-    private $entityManager;
+    private EntityManagerInterface $entityManager;
 
     private RoutesRepository $routesRepository;
 
@@ -46,7 +46,7 @@ class Remove extends Command
             $output->writeln('<info>The given route canot be found in database</info>');
             return Command::SUCCESS;
         }
-        
+
         $details = $route->getDetails();
 
         if (count($details) == 0) {

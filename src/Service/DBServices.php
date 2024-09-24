@@ -6,24 +6,24 @@ class DBServices
 {
     public function __construct()
     {
-        
+
     }
 
-    public function initDBUpdate($db)
+    public function initDBUpdate($db): mixed
     {
         $req = $db->prepare("SET FOREIGN_KEY_CHECKS=0;");
         $req->execute([]);
         return $req;
     }
 
-    public function endDBUpdate($db)
+    public function endDBUpdate($db): mixed
     {
         $req = $db->prepare("SET FOREIGN_KEY_CHECKS=1;");
         $req->execute([]);
         return $req;
     }
 
-    public function clearProviderDataInTable($db, $table, $provider_id)
+    public function clearProviderDataInTable($db, $table, $provider_id): mixed
     {
         $req = $db->prepare("
             DELETE FROM $table
@@ -33,7 +33,7 @@ class DBServices
         return $req;
     }
 
-    public function perpareTempTable($db, $table, $temp_table)
+    public function perpareTempTable($db, $table, $temp_table): mixed
     {
         $req = $db->prepare("
             DROP TABLE IF EXISTS $temp_table;
@@ -51,8 +51,8 @@ class DBServices
         $req->execute();
         return $req;
     }
-    
-    public function insertFile($db, $type, $path, $header, $set, $sep = ',')
+
+    public function insertFile($db, $type, $path, $header, $set, $sep = ','): mixed
     {
         $table = $type;
         $path = realpath($path);
@@ -73,7 +73,7 @@ class DBServices
         return $req;
     }
 
-    public function prefixTable($db, $table, $column, $prefix)
+    public function prefixTable($db, $table, $column, $prefix): mixed
     {
         $prefix_ch = $prefix . '%';
 
@@ -86,7 +86,7 @@ class DBServices
         return $req;
     }
 
-    public function copyTable($db, $from, $to)
+    public function copyTable($db, $from, $to): mixed
     {
         $req = $db->prepare("
             INSERT INTO $to 
@@ -99,7 +99,7 @@ class DBServices
         return $req;
     }
 
-    public function truncateTable($db, $table)
+    public function truncateTable($db, $table): mixed
     {
         $req = $db->prepare("
             TRUNCATE $table;
@@ -108,7 +108,7 @@ class DBServices
         return $req;
     }
 
-    public function generateTempStopRoute($db)
+    public function generateTempStopRoute($db): mixed
     {
         $req = $db->prepare("
             INSERT INTO temp_stop_route
@@ -134,7 +134,7 @@ class DBServices
         return $req;
     }
 
-    public function generateTempStopRoute2($db)
+    public function generateTempStopRoute2($db): mixed
     {
         $req = $db->prepare("
             INSERT INTO temp_stop_route
@@ -160,7 +160,7 @@ class DBServices
         return $req;
     }
 
-    public function autoDeleteStopRoute($db)
+    public function autoDeleteStopRoute($db): mixed
     {
         $req = $db->prepare("
             DELETE FROM stop_route 
@@ -170,7 +170,7 @@ class DBServices
         return $req;
     }
 
-    public function autoInsertStopRoute($db)
+    public function autoInsertStopRoute($db): mixed
     {
         $req = $db->prepare("
             INSERT INTO stop_route (route_key, route_id, route_short_name, route_long_name, route_type, route_color, route_text_color, stop_id, stop_name, stop_query_name, stop_lat, stop_lon, town_id, town_name, town_query_name, zip_code, location_type)
@@ -186,7 +186,7 @@ class DBServices
         return $req;
     }
 
-    public function prepareStopRoute($db)
+    public function prepareStopRoute($db): mixed
     {
         $req = $db->prepare("
             UPDATE stop_route SR 
@@ -201,7 +201,7 @@ class DBServices
         return $req;
     }
 
-    public function generateQueryRoute($db)
+    public function generateQueryRoute($db): mixed
     {
         $req = $db->prepare("
             SET NAMES 'utf8' COLLATE 'utf8_unicode_ci';
@@ -217,7 +217,7 @@ class DBServices
         return $req;
     }
 
-    public function getColumns($db, $table)
+    public function getColumns($db, $table): mixed
     {
         $query = "
             SELECT COLUMN_NAME

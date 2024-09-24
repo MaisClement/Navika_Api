@@ -18,8 +18,8 @@ use Symfony\Component\Console\Helper\ProgressIndicator;
 
 class IDFM_Timetables extends Command
 {
-    private $entityManager;
-    private $params;
+    private EntityManagerInterface $entityManager;
+    private ParameterBagInterface $params;
 
     private Logger $logger;
 
@@ -52,7 +52,7 @@ class IDFM_Timetables extends Command
         $file = $dir . '/timetables.csv';
         $event_id = uniqid();
 
-        $this->logger->log(['event_id' => $event_id,'message' => "[app:timetables:update][$event_id] Task began"], 'INFO');
+        $this->logger->log(['event_id' => $event_id, 'message' => "[app:timetables:update][$event_id] Task began"], 'INFO');
 
 
         // Récupération du trafic
@@ -60,14 +60,14 @@ class IDFM_Timetables extends Command
         $progressIndicator->start('Geting timetable...');
         
         $url = $this->params->get('prim_url_timetables');
-        $this->logger->log(['event_id' => $event_id,'message' => "[$event_id] Getting IDFM timetables from $url"], 'INFO');
-        
+        $this->logger->log(['event_id' => $event_id, 'message' => "[$event_id] Getting IDFM timetables from $url"], 'INFO');
+
         $client = HttpClient::create();
         $response = $client->request('GET', $url);
         $status = $response->getStatusCode();
 
         if ($status != 200) {
-            $this->logger->log(['event_id' => $event_id,'message' => "[$event_id] $url return HTTP $status error"], 'ERROR');
+            $this->logger->log(['event_id' => $event_id, 'message' => "[$event_id] $url return HTTP $status error"], 'ERROR');
             return Command::FAILURE;
         }
 
@@ -101,19 +101,19 @@ class IDFM_Timetables extends Command
             }
         }
 
-        $this->logger->log(['event_id' => $event_id,'message' => "[$event_id] Saving $count timetables"], 'INFO');
-        
+        $this->logger->log(['event_id' => $event_id, 'message' => "[$event_id] Saving $count timetables"], 'INFO');
+
         // On efface les messages existant
         $progressIndicator->setMessage('Removing old timetables...');
 
         $old_timetables = $this->timetablesRepository->findAll();
 
-        foreach ($old_timetables as $old_timetables) {
+        foreach ($old_timetables as $old_timetable) {
 
             // Loader
             $progressIndicator->advance();
 
-            $this->entityManager->remove($old_timetables);
+            $this->entityManager->remove($old_timetable);
         }
 
         // On sauvegarde
@@ -122,7 +122,7 @@ class IDFM_Timetables extends Command
         $this->entityManager->flush();
 
         $progressIndicator->finish('<info>✅ OK</info>');
-        $this->logger->log(['event_id' => $event_id,'message' => "[$event_id] Task ended succesfully"], 'INFO');
+        $this->logger->log(['event_id' => $event_id, 'message' => "[$event_id] Task ended succesfully"], 'INFO');
 
         return Command::SUCCESS;
     }

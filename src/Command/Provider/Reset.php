@@ -12,7 +12,7 @@ use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
 
 class Reset extends Command
 {
-    private $entityManager;
+    private EntityManagerInterface $entityManager;
 
     private ProviderRepository $providerRepository;
 

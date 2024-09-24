@@ -13,23 +13,27 @@ use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Routing\Annotation\Route;
 use Elastic\Elasticsearch\ClientBuilder;
+use App\Service\Logger;
 
 class Places
 {
+    private EntityManagerInterface $entityManager;
+    private ParameterBagInterface $params;
+    private Logger $logger;
     private StopRouteRepository $stopRouteRepository;
     private TownRepository $townRepository;
-    private $entityManager;
-    private $params;
 
-    public function __construct(EntityManagerInterface $entityManager, ParameterBagInterface $params, StopRouteRepository $stopRouteRepository, TownRepository $townRepository)
+    public function __construct(EntityManagerInterface $entityManager, ParameterBagInterface $params, Logger $logger, StopRouteRepository $stopRouteRepository, TownRepository $townRepository)
     {
         $this->entityManager = $entityManager;
         $this->params = $params;
-    
+
+        $this->logger = $logger;
+
         $this->stopRouteRepository = $stopRouteRepository;
         $this->townRepository = $townRepository;
     }
-    
+
     /**
      * Get places
      * 
@@ -46,28 +50,28 @@ class Places
     #[Route('/places', name: 'search_places', methods: ['GET'])]
     #[OA\Tag(name: 'Places')]
     #[OA\Parameter(
-        name:"q",
-        in:"query",
-        description:"Query (Stop name or town)",
+        name: "q",
+        in: "query",
+        description: "Query (Stop name or town)",
         schema: new OA\Schema(type: 'string')
     )]
     #[OA\Parameter(
-        name:"lat",
-        in:"query",
-        description:"Latitude for location-based search",
+        name: "lat",
+        in: "query",
+        description: "Latitude for location-based search",
         schema: new OA\Schema(type: 'string')
     )]
     #[OA\Parameter(
-        name:"lon",
-        in:"query",
-        description:"Longitude for location-based search",
+        name: "lon",
+        in: "query",
+        description: "Longitude for location-based search",
         schema: new OA\Schema(type: 'string')
     )]
 
     #[OA\Response(
         response: 200,
         description: 'OK'
-    )]    
+    )]
     #[OA\Response(
         response: 400,
         description: 'Bad request'
@@ -77,48 +81,48 @@ class Places
     {
         try {
             $client = ClientBuilder::create()
-            ->setHosts($this->params->get('elastic_hosts'))
-            ->setBasicAuthentication($this->params->get('elastic_user'), $this->params->get('elastic_pswd'))
-            ->setCABundle($this->params->get('elastic_cert'))
-            ->build();
-       } catch (\Exception $e) {
+                ->setHosts($this->params->get('elastic_hosts'))
+                ->setBasicAuthentication($this->params->get('elastic_user'), $this->params->get('elastic_pswd'))
+                ->setCABundle($this->params->get('elastic_cert'))
+                ->build();
+        } catch (\Exception $e) {
             // Elastic not working
             // Pas content
-       }
+        }
 
         $search = ['-', ' ', "'"];
         $replace = ['', '', ''];
 
         $q = $request->get('q');
-        $q = urldecode( trim( $q ) );
+        $q = urldecode(trim($q));
         $query = str_replace($search, $replace, $q);
 
         $lat = $request->get('lat');
         $lon = $request->get('lon');
 
-        if ( ( is_string($request->get('q')) && $query != "" ) ) {
+        if ((is_string($request->get('q')) && $query != "")) {
             if ($lat != null && $lon != null) {
                 $search_type = 3;
                 $url = $this->params->get('geosearch_url') . 'autocomplete?lang=fr&text=' . $q . '&focus.point.lon=' . $lon . '&focus.point.lat=' . $lat;
             } else {
                 $search_type = 1;
                 $url = $this->params->get('geosearch_url') . 'autocomplete?lang=fr&text=' . $q;
-        
+
             }
 
             $stops = [];
             if (strlen($q) >= 3) {
-                $stops = $this->stopRouteRepository->findByQueryName( $query );
+                $stops = $this->stopRouteRepository->findByQueryName($query);
             }
-            
+
             // $stops2 = $this->stopRouteRepository->findByTownName( $query );
             // $stops = array_merge($stops1, $stops2);
 
             try {
                 $params = [
                     'index' => 'stops',
-                    'size'   => 50,
-                    'body'  => [
+                    'size' => 50,
+                    'body' => [
                         'query' => [
                             'fuzzy' => [
                                 'name' => [
@@ -131,39 +135,43 @@ class Places
                 ];
                 $results = $client->search($params);
 
-                foreach($results['hits']['hits'] as $result) {
-                    $s = $this->stopRouteRepository->findById( $result['_id'] );
+                foreach ($results['hits']['hits'] as $result) {
+                    $s = $this->stopRouteRepository->findById($result['_id']);
                     $stops = array_merge($stops, $s);
                 }
             } catch (\Exception $e) {
                 // Elastic not working
-                $stops = $this->stopRouteRepository->findByQueryName( $query );
+                $stops = $this->stopRouteRepository->findByQueryName($query);
             }
-        
-        } else if ( $lat != null && $lon != null ) {
+
+        } else if ($lat != null && $lon != null) {
             $search_type = 2;
             $stops = $this->stopRouteRepository->findByNearbyLocation($lat, $lon, 5000);
             $url = $this->params->get('geosearch_url') . 'reverse?lang=fr&point.lat=' . $lat . '&point.lon=' . $lon;
-        
-        } else if ( is_string($request->get('q')) ) {
+
+        } else if (is_string($request->get('q'))) {
             $json["places"] = [];
             if ($request->get('flag') != null) {
                 $json["flag"] = (int) $request->get('flag');
             }
             return new JsonResponse($json);
-        
+
         } else {
-            return new JsonResponse(Functions::ErrorMessage(400, 'One or more parameters are missing or null, have you "q" or "lat" and "lon" ?'), 400);
+            $this->logger->logHttpErrorMessage($request, 'At least one required parameter is missing or null, have you "q" or "lat" and "lon" ?', 'WARN');
+            return new JsonResponse(Functions::httpErrorMessage(400, 'At least one required parameter is missing or null, have you "q" or "lat" and "lon" ?'), 400);
         }
 
         // ------------
         // GEOSEARCH
-        $client = HttpClient::create();        
+        $this->logger->log(['message' => "GeoSearch query: $url"], 'INFO');
+
+        $client = HttpClient::create();
         $response = $client->request('GET', $url);
         $status = $response->getStatusCode();
 
-        if ($status != 200){
-            return new JsonResponse(Functions::ErrorMessage(500, 'Can\'t get data from GeoSearch'), 500);
+        if ($status != 200) {
+            $this->logger->logHttpErrorMessage($request, "GeoSearch query: Unable to fetch data. HTTP error code $status", 'ERROR');
+            return new JsonResponse(Functions::httpErrorMessage(500, "Failed to get data from GeoSearch"), 500);
         }
 
         $content = $response->getContent();
@@ -173,26 +181,25 @@ class Places
 
         $places = [];
         foreach ($results as $result) {
-            // if ( !(isset($result->properties->addendum->osm->operator))  ) {
-            if ( !(isset($result->properties->addendum->osm->operator) && ($result->properties->addendum->osm->operator == "SNCF" || $result->properties->addendum->osm->operator == 'RATP' || $result->properties->addendum->osm->operator == 'RATP/SNCF'))  ) {
+            if (!(isset($result->properties->addendum->osm->operator) && ($result->properties->addendum->osm->operator == "SNCF" || $result->properties->addendum->osm->operator == 'RATP' || $result->properties->addendum->osm->operator == 'RATP/SNCF'))) {
                 $places[] = array(
-                    "id"         =>  (string)    $result->geometry->coordinates[0] . ';' . $result->geometry->coordinates[1],
-                    "name"       =>  (string)    $result->properties->name,
-                    "type"       =>  (string)    Functions::getTypeFromPelias($result->properties->layer),
-                    "distance"   =>  (float)     (isset($result->distance) ? $result->distance : 0),
-                    "town"       =>  (string)    (isset($result->properties->locality) ? $result->properties->locality : ''),
-                    "zip_code"   =>  (string)    (isset($result->properties->postalcode) ? $result->properties->postalcode : ''),
-                    "department" =>  (string)    (isset($result->properties->region) ? $result->properties->region : ''),
-                    "region"     =>  (string)    (isset($result->properties->macroregion) ? $result->properties->macroregion : ''),
-                    "coord"      => array(
-                        "lat"       =>  (float) $result->geometry->coordinates[1],
-                        "lon"       =>  (float) $result->geometry->coordinates[0],
+                    "id" => (string) $result->geometry->coordinates[0] . ';' . $result->geometry->coordinates[1],
+                    "name" => (string) $result->properties->name,
+                    "type" => (string) Functions::getTypeFromPelias($result->properties->layer),
+                    "distance" => (float) (isset($result->distance) ? $result->distance : 0),
+                    "town" => (string) (isset($result->properties->locality) ? $result->properties->locality : ''),
+                    "zip_code" => (string) (isset($result->properties->postalcode) ? $result->properties->postalcode : ''),
+                    "department" => (string) (isset($result->properties->region) ? $result->properties->region : ''),
+                    "region" => (string) (isset($result->properties->macroregion) ? $result->properties->macroregion : ''),
+                    "coord" => array(
+                        "lat" => (float) $result->geometry->coordinates[1],
+                        "lon" => (float) $result->geometry->coordinates[0],
                     ),
-                    "lines"     =>              [],
-                    "modes"     =>              [],
+                    "lines" => [],
+                    "modes" => [],
                 );
             }
-        } 
+        }
 
         // ------------
         // STOPS
@@ -201,12 +208,12 @@ class Places
         $lines[] = [];
         $modes[] = [];
 
-        foreach($stops as $stop) {
+        foreach ($stops as $stop) {
             try {
                 if (!isset($stop_places[$stop->getStopId()->getStopId()])) {
 
                     $stop_places[$stop->getStopId()->getStopId()] = $stop->getStop($lat, $lon);
-                    
+
                     $lines[$stop->getStopId()->getStopId()] = [];
                     $modes[$stop->getStopId()->getStopId()] = [];
                 }
@@ -219,7 +226,7 @@ class Places
                     $modes[$stop->getStopId()->getStopId()][] = $stop->getRouteId()->getTransportMode();
                 }
             } catch (\Exception $e) {
-                // Pas content
+                $this->logger->error($e, 'WARN');
             }
         }
 
