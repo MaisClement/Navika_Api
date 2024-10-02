@@ -711,6 +711,7 @@ class Functions
         if (isset($arrival)) {
             return date_create($arrival) >= date_create();
         }
+        return false;
     }
 
     public static function callIsFuture($call): bool
