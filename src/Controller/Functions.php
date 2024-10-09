@@ -699,19 +699,24 @@ class Functions
 
     public static function isFuture($real_time_departure, $departure, $real_time_arrival, $arrival): bool
     {
-        if (isset($real_time_departure)) {
-            return date_create($real_time_departure) >= date_create();
+        try {
+            if (isset($real_time_departure)) {
+                return date_create($real_time_departure) >= date_create();
+            }
+            if (isset($departure)) {
+                return date_create($departure) >= date_create();
+            }
+            if (isset($real_time_arrival)) {
+                return date_create($real_time_arrival) >= date_create();
+            }
+            if (isset($arrival)) {
+                return date_create($arrival) >= date_create();
+            }
+            return false;
+        } catch (\Exception $e) {
+            return false;
         }
-        if (isset($departure)) {
-            return date_create($departure) >= date_create();
-        }
-        if (isset($real_time_arrival)) {
-            return date_create($real_time_arrival) >= date_create();
-        }
-        if (isset($arrival)) {
-            return date_create($arrival) >= date_create();
-        }
-        return false;
+        
     }
 
     public static function callIsFuture($call): bool
@@ -1049,7 +1054,7 @@ class Functions
     public static function getSchedulesByStop($em, $stop_id, $route_id, $date): mixed
     {
         $req = $em->prepare("
-            SELECT DISTINCT ST.*, CONCAT(:date, ' ', ST.departure_time), CONCAT(:date, ' ', ST.arrival_time) as arrival_time, T.*
+            SELECT DISTINCT ST.*, CONCAT(:date, ' ', ST.departure_time) as departure_time, CONCAT(:date, ' ', ST.arrival_time) as arrival_time, T.*
             FROM stops S
             
             INNER JOIN stop_times ST 
