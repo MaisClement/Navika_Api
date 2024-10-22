@@ -667,7 +667,7 @@ class Functions
             "base_arrival_date_time" => (string) isset($call->AimedArrivalTime) ? $call->AimedArrivalTime : (isset($call->ExpectedArrivalTime) ? $call->ExpectedArrivalTime : ''),
             "arrival_date_time" => (string) isset($call->ExpectedArrivalTime) ? $call->ExpectedArrivalTime : (isset($call->AimedArrivalTime) ? $call->AimedArrivalTime : ''),
             "state" => (string) Functions::getState($call),
-            "atStop" => (string) isset($call->VehicleAtStop) !== '' && (string) isset($call->VehicleAtStop) !== '0' ? ($call->VehicleAtStop ? 'true' : 'false') : 'false',
+            "atStop2" => (string) isset($call->VehicleAtStop) !== '' && (string) isset($call->VehicleAtStop) !== '0' ? ($call->VehicleAtStop ? 'true' : 'false') : 'false',
             "platform" => (string) isset($call->ArrivalPlatformName->value) !== '' && (string) isset($call->ArrivalPlatformName->value) !== '0' ? $call->ArrivalPlatformName->value : '-'
         );
     }
@@ -697,26 +697,20 @@ class Functions
         }
     }
 
-    public static function isFuture($real_time_departure, $departure, $real_time_arrival, $arrival)
+    public static function isFuture($real_time_departure, $departure, $real_time_arrival, $arrival): bool
     {
-        try {
-            if (isset($real_time_departure)) {
-                return date_create($real_time_departure) >= date_create();
-            }
-            if (isset($departure)) {
-                return date_create($departure) >= date_create();
-            }
-            if (isset($real_time_arrival)) {
-                return date_create($real_time_arrival) >= date_create();
-            }
-            if (isset($arrival)) {
-                return date_create($arrival) >= date_create();
-            }
-            return false;
-        } catch (\Exception $e) {
-            return false;
+        if (isset($real_time_departure)) {
+            return date_create($real_time_departure) >= date_create();
         }
-        
+        if (isset($departure)) {
+            return date_create($departure) >= date_create();
+        }
+        if (isset($real_time_arrival)) {
+            return date_create($real_time_arrival) >= date_create();
+        }
+        if (isset($arrival)) {
+            return date_create($arrival) >= date_create();
+        }
     }
 
     public static function callIsFuture($call): bool

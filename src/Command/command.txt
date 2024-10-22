@@ -21,12 +21,12 @@ php bin/console app:provider:add "tc" "SNCF:TGV"    "TGV"                     "F
 
 php bin/console app:provider:add "tc" "IDFM"        "Île-de-France Mobilités" "Île-de-France"                   "6449c52caeceb71273a42dd3" 
 php bin/console app:provider:add "tc" "BIBUS"       "Bibus - Brest Métropole" "Brest"                           "55ffbe0888ee387348ccb97d" 
-
 php bin/console app:provider:add "tc" "TAN"         "TAN - Nantes Métropole"  "Nantes Métropole"                "5b873d7206e3e76e5b2ffd32" 
+php bin/console app:provider:add "tc" "CTS"         "CTS - Strasbourg"        "Eurométropole de Strasbourg"     "5ae1715488ee384c8ba0342b"
+
 php bin/console app:provider:add "tc" "OURA"        "OURA - Agrégat AURA"     "Auvergne Rhône-Alpes"            "61f7b4f89e4131deaf48fe02" 
 php bin/console app:provider:add "tc" "SIBRA"       "Sibra - Annecy"          "CA du Grand Annecy"              "5bd9843e634f413220f7f04a" 
 php bin/console app:provider:add "tc" "SYNCHRO"     "Synchro - Chambéry"      "CA du Grand Chambéry"            "5bae8c2806e3e75b699dc606"
-php bin/console app:provider:add "tc" "CTS"         "CTS - Strasbourg"        "Eurométropole de Strasbourg"     "5ae1715488ee384c8ba0342b"
 php bin/console app:provider:add "tc" "IRIGO"	    "Irigo - Angers"	      "Angers Loire Métropole"	        "6178cee254e3b3f0744a1318"
 php bin/console app:provider:add "tc" "ILEVIA"	    "Ilévia - Lille"	      "Métropole Européenne de Lille"	"58b69b59a3a7295a7d8251db"
 php bin/console app:provider:add "tc" "CTRL"	    "CTRL - Lorient"           "CA Lorient Agglomération"	    "61c97dd9a3499a9c8e8b8ea0"
@@ -84,10 +84,6 @@ php bin/console app:gtfs:update
 php bin/console app:index:remove
 php bin/console app:index:create
 
-https://download.geofabrik.de/europe/france-latest.osm.pbf
-
-java -Xmx16G -jar otp-2.5.0-shaded.jar --build --serve /var/www/OTP/GTFS/
-
 // -----
 */2 * * * * php /var/www/Navika/bin/console app:trafic:update
 0 2 * * * php /var/www/Navika/bin/console app:timetables:update
@@ -114,6 +110,3 @@ php bin/console app:routedetails:add "IDFM:C02529" "Tram-Train Dualis" "/img/veh
 php bin/console app:routedetails:add "IDFM:C02344" "Tram-Train Dualis" "/img/vehicule/dualis.png" 1 1 1 1
 
 // -----
-
-java -Xmx10G -jar otp-2.5.0-shaded.jar --build /var/www/OTP/GTFS --save .
-java -Xmx10G -jar otp-2.5.0-shaded.jar --load .

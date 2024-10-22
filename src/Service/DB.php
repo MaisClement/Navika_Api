@@ -2,7 +2,7 @@
 
 namespace App\Service;
 
-class DBServices
+class DB
 {
     public function __construct()
     {
@@ -52,7 +52,7 @@ class DBServices
         return $req;
     }
 
-    public function insertFile($db, $type, $path, $header, $set, $sep = ','): mixed
+    public function importFile($db, $type, $path, $header, $set, $sep = ','): mixed
     {
         $table = $type;
         $path = realpath($path);
@@ -70,6 +70,25 @@ class DBServices
             SET $set
         ");
         $req->execute([$path, $sep]);
+        return $req;
+    }
+
+    public function exportFile($db, $type, $file, $sep = ','): mixed
+    {
+        $table = $type;
+
+        $req = $db->prepare("
+            SET @@session.datetime_format = '%Y%m%d %H:%i:%s';
+
+            SELECT * FROM $table
+            INTO OUTFILE ?
+            FIELDS
+                TERMINATED BY ?
+                ENCLOSED BY '\"'
+            LINES
+                TERMINATED BY  ',\n'
+        ");
+        $req->execute([$file, $sep]);
         return $req;
     }
 

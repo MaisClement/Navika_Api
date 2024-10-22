@@ -1,5 +1,37 @@
 ![Titre](https://navika.fr/changelog/title.png "Titre")
 
+# Mise à jour v1.6.0
+> 🗓️ 07/07/2024 
+
+### 🐛 Quelques corrections
+Cette mise à jour corrige principalement les problèmes [#56](https://github.com/MaisClement/Navika_App/issues/56) et [#59](https://github.com/MaisClement/Navika_App/issues/59)
+
+✨ Il y a également quelques modifications pour corriger des bugs et améliorer l'application.
+
+---
+---
+
+# Mise à jour v1.5.0
+> 🗓️ 31/05/2024 
+
+### ✨ Une expérience amélioré
+La navigation sur la carte a été améliorée. L'affichage de votre position est désormais bien plus rapide et les détails des lieux et stations à été retravaillée
+
+![Détails](https://navika.fr/changelog/150_map_enchancement.png "Détails")
+
+### 🚧 Plus de détails sur le trafic
+Les informations trafic affiché avec vos horaires sont désormais plus complet et plus détaillé :
+
+![Détails](https://navika.fr/changelog/150_trafic_change.png "Détails")
+
+### 🗺️ In english please !
+Navika est désormais également disponible en Anglais (en)
+
+✨ Il y a également quelques modifications pour corriger des bugs et améliorer l'application.
+
+*💖 Un grand merci a @benjamin-voisin et @filau pour leur contribution a cette mise à jour ! 💖*
+
+---
 # Mise à jour v1.4.0
 > 🗓️ 20/04/2024 
 
@@ -13,7 +45,6 @@ Navika peut désormais être utilisé pour ouvrir les liens ou adresse.
 
 ✨ Il y a également quelques modifications pour corriger des bugs et améliorer l'application.
 
----
 ---
 
 # Mise à jour v1.3.3

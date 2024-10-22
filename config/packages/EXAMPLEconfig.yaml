@@ -3,7 +3,7 @@
 parameters:
     open_data_url: 'https://transport.data.gouv.fr/api/datasets/'
     
-    geosearch_url: 'https://geo.hackernwar.com/v1/'
+    geosearch_url: 'https://geo.navika.fr/v1/'
 
     prim_url: 'https://prim.iledefrance-mobilites.fr/marketplace/v2/navitia'
     prim_url_trafic: 'https://prim.iledefrance-mobilites.fr/marketplace/v2/navitia/line_reports'

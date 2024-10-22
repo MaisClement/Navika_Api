@@ -3,7 +3,7 @@
 namespace App\Command\GTFS;
 
 use App\Command\CommandFunctions;
-use App\Service\DBServices;
+use App\Service\DB;
 use App\Service\FileSplitter;
 use App\Controller\Functions;
 use App\Repository\AgencyRepository;
@@ -25,19 +25,19 @@ class Update extends Command
 {
     private EntityManagerInterface $entityManager;
     private ParameterBagInterface $params;
-    private DBServices $dbServices;
+    private DB $DB;
     private FileSplitter $fileSplitter;
     private Logger $logger;
 
     private ProviderRepository $providerRepository;
     private AgencyRepository $agencyRepository;
 
-    public function __construct(EntityManagerInterface $entityManager, ParameterBagInterface $params, DBServices $dbServices, FileSplitter $fileSplitter, Logger $logger, ProviderRepository $providerRepository, AgencyRepository $agencyRepository)
+    public function __construct(EntityManagerInterface $entityManager, ParameterBagInterface $params, DB $DB, FileSplitter $fileSplitter, Logger $logger, ProviderRepository $providerRepository, AgencyRepository $agencyRepository)
     {
         $this->entityManager = $entityManager;
         $this->params = $params;
 
-        $this->dbServices = $dbServices;
+        $this->DB = $DB;
         $this->fileSplitter = $fileSplitter;
         $this->logger = $logger;
 
@@ -56,9 +56,39 @@ class Update extends Command
 
     function execute(InputInterface $input, OutputInterface $output): int
     {
-        $dir = sys_get_temp_dir();
+        $dir = sys_get_temp_dir() . '/navika';
+        if (!is_dir($dir)) {
+            mkdir($dir, 0777, true);
+        }
+
         $db = $this->entityManager->getConnection();
         $event_id = uniqid();
+
+        $types = [
+            'agency' => ['agency_id'],
+            'routes' => ['route_id', 'agency_id'],
+
+            'calendar' => ['service_id'],
+            'calendar_dates' => ['service_id'],
+            'shapes' => ['shape_id'],
+            'trips' => ['route_id', 'service_id', 'trip_id', 'shape_id'],
+
+            'levels' => ['level_id'],
+            'stops' => ['stop_id', 'level_id', 'parent_station'],
+            //    'transfers' => ['from_stop_id', 'to_stop_id'],
+            'pathways' => ['pathway_id', 'from_stop_id', 'to_stop_id'],
+
+            'stop_times' => ['trip_id', 'stop_id'],
+
+            'fare_rules' => ['fare_id', 'route_id', 'origin_id', 'destination_i'],
+            'fare_attributes' => ['fare_id', 'agency_id'],
+
+            'frequencies' => ['trip_id'],
+
+            'feed_info' => [],
+            //    'translations' => [],
+            'attributions' => []
+        ];
 
         $this->logger->log(['event_id' => $event_id, 'message' => "[app:gtfs:update][$event_id] Task began"], 'INFO');
 
@@ -114,11 +144,10 @@ class Update extends Command
         }
 
         $output->writeln("");
-        $output->writeln("Lets's update !");
+        $output->writeln("Download GTFS");
 
         $step = 0;
         foreach ($to_update as $update) {
-            $step++;
             $tc_provider = $update['provider'];
             $ressource = $update['ressource'];
 
@@ -126,7 +155,7 @@ class Update extends Command
             $output->writeln('    ' . $provider);
             $output->writeln('      ' . $ressource['url']);
 
-            $this->logger->log(['event_id' => $event_id, 'message' => sprintf("[$event_id][$step] updating $provider GTFS from %s", $ressource['url'])], 'INFO');
+            $this->logger->log(['event_id' => $event_id, 'message' => sprintf("[$event_id] updating $provider GTFS from %s", $ressource['url'])], 'INFO');
 
             // ---
 
@@ -138,7 +167,7 @@ class Update extends Command
 
             if ($status != 200) {
                 $output->writeln('<error>Fail to download GTFS !</error>');
-                $this->logger->log(['event_id' => $event_id, 'message' => sprintf("[$event_id][$step] fail to download GTFS from %s", $ressource['url'])], 'WARN');
+                $this->logger->log(['event_id' => $event_id, 'message' => sprintf("[$event_id] fail to download GTFS from %s", $ressource['url'])], 'WARN');
 
                 break;
             }
@@ -146,13 +175,29 @@ class Update extends Command
             $zip = $response->getContent();
             $zip_name = $dir . '/' . $provider . '_gtfs.zip';
             file_put_contents($zip_name, $zip);
-            $this->logger->log(['event_id' => $event_id, 'message' => sprintf("[$event_id][$step] GTFS saved to $zip_name - size : %s", filesize($zip_name))], 'INFO');
+            $this->logger->log(['event_id' => $event_id, 'message' => sprintf("[$event_id] GTFS saved to $zip_name - size : %s", filesize($zip_name))], 'INFO');
 
-            $otp_zip_name = $this->params->get('otp_path') . 'GTFS/' . $provider . '_gtfs.zip';
-            file_put_contents($otp_zip_name, $zip);
-            $this->logger->log(['event_id' => $event_id, 'message' => sprintf("[$event_id][$step] GTFS saved to $otp_zip_name - size : %s", filesize($otp_zip_name))], 'INFO');
+            $gtfs_path = $this->params->get('gtfs_path');
+            $zip_name = $gtfs_path . '/' . $provider . '_gtfs.zip';
+            file_put_contents($zip_name, $zip);
+            $this->logger->log(['event_id' => $event_id, 'message' => sprintf("[$event_id] GTFS saved to $zip_name - size : %s", filesize($zip_name))], 'INFO');
+
 
             unset($zip);
+        }
+
+        exit();
+
+        $output->writeln("");
+        $output->writeln("Lets's update !");
+
+        foreach ($to_update as $update) {
+            $step++;
+            $tc_provider = $update['provider'];
+            $ressource = $update['ressource'];
+            $provider = $tc_provider->getId();
+            $output->writeln('    ' . $provider);
+            $output->writeln('      ' . $ressource['url']);
 
             // ---
             $output->writeln('      > Unzip gtfs...');
@@ -170,51 +215,25 @@ class Update extends Command
             $output->writeln('      > Format file...');
 
             foreach ($ressource['filenames'] as $filename) {
-                $content = file_get_contents($dir . '/' . $provider . '/' . $filename);
-                unlink($dir . '/' . $provider . '/' . $filename);
-                $content = str_replace("\r\n", "\n", $content);
-                $content = str_replace("\n", ",\n", $content);
-                $regex = '/^(?:(?![×Þß÷þø])[-\'0-9a-zA-ZÀ-ÿ])+$/u';
-                $content = preg_replace($regex, '', $content);
-                file_put_contents($dir . '/' . $provider . '/' . $filename, $content);
-                if (strpos($filename, '/')) {
-                    $new = substr($filename, strpos($filename, '/') + 1);
-                    rename($dir . '/' . $provider . '/' . $filename, $dir . '/' . $provider . '/' . $new);
+                if (is_file($dir . '/' . $provider . '/' . $filename)){
+                    $content = file_get_contents($dir . '/' . $provider . '/' . $filename);
+                    unlink($dir . '/' . $provider . '/' . $filename);
+                    $content = str_replace("\r\n", "\n", $content);
+                    $content = str_replace("\n", ",\n", $content);
+                    $regex = '/^(?:(?![×Þß÷þø])[-\'0-9a-zA-ZÀ-ÿ])+$/u';
+                    $content = preg_replace($regex, '', $content);
+                    file_put_contents($dir . '/' . $provider . '/' . $filename, $content);
+                    if (strpos($filename, '/')) {
+                        $new = substr($filename, strpos($filename, '/') + 1);
+                        rename($dir . '/' . $provider . '/' . $filename, $dir . '/' . $provider . '/' . $new);
+                    }
                 }
             }
-
-            unlink($zip_name);
 
             // import gtfs
             $output->writeln('      > Import new GTFS...');
             $this->logger->log(['event_id' => $event_id, 'message' => "[$event_id][$step] Start GTFS import"], 'INFO');
             $err = 0;
-            $types = [
-                'agency' => ['agency_id'],
-                'routes' => ['route_id', 'agency_id'],
-
-                'calendar' => ['service_id'],
-                'calendar_dates' => ['service_id'],
-                'shapes' => ['shape_id'],
-                'trips' => ['route_id', 'service_id', 'trip_id', 'shape_id'],
-
-                'levels' => ['level_id'],
-                'stops' => ['stop_id', 'level_id', 'parent_station'],
-                //    'transfers' => ['from_stop_id', 'to_stop_id'],
-                'pathways' => ['pathway_id', 'from_stop_id', 'to_stop_id'],
-
-                'stop_times' => ['trip_id', 'stop_id'],
-
-                'fare_rules' => ['fare_id', 'route_id', 'origin_id', 'destination_i'],
-                'fare_attributes' => ['fare_id', 'agency_id'],
-
-                'frequencies' => ['trip_id'],
-
-                'feed_info' => [],
-                //    'translations' => [],
-                'attributions' => []
-            ];
-
             ProgressBar::setFormatDefinition('custom', '%percent%% [%bar%] %elapsed% - %remaining% | %message%');
 
             $steps = 7 * count($ressource['filenames']);
@@ -233,7 +252,7 @@ class Update extends Command
 
                     // Get field of the table in bd
                     $table_head = [];
-                    $results = $this->dbServices->getColumns($db, $type);
+                    $results = $this->DB->getColumns($db, $type);
                     foreach ($results as $obj) {
                         $table_head[] = $obj['COLUMN_NAME'];
                     }
@@ -278,7 +297,7 @@ class Update extends Command
                         $progressBar->advance();
 
                         $table = 'temp_' . $type;
-                        $this->dbServices->perpareTempTable($db, $type, $table);
+                        $this->DB->perpareTempTable($db, $type, $table);
 
                         $progressBar->setMessage("Importing $type... (Spliting file...)");
                         $progressBar->advance();
@@ -294,7 +313,7 @@ class Update extends Command
                             $progressBar->advance();
 
                             $splited_file = $dir . '/' . $provider . '/' . $type . '_' . $i . '.txt';
-                            $this->dbServices->insertFile($db, $table, $splited_file, $header, $set, ',');
+                            $this->DB->importFile($db, $table, $splited_file, $header, $set, ',');
                         }
 
                         $progressBar->setMessage("Importing $type... (Add prefix...)");
@@ -303,7 +322,7 @@ class Update extends Command
                         $prefix = $provider . ':';
 
                         foreach ($columns as $column) {
-                            $this->dbServices->prefixTable($db, $table, $column, $prefix);
+                            $this->DB->prefixTable($db, $table, $column, $prefix);
                             $progressBar->advance(0);
                         }
 
@@ -313,27 +332,27 @@ class Update extends Command
                         $progressBar->advance($count);
 
                         // On enleve la vérification des clé quand on supprime (on supprime toutes les tables de toute façon)
-                        $this->dbServices->initDBUpdate($db);
+                        $this->DB->initDBUpdate($db);
                         $this->logger->log(['event_id' => $event_id, 'message' => "[$event_id][$step][$type] Disable FOREIGN_KEY_CHECKS"], 'INFO');
 
-                        $this->dbServices->clearProviderDataInTable($db, $type, $provider);
+                        $this->DB->clearProviderDataInTable($db, $type, $provider);
 
                         if ($tc_provider->getParentProvider() != null) {
-                            $this->dbServices->clearProviderDataInTable($db, $type, $tc_provider->getParentProvider());
+                            $this->DB->clearProviderDataInTable($db, $type, $tc_provider->getParentProvider());
                         }
                         $this->logger->log(['event_id' => $event_id, 'message' => "[$event_id][$step][$type] Data cleared"], 'INFO');
 
                         $progressBar->setMessage("Importing $type... (Validating data...)");
                         $progressBar->advance();
 
-                        $this->dbServices->copyTable($db, $table, $type);
+                        $this->DB->copyTable($db, $table, $type);
                         $this->logger->log(['event_id' => $event_id, 'message' => "[$event_id][$step][$type] Data copied from temp table"], 'INFO');
 
                         $progressBar->setMessage("Perfect 👌");
                         $progressBar->advance();
 
                         // On réactive la vérification
-                        $this->dbServices->endDBUpdate($db);
+                        $this->DB->endDBUpdate($db);
                         $this->logger->log(['event_id' => $event_id, 'message' => "[$event_id][$step][$type] Enable FOREIGN_KEY_CHECKS"], 'INFO');
 
                     } catch (\Exception $e) {
@@ -379,19 +398,25 @@ class Update extends Command
         ]);
         $returnCode = $this->getApplication()->doRun($input, $output);
 
+        // Stop Area
+        $this->logger->log(['event_id' => $event_id, 'message' => "[$event_id] Running app:index:update"], 'INFO');
+        $input = new ArrayInput([
+            'command' => 'app:index:update'
+        ]);
+        $returnCode = $this->getApplication()->doRun($input, $output);
+
         // ----
 
         $output->writeln('<fg=white;bg=green>           </>');
         $output->writeln('<fg=white;bg=green> Ready ✅  </>');
         $output->writeln('<fg=white;bg=green>           </>');
 
-        $this->dbServices->prepareStopRoute($db);
+        $this->DB->prepareStopRoute($db);
 
         $output->writeln('> Preparing for query...');
-        $this->dbServices->generateQueryRoute($db);
+        $this->DB->generateQueryRoute($db);
 
         $this->logger->log(['event_id' => $event_id, 'message' => "[$event_id] Query StopRoute updated"], 'INFO');
-
 
         $output->writeln('Finished');
         $this->logger->log(['event_id' => $event_id, 'message' => "[$event_id] Task ended succesfully"], 'INFO');

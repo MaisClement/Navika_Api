@@ -26,11 +26,12 @@ class VehicleJourney
     public function __construct(EntityManagerInterface $entityManager, ProviderRepository $providerRepository, Logger $logger, RoutesRepository $routesRepository, ParameterBagInterface $params)
     {
         $this->entityManager = $entityManager;
+        $this->params = $params;
+        $this->logger = $logger;
 
         $this->providerRepository = $providerRepository;
         $this->routesRepository = $routesRepository;
 
-        $this->params = $params;
     }
 
     /**

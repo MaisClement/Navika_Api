@@ -3,7 +3,7 @@
 namespace App\Command\Provider;
 
 use App\Command\CommandFunctions;
-use App\Service\DBServices;
+use App\Service\DB;
 use App\Repository\ProviderRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\Console\Command\Command;
@@ -17,14 +17,14 @@ use Symfony\Component\Console\Helper\ProgressIndicator;
 class Clear extends Command
 {
     private EntityManagerInterface $entityManager;
-    private DBServices $dbServices;
+    private DB $DB;
 
     private ProviderRepository $providerRepository;
 
-    public function __construct(EntityManagerInterface $entityManager, DBServices $dbServices, ProviderRepository $providerRepository)
+    public function __construct(EntityManagerInterface $entityManager, DB $DB, ProviderRepository $providerRepository)
     {
         $this->entityManager = $entityManager;
-        $this->dbServices = $dbServices;
+        $this->DB = $DB;
 
         $this->providerRepository = $providerRepository;
 
@@ -96,7 +96,7 @@ class Clear extends Command
             foreach ($tables as $table) {
                 $progressIndicator->advance();
                 $progressIndicator->setMessage("Clearing $table...");
-                $this->dbServices->clearProviderDataInTable($db, $table, $provider->getId());
+                $this->DB->clearProviderDataInTable($db, $table, $provider->getId());
             }
             $this->entityManager->flush();
             $output->writeln('<info>✅ Provider data cleared successfully</info>');

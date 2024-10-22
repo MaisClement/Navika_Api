@@ -38,6 +38,12 @@ class Messages
     #[ORM\Column(length: 255, nullable: true)]
     private ?string $link = null;
 
+    #[ORM\Column]
+    private ?bool $is_reduced = null;
+
+    #[ORM\Column(length: 255, nullable: true)]
+    private ?string $img = null;
+
     public function getId(): ?int
     {
         return $this->id;
@@ -135,6 +141,30 @@ class Messages
     public function setLink(?string $link): static
     {
         $this->link = $link;
+
+        return $this;
+    }
+
+    public function isIsReduced(): ?bool
+    {
+        return $this->is_reduced;
+    }
+
+    public function setIsReduced(bool $is_reduced): static
+    {
+        $this->is_reduced = $is_reduced;
+
+        return $this;
+    }
+
+    public function getImg(): ?string
+    {
+        return $this->img;
+    }
+
+    public function setImg(?string $img): static
+    {
+        $this->img = $img;
 
         return $this;
     }

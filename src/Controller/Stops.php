@@ -165,13 +165,13 @@ class Stops
                 $search_type = 1;
             }
 
-            $stops = [];
+            $stops1 = [];
             if (strlen($q) >= 3) {
-                $stops = $this->stopRouteRepository->findByQueryName($query);
+                $stops1 = $this->stopRouteRepository->findByQueryName($query);
             }
 
-            // $stops2 = $this->stopRouteRepository->findByTownName( $query );
-            // $stops = array_merge($stops1, $stops2);
+            $stops2 = $this->stopRouteRepository->findByTownName( $query );
+            $stops = array_merge($stops1, $stops2);
 
             try {
                 $params = [
@@ -179,15 +179,13 @@ class Stops
                     'size' => 50,
                     'body' => [
                         'query' => [
-                            'fuzzy' => [
-                                'name' => [
-                                    'value' => $query,
-                                    'fuzziness' => 'AUTO',
-                                ],
+                            "match" => [
+                                "name" => $q
                             ],
                         ],
                     ],
                 ];
+
                 $results = $client->search($params);
 
                 foreach ($results['hits']['hits'] as $result) {
@@ -195,7 +193,7 @@ class Stops
                     $stops = array_merge($stops, $s);
                 }
             } catch (\Exception $e) {
-                // Elastic not working
+                $this->logger->error($e);
                 $stops = $this->stopRouteRepository->findByQueryName($query);
             }
 
@@ -219,6 +217,7 @@ class Stops
         //
         $places = [];
         $lines = [];
+        $lines_id = [];
         $modes = [];
 
         foreach ($stops as $stop) {
@@ -255,8 +254,9 @@ class Stops
                         $modes[$stop->getStopId()->getStopId()] = [];
                     }
 
-                    if (!in_array($stop->getRouteId()->getRoute(), $lines[$stop->getStopId()->getStopId()])) {
+                    if (!in_array($stop->getRouteId()->getRouteId(), $lines_id)) {
                         $lines[$stop->getStopId()->getStopId()][] = $stop->getRouteId()->getRoute();
+                        $lines_id[] = $stop->getRouteId()->getRouteId();
                     }
 
                     if (!in_array($stop->getRouteId()->getTransportMode(), $modes[$stop->getStopId()->getStopId()])) {

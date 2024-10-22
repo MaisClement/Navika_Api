@@ -4,7 +4,7 @@ namespace App\Command\GTFS;
 
 use App\Controller\Notify;
 use App\Controller\Functions;
-use App\Command\GTFS\CommandFunctions;
+use App\Command\CommandFunctions;
 use App\Entity\Trafic;
 use App\Entity\TraficLinks;
 use App\Repository\RoutesRepository;

@@ -1,4 +1,4 @@
-![Titre](https://app.navika.hackernwar.com/changelog/màj.png "Titre")
+![Titre](https://app.navika.fr/changelog/màj.png "Titre")
 
 # Mise à jour v1.3.1
 > 🗓️ 18/02/2024 
@@ -37,7 +37,7 @@ Tu peux désormais placer un repère sur la carte et obtenir rapidement les info
 
 ---
 
-![Repère sur carte](https://app.navika.hackernwar.com/changelog/point.png "Repère sur carte")
+![Repère sur carte](https://app.navika.fr/changelog/point.png "Repère sur carte")
 
 ---
 
@@ -46,7 +46,7 @@ Les entrées et sorties de tes stations de métro sont désormais indiquées, po
 
 ---
 
-![Indications des sorties](https://app.navika.hackernwar.com/changelog/exit.png "Indications des sorties")
+![Indications des sorties](https://app.navika.fr/changelog/exit.png "Indications des sorties")
 
 ---
 
