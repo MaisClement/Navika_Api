@@ -182,12 +182,9 @@ class Update extends Command
             file_put_contents($zip_name, $zip);
             $this->logger->log(['event_id' => $event_id, 'message' => sprintf("[$event_id] GTFS saved to $zip_name - size : %s", filesize($zip_name))], 'INFO');
 
-
             unset($zip);
         }
-
-        exit();
-
+        
         $output->writeln("");
         $output->writeln("Lets's update !");
 
