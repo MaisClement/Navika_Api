@@ -176,7 +176,7 @@ class Stops
             try {
                 $params = [
                     'index' => 'stops',
-                    'size' => 50,
+                    'size' => 500,
                     'body' => [
                         'query' => [
                             "match" => [

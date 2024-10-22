@@ -80,7 +80,7 @@ class Update extends Command
 
             'stop_times' => ['trip_id', 'stop_id'],
 
-            'fare_rules' => ['fare_id', 'route_id', 'origin_id', 'destination_i'],
+            'fare_rules' => ['fare_id', 'route_id', 'origin_id', 'destination_id'],
             'fare_attributes' => ['fare_id', 'agency_id'],
 
             'frequencies' => ['trip_id'],
