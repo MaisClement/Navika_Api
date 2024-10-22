@@ -177,10 +177,14 @@ class Update extends Command
             file_put_contents($zip_name, $zip);
             $this->logger->log(['event_id' => $event_id, 'message' => sprintf("[$event_id] GTFS saved to $zip_name - size : %s", filesize($zip_name))], 'INFO');
 
+            $output->writeln('     ' . $zip_name);
+
             $gtfs_path = $this->params->get('gtfs_path');
             $zip_name = $gtfs_path . '/' . $provider . '_gtfs.zip';
             file_put_contents($zip_name, $zip);
             $this->logger->log(['event_id' => $event_id, 'message' => sprintf("[$event_id] GTFS saved to $zip_name - size : %s", filesize($zip_name))], 'INFO');
+
+            $output->writeln('     ' . $zip_name);
 
             unset($zip);
         }
@@ -198,6 +202,8 @@ class Update extends Command
 
             // ---
             $output->writeln('      > Unzip gtfs...');
+
+            $zip_name = $dir . '/' . $provider . '_gtfs.zip';
 
             $zip = new ZipArchive;
             if (!$zip->open($zip_name)) {
