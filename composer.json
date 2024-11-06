@@ -30,7 +30,7 @@
         "symfony/maker-bundle": "^1.49",
         "symfony/property-access": "6.3.*",
         "symfony/property-info": "6.3.*",
-        "symfony/runtime": "6.3.*",
+        "symfony/runtime": "6.4.*",
         "symfony/serializer": "6.3.*",
         "symfony/stopwatch": "6.3.*",
         "symfony/twig-bundle": "6.3.*",
