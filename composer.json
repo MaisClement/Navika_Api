@@ -26,7 +26,7 @@
         "symfony/dotenv": "6.3.*",
         "symfony/flex": "^2",
         "symfony/framework-bundle": "6.3.*",
-        "symfony/http-client": "6.3.*",
+        "symfony/http-client": "6.4.*",
         "symfony/maker-bundle": "^1.49",
         "symfony/property-access": "6.3.*",
         "symfony/property-info": "6.3.*",
