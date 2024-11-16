@@ -109,7 +109,7 @@ class DB
     {
         $req = $db->prepare("
             INSERT INTO $to 
-            SELECT * 
+            SELECT DISTINCT * 
             FROM $from;
     
             DROP TABLE $from;

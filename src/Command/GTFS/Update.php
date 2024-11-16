@@ -75,7 +75,8 @@ class Update extends Command
 
             'levels' => ['level_id'],
             'stops' => ['stop_id', 'level_id', 'parent_station'],
-            //    'transfers' => ['from_stop_id', 'to_stop_id'],
+            // 'stop_extensions' => ['object_id', 'object_code'],
+            // 'transfers' => ['from_stop_id', 'to_stop_id'],
             'pathways' => ['pathway_id', 'from_stop_id', 'to_stop_id'],
 
             'stop_times' => ['trip_id', 'stop_id'],
@@ -426,7 +427,7 @@ class Update extends Command
 
         // Monitoring
         file_get_contents('https://betteruptime.com/api/v1/heartbeat/SrRkcBMzc4AgsXXzzZa2qFDa');
-
+        
         return Command::SUCCESS;
     }
 }

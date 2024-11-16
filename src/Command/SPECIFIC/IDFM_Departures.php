@@ -69,26 +69,36 @@ class IDFM_Departures extends Command
         $json = $json->Siri->ServiceDelivery->EstimatedTimetableDelivery[0]->EstimatedJourneyVersionFrame[0]->EstimatedVehicleJourney;
 
         $data = [];
+        $stops = [];
         foreach ($json as $el) {
 
             $order = 0;
             $len = count($el->EstimatedCalls->EstimatedCall);
             $stop_times = [];
 
-            foreach ($el->EstimatedCalls->EstimatedCall as $stops) {
-                $call = $stops;
+            foreach ($el->EstimatedCalls->EstimatedCall as $stop) {
+                $call = $stop;
 
-                $_stop_id = 'IDFM:' . Functions::idfmFormat($stops->StopPointRef->value);
-                if (count($stops->DestinationDisplay) > 0) {
-                    $_stop_name = Functions::gareFormat($stops->DestinationDisplay[0]->value);
+                $_stop_id = 'IDFM:' . Functions::idfmFormat($stop->StopPointRef->value);
+                if (count($stop->DestinationDisplay) > 0) {
+                    $_stop_name = Functions::gareFormat($stop->DestinationDisplay[0]->value);
                 } else {
                     $_stop_name = '';
                 }
-                $_stops = null;
+                $_stop = null;
 
-                $_stops = $this->stopsRepository->findStopById($_stop_id);
-                if ($_stops == null) {
-                    echo $_stop_id;
+                echo $_stop_id;
+
+                if ( !isset($stops[$_stop_id]) ){
+                    $_stop = $this->stopsRepository->findStopsById($_stop_id);
+                    if ($_stop[0] == null) {
+                        echo $_stop_id;
+                    }
+                    $_stop = $_stop[0];
+
+                    $stops[$_stop_id] = $_stop;
+                } else {
+                    $_stop = $stops[$_stop_id];
                 }
 
                 $state = array(
@@ -99,16 +109,17 @@ class IDFM_Departures extends Command
                     "MISSED" => 'deleted',
                     "DELAYED" => 'delayed',
                     "NO_REPORT" => 'theorical',
+                    "DEPARTED" => 'departed',
                 );
-
+                
                 $stop_times[] = array(
-                    "name" => $_stops != null ? $_stops->getStopName() : "uh?",
-                    "id" => $_stops != null ? $_stops->getStopId() : $_stop_id,
+                    "name" => $_stop != null ? $_stop->getStopName() : "uh?",
+                    "id" => $_stop != null ? $_stop->getStopId() : $_stop_id,
                     "order" => (int) $order,
                     "type" => (int) $len - 1 === $order ? 'terminus' : ($order == 0 ? 'origin' : ''),
                     "coords" => array(
-                        "lat" => $_stops != null ? $_stops->getStopLat() : '',
-                        "lon" => $_stops != null ? $_stops->getStopLon() : '',
+                        "lat" => $_stop != null ? $_stop->getStopLat() : '',
+                        "lon" => $_stop != null ? $_stop->getStopLon() : '',
                     ),
                     "stop_time" => array(
                         "departure_date_time" => (string) isset($call->ExpectedDepartureTime) ? $call->ExpectedDepartureTime : (isset($call->AimedDepartureTime) ? $call->AimedDepartureTime : ''),
@@ -124,7 +135,8 @@ class IDFM_Departures extends Command
                         "arrival_date_time" => (string) isset($call->ExpectedArrivalTime) ? $call->ExpectedArrivalTime : (isset($call->AimedArrivalTime) ? $call->AimedArrivalTime : ''),
                     ),
                 );
-                $route_type = $_stops != null ? $_stops->getVehicleType() : '';
+                
+                $route_type = $_stop != null ? $_stop->getVehicleType() : '';
                 $order++;
             }
             $_vehicle_journey_id = 'IDFM:' . $el->DatedVehicleJourneyRef->value;
@@ -133,8 +145,8 @@ class IDFM_Departures extends Command
                 "informations" => array(
                     "id" => $_vehicle_journey_id,
                     "mode" => $route_type,
-                    "name" => '',// $el->JourneyNote[0]->JourneyNote,
-                    "headsign" => '',// $el->JourneyNote[0]->JourneyNote,
+                    "name" => $el->JourneyNote[0]->JourneyNote ?? '',
+                    "headsign" => $el->JourneyNote[0]->JourneyNote ?? '',
                     "description" => '',
                     "message" => '',
                     "origin" => array(

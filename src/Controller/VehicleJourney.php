@@ -73,28 +73,28 @@ class VehicleJourney
         $json = [];
 
         // ------------
-        // if ($provider == 'IDFM') {   
-        //     $content = file_get_contents($dir . '/NAVIKA_idfm_departures.json');
-        //     $content = json_decode($content, true);
-        // 
-        //     if (isset($content[$id])) {
-        //         $vehicle_journey = $content[$id];
+        if ($provider == 'IDFM') {   
+            $content = file_get_contents($dir . '/NAVIKA_idfm_departures.json');
+            $content = json_decode($content, true);
+        
+            if (isset($content[$id])) {
+                $vehicle_journey = $content[$id];
 
 
-        //         // get route details
-        //         $route_id = $vehicle_journey['informations']['line'];
-        //         $route = $this->routesRepository->findOneBy( ['route_id' => $route_id] );
-        //         if ( $route != null ) {
-        //             $route = $route->getRoute(true);
-        //         }
-        //         $vehicle_journey['informations']['line'] = $route;
-        //         $vehicle_journey["reports"] = [];
-        //         
-        //     } else {
-        //         $provider = 'ADMIN';
-        //     }
-        // }
-        // if ($provider == 'ADMIN') {
+                // get route details
+                $route_id = $vehicle_journey['informations']['line'];
+                $route = $this->routesRepository->findOneBy( ['route_id' => $route_id] );
+                if ( $route != null ) {
+                    $route = $route->getRoute(true);
+                }
+                $vehicle_journey['informations']['line'] = $route;
+                $vehicle_journey["reports"] = [];
+                
+            } else {
+                $provider = 'ADMIN';
+            }
+        }
+        if ($provider == 'ADMIN') {
         $trip = Functions::getTripStopsById($db, $id, date("Y-m-d"));
 
         $len = count($trip);
@@ -194,7 +194,7 @@ class VehicleJourney
                 ),
             );
         }
-        // }
+        }
 
         $json['vehicle_journey'] = $vehicle_journey;
 

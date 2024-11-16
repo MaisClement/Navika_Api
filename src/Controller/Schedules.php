@@ -150,9 +150,6 @@ class Schedules
             $trips_update = array_merge($trips_update, Functions::getRealtimeData($p));
         }
 
-        $file_name = $dir . '/test_gtfsrt.pb';
-        file_put_contents($file_name, json_encode($trips_update, JSON_PRETTY_PRINT));
-
         if ($provider == 'IDFM') {
             $qId = Functions::idfmFormat($id);
             $prim_url = 'https://prim.iledefrance-mobilites.fr/marketplace/stop-monitoring?MonitoringRef=STIF:StopPoint:Q:' . $qId . ':';
@@ -173,6 +170,11 @@ class Schedules
             $content = $response->getContent();
             $results = json_decode($content);
             $results = $results->Siri->ServiceDelivery->StopMonitoringDelivery[0]->MonitoredStopVisit;
+
+
+            $content = json_encode($results, JSON_PRETTY_PRINT);
+            file_put_contents($dir . '/NAVIKA_call.json', $content);
+
             foreach ($results as $result) {
                 if (!isset($result->MonitoredVehicleJourney->MonitoredCall)) {
                     $this->logger->log(["message" => "PRIM Schedule query: Unable to fetch data. HTTP error code $status"], 'ERROR');
@@ -227,7 +229,7 @@ class Schedules
                                             "name"          => (string) $direction[$direction_id],
                                             "direction_id"  => null,
                                         ),
-                                        "id"                => (string) isset($result->MonitoredVehicleJourney->TrainNumbers->TrainNumberRef[0]->value) !== '' && (string) isset($result->MonitoredVehicleJourney->TrainNumbers->TrainNumberRef[0]->value) !== '0' ? $result->MonitoredVehicleJourney->TrainNumbers->TrainNumberRef[0]->value : ($result->MonitoredVehicleJourney->VehicleJourneyName[0]->value ? $result->MonitoredVehicleJourney->VehicleJourneyName[0]->value : ''),
+                                        "id"                => (string) isset($result->MonitoredVehicleJourney->FramedVehicleJourneyRef->DatedVehicleJourneyRef) ? 'IDFM:' . $result->MonitoredVehicleJourney->FramedVehicleJourneyRef->DatedVehicleJourneyRef : '',
                                         "name"              => (string) isset($result->MonitoredVehicleJourney->TrainNumbers->TrainNumberRef[0]->value) !== '' && (string) isset($result->MonitoredVehicleJourney->TrainNumbers->TrainNumberRef[0]->value) !== '0' ? $result->MonitoredVehicleJourney->TrainNumbers->TrainNumberRef[0]->value : ($result->MonitoredVehicleJourney->VehicleJourneyName[0]->value ? $result->MonitoredVehicleJourney->VehicleJourneyName[0]->value : ''),
                                         "mode"              => (string) $line['mode'],
                                         "trip_name"         => (string) isset($result->MonitoredVehicleJourney->TrainNumbers->TrainNumberRef[0]->value) !== '' && (string) isset($result->MonitoredVehicleJourney->TrainNumbers->TrainNumberRef[0]->value) !== '0' ? $result->MonitoredVehicleJourney->TrainNumbers->TrainNumberRef[0]->value : ($result->MonitoredVehicleJourney->VehicleJourneyName[0]->value ? $result->MonitoredVehicleJourney->VehicleJourneyName[0]->value : ''),
