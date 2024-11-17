@@ -61,6 +61,10 @@ php bin/console app:provider:add "bikes" "NAOLIBV"   "Naolib"        "Nantes"   
 php bin/console app:provider:add "bikes" "OPTYMO"    "Optymo"        "Belfort"          "5c209625634f41616b51e726"
 php bin/console app:provider:add "bikes" "VELHOP"    "Vél’hop"       "Strasbourg"       "65ab0d58c86e8597d65aa47f"
 
+php bin/console app:motis:add "blue" "8080" "unknown"
+php bin/console app:motis:add "green" "8081" "unknown"
+php bin/console app:motis:add "orange" "8082" "unknown"
+
 
     // Unavailable
     php bin/console app:provider:add "bikes" "CRISTOLIB" "Cristolib"     "Créteil"          "5defc8f7634f41318eb5e239" 

@@ -18,6 +18,7 @@ use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
 use Symfony\Component\HttpClient\HttpClient;
 use Symfony\Component\Console\Helper\ProgressBar;
+use Symfony\Component\Yaml\Yaml;
 use ZipArchive;
 use App\Service\Logger;
 
@@ -75,8 +76,7 @@ class Update extends Command
 
             'levels' => ['level_id'],
             'stops' => ['stop_id', 'level_id', 'parent_station'],
-            // 'stop_extensions' => ['object_id', 'object_code'],
-            // 'transfers' => ['from_stop_id', 'to_stop_id'],
+            //    'transfers' => ['from_stop_id', 'to_stop_id'],
             'pathways' => ['pathway_id', 'from_stop_id', 'to_stop_id'],
 
             'stop_times' => ['trip_id', 'stop_id'],
@@ -189,6 +189,45 @@ class Update extends Command
 
             unset($zip);
         }
+
+        $motis_update = [];
+        
+        $motis_file = $this->params->get('kernel.project_dir') . '/motis_default_config.yml';
+        $motis = Yaml::parseFile($motis_file);
+        
+        foreach ($tc_providers as $tc_provider) {
+            $name = $tc_provider->getName();
+            $provider = $tc_provider->getId();
+            $gtfs_path = $this->params->get('gtfs_path');
+            $zip_name = $gtfs_path . '/' . $provider . '_gtfs.zip';
+
+            $provider_l = strtolower($provider);
+            $provider_l = str_replace(':', '_', $provider_l);
+
+            if ($tc_provider->getGtfsUrl() != null) {
+                $motis_update[$provider_l]['path'] = $zip_name;
+            }
+
+            //MARCHE PAS $rt = [];
+            //MARCHE PAS if ($tc_provider->getGtfsRtServicesAlerts() != null) {
+            //MARCHE PAS     $rt[] = $tc_provider->getGtfsRtServicesAlerts();
+            //MARCHE PAS }
+            //MARCHE PAS if ($tc_provider->getGtfsRtVehiclePositions() != null) {
+            //MARCHE PAS     $rt[] = $tc_provider->getGtfsRtVehiclePositions();
+            //MARCHE PAS }
+            //MARCHE PAS if ($tc_provider->getGtfsRtTripUpdates() != null) {
+            //MARCHE PAS     $rt[] = $tc_provider->getGtfsRtTripUpdates();
+            //MARCHE PAS }
+            //MARCHE PAS if (count($rt) > 0) {
+            //MARCHE PAS     $motis_update[$provider_l]['rt'] = [];
+            //MARCHE PAS     $motis_update[$provider_l]['rt'] = $rt;
+            //MARCHE PAS }
+        }
+        $motis["timetable"]["datasets"] = $motis_update;
+
+        $yaml = Yaml::dump($motis, 4, 2, Yaml::DUMP_MULTI_LINE_LITERAL_BLOCK);
+        $motis_file = $this->params->get('motis_path') . '/build/config.yml';
+        file_put_contents($motis_file, $yaml);
         
         $output->writeln("");
         $output->writeln("Lets's update !");
@@ -427,7 +466,7 @@ class Update extends Command
 
         // Monitoring
         file_get_contents('https://betteruptime.com/api/v1/heartbeat/SrRkcBMzc4AgsXXzzZa2qFDa');
-        
+
         return Command::SUCCESS;
     }
 }

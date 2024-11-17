@@ -23,7 +23,6 @@ final class Version20241116114615 extends AbstractMigration
         $this->addSql('CREATE TABLE stop_extensions (id INT AUTO_INCREMENT NOT NULL, provider_id VARCHAR(255) DEFAULT NULL, object_id VARCHAR(255) DEFAULT NULL, object_code VARCHAR(255) NOT NULL, INDEX IDX_E3C4DCCEA53A8AA (provider_id), INDEX stop_extensions_object_code (object_id), PRIMARY KEY(id)) DEFAULT CHARACTER SET utf8mb4 COLLATE `utf8mb4_unicode_ci` ENGINE = InnoDB');
         $this->addSql('ALTER TABLE stop_extensions ADD CONSTRAINT FK_E3C4DCCEA53A8AA FOREIGN KEY (provider_id) REFERENCES provider (id) ON DELETE CASCADE');
         $this->addSql('ALTER TABLE stop_extensions ADD CONSTRAINT FK_E3C4DCCE232D562B FOREIGN KEY (object_id) REFERENCES stops (stop_id) ON DELETE CASCADE');
-        
     }
 
     public function down(Schema $schema): void
@@ -32,6 +31,5 @@ final class Version20241116114615 extends AbstractMigration
         $this->addSql('ALTER TABLE stop_extensions DROP FOREIGN KEY FK_E3C4DCCEA53A8AA');
         $this->addSql('ALTER TABLE stop_extensions DROP FOREIGN KEY FK_E3C4DCCE232D562B');
         $this->addSql('DROP TABLE stop_extensions');
-        
     }
 }

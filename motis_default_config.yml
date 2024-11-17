@@ -1,0 +1,59 @@
+server:
+  host: 0.0.0.0                     # host (default = 0.0.0.0)
+  port: 8080                        # port (default = 8080)
+  web_folder: ui                    # folder with static files to serve
+
+osm: OSM/france.osm.pbf     # required by tiles, street routing, geocoding and reverse-geocoding
+
+tiles:                              # tiles won't be available if this key is missing
+  profile: tiles-profiles/full.lua  # currently `background.lua` (less details) and `full.lua` (more details) are available
+  
+timetable:                          # if not set, no timetable will be loaded
+  # first_day: TODAY                  # first day of timetable to load, format: "YYYY-MM-DD" (special value "TODAY")
+  # num_days: 365                     # number of days to load, default is 365 days
+  railviz: false                     # enable viewing vehicles in real-time on the map, requires some extra lookup data structures
+  # with_shapes: true                 # extract and serve shapes (if disabled, direct lines are used)
+  # ignore_errors: false              # ignore errors when a dataset could not be loaded
+  adjust_footpaths: true            # if footpaths are too fast, they are adjusted if set to true
+  # merge_dupes_intra_src: false      # duplicates within the same datasets will be merged
+  # merge_dupes_inter_src: false      # duplicates withing different datasets will be merged
+  # link_stop_distance: 100           # stops will be linked by footpaths if they're less than X meters (default=100m) apart
+  # update_interval: 60               # real-time updates are polled every `update_interval` seconds
+  # http_timeout: 10                  # timeout for the HTTP server to respond with a package
+  # incremental_rt_update: false      # false = real-time updates are applied to a clean slate, true = no data will be dropped
+  max_footpath_length: 60           # maximum footpath length when transitively connecting stops or for routing footpaths if `osr_footpath` is set to true
+  datasets:                         
+    bibus:                          
+      path: GTFS/BIBUS_gtfs.zip 
+      rt:
+        - url: https://gtfs.ovapi.nl/nl/trainUpdates.pb
+        - url: https://gtfs.ovapi.nl/nl/tripUpdates.pb
+    cts:                          
+      path: GTFS/CTS_gtfs.zip 
+    fst:                          
+      path: GTFS/FST_gtfs.zip 
+    isfm:                         
+      path: GTFS/IDFM_gtfs.zip 
+    ilevia:                       
+      path: GTFS/ILEVIA_gtfs.zip 
+    irigo:                        
+      path: GTFS/IRIGO_gtfs.zip 
+    lia:                          
+      path: GTFS/LIA_gtfs.zip 
+    sncf_ic:                      
+      path: GTFS/SNCF_IC_gtfs.zip     
+    sncf_ter:                     
+      path: GTFS/SNCF_TER_gtfs.zip
+    sncf_tgv:                     
+      path: GTFS/SNCF_TGV_gtfs.zip
+    sub:                          
+      path: GTFS/SUB_gtfs.zip 
+    tan:                          
+      path: GTFS/TAN_gtfs.zip 
+    tbm:                          
+      path: GTFS/TBM_gtfs.zip
+
+street_routing: true    
+osr_footpath: true      
+geocoding: false        
+reverse_geocoding: false

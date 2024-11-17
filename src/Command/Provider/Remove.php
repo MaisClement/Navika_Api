@@ -31,7 +31,7 @@ class Remove extends Command
     {
         $this
             ->setName('app:provider:remove')
-            ->setDescription('Add provider')
+            ->setDescription('Remove a provider')
             ->addArgument('id', InputArgument::OPTIONAL, 'id')
             ->addOption(
                 'skip-clear',
