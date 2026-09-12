@@ -77,7 +77,7 @@ class Places
         description: 'Bad request'
     )]
 
-    public function searchPlaces(Request $request)
+    public function searchPlaces(Request $request): JsonResponse
     {
         try {
             $client = ClientBuilder::create()
@@ -110,29 +110,27 @@ class Places
 
             }
 
-            $stops = [];
+            $stops1 = [];
             if (strlen($q) >= 3) {
-                $stops = $this->stopRouteRepository->findByQueryName($query);
+                $stops1 = $this->stopRouteRepository->findByQueryName($query);
             }
 
-            // $stops2 = $this->stopRouteRepository->findByTownName( $query );
-            // $stops = array_merge($stops1, $stops2);
+            $stops2 = $this->stopRouteRepository->findByTownName( $query );
+            $stops = array_merge($stops1, $stops2);
 
             try {
                 $params = [
                     'index' => 'stops',
-                    'size' => 50,
+                    'size' => 30,
                     'body' => [
                         'query' => [
-                            'fuzzy' => [
-                                'name' => [
-                                    'value' => $query,
-                                    'fuzziness' => 'AUTO',
-                                ],
+                            "match" => [
+                                "name" => $q
                             ],
                         ],
                     ],
                 ];
+
                 $results = $client->search($params);
 
                 foreach ($results['hits']['hits'] as $result) {
@@ -140,7 +138,7 @@ class Places
                     $stops = array_merge($stops, $s);
                 }
             } catch (\Exception $e) {
-                // Elastic not working
+                $this->logger->error($e);
                 $stops = $this->stopRouteRepository->findByQueryName($query);
             }
 
@@ -206,20 +204,26 @@ class Places
 
         $stop_places = [];
         $lines[] = [];
+        $lines_id = [];
         $modes[] = [];
 
         foreach ($stops as $stop) {
             try {
                 if (!isset($stop_places[$stop->getStopId()->getStopId()])) {
 
-                    $stop_places[$stop->getStopId()->getStopId()] = $stop->getStop($lat, $lon);
+                    $stop_places[$stop->getStopId()->getStopId()] = $stop->getStopId()->getStop($lat, $lon);
 
                     $lines[$stop->getStopId()->getStopId()] = [];
                     $modes[$stop->getStopId()->getStopId()] = [];
                 }
 
-                if (!in_array($stop->getRouteId()->getTransportMode(), $lines[$stop->getStopId()->getStopId()])) {
+                if (!isset($lines_id[$stop->getStopId()->getStopId()])) {
+                    $lines_id[$stop->getStopId()->getStopId()] = [];
+                }
+
+                if (!in_array($stop->getRouteId()->getRouteId(), $lines_id[$stop->getStopId()->getStopId()])) {
                     $lines[$stop->getStopId()->getStopId()][] = $stop->getRouteId()->getRoute();
+                    $lines_id[$stop->getStopId()->getStopId()][] = $stop->getRouteId()->getRouteId();
                 }
 
                 if (!in_array($stop->getRouteId()->getTransportMode(), $modes[$stop->getStopId()->getStopId()])) {
@@ -235,29 +239,32 @@ class Places
             $lines[$key] = Functions::order_line($lines[$key]);
             $place['lines'] = $lines[$key];
             $place['modes'] = $modes[$key];
+
             $stop_echo[] = $place;
         }
 
         if ($search_type == 2) {
             $stop_echo = Functions::orderByDistance($stop_echo, $lat, $lon);
-        } else {
+        }
+        else {
             $stop_echo = Functions::orderPlaces($stop_echo);
         }
 
-        // array_splice($stop_echo, 15);
+        array_splice($stop_echo, 30);
 
-        // foreach($echo as $key => $e) {
-        //     if ($e['distance'] == 0) {
-        //         $town = $this->townRepository->findTownByCoordinates($e['coord']['lon'], $e['coord']['lat']);
-        //         if ($town != null) {
-        //             $echo[$key]['town'] = $town->getTownName();
-        //             $echo[$key]['zip_code'] = $town->getZipCode();
-        //         }
-        //     }
-        // }
+        foreach($stop_echo as $key => $e) {
+            if ($e['distance'] == 0) {
+                $town = $this->townRepository->findTownByCoordinates($e['coord']['lat'], $e['coord']['lon']);
+                if ($town != null) {
+                    $stop_echo[$key]['town'] = $town->getTownName();
+                    $stop_echo[$key]['zip_code'] = $town->getZipCode();
+                }
+            }
+        }
 
         $places = array_merge($stop_echo, $places);
-        $json["places"] = Functions::orderWithLevenshtein($places, $q);
+        $json["places"] = Functions::orderPlacesMixed($places, $q);
+        // $json["places"] = $places;
 
         if ($request->get('flag') != null) {
             $json["flag"] = (int) $request->get('flag');

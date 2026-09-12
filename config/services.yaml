@@ -64,6 +64,10 @@ services:
         autowire: true
         tags: ['controller.service_arguments']
 
+    App\Controller\Shapes:
+        autowire: true
+        tags: ['controller.service_arguments']
+
     App\Controller\Lines:
         autowire: true
         tags: ['controller.service_arguments']

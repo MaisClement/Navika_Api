@@ -1,0 +1,68 @@
+# Modèle de configuration MOTIS.
+#
+# La clé timetable.datasets est réécrite à chaque déploiement par
+# app:motis:deploy à partir des providers `tc` ayant une URL GTFS, et
+# server.port est positionné selon l'instance ciblée. Le reste vient d'ici.
+
+server:
+  host: 0.0.0.0
+  port: 8080                        # écrasé par app:motis:deploy selon l'instance
+  web_folder: ui
+
+osm: OSM/france.osm.pbf
+
+tiles:
+  profile: tiles-profiles/full.lua
+
+timetable:
+  railviz: false
+
+  # --- Correspondances à pied ---------------------------------------------
+  #
+  # Avec osr_footpath: true, MOTIS *remplace* les correspondances issues des
+  # GTFS par des itinéraires piétons calculés sur OpenStreetMap. Une
+  # correspondance que le calculateur piéton n'arrive pas à tracer n'est pas
+  # dégradée : elle disparaît. C'est ce qui produisait des itinéraires absurdes
+  # (faire le tour de l'Île-de-France faute de correspondance à pied entre les
+  # halls de Montparnasse) : sans arête piétonne, le seul chemin restant est en
+  # transport en commun.
+  #
+  # Les trois réglages ci-dessous traitent les deux causes de disparition.
+
+  # 1. Rattachement des arrêts au réseau piéton.
+  #    Par défaut un arrêt situé à plus de 25 m d'une voie piétonne OSM n'est
+  #    rattaché à rien, et se retrouve donc sans aucune correspondance à pied.
+  #    Les grandes gares sont précisément dans ce cas : leur coordonnée GTFS
+  #    tombe au milieu du bâtiment ou sur les voies, loin de la première
+  #    highway=footway. 75 m couvre ces cas sans rattacher n'importe quoi.
+  max_matching_distance: 75
+
+  # 2. Filet de sécurité : les correspondances présentes dans les GTFS que le
+  #    calculateur piéton n'a pas su tracer sont réinjectées avec une durée
+  #    estimée, au lieu d'être supprimées.
+  extend_missing_footpaths: true
+
+  # 3. Portée maximale d'une correspondance à pied, en minutes.
+  #    20 min laisse largement de quoi traverser un pôle d'échange (Montparnasse
+  #    Bienvenüe -> Montparnasse Grandes Lignes ≈ 10 min). L'ancienne valeur de
+  #    60 min faisait surtout exploser le temps d'import : le rayon de calcul
+  #    piéton autour de chaque arrêt croît avec cette durée.
+  max_footpath_length: 20
+
+  # Distance de liaison des arrêts d'un même jeu de données (m).
+  link_stop_distance: 200
+
+  # Les mêmes trains figurent dans les GTFS IDFM et SNCF. Sans fusion, ils
+  # apparaissent en double et les deux versions d'une gare restent distinctes.
+  merge_dupes_intra_src: true
+  merge_dupes_inter_src: true
+
+  # Ajuste les correspondances annoncées plus rapides que la marche réelle.
+  adjust_footpaths: true
+
+  datasets: {}                      # réécrit par app:motis:deploy
+
+street_routing: true
+osr_footpath: true
+geocoding: false
+reverse_geocoding: false

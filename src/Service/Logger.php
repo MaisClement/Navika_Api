@@ -72,7 +72,7 @@ class Logger
         ];
 
         if ($message != null){
-            $data['message'] =  sprintf( '%s %s',
+            $data['message'] = sprintf( '%s %s',
                 $message,
                 $exception->getMessage()
             );

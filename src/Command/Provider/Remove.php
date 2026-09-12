@@ -5,23 +5,20 @@ namespace App\Command\Provider;
 use App\Repository\ProviderRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\Console\Command\Command;
-use Symfony\Component\Console\Input\InputArgument;
-use Symfony\Component\Console\Input\InputOption;
-use Symfony\Component\Console\Input\InputInterface;
-use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Input\ArrayInput;
-use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
+use Symfony\Component\Console\Input\InputArgument;
+use Symfony\Component\Console\Input\InputInterface;
+use Symfony\Component\Console\Input\InputOption;
+use Symfony\Component\Console\Output\OutputInterface;
 
 class Remove extends Command
 {
     private EntityManagerInterface $entityManager;
-
     private ProviderRepository $providerRepository;
 
     public function __construct(EntityManagerInterface $entityManager, ProviderRepository $providerRepository)
     {
         $this->entityManager = $entityManager;
-
         $this->providerRepository = $providerRepository;
 
         parent::__construct();
@@ -31,7 +28,7 @@ class Remove extends Command
     {
         $this
             ->setName('app:provider:remove')
-            ->setDescription('Add provider')
+            ->setDescription('Remove a provider')
             ->addArgument('id', InputArgument::OPTIONAL, 'id')
             ->addOption(
                 'skip-clear',
@@ -49,22 +46,20 @@ class Remove extends Command
             );
     }
 
-    function execute(InputInterface $input, OutputInterface $output): int
+    protected function execute(InputInterface $input, OutputInterface $output): int
     {
         $id = $input->getArgument('id');
         $all = $input->getOption('all');
-        $i = $input->getOption('skip-clear');
+        $skipClear = $input->getOption('skip-clear');
 
-        // --
         $providers = [];
 
-        if ($all == null) {
+        if ($all === null) {
             $providers = $this->providerRepository->findAll();
-
-        } else if ($id != null) {
+        } elseif ($id !== null) {
             $provider = $this->providerRepository->find($id);
-            if ($provider == null) {
-                $output->writeln('<warning>Unknow provider</warning>');
+            if ($provider === null) {
+                $output->writeln('<warning>Unknown provider</warning>');
                 return Command::FAILURE;
             }
             $providers[] = $provider;
@@ -73,7 +68,7 @@ class Remove extends Command
         }
 
         foreach ($providers as $provider) {
-            if ($i == true) {
+            if ($skipClear === true) {
                 $input = new ArrayInput([
                     'command' => 'app:provider:clear',
                     'id' => $provider->getId(),

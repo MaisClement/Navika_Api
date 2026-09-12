@@ -30,10 +30,11 @@ class Notifications
     private RouteSubRepository $routeSubRepository;
     private SubscribersRepository $subscribersRepository;
 
-    public function __construct(EntityManagerInterface $entityManager, Messaging $messaging, RoutesRepository $routesRepository, RouteSubRepository $routeSubRepository, SubscribersRepository $subscribersRepository)
+    public function __construct(EntityManagerInterface $entityManager, Logger $logger, Messaging $messaging, RoutesRepository $routesRepository, RouteSubRepository $routeSubRepository, SubscribersRepository $subscribersRepository)
     {
         $this->entityManager = $entityManager;
 
+        $this->logger = $logger;
         $this->messaging = $messaging;
         $this->routesRepository = $routesRepository;
         $this->routeSubRepository = $routeSubRepository;
@@ -111,6 +112,8 @@ class Notifications
         $start_time = $request->request->get('start_time');
         $end_time = $request->request->get('end_time');
 
+        
+
         if ($token == null || $line == null || $type == null || $days == null || $start_time == null || $end_time == null) {
             $this->logger->logHttpErrorMessage($request, 'At least one required parameter is missing or null, have you "token", "line", "type", "days", "start_time" and "end_time" ?', 'WARN');
             return new JsonResponse(Functions::httpErrorMessage(400, 'At least one required parameter is missing or null, have you "token", "line", "type", "days", "start_time" and "end_time" ?'), 400);
@@ -163,15 +166,15 @@ class Notifications
 
         $this->entityManager->flush();
 
-        $this->logger->log([
-            "message" => "$token has subscribed to $line",
-            "token" => $token,
-            "line" => $line,
-            "type" => $type,
-            "days" => $days,
-            "start_time" => $start_time,
-            "end_time" => $end_time,
-        ], 'INFO');
+        // $this->logger->log([
+        //     "message" => "$token has subscribed to $line",
+        //     "token" => $token,
+        //     "line" => $line,
+        //     "type" => $type,
+        //     // "days" => $days,
+        //     "start_time" => $start_time,
+        //     "end_time" => $end_time,
+        // ], 'INFO');
 
         //--
 

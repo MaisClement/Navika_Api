@@ -97,7 +97,7 @@ class Address
         foreach ($stops as $stop) {
             if (!isset($places[$stop->getStopId()->getStopId()])) {
 
-                $places[$stop->getStopId()->getStopId()] = $stop->getStop($lat, $lon);
+                $places[$stop->getStopId()->getStopId()] = $stop->getStopId()->getStop($lat, $lon);
 
                 $lines[$stop->getStopId()->getStopId()] = [];
                 $modes[$stop->getStopId()->getStopId()] = [];

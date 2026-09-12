@@ -2,42 +2,43 @@
 
 namespace App\Command\SPECIFIC;
 
-use App\Controller\Notify;
 use App\Controller\Functions;
+use App\Controller\Notify;
 use App\Entity\Trafic;
+use App\Entity\TraficApplicationPeriods;
 use App\Repository\RoutesRepository;
 use App\Repository\TraficRepository;
-use App\Entity\TraficApplicationPeriods;
+use App\Service\Logger;
 use DateTime;
 use Doctrine\ORM\EntityManagerInterface;
+use Kreait\Firebase\Contract\Messaging;
 use Symfony\Component\Console\Command\Command;
+use Symfony\Component\Console\Helper\ProgressIndicator;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
 use Symfony\Component\HttpClient\HttpClient;
-use Kreait\Firebase\Contract\Messaging;
-use App\Repository\SubscribersRepository;
-use App\Service\Logger;
-use Symfony\Component\Console\Helper\ProgressIndicator;
 
 class IDFM_Trafic extends Command
 {
-    private $entityManager;
-    private $params;
-
+    private EntityManagerInterface $entityManager;
+    private ParameterBagInterface $params;
     private Logger $logger;
-
     private Messaging $messaging;
     private RoutesRepository $routesRepository;
     private TraficRepository $traficRepository;
 
-    public function __construct(EntityManagerInterface $entityManager, ParameterBagInterface $params, Logger $logger, Messaging $messaging, RoutesRepository $routesRepository, TraficRepository $traficRepository)
-    {
+    public function __construct(
+        EntityManagerInterface $entityManager,
+        ParameterBagInterface $params,
+        Logger $logger,
+        Messaging $messaging,
+        RoutesRepository $routesRepository,
+        TraficRepository $traficRepository
+    ) {
         $this->entityManager = $entityManager;
         $this->params = $params;
-
         $this->logger = $logger;
-        
         $this->messaging = $messaging;
         $this->routesRepository = $routesRepository;
         $this->traficRepository = $traficRepository;
@@ -52,29 +53,25 @@ class IDFM_Trafic extends Command
             ->setDescription('Update trafic data');
     }
 
-    function execute(InputInterface $input, OutputInterface $output): int
+    protected function execute(InputInterface $input, OutputInterface $output): int
     {
-        $event_id = uniqid();
+        $eventId = uniqid();
+        $this->logger->log(['event_id' => $eventId, 'message' => "[app:trafic:update:IDFM][$eventId] Task began"], 'INFO');
 
-        $this->logger->log(['event_id' => $event_id,'message' => "[app:trafic:update:IDFM][$event_id] Task began"], 'INFO');
-
-        // Récupération du trafic
         $progressIndicator = new ProgressIndicator($output, 'verbose', 100, ['⠏', '⠛', '⠹', '⢸', '⣰', '⣤', '⣆', '⡇']);
-        $progressIndicator->start('Geting trafic...');
+        $progressIndicator->start('Getting trafic...');
 
         $disruptions = [];
-        $line_reports = [];
+        $lineReports = [];
 
-        // Paramètres de pagination
         $page = 0;
         $itemsPerPage = 0;
         $itemsOnPage = 1;
 
-        // Boucler à travers les pages jusqu'à ce que tous les résultats soient récupérés
         while ($itemsOnPage >= $itemsPerPage) {
             $url = $this->params->get('prim_url_trafic') . '/line_reports?count=1000&start_page=' . $page;
-            $this->logger->log(['event_id' => $event_id,'message' => "[$event_id] Getting IDFM trafic reports from $url"], 'INFO');
-            
+            $this->logger->log(['event_id' => $eventId, 'message' => "[$eventId] Getting IDFM trafic reports from $url"], 'INFO');
+
             $client = HttpClient::create();
             $response = $client->request('GET', $url, [
                 'headers' => [
@@ -84,201 +81,102 @@ class IDFM_Trafic extends Command
             $status = $response->getStatusCode();
 
             if ($status != 200) {
-                $this->logger->log(['event_id' => $event_id,'message' => "[$event_id][$id] $url return HTTP $status error"], 'ERROR');
+                $this->logger->log(['event_id' => $eventId, 'message' => "[$eventId] $url return HTTP $status error"], 'ERROR');
                 return Command::FAILURE;
             }
 
-            // Loader
             $progressIndicator->advance();
 
             $content = $response->getContent();
+            file_put_contents('/tmp/navika_trafic_' . $page . '.json', $content);
             $results = json_decode($content);
 
-            // Pagination
             $itemsPerPage = $results->pagination->items_per_page;
             $itemsOnPage = $results->pagination->items_on_page;
             $page++;
 
             $disruptions = array_merge($disruptions, $results->disruptions);
-            $line_reports = array_merge($line_reports, $results->line_reports);
+            $lineReports = array_merge($lineReports, $results->line_reports);
         }
 
-        // On crée les messages
         $reports = [];
-        $r = [];
         foreach ($disruptions as $disruption) {
             $progressIndicator->advance();
-
             if ($disruption->status != 'past') {
                 $reports['IDFM:' . $disruption->id] = $disruption;
             }
         }
 
         $count = 0;
-        // On assigne une ligne aux messages
-        foreach ($line_reports as $line) {
+        $r = [];
+        foreach ($lineReports as $line) {
             $progressIndicator->advance();
-
-            foreach ($line->line->links as $link) {
+            foreach (array_merge($line->line->links, $line->line->network->links) as $link) {
                 $id = 'IDFM:' . $link->id;
+                if ($link->type == "disruption" && isset($reports[$id])) {
+                    $route = $this->routesRepository->findOneBy(['route_id' => 'IDFM:' . Functions::idfmFormat($line->line->id)]);
+                    if ($route != null) {
+                        $disruption = $reports[$id];
+                        $msg = new Trafic();
+                        $msg->setReportId('IDFM:' . $disruption->id);
+                        $msg->setStatus($disruption->status);
+                        $msg->setCause($disruption->cause);
+                        $msg->setSeverity(Functions::getSeverity($disruption->severity->effect, $disruption->cause, $disruption->status));
+                        $msg->setEffect($disruption->severity->effect);
+                        $msg->setUpdatedAt(DateTime::createFromFormat('Ymd\THis', $disruption->updated_at));
+                        $msg->setTitle(Functions::getReportsMesageTitle($disruption->messages));
+                        $msg->setText(Functions::getReportsMesageText($disruption->messages));
+                        $msg->setRouteId($route);
 
-                if ($link->type == "disruption") {
-                    if (isset($reports[$id])) {
-                        $route = $this->routesRepository->findOneBy(['route_id' => 'IDFM:' . Functions::idfmFormat($line->line->id)]);
-
-                        if ($route != null) {
-                            $disruption = $reports[$id];
-
-                            $msg = new Trafic();
-                            $msg->setReportId('IDFM:' . $disruption->id);
-                            $msg->setStatus($disruption->status);
-                            $msg->setCause($disruption->cause);
-                            $msg->setSeverity(Functions::getSeverity($disruption->severity->effect, $disruption->cause, $disruption->status));
-                            $msg->setEffect($disruption->severity->effect);
-                            $msg->setUpdatedAt(DateTime::createFromFormat('Ymd\THis', $disruption->updated_at));
-                            $msg->setTitle(Functions::getReportsMesageTitle($disruption->messages));
-                            $msg->setText(Functions::getReportsMesageText($disruption->messages));
-                            $msg->setRouteId($route);
-
-                            foreach ($disruption->application_periods as $application_period) {
-                                $period = new TraficApplicationPeriods();
-                                $period->setBegin(DateTime::createFromFormat('Ymd\THis', $application_period->begin));
-                                $period->setEnd(DateTime::createFromFormat('Ymd\THis', $application_period->end));
-
-                                $msg->addApplicationPeriod($period);
-                                $this->entityManager->persist($period);
-                            }
-
-                            $this->entityManager->persist($msg);
-                            $r['IDFM:' . $disruption->id] = $msg;
-                            $count++;
+                        foreach ($disruption->application_periods as $applicationPeriod) {
+                            $period = new TraficApplicationPeriods();
+                            $period->setBegin(DateTime::createFromFormat('Ymd\THis', $applicationPeriod->begin));
+                            $period->setEnd(DateTime::createFromFormat('Ymd\THis', $applicationPeriod->end));
+                            $msg->addApplicationPeriod($period);
+                            $this->entityManager->persist($period);
                         }
-                    }
-                }
-            }
-            foreach ($line->line->network->links as $link) {
-                $id = 'IDFM:' . $link->id;
 
-                if ($link->type == "disruption") {
-                    if (isset($reports[$id])) {
-                        $route = $this->routesRepository->findOneBy(['route_id' => 'IDFM:' . Functions::idfmFormat($line->line->id)]);
-
-                        if ($route != null) {
-                            $disruption = $reports[$id];
-
-                            $msg = new Trafic();
-                            $msg->setReportId('IDFM:' . $disruption->id);
-                            $msg->setStatus($disruption->status);
-                            $msg->setCause($disruption->cause);
-                            $msg->setSeverity(Functions::getSeverity($disruption->severity->effect, $disruption->cause, $disruption->status));
-                            $msg->setEffect($disruption->severity->effect);
-                            $msg->setUpdatedAt(DateTime::createFromFormat('Ymd\THis', $disruption->updated_at));
-                            $msg->setTitle(Functions::getReportsMesageTitle($disruption->messages));
-                            $msg->setText(Functions::getReportsMesageText($disruption->messages));
-                            $msg->setRouteId($route);
-
-                            foreach ($disruption->application_periods as $application_period) {
-                                $period = new TraficApplicationPeriods();
-                                $period->setBegin(DateTime::createFromFormat('Ymd\THis', $application_period->begin));
-                                $period->setEnd(DateTime::createFromFormat('Ymd\THis', $application_period->end));
-
-                                $msg->addApplicationPeriod($period);
-                                $this->entityManager->persist($period);
-                            }
-
-                            $this->entityManager->persist($msg);
-                            $r['IDFM:' . $disruption->id] = $msg;
-                            $count++;
-                        }
+                        $this->entityManager->persist($msg);
+                        $r['IDFM:' . $disruption->id] = $msg;
+                        $count++;
                     }
                 }
             }
         }
 
-        $this->logger->log(['event_id' => $event_id,'message' => "[$event_id] Saving $count trafic reports"], 'INFO');
+        $this->logger->log(['event_id' => $eventId, 'message' => "[$eventId] Saving $count trafic reports"], 'INFO');
 
-        // On calcule les notifications
         $progressIndicator->setMessage('Looking for notification...');
+        $oldMessages = $this->traficRepository->findByLikeField('report_id', 'IDFM:');
 
-        $old_messages = $this->traficRepository->findByLikeField('report_id', 'IDFM:');
-
-        // Pour tous les old_messages, si il existe deja un message avec le meme ReportId on supprime
-        foreach ($old_messages as $old_message) {
+        foreach ($oldMessages as $oldMessage) {
             $progressIndicator->advance();
-            $id = $old_message->getReportId();
-
+            $id = $oldMessage->getReportId();
             if (isset($r[$id])) {
                 unset($r[$id]);
             }
         }
 
-        // Init Notif
         $notif = new Notify($this->messaging);
 
-        // On envoie les notification
         foreach ($r as $report) {
             if ($report->getRouteId() != null) {
                 foreach ($report->getRouteId()->getRouteSubs() as $sub) {
                     $progressIndicator->advance();
-
-                    // On vérifie que l'on soit ne soit pas un jour interdit
-                    $allow = true;
-
-                    if ($sub->getType() == 'all' && $report->getSeverity() < 3) {
-                        $allow = false;
-                    } else if ($sub->getType() == 'alert' && $report->getSeverity() < 4) {
-                        $allow = false;
-                    }
-
-                    if (date('N') == "1" && $sub->getMonday() != "1") {
-                        $allow = false;
-                    } else if (date('N') == 2 && $sub->getTuesday() != "1") {
-                        $allow = false;
-                    } else if (date('N') == "3" && $sub->getWednesday() != "1") {
-                        $allow = false;
-                    } else if (date('N') == "4" && $sub->getThursday() != "1") {
-                        $allow = false;
-                    } else if (date('N') == "5" && $sub->getFriday() != "1") {
-                        $allow = false;
-                    } else if (date('N') == "6" && $sub->getSaturday() != "1") {
-                        $allow = false;
-                    } else if (date('N') == "7" && $sub->getSunday() != "1") {
-                        $allow = false;
-                    }
-
-                    $startTime = DateTime::createFromFormat('H:i:s', $sub->getStartTime()->format('H:i:s'));
-                    $endTime = DateTime::createFromFormat('H:i:s', $sub->getEndTime()->format('H:i:s'));
-
-                    $now = new DateTime();
-                    if ($endTime < $startTime) {
-                        $endTime->modify('+1 day');
-                    }
-
-                    if ($startTime > $now || $endTime < $now) {
-                        $allow = false;
-                    }
-
-                    if ($allow == true) {
+                    $allow = $this->isNotificationAllowed($sub, $report);
+                    if ($allow) {
                         $token = $sub->getSubscriberId()->getFcmToken();
                         $title = $report->getTitle();
                         $body = $report->getText();
                         $data = [];
 
                         try {
-                            // $notif->sendMessage($token, $report->getReportMessage() );
-                            $notif->sendNotificationToUser(
-                                $this->logger,
-                                $token,
-                                $title,
-                                $body,
-                                $data
-                            );
-                            $this->logger->log(['event_id' => $event_id,'message' => "[$event_id] Trafic report notification sent to $token"], 'INFO');
-
+                            $notif->sendNotificationToUser($this->logger, $token, $title, $body, $data);
+                            $this->logger->log(['event_id' => $eventId, 'message' => "[$eventId] Trafic report notification sent to $token"], 'INFO');
                         } catch (\Exception $e) {
                             if (get_class($e) == 'Kreait\Firebase\Exception\Messaging\NotFound') {
                                 $this->entityManager->remove($sub);
-                                $this->logger->log(['event_id' => $event_id,'message' => "[$event_id] Subscriber $token no longer exists and was removed"], 'INFO');
+                                $this->logger->log(['event_id' => $eventId, 'message' => "[$eventId] Subscriber $token no longer exists and was removed"], 'INFO');
                             } else {
                                 $this->logger->error($e);
                             }
@@ -288,24 +186,17 @@ class IDFM_Trafic extends Command
             }
         }
 
-        // On supprime
         $progressIndicator->setMessage('Remove old...');
-
-        // On efface les messages existant
-        foreach ($old_messages as $old_message) {
+        foreach ($oldMessages as $oldMessage) {
             $progressIndicator->advance();
-            $this->entityManager->remove($old_message);
+            $this->entityManager->remove($oldMessage);
         }
 
-        // On sauvegarde
         $progressIndicator->setMessage('Saving...');
         $this->entityManager->flush();
 
-        // Monitoring
         $progressIndicator->setMessage('Monitoring...');
-
         $url = 'https://uptime.betterstack.com/api/v1/heartbeat/pbe86jt9hZHP5sW93MJNxw7C';
-
         $client = HttpClient::create();
         $response = $client->request('GET', $url);
         $status = $response->getStatusCode();
@@ -315,8 +206,43 @@ class IDFM_Trafic extends Command
         }
 
         $progressIndicator->finish('<info>✅ OK</info>');
-        $this->logger->log(['event_id' => $event_id,'message' => "[$event_id] Task ended succesfully"], 'INFO');
+        $this->logger->log(['event_id' => $eventId, 'message' => "[$eventId] Task ended successfully"], 'INFO');
 
         return Command::SUCCESS;
+    }
+
+    private function isNotificationAllowed($sub, $report): bool
+    {
+        $allow = true;
+        if ($sub->getType() == 'all' && $report->getSeverity() < 3) {
+            $allow = false;
+        } elseif ($sub->getType() == 'alert' && $report->getSeverity() < 4) {
+            $allow = false;
+        }
+
+        $dayOfWeek = date('N');
+        if (($dayOfWeek == "1" && $sub->getMonday() != "1") ||
+            ($dayOfWeek == "2" && $sub->getTuesday() != "1") ||
+            ($dayOfWeek == "3" && $sub->getWednesday() != "1") ||
+            ($dayOfWeek == "4" && $sub->getThursday() != "1") ||
+            ($dayOfWeek == "5" && $sub->getFriday() != "1") ||
+            ($dayOfWeek == "6" && $sub->getSaturday() != "1") ||
+            ($dayOfWeek == "7" && $sub->getSunday() != "1")) {
+            $allow = false;
+        }
+
+        $startTime = DateTime::createFromFormat('H:i:s', $sub->getStartTime()->format('H:i:s'));
+        $endTime = DateTime::createFromFormat('H:i:s', $sub->getEndTime()->format('H:i:s'));
+        $now = new DateTime();
+
+        if ($endTime < $startTime) {
+            $endTime->modify('+1 day');
+        }
+
+        if ($startTime > $now || $endTime < $now) {
+            $allow = false;
+        }
+
+        return $allow;
     }
 }

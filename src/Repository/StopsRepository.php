@@ -51,9 +51,31 @@ class StopsRepository extends ServiceEntityRepository
                 )
             )
             ->setParameter('id', $id);
-
+     
         return $qb->getQuery()->getOneOrNullResult();
     }
+
+    public function findStopsById(string $id)
+    {
+        $qb = $this->createQueryBuilder('S');
+        $qb->select('S')
+            ->where('stop_id', ':id')
+            ->setParameter('id', $id);
+    
+        return $qb->getQuery()->getResult();
+    }
+
+    public function findStopsByExtensions(string $id)
+    {
+        $qb = $this->createQueryBuilder('S');
+        $qb->select('S, SE')
+            ->join('S.stopExtensions', 'SE')
+            ->where('SE.object_code = :id')
+            ->setParameter('id', $id);
+    
+        return $qb->getQuery()->getResult();
+    }
+    
     
     public function findAllByLocationType($locationType): array
     {

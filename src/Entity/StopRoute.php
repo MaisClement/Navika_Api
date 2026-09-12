@@ -288,22 +288,4 @@ class StopRoute
 
         return $this;
     }
-
-    public function getStop($lat = null, $lon = null): ?array
-    {
-        $stop = array(
-            'id'   =>       (string) $this->stop_id->getStopId(),
-            'name' =>       (string) $this->stop_id->getStopName(),
-            'type' =>       (string) $this->stop_id->getLocationType() == 0 ? 'stop_point' : 'stop_area',
-            'town' =>       (string) '',
-            'zip_code' =>   (string) '',
-            'coord' => array(
-                'lat' =>    (float) $this->stop_lat,
-                'lon' =>    (float) $this->stop_lon,
-            ),
-            'distance' =>   (int)   ($lat != null && $lon != null) ? Functions::calculateDistance($this->stop_lat, $this->stop_lon, $lat, $lon) : 0
-        );
-
-        return $stop;
-    }
 }

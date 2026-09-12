@@ -108,6 +108,9 @@ class Provider
     #[ORM\OneToMany(mappedBy: 'provider_id', targetEntity: Trafic::class)]
     private Collection $trafics;
 
+    #[ORM\OneToMany(mappedBy: 'provider_id', targetEntity: StopExtensions::class)]
+    private Collection $stopExtensions;
+
     #[ORM\Column(length: 255, nullable: true)]
     private ?string $parent_provider = null;
 
@@ -132,6 +135,7 @@ class Provider
         $this->fareRules = new ArrayCollection();
         $this->fareAttributes = new ArrayCollection();
         $this->trafics = new ArrayCollection();
+        $this->stopExtensions = new ArrayCollection();
     }
 
     public function getId(): ?string
@@ -800,6 +804,14 @@ class Provider
     public function getTrafics(): Collection
     {
         return $this->trafics;
+    }
+
+    /**
+     * @return Collection<int, StopExtensions>
+     */
+    public function getStopExtensions(): Collection
+    {
+        return $this->stopExtensions;
     }
 
     public function getParentProvider(): ?string

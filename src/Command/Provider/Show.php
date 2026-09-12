@@ -3,20 +3,17 @@
 namespace App\Command\Provider;
 
 use App\Repository\ProviderRepository;
-use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
-use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
 
 class Show extends Command
 {
     private ProviderRepository $providerRepository;
 
-    public function __construct(ProviderRepository $providerRepository, )
+    public function __construct(ProviderRepository $providerRepository)
     {
         $this->providerRepository = $providerRepository;
-
         parent::__construct();
     }
 
@@ -24,23 +21,20 @@ class Show extends Command
     {
         $this
             ->setName('app:provider:list')
-            ->setDescription('List all provider');
+            ->setDescription('List all providers');
     }
 
-    function execute(InputInterface $input, OutputInterface $output): int
+    protected function execute(InputInterface $input, OutputInterface $output): int
     {
-        $providers = $this->providerRepository->FindAll();
+        $providers = $this->providerRepository->findAll();
 
         foreach ($providers as $provider) {
             $output->writeln('> ' . $provider->getId() . ' - ' . $provider->getName());
             $output->writeln('   type: ' . $provider->getType());
             $output->writeln('   flag: ' . $provider->getFlag());
             $output->writeln('   url: ' . $provider->getUrl());
-            if ($provider->getUpdatedAt() != null) {
-                $output->writeln('   updated: ' . $provider->getUpdatedAt()->format('Y-m-d H:i:s'));
-            } else {
-                $output->writeln('   updated: never');
-            }
+            $updatedAt = $provider->getUpdatedAt();
+            $output->writeln('   updated: ' . ($updatedAt ? $updatedAt->format('Y-m-d H:i:s') : 'never'));
             $output->writeln('');
         }
 

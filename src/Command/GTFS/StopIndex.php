@@ -3,7 +3,7 @@
 namespace App\Command\GTFS;
 
 use App\Command\CommandFunctions;
-use App\Service\DBServices;
+use App\Service\DB;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
@@ -19,14 +19,14 @@ class StopIndex extends Command
     private ParameterBagInterface $params;
 
     private StopsRepository $stopsRepository;
-    private DBServices $dbServices;
+    private DB $DB;
 
-    public function __construct(EntityManagerInterface $entityManager, ParameterBagInterface $params, StopsRepository $stopsRepository, DBServices $dbServices)
+    public function __construct(EntityManagerInterface $entityManager, ParameterBagInterface $params, StopsRepository $stopsRepository, DB $DB)
     {
         $this->entityManager = $entityManager;
         $this->params = $params;
 
-        $this->dbServices = $dbServices;
+        $this->DB = $DB;
         $this->stopsRepository = $stopsRepository;
 
         parent::__construct();
@@ -63,17 +63,14 @@ class StopIndex extends Command
         ];
 
         $client->deleteByQuery($params);
-        // return $response;
 
         // Add by batch
-
         $stops_to_add = $this->stopsRepository->findAllByLocationType(1);
 
         $params = ['body' => []];
 
         $i = 1;
         foreach ($stops_to_add as $stop) {
-            print ($stop->getStopId());
             $params['body'][] = [
                 'index' => [
                     '_index' => 'stops',

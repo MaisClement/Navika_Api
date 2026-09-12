@@ -3,12 +3,14 @@
 parameters:
     open_data_url: 'https://transport.data.gouv.fr/api/datasets/'
     
-    geosearch_url: 'https://geo.hackernwar.com/v1/'
+    geosearch_url: 'https://geo.navika.fr/v1/'
 
     prim_url: 'https://prim.iledefrance-mobilites.fr/marketplace/v2/navitia'
     prim_url_trafic: 'https://prim.iledefrance-mobilites.fr/marketplace/v2/navitia/line_reports'
     prim_url_timetables: 'https://data.iledefrance-mobilites.fr/explore/dataset/fiches-horaires-et-plans/download/'
     prim_url_maps: 'https://data.iledefrance-mobilites.fr/explore/dataset/plans-region/download/'
+    prim_url_shapes: 'https://data.iledefrance-mobilites.fr/explore/dataset/traces-du-reseau-ferre-idf/download/'
+    prim_url_shapes2: 'https://data.iledefrance-mobilites.fr/explore/dataset/traces-des-lignes-regulieres-de-bus-en-ile-de-france/download/'
     prim_api_key: 'prim_api_key'
     
     sncf_gc_key: 'sncf_gc_key'

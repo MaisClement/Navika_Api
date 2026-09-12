@@ -12,9 +12,14 @@ use Doctrine\ORM\Mapping as ORM;
 
 class StopTimes
 {
+    // BIGINT UNSIGNED : cette table est reconstruite en boucle, son compteur
+    // AUTO_INCREMENT doit avoir de la marge même si la renumérotation opérée à
+    // chaque import (App\Service\DB::copyTable) le maintient au niveau du
+    // nombre de lignes. columnDefinition garde le type PHP en int : Doctrine
+    // continue d'hydrater et de générer l'id comme un entier.
     #[ORM\Id]
     #[ORM\GeneratedValue]
-    #[ORM\Column]
+    #[ORM\Column(columnDefinition: 'BIGINT UNSIGNED AUTO_INCREMENT NOT NULL')]
     private ?int $id = null;
 
     #[ORM\ManyToOne(inversedBy: 'stopTimes')]
@@ -56,8 +61,8 @@ class StopTimes
     #[ORM\Column(columnDefinition: 'ENUM("0", "1", "2", "3")')]
     private ?int $continuous_drop_off = null;
 
-    #[ORM\Column(type: Types::DECIMAL, precision: 15, scale: '0', nullable: true)]
-    private ?string $shape_dist_traveled = null;
+    // #[ORM\Column(type: Types::DECIMAL, precision: 15, scale: '0', nullable: true)]
+    // private ?string $shape_dist_traveled = null;
 
     #[ORM\Column(columnDefinition: 'ENUM("0", "1")')]
     private ?int $timepoint = null;
@@ -182,17 +187,17 @@ class StopTimes
         return $this;
     }
 
-    public function getShapeDistTraveled(): ?string
-    {
-        return $this->shape_dist_traveled;
-    }
+    // public function getShapeDistTraveled(): ?string
+    // {
+    //     return $this->shape_dist_traveled;
+    // }
 
-    public function setShapeDistTraveled(?string $shape_dist_traveled): static
-    {
-        $this->shape_dist_traveled = $shape_dist_traveled;
+    // public function setShapeDistTraveled(?string $shape_dist_traveled): static
+    // {
+    //     $this->shape_dist_traveled = $shape_dist_traveled;
 
-        return $this;
-    }
+    //     return $this;
+    // }
 
     public function getTimepoint(): ?int
     {

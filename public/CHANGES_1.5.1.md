@@ -1,4 +1,4 @@
-![Titre](https://navika.hackernwar.com/changelog/title.png "Titre")
+![Titre](https://navika.fr/changelog/title.png "Titre")
 
 # Mise à jour v1.5.1
 > 🗓️ 07/07/2024 
@@ -17,12 +17,12 @@ Cette mise à jour corrige principalement les problèmes [#56](https://github.co
 ### ✨ Une expérience amélioré
 La navigation sur la carte a été améliorée. L'affichage de votre position est désormais bien plus rapide et les détails des lieux et stations à été retravaillée
 
-![Détails](https://navika.hackernwar.com/changelog/150_map_enchancement.png "Détails")
+![Détails](https://navika.fr/changelog/150_map_enchancement.png "Détails")
 
 ### 🚧 Plus de détails sur le trafic
 Les informations trafic affiché avec vos horaires sont désormais plus complet et plus détaillé :
 
-![Détails](https://navika.hackernwar.com/changelog/150_trafic_change.png "Détails")
+![Détails](https://navika.fr/changelog/150_trafic_change.png "Détails")
 
 ### 🗺️ In english please !
 Navika est désormais également disponible en Anglais (en)
@@ -118,7 +118,7 @@ Tu peux désormais placer un repère sur la carte et obtenir rapidement les info
 
 ---
 
-![Repère sur carte](https://app.navika.hackernwar.com/changelog/point.png "Repère sur carte")
+![Repère sur carte](https://app.navika.fr/changelog/point.png "Repère sur carte")
 
 ---
 
@@ -127,7 +127,7 @@ Les entrées et sorties de tes stations de métro sont désormais indiquées, po
 
 ---
 
-![Indications des sorties](https://app.navika.hackernwar.com/changelog/exit.png "Indications des sorties")
+![Indications des sorties](https://app.navika.fr/changelog/exit.png "Indications des sorties")
 
 ---
 

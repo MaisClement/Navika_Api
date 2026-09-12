@@ -9,13 +9,18 @@ use Doctrine\ORM\Mapping as ORM;
 #[ORM\Entity(repositoryClass: TraficApplicationPeriodsRepository::class)]
 class TraficApplicationPeriods
 {
+    // BIGINT UNSIGNED : cette table est reconstruite en boucle, son compteur
+    // AUTO_INCREMENT doit avoir de la marge même si la renumérotation opérée à
+    // chaque import (App\Service\DB::copyTable) le maintient au niveau du
+    // nombre de lignes. columnDefinition garde le type PHP en int : Doctrine
+    // continue d'hydrater et de générer l'id comme un entier.
     #[ORM\Id]
     #[ORM\GeneratedValue]
-    #[ORM\Column]
+    #[ORM\Column(columnDefinition: 'BIGINT UNSIGNED AUTO_INCREMENT NOT NULL')]
     private ?int $id = null;
 
     #[ORM\ManyToOne(inversedBy: 'applicationPeriods')]
-    #[ORM\JoinColumn(nullable: false, onDelete: "CASCADE")]
+    #[ORM\JoinColumn(nullable: false, onDelete: "CASCADE", columnDefinition: 'BIGINT UNSIGNED NOT NULL')]
     private ?Trafic $report_id = null;
 
     #[ORM\Column(nullable: false)]

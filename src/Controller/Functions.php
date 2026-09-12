@@ -8,6 +8,20 @@ use DateTimeZone;
 
 class Functions
 {
+    /**
+     * Itinerary analysis of the trip updates already seen during this request.
+     *
+     * @var array
+     */
+    private static array $trip_update_analysis = [];
+
+    /**
+     * Stop areas already resolved during this request.
+     *
+     * @var array
+     */
+    private static array $parent_stops = [];
+
     public static function httpErrorMessage($http_code, $details = ''): array
     {
         return array(
@@ -336,6 +350,71 @@ class Functions
         return $res;
     }
 
+    public static function orderPlacesMixed(array $array, string $text): array
+    {
+        $text = strtolower($text);
+
+        usort($array, function ($a, $b) use ($text): int {
+            // 1. Calcul de la distance avec la fonction native PHP
+            $levA = levenshtein($text, strtolower($a['name']));
+            $levB = levenshtein($text, strtolower($b['name']));
+
+            // 2. Définition des "paliers" de tolérance (Tiers)
+            // 0 = Exact, 1 = Petite faute (1-2), 2 = Faute moyenne (3-4), 3 = Loin
+            $getTier = function(int $lev): int {
+                if ($lev === 0) return 0;
+                if ($lev <= 2) return 1;
+                if ($lev <= 4) return 2;
+                return 3;
+            };
+
+            $tierA = $getTier($levA);
+            $tierB = $getTier($levB);
+
+            // Si les paliers sont différents, le meilleur palier gagne (le plus petit)
+            if ($tierA !== $tierB) {
+                return $tierA <=> $tierB;
+            }
+
+            // 3. À palier égal, on calcule un "Score d'importance"
+            // On convertit tes critères en un score numérique unique pour simplifier le tri
+            $getImportanceScore = function (array $item): float {
+                $modes = $item['modes'] ?? [];
+                $lines = $item['lines'] ?? [];
+                
+                $score = count($modes);
+                if (in_array('nationalrail', $modes, true)) {
+                    $score += 1; // Bonus pour les gares nationales
+                }
+                
+                // On utilise les lignes comme un critère secondaire (décimales)
+                // Ex: 2 modes et 5 lignes = score de 2.05
+                $score += count($lines) * 0.02; 
+                
+                return $score;
+            };
+
+            $importanceA = $getImportanceScore($a);
+            $importanceB = $getImportanceScore($b);
+
+            // Si l'importance est différente, on trie par importance décroissante (le plus grand en premier)
+            if ($importanceA !== $importanceB) {
+                return $importanceB <=> $importanceA;
+            }
+
+            // 4. En cas d'égalité parfaite (même palier de faute ET même importance)
+            // On départage sur la distance de Levenshtein pure (le plus petit en premier)
+            if ($levA !== $levB) {
+                return $levA <=> $levB;
+            }
+
+            // Ultime secours : tri alphabétique
+            return $a['name'] <=> $b['name'];
+        });
+
+        return $array;
+    }
+
     public static function orderDeparture($array): array
     {
         usort($array, function ($a, $b): int {
@@ -552,15 +631,17 @@ class Functions
             }
         }
         foreach ($real_time as $real) {
-            if ($real['id'] == $el['trip_name'] && strlen($el['trip_name']) >= 6) {
-                return $real['date_time'];
+            if (isset($el['trip_name'])) {
+                if ($real['id'] == $el['trip_name'] && strlen($el['trip_name']) >= 6) {
+                    return $real['date_time'];
+                }
             }
         }
-        foreach ($real_time as $real) {
-            if ($real['trip_name'] == $el['trip_name'] && strlen($el['trip_name']) >= 6) {
-                return $real['date_time'];
-            }
-        }
+        // foreach ($real_time as $real) {
+        //     if ($real['trip_name'] == $el['trip_name'] && strlen($el['trip_name']) >= 6) {
+        //         return $real['date_time'];
+        //     }
+        // }
         return null;
     }
 
@@ -580,13 +661,25 @@ class Functions
         $date_time = $i == true ? date_create($dt, timezone_open('Europe/Paris')) : date_create($dt, timezone_open('UTC'));
 
         if (is_bool($date_time)) {
+            $s = $dt;
             $dt = explode(' ', $dt);
             $dateArray = explode('-', $dt[0]);
-            $year = (int) $dateArray[0];
-            $month = (int) $dateArray[1];
-            $day = (int) $dateArray[2];
 
-            $timeArray = explode(':', $dt[1]);
+            if (!isset($dateArray[1])) {
+                $year = date("Y");
+                $month = date("m");
+                $day = date("d");
+
+                $timeArray = $dt[0];
+
+            } else {
+                $year = (int) $dateArray[0];
+                $month = (int) $dateArray[1];
+                $day = (int) $dateArray[2];
+
+                $timeArray = $dt[0];
+            }
+            
             $hours = (int) $timeArray[0];
             $minutes = (int) $timeArray[1];
             $seconds = (int) $timeArray[2];
@@ -620,7 +713,7 @@ class Functions
         if ((isset($call->DepartureStatus) && $call->DepartureStatus == "onTime") || (isset($call->ArrivalStatus) && $call->ArrivalStatus == "onTime"))
             return "ontime";
 
-        return "theorical";
+        return "ontime";
     }
 
     public static function getMessage($call): string
@@ -632,6 +725,15 @@ class Functions
             return "origin";
         } else
             return "";
+    }
+
+    public static function getVehicleSize($vehicle_feature)
+    {
+        if ( in_array('shortTrain', $vehicle_feature))
+            return 'short';
+        if ( in_array('longTrain', $vehicle_feature))
+            return 'long';
+        return null;
     }
 
     public static function getIDFMID($id): mixed
@@ -672,21 +774,6 @@ class Functions
         );
     }
 
-    public static function getDisruptionForStop($trip_update, $obj): array
-    {
-        $real_time = Functions::getTripRealtimeDateTime($trip_update, $obj['stop_id']);
-
-        return array(
-            "departure_state" => (string) $real_time['departure_state'] != null ? $real_time['departure_state'] : 'unchanged',
-            "arrival_state" => (string) $real_time['arrival_state'] != null ? $real_time['arrival_state'] : 'unchanged',
-            "message" => (string) $real_time['message'] != null ? $real_time['message'] : '',
-            "base_departure_date_time" => (string) Functions::prepareTime($obj['departure_time'], true),
-            "departure_date_time" => (string) $real_time['departure_date_time'] != null ? Functions::prepareTime($real_time['departure_date_time'], true) : Functions::prepareTime($obj['departure_time'], true),
-            "base_arrival_date_time" => (string) Functions::prepareTime($obj['arrival_time'], true),
-            "arrival_date_time" => (string) $real_time['arrival_date_time'] != null ? Functions::prepareTime($real_time['arrival_date_time'], true) : Functions::prepareTime($obj['arrival_time'], true),
-        );
-    }
-
     public static function isInNext12Hours($departure, $arrival): bool
     {
         if (isset($departure)) {
@@ -695,6 +782,7 @@ class Functions
         if (isset($arrival)) {
             return date_create($arrival) <= date_create('+12 hours');
         }
+        return true;
     }
 
     public static function isFuture($real_time_departure, $departure, $real_time_arrival, $arrival): bool
@@ -711,6 +799,7 @@ class Functions
         if (isset($arrival)) {
             return date_create($arrival) >= date_create();
         }
+        return true;
     }
 
     public static function callIsFuture($call): bool
@@ -727,6 +816,41 @@ class Functions
         if (isset($call->AimedArrivalTime)) {
             return date_create($call->AimedArrivalTime) >= date_create();
         }
+    }
+
+    /**
+     * Retrieves the stop area a stop point belongs to.
+     *
+     * @param mixed $em The entity manager.
+     * @param mixed $id The ID of the stop point.
+     * @return mixed The stop area, null when it is unknown.
+     */
+    public static function getParentStopById($em, $id): mixed
+    {
+        if ($id == null) {
+            return null;
+        }
+
+        if (array_key_exists($id, self::$parent_stops)) {
+            return self::$parent_stops[$id];
+        }
+
+        $req = $em->prepare("
+            SELECT S2.stop_id, S2.stop_name
+            FROM stops S
+
+            JOIN stops S2
+            ON S.parent_station = S2.stop_id
+
+            WHERE S.stop_id = :stop_id;
+        ");
+        $req->bindValue("stop_id", $id);
+        $results = $req->executeQuery();
+
+        $res = $results->fetchAll();
+        self::$parent_stops[$id] = array_key_exists(0, $res) ? $res[0] : null;
+
+        return self::$parent_stops[$id];
     }
 
     public static function getParentId($em, $id): mixed
@@ -751,107 +875,531 @@ class Functions
      * Retrieves the realtime data from the specified provider.
      *
      * @param mixed $provider The provider from which to retrieve the data.
-     * @return mixed The realtime data.
+     * @return mixed The realtime data : the trip updates of the feed, and the
+     *               messages of the service alerts feed already formatted for
+     *               the API.
      */
     public static function getRealtimeData($provider): mixed
     {
-        $url = $provider->getGtfsRtTripUpdates();
-
-        if ($url != null) {
-            $client = HttpClient::create();
-            $response = $client->request('GET', $url);
-            $status = $response->getStatusCode();
-
-            if ($status == 200) {
-                $feed = new FeedMessage();
-                $feed->mergeFromString($response->getContent());
-
-                $content = $feed->serializeToJsonString();
-
-                ## We add the provider id before
-                $search = [
-                    '"tripId":"',
-                    '"stopId":"',
-                ];
-                $replace = [
-                    '"tripId":"' . $provider->getId() . ':',
-                    '"stopId":"' . $provider->getId() . ':',
-                ];
-                $content = str_replace($search, $replace, $content);
-
-                # Remove timestamp if added
-                $regex = "/:\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}Z/";
-                $content = preg_replace($regex, '', $content);
-
-                return json_decode($content)->entity;
-            }
-        }
-        return [];
+        return array(
+            "trip_updates"  => self::getGtfsRtEntities($provider, $provider->getGtfsRtTripUpdates()),
+            "alerts"        => self::getRealtimeAlerts($provider),
+        );
     }
 
+    /**
+     * Downloads a GTFS-RT feed and decodes the entities it carries.
+     *
+     * @param mixed $provider The provider owning the feed.
+     * @param mixed $url The url of the feed, null when the provider has none.
+     * @return array The entities of the feed.
+     */
+    private static function getGtfsRtEntities($provider, $url): array
+    {
+        if ($url == null) {
+            return [];
+        }
+
+        $client = HttpClient::create();
+        $response = $client->request('GET', $url);
+        $status = $response->getStatusCode();
+
+        if ($status != 200) {
+            return [];
+        }
+
+        $feed = new FeedMessage();
+        $feed->mergeFromString($response->getContent());
+
+        $content = $feed->serializeToJsonString();
+
+        ## We add the provider id before
+        $search = [
+            '"tripId":"',
+            '"stopId":"',
+        ];
+        $replace = [
+            '"tripId":"' . $provider->getId() . ':',
+            '"stopId":"' . $provider->getId() . ':',
+        ];
+        $content = str_replace($search, $replace, $content);
+
+        # Remove timestamp if added
+        $regex = "/:\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}Z/";
+        $content = preg_replace($regex, '', $content);
+
+        $decoded = json_decode($content);
+
+        return isset($decoded->entity) ? $decoded->entity : [];
+    }
+
+    /**
+     * Messages of the service alerts feed of a provider, formatted as API
+     * reports.
+     *
+     * Only the alerts naming a trip are kept : the ones about a whole line are
+     * already gathered by the `app:trafic:update` task, and served aside the
+     * line they disturb.
+     *
+     * @param mixed $provider The provider from which to retrieve the alerts.
+     * @return array The alerts, each one as its report and the trips it informs.
+     */
+    public static function getRealtimeAlerts($provider): array
+    {
+        $alerts = [];
+
+        foreach (self::getGtfsRtEntities($provider, $provider->getGtfsRtServicesAlerts()) as $entity) {
+            if (!isset($entity->alert)) {
+                continue;
+            }
+
+            $alert = $entity->alert;
+            $trips = [];
+
+            $informed_entities = isset($alert->informedEntity) ? $alert->informedEntity : [];
+
+            foreach ($informed_entities as $informed_entity) {
+                if (isset($informed_entity->trip->tripId) && $informed_entity->trip->tripId != '') {
+                    $trips[] = (string) $informed_entity->trip->tripId;
+                }
+            }
+
+            if (count($trips) == 0) {
+                continue;
+            }
+
+            $status = self::getGtfsRtStatus($alert);
+
+            // The alert has nothing to tell about the trip anymore.
+            if ($status == 'past') {
+                continue;
+            }
+
+            $title = self::getGtfsRtText(isset($alert->headerText) ? $alert->headerText : null);
+            $text = self::getGtfsRtText(isset($alert->descriptionText) ? $alert->descriptionText : null);
+
+            // Nothing to display.
+            if ($title == '' && $text == '') {
+                continue;
+            }
+
+            $cause = self::getGtfsRtCause(isset($alert->cause) ? $alert->cause : 'UNKNOWN_CAUSE');
+            $effect = isset($alert->effect) ? $alert->effect : 'OTHER_EFFECT';
+
+            $alerts[] = array(
+                "trips" => $trips,
+                "report" => array(
+                    "id"        => (string) $provider->getId() . ':' . (isset($entity->id) ? $entity->id : ''),
+                    "status"    => (string) $status,
+                    "cause"     => (string) $cause,
+                    "severity"  => (int) self::getGtfsRtSeverity($alert, $effect, $cause, $status),
+                    "effect"    => (string) $effect,
+                    "message"   => array(
+                        "title" => (string) ($title != '' ? $title : $text),
+                        "text"  => (string) ($title != '' ? $text : ''),
+                    ),
+                ),
+            );
+        }
+
+        return $alerts;
+    }
+
+    /**
+     * Reports of the service alerts feed which inform a trip.
+     *
+     * A feed does not always name a trip the way the schedules do : the SNCF
+     * one only gives `OCESN<train number>F` where the trip id also carries the
+     * agency and the itinerary (`OCESN6949F1187_F:OUI:FR:Line::...`). A trip is
+     * informed as soon as its id starts with the one given by the alert.
+     *
+     * @param array $alerts The alerts, as returned by getRealtimeData.
+     * @param mixed $trip_id The id of the trip.
+     * @return array The reports informing the trip.
+     */
+    public static function getTripRealtimeAlerts($alerts, $trip_id): array
+    {
+        $regex = "/:\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}Z/";
+        $trip_id = preg_replace($regex, '', $trip_id);
+
+        $reports = [];
+
+        foreach ($alerts as $alert) {
+            foreach ($alert['trips'] as $informed_trip_id) {
+                if (str_starts_with($trip_id, $informed_trip_id)) {
+                    $reports[] = $alert['report'];
+                    break;
+                }
+            }
+        }
+
+        return $reports;
+    }
+
+    /**
+     * Text of a GTFS-RT translated string, in French as soon as the feed gives
+     * it, cleaned up from the html a producer may add.
+     *
+     * @param mixed $translated_string The translated string of the feed.
+     * @param string $language The wanted language.
+     * @return string The text, empty when the feed gives none.
+     */
+    private static function getGtfsRtText($translated_string, $language = 'fr'): string
+    {
+        if ($translated_string == null || !isset($translated_string->translation)) {
+            return '';
+        }
+
+        $text = null;
+
+        foreach ($translated_string->translation as $translation) {
+            if (!isset($translation->text)) {
+                continue;
+            }
+
+            // The feed does not always tell the language, the first text is
+            // then the only one to display.
+            if ($text === null) {
+                $text = $translation->text;
+            }
+
+            if (isset($translation->language) && $translation->language == $language) {
+                $text = $translation->text;
+                break;
+            }
+        }
+
+        if ($text === null) {
+            return '';
+        }
+
+        $search = ['<br>', '</p>', '  '];
+        $replace = [PHP_EOL, PHP_EOL, ' '];
+
+        $text = str_replace($search, $replace, $text);
+        $text = strip_tags($text);
+        $text = html_entity_decode($text);
+
+        return trim($text);
+    }
+
+    /**
+     * Status of an alert, read from its active periods : one without an end
+     * never ends, one without a start has always begun, and an alert giving no
+     * period at all is always active.
+     *
+     * @param mixed $alert The alert of the feed.
+     * @return string The status : active, future or past.
+     */
+    private static function getGtfsRtStatus($alert): string
+    {
+        if (!isset($alert->activePeriod) || count($alert->activePeriod) == 0) {
+            return 'active';
+        }
+
+        $now = time();
+        $is_future = false;
+
+        foreach ($alert->activePeriod as $period) {
+            $start = isset($period->start) ? (int) $period->start : null;
+            $end = isset($period->end) ? (int) $period->end : null;
+
+            if ($start !== null && $now < $start) {
+                $is_future = true;
+                continue;
+            }
+
+            if ($end !== null && $now > $end) {
+                continue;
+            }
+
+            return 'active';
+        }
+
+        return $is_future ? 'future' : 'past';
+    }
+
+    /**
+     * Cause of an alert, as the API names it.
+     *
+     * @param mixed $cause The cause given by the feed.
+     * @return string The cause for the API.
+     */
+    private static function getGtfsRtCause($cause): string
+    {
+        $causes = array(
+            'UNKNOWN_CAUSE' => 'perturbation',
+            'OTHER_CAUSE' => 'perturbation',
+            'TECHNICAL_PROBLEM' => 'perturbation',
+            'STRIKE' => 'perturbation',
+            'DEMONSTRATION' => 'perturbation',
+            'ACCIDENT' => 'perturbation',
+            'HOLIDAY' => 'perturbation',
+            'WEATHER' => 'perturbation',
+            'MAINTENANCE' => 'travaux',
+            'CONSTRUCTION' => 'travaux',
+            'POLICE_ACTIVITY' => 'perturbation',
+            'MEDICAL_EMERGENCY' => 'perturbation',
+        );
+
+        return isset($causes[$cause]) ? $causes[$cause] : 'perturbation';
+    }
+
+    /**
+     * Severity of an alert : the one the feed gives when it does, otherwise the
+     * one deduced from its effect.
+     *
+     * @param mixed $alert The alert of the feed.
+     * @param mixed $effect The effect of the alert.
+     * @param mixed $cause The cause of the alert, as the API names it.
+     * @param mixed $status The status of the alert.
+     * @return int The severity.
+     */
+    private static function getGtfsRtSeverity($alert, $effect, $cause, $status): int
+    {
+        $severities = array(
+            'INFO' => 1,
+            'WARNING' => 4,
+            'SEVERE' => 5,
+        );
+
+        if (isset($alert->severityLevel) && isset($severities[$alert->severityLevel])) {
+            return $severities[$alert->severityLevel];
+        }
+
+        return self::getSeverity($effect, $cause, $status);
+    }
+
+    /**
+     * Analyse the stopTimeUpdate list of a trip update to rebuild the itinerary
+     * really operated by the vehicle.
+     *
+     * GTFS-RT conventions used here :
+     *  - a stop with the SKIPPED scheduleRelationship is not served anymore ;
+     *  - a stop having an arrival but no departure, and which is not the last
+     *    one of the feed, means the vehicle terminates there (exceptional
+     *    terminus) : every following stop is dropped ;
+     *  - a stop having a departure but no arrival, and which is not the first
+     *    one of the feed, means the vehicle starts there (exceptional origin) :
+     *    every previous stop is dropped.
+     *
+     * The two last rules are only applied when the feed is known to publish
+     * both times (some producers only publish departures, or only arrivals),
+     * otherwise every stop would look like a terminus / an origin.
+     *
+     * @param mixed $trip_update The trip update, as returned by getTripRealtime.
+     * @return array The itinerary analysis.
+     */
+    public static function analyzeTripUpdate($trip_update): array
+    {
+        $res = array(
+            "stops" => array(),
+            "origin_id" => null,
+            "terminus_id" => null,
+            "has_exceptional_origin" => false,
+            "has_exceptional_terminus" => false,
+            "is_modified" => false,
+            "is_cancelled" => false,
+            "is_added" => false,
+            "is_delayed" => false,
+        );
+
+        if ($trip_update == null || !isset($trip_update['trip_update']) || $trip_update['trip_update'] == null) {
+            return $res;
+        }
+
+        $update = $trip_update['trip_update'];
+
+        // Analysing the same feed entity once per stop would be pointless, the
+        // result only depends on the trip and on the timestamp of the update.
+        $cache_key = (isset($update->trip->tripId) ? $update->trip->tripId : '')
+            . '|' . (isset($update->timestamp) ? $update->timestamp : '');
+
+        if ($cache_key != '|' && isset(self::$trip_update_analysis[$cache_key])) {
+            return self::$trip_update_analysis[$cache_key];
+        }
+
+        if (isset($update->trip->scheduleRelationship)) {
+            $schedule_relationship = $update->trip->scheduleRelationship;
+
+            if ($schedule_relationship == "CANCELED" || $schedule_relationship == "DELETED") {
+                $res['is_cancelled'] = true;
+            }
+            if ($schedule_relationship == "ADDED" || $schedule_relationship == "DUPLICATED") {
+                $res['is_added'] = true;
+            }
+        }
+
+        $stop_times = isset($update->stopTimeUpdate) ? $update->stopTimeUpdate : array();
+        $len = count($stop_times);
+
+        if ($len == 0) {
+            return $res;
+        }
+
+        // ---- Which stops are still served ?
+        $served = array();
+        $feed_has_departures = false;
+        $feed_has_arrivals = false;
+
+        for ($i = 0; $i < $len; $i++) {
+            $stop_time = $stop_times[$i];
+
+            $skipped = isset($stop_time->scheduleRelationship) && $stop_time->scheduleRelationship == "SKIPPED";
+            $served[$i] = !$skipped && !$res['is_cancelled'];
+
+            if (!$skipped && $i > 0 && $i < $len - 1) {
+                if (isset($stop_time->departure)) {
+                    $feed_has_departures = true;
+                }
+                if (isset($stop_time->arrival)) {
+                    $feed_has_arrivals = true;
+                }
+            }
+
+            if (!$skipped) {
+                if (isset($stop_time->arrival->delay) && $stop_time->arrival->delay != 0) {
+                    $res['is_delayed'] = true;
+                }
+                if (isset($stop_time->departure->delay) && $stop_time->departure->delay != 0) {
+                    $res['is_delayed'] = true;
+                }
+            }
+        }
+
+        // ---- The vehicle terminates at the first served stop it never leaves.
+        if ($feed_has_departures) {
+            for ($i = 0; $i < $len - 1; $i++) {
+                if (!$served[$i]) {
+                    continue;
+                }
+
+                if (isset($stop_times[$i]->arrival) && !isset($stop_times[$i]->departure)) {
+                    for ($j = $i + 1; $j < $len; $j++) {
+                        $served[$j] = false;
+                    }
+                    break;
+                }
+            }
+        }
+
+        // ---- ... and starts at the last served stop it never reaches.
+        if ($feed_has_arrivals) {
+            for ($i = $len - 1; $i > 0; $i--) {
+                if (!$served[$i]) {
+                    continue;
+                }
+
+                if (isset($stop_times[$i]->departure) && !isset($stop_times[$i]->arrival)) {
+                    for ($j = $i - 1; $j >= 0; $j--) {
+                        $served[$j] = false;
+                    }
+                    break;
+                }
+            }
+        }
+
+        // ---- Origin and terminus of the itinerary really operated.
+        $origin = null;
+        $terminus = null;
+
+        for ($i = 0; $i < $len; $i++) {
+            if ($served[$i]) {
+                if ($origin === null) {
+                    $origin = $i;
+                }
+                $terminus = $i;
+            }
+        }
+
+        if ($origin !== null) {
+            $res['has_exceptional_origin'] = $origin > 0;
+            $res['has_exceptional_terminus'] = $terminus < $len - 1;
+            $res['origin_id'] = $stop_times[$origin]->stopId;
+            $res['terminus_id'] = $stop_times[$terminus]->stopId;
+
+            // A stop dropped between the origin and the terminus changes the
+            // served stops, not the boundaries of the itinerary.
+            for ($i = $origin; $i <= $terminus; $i++) {
+                if (!$served[$i]) {
+                    $res['is_modified'] = true;
+                    break;
+                }
+            }
+        } else {
+            $res['is_cancelled'] = true;
+        }
+
+        for ($i = 0; $i < $len; $i++) {
+            $stop_id = $stop_times[$i]->stopId;
+
+            // On a trip calling twice at the same place, keep the first call.
+            if (isset($res['stops'][$stop_id])) {
+                continue;
+            }
+
+            $res['stops'][$stop_id] = array(
+                "index" => $i,
+                "stop_time" => $stop_times[$i],
+                "served" => $served[$i],
+                "skipped" => isset($stop_times[$i]->scheduleRelationship) && $stop_times[$i]->scheduleRelationship == "SKIPPED",
+                "is_origin" => $i === $origin,
+                "is_terminus" => $i === $terminus,
+            );
+        }
+
+        if ($cache_key != '|') {
+            self::$trip_update_analysis[$cache_key] = $res;
+        }
+
+        return $res;
+    }
+
+    /**
+     * Retrieves the realtime informations of a trip.
+     *
+     * @param mixed $trip_update The entities of the realtime feed.
+     * @param mixed $trip_id The ID of the trip.
+     * @param mixed $stop_id The ID of the stop the trip is requested from.
+     * @return array|null The trip update and its state.
+     */
     public static function getTripRealtime($trip_update, $trip_id, $stop_id = null): array|null
     {
         $regex = "/:\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}Z/";
         $trip_id = preg_replace($regex, '', $trip_id);
 
-        $is_cancelled = false;
-        $is_modified = false;
-        $has_exceptional_terminus = false;
-        $is_added = false;
-
         foreach ($trip_update as $trip) {
-            if (substr($trip->tripUpdate->trip->tripId, 0, -8) == substr($trip_id, 0, -8)) {
+            if (!is_object($trip) || !isset($trip->tripUpdate->trip->tripId)) {
+                continue;
+            }
 
-                // Check if fully canceled
-                if (isset($trip->tripUpdate->trip->scheduleRelationship)) {
-                    $schedule_relationship = $trip->tripUpdate->trip->scheduleRelationship;
-
-                    // Check if fully canceled
-                    if ($schedule_relationship == "CANCELED") {
-                        $is_cancelled = true;
-                    }
-                    // Check if fully canceled
-                    if ($schedule_relationship == "ADDED") {
-                        $is_added = true;
-                    }
-                }
-                $l = count($trip->tripUpdate->stopTimeUpdate);
-                for ($i = 0; $i < $l; $i++) {
-                    if (isset($trip->tripUpdate->stopTimeUpdate[$i]->scheduleRelationship)) {
-
-                        // if modified
-                        if ($trip->tripUpdate->stopTimeUpdate[$i]->scheduleRelationship == "SKIPPED")
-                            $is_modified = true;
-
-                        if ($stop_id != null) {
-                            // Check if cancelled at stop
-                            if ($trip->tripUpdate->stopTimeUpdate[$i]->stopId == $stop_id && $trip->tripUpdate->stopTimeUpdate[$i]->scheduleRelationship == "SKIPPED")
-                                $is_cancelled = true;
-                        }
-
-                        // Check if cancelled at last stop
-                        if (($i == ($l - 1)) && $trip->tripUpdate->stopTimeUpdate[$i]->scheduleRelationship == "SKIPPED")
-                            $has_exceptional_terminus = true;
-                    }
-                }
-
-                $state = "ontime";
-                if ($is_cancelled) {
-                    $state = "cancelled";
-                } else if ($has_exceptional_terminus) {
-                    $state = "exceptional_terminus";
-                } else if ($is_modified) {
-                    $state = "modified";
-                } else if ($is_added) {
-                    $state = "added";
-                } else if ($is_modified) {
-                    $state = "ontime";
-                }
-
-                return array(
+            if ($trip->tripUpdate->trip->tripId == $trip_id) {
+                $res = array(
                     "trip_update" => $trip->tripUpdate,
-                    "state" => $state
+                    "state" => "ontime",
                 );
+
+                $analyze = self::analyzeTripUpdate($res);
+                $is_cancelled = $analyze['is_cancelled'];
+
+                // Check if cancelled at the requested stop
+                if ($stop_id != null && isset($analyze['stops'][$stop_id]) && !$analyze['stops'][$stop_id]['served']) {
+                    $is_cancelled = true;
+                }
+
+                // An exceptional origin is reported as a modified trip : the
+                // details are in the reports and in the state of each stop.
+                if ($is_cancelled) {
+                    $res['state'] = "cancelled";
+                } else if ($analyze['has_exceptional_terminus']) {
+                    $res['state'] = "exceptional_terminus";
+                } else if ($analyze['is_modified'] || $analyze['has_exceptional_origin']) {
+                    $res['state'] = "modified";
+                } else if ($analyze['is_added']) {
+                    $res['state'] = "added";
+                }
+
+                return $res;
             }
         }
         return null;
@@ -861,9 +1409,11 @@ class Functions
      * Retrieves the realtime reports for a trip.
      *
      * @param mixed $trip_update The trip update data.
+     * @param mixed $terminus The name of the exceptional terminus, when known.
+     * @param mixed $origin The name of the exceptional origin, when known.
      * @return array The array of realtime reports for the trip.
      */
-    public static function getTripRealtimeReports($trip_update): array
+    public static function getTripRealtimeReports($trip_update, $terminus = null, $origin = null): array
     {
         $message = array(
             "canceled" => array(
@@ -873,8 +1423,27 @@ class Functions
                 "severity" => 5,
                 "effect" => 'OTHER',
                 "message" => array(
-                    "title" => "Supprimé",
-                    "name" => "",
+                    "title" => "Supprimé"
+                ),
+            ),
+            "exceptional_terminus" => array(
+                "id" => 'ADMIN:exceptional_terminus',
+                "status" => 'active',
+                "cause" => 'exceptional_terminus',
+                "severity" => 5,
+                "effect" => 'OTHER',
+                "message" => array(
+                    "title" => "Terminus exceptionnel"
+                ),
+            ),
+            "exceptional_origin" => array(
+                "id" => 'ADMIN:exceptional_origin',
+                "status" => 'active',
+                "cause" => 'exceptional_origin',
+                "severity" => 5,
+                "effect" => 'OTHER',
+                "message" => array(
+                    "title" => "Origine exceptionnelle"
                 ),
             ),
             "modified" => array(
@@ -884,8 +1453,7 @@ class Functions
                 "severity" => 4,
                 "effect" => 'OTHER',
                 "message" => array(
-                    "title" => "Desserte modifié",
-                    "name" => "",
+                    "title" => "Desserte modifiée"
                 ),
             ),
             "delayed" => array(
@@ -895,8 +1463,7 @@ class Functions
                 "severity" => 4,
                 "effect" => 'OTHER',
                 "message" => array(
-                    "title" => "Retardé",
-                    "name" => "",
+                    "title" => "Retardé"
                 ),
             ),
             "added" => array(
@@ -906,47 +1473,32 @@ class Functions
                 "severity" => 1,
                 "effect" => 'OTHER',
                 "message" => array(
-                    "title" => "Trajet supplémentaire",
+                    "title" => "Trajet supplémentaire"
                 ),
             ),
         );
 
-        $is_delayed = false;
-        $is_modified = false;
-
         $reports = [];
 
         if ($trip_update != null && $trip_update['trip_update'] != null) {
-            // Check if fully canceled
-            if (isset($trip_update['trip_update']->trip->scheduleRelationship)) {
-                $schedule_relationship = $trip_update['trip_update']->trip->scheduleRelationship;
+            $analyze = self::analyzeTripUpdate($trip_update);
 
-                // Check if fully canceled
-                if ($schedule_relationship == "CANCELED") {
-                    $reports[] = $message['canceled'];
-                }
-                // Check if fully canceled
-                if ($schedule_relationship == "ADDED") {
-                    $reports[] = $message['added'];
-                }
+            if ($analyze['is_cancelled']) {
+                $reports[] = $message['canceled'];
             }
-
-            foreach ($trip_update['trip_update']->stopTimeUpdate as $stop_time) {
-                if (isset($stop_time->scheduleRelationship) && $stop_time->scheduleRelationship == "SKIPPED") {
-                    $is_modified = true;
-                }
-                if (isset($stop_time->arrival) && isset($stop_time->arrival->delay)) {
-                    $is_delayed = true;
-                }
-                if (isset($stop_time->departure) && isset($stop_time->departure->delay)) {
-                    $is_delayed = true;
-                }
+            if ($analyze['is_added']) {
+                $reports[] = $message['added'];
             }
-
-            if ($is_modified) {
+            if ($analyze['has_exceptional_terminus']) {
+                $reports[] = $message['exceptional_terminus'];
+            }
+            if ($analyze['has_exceptional_origin']) {
+                $reports[] = $message['exceptional_origin'];
+            }
+            if ($analyze['is_modified']) {
                 $reports[] = $message['modified'];
             }
-            if ($is_delayed) {
+            if ($analyze['is_delayed']) {
                 $reports[] = $message['delayed'];
             }
         }
@@ -968,52 +1520,108 @@ class Functions
             "departure_state" => null,
             "arrival_date_time" => null,
             "arrival_state" => null,
+            "departure_delay" => null,
+            "arrival_delay" => null,
             "message" => null,
+            "state" => "theorical",
+            "stop_state" => null,
+            "is_origin" => false,
+            "is_terminus" => false,
+            "is_deleted" => false,
         );
 
-        if ($trip_update != null && $trip_update['trip_update'] != null) {
-            $len = count($trip_update['trip_update']->stopTimeUpdate);
-            for ($i = 0; $i < $len; $i++) {
-                $stop_time = $trip_update['trip_update']->stopTimeUpdate[$i];
-                if ($stop_time->stopId == $stop_id) {
-                    if (isset($stop_time->departure)) {
-                        $date_time = new DateTime();
-                        $date_time->setTimestamp($stop_time->departure->time);
-                        $res["departure_date_time"] = $date_time->format(DATE_ATOM);
-                    }
+        if ($trip_update == null || !isset($trip_update['trip_update']) || $trip_update['trip_update'] == null) {
+            return $res;
+        }
 
-                    if (isset($stop_time->arrival)) {
-                        $date_time = new DateTime();
-                        $date_time->setTimestamp($stop_time->arrival->time);
-                        $res["arrival_date_time"] = $date_time->format(DATE_ATOM);
-                    }
+        $analyze = self::analyzeTripUpdate($trip_update);
 
-                    if (isset($stop_time->departure) && isset($stop_time->departure->delay)) {
-                        $res["departure_state"] = "delayed";
-                    }
-                    if (isset($stop_time->arrival) && isset($stop_time->arrival->delay)) {
-                        $res["arrival_state"] = "delayed";
-                    }
+        // The feed says nothing about this stop, keep the theorical times.
+        if (!isset($analyze['stops'][$stop_id])) {
+            return $res;
+        }
 
-                    if ($i != $len - 1 && !isset($stop_time->departure)) {
-                        $res["departure_state"] = "deleted";
-                        $res["departure_date_time"] = null;
-                    }
-                    if ($i > 0 && !isset($stop_time->arrival)) {
-                        $res["arrival_state"] = "deleted";
-                        $res["arrival_date_time"] = null;
-                    }
+        $stop = $analyze['stops'][$stop_id];
+        $stop_time = $stop['stop_time'];
 
-                    if (isset($stop_time->scheduleRelationship) && $stop_time->scheduleRelationship == "SKIPPED") {
-                        $res["departure_state"] = "deleted";
-                        $res["departure_date_time"] = null;
-                        $res["arrival_state"] = "deleted";
-                        $res["arrival_date_time"] = null;
-                    }
-                    return $res;
+        $res['state'] = "ontime";
+        $res['is_origin'] = $stop['is_origin'];
+        $res['is_terminus'] = $stop['is_terminus'];
+
+        // The stop is not served anymore : the callers keep the theorical
+        // times, they are the ones to display, struck through.
+        if (!$stop['served']) {
+            $res['state'] = "deleted";
+            $res['stop_state'] = "deleted";
+            $res['is_deleted'] = true;
+            $res['departure_state'] = "deleted";
+            $res['arrival_state'] = "deleted";
+            return $res;
+        }
+
+        if (isset($stop_time->arrival)) {
+            $date_time = new DateTime();
+            $date_time->setTimestamp($stop_time->arrival->time);
+            $res['arrival_date_time'] = $date_time->format(DATE_ATOM);
+
+            if (isset($stop_time->arrival->delay)) {
+                $res['arrival_delay'] = (int) $stop_time->arrival->delay;
+
+                if ($stop_time->arrival->delay != 0) {
+                    $res['arrival_state'] = "delayed";
                 }
             }
         }
+
+        if (isset($stop_time->departure)) {
+            $date_time = new DateTime();
+            $date_time->setTimestamp($stop_time->departure->time);
+            $res['departure_date_time'] = $date_time->format(DATE_ATOM);
+
+            if (isset($stop_time->departure->delay)) {
+                $res['departure_delay'] = (int) $stop_time->departure->delay;
+
+                if ($stop_time->departure->delay != 0) {
+                    $res['departure_state'] = "delayed";
+                }
+            }
+        }
+
+        // The vehicle never leaves its terminus : mirroring the arrival on the
+        // departure keeps the delay visible for a client showing departures.
+        if (!isset($stop_time->departure)) {
+            if ($stop['is_terminus']) {
+                $res['departure_date_time'] = $res['arrival_date_time'];
+                $res['departure_state'] = $res['arrival_state'];
+                $res['departure_delay'] = $res['arrival_delay'];
+            } else {
+                $res['departure_state'] = "deleted";
+                $res['departure_date_time'] = null;
+            }
+        }
+
+        // Same thing at the origin, the vehicle never arrives there.
+        if (!isset($stop_time->arrival)) {
+            if ($stop['is_origin']) {
+                $res['arrival_date_time'] = $res['departure_date_time'];
+                $res['arrival_state'] = $res['departure_state'];
+                $res['arrival_delay'] = $res['departure_delay'];
+            } else {
+                $res['arrival_state'] = "deleted";
+                $res['arrival_date_time'] = null;
+            }
+        }
+
+        if ($stop['is_terminus'] && $analyze['has_exceptional_terminus']) {
+            $res['stop_state'] = "exceptional_terminus";
+        } else if ($stop['is_origin'] && $analyze['has_exceptional_origin']) {
+            $res['stop_state'] = "exceptional_origin";
+        } else if ($analyze['is_added']) {
+            $res['stop_state'] = "added";
+        } else {
+            $res['stop_state'] = "unchanged";
+        }
+
         return $res;
     }
 
@@ -1048,7 +1656,7 @@ class Functions
     public static function getSchedulesByStop($em, $stop_id, $route_id, $date): mixed
     {
         $req = $em->prepare("
-            SELECT DISTINCT ST.*, CONCAT(:date, ' ', ST.departure_time), CONCAT(:date, ' ', ST.arrival_time) as arrival_time, T.*
+            SELECT DISTINCT ST.*, CONCAT(:date, ' ', ST.departure_time) as departure_time, CONCAT(:date, ' ', ST.arrival_time) as arrival_time, T.*
             FROM stops S
             
             INNER JOIN stop_times ST 
@@ -1087,6 +1695,31 @@ class Functions
         $req->bindValue("date", $date);
         $req->bindValue("route_id", $route_id);
         $req->bindValue("stop_id", $stop_id);
+        $results = $req->executeQuery();
+        return $results->fetchAll();
+    }
+
+    public static function getLastStopOfTrip($em, $trip_id){    
+        $req = $em->prepare("
+            SELECT S2.*
+            FROM trips T
+
+            JOIN stop_times ST 
+            ON T.trip_id = ST.trip_id
+
+            JOIN stops S
+            ON ST.stop_id = S.stop_id
+
+            JOIN stops S2
+            ON S.parent_station = S2.stop_id
+
+            WHERE T.trip_id = :trip_id
+
+            ORDER BY ST.stop_sequence DESC
+            LIMIT 1;
+      
+        ");
+        $req->bindValue("trip_id", $trip_id);
         $results = $req->executeQuery();
         return $results->fetchAll();
     }
@@ -1148,7 +1781,7 @@ class Functions
     /**
      * Retrieves the stops of a specific route.
      *
-     * @param EntityManager $em The entity manager.
+     * @param mixed $em The entity manager.
      * @param mixed $route_id The ID of the route.
      * @return mixed The stops of the specified route.
      */
@@ -1172,6 +1805,47 @@ class Functions
             
             WHERE R.route_id = :route_id
             ORDER BY T.trip_id, ST.stop_sequence;
+        ");
+        $req->bindValue("route_id", $route_id);
+        $results = $req->executeQuery();
+        return $results->fetchAll();
+    }
+
+    /**
+     * Retrieves the stops of a specific route.
+     *
+     * @param mixed $em The entity manager.
+     * @param mixed $route_id The ID of the route.
+     * @return mixed The stops of the specified route.
+     */
+    public static function getStopRelations($em, $route_id): mixed
+    {
+        $req = $em->prepare("
+            SELECT
+                s.parent_station as from_stop_id,
+                (
+                    SELECT 
+                        s2.parent_station
+                    FROM
+                        stops s2
+                    JOIN stop_times st2 ON s2.stop_id = st2.stop_id
+                    JOIN stops s ON st.stop_id = s.stop_id
+                    WHERE 
+                        st2.trip_id = t.trip_id
+                    AND st2.stop_sequence = st.stop_sequence + 1
+                ) AS to_stop_id,
+                st.stop_sequence
+            FROM 
+                routes r
+            JOIN trips t ON r.route_id = t.route_id
+            JOIN stop_times st ON t.trip_id = st.trip_id
+            JOIN stops s ON st.stop_id = s.stop_id
+            WHERE 
+                r.route_id = :route_id
+                AND t.direction_id = '1'
+            ORDER BY 
+                t.trip_id, st.stop_sequence;
+
         ");
         $req->bindValue("route_id", $route_id);
         $results = $req->executeQuery();

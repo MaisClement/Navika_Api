@@ -3,7 +3,7 @@
 namespace App\Command\GTFS;
 
 use App\Command\CommandFunctions;
-use App\Service\DBServices;
+use App\Service\DB;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
@@ -13,12 +13,12 @@ use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
 class StopRoute extends Command
 {
     private EntityManagerInterface $entityManager;
-    private DBServices $dbServices;
+    private DB $DB;
 
-    public function __construct(EntityManagerInterface $entityManager, DBServices $dbServices)
+    public function __construct(EntityManagerInterface $entityManager, DB $DB)
     {
         $this->entityManager = $entityManager;
-        $this->dbServices = $dbServices;
+        $this->DB = $DB;
 
         parent::__construct();
     }
@@ -37,19 +37,19 @@ class StopRoute extends Command
 
         // --
         $output->writeln('> Generate Temp Stop Route...');
-        $this->dbServices->TruncateTable($db, 'temp_stop_route');
+        $this->DB->TruncateTable($db, 'temp_stop_route');
 
         $output->writeln('> Generate Temp Stop Route 1/2...');
-        $this->dbServices->generateTempStopRoute($db);
+        $this->DB->generateTempStopRoute($db);
 
         $output->writeln('> Generate Temp Stop Route 2/2...');
-        $this->dbServices->generateTempStopRoute2($db);
+        $this->DB->generateTempStopRoute2($db);
 
         // ---
         $output->writeln('> Updating Stop Route...');
 
-        $this->dbServices->autoDeleteStopRoute($db);
-        $this->dbServices->autoInsertStopRoute($db);
+        $this->DB->autoDeleteStopRoute($db);
+        $this->DB->autoInsertStopRoute($db);
 
         return Command::SUCCESS;
     }

@@ -98,6 +98,8 @@ class Near
                 if (($zoom >= 15000 && ($stop->getTransportMode() == 'rail' || $stop->getTransportMode() == 'nationalrail')) || $zoom < 15000) {
 
                     if (!isset($places[$stop->getStopId()->getStopId()])) {
+
+                        $parentStation = $stop->getStopId()->getParentStation();
                         $places[$stop->getStopId()->getStopId()] = array(
                             'id' => $stop->getStopId()->getStopId(),
                             'name' => (string) $stop->getStopName(),
@@ -110,7 +112,7 @@ class Near
                                 'lon' => (float) $stop->getStopLon(),
                             ),
                             'location_type' => $stop->getLocationType(),
-                            'parent' => $stop->getStopId()->getParentStation(),
+                            'parent' => $parentStation != null ? $parentStation : null,
                             'lines' => array(),
                             'modes' => array(),
                         );

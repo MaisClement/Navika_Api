@@ -560,7 +560,7 @@ class Routes
         return $this;
     }
 
-    public function removeDetails(RouteDetails $routeDetails): static
+    public function removeDetails(RouteDetails $routeDetail): static
     {
         if ($this->routeDetails->removeElement($routeDetail)) {
             // set the owning side to null (unless already changed)

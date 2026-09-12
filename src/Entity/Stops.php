@@ -5,6 +5,7 @@ namespace App\Entity;
 use App\Repository\StopsRepository;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
+use App\Controller\Functions;
 use Doctrine\ORM\Mapping as ORM;
 
 #[ORM\Entity(repositoryClass: StopsRepository::class)]
@@ -73,12 +74,16 @@ class Stops
     #[ORM\OneToMany(mappedBy: 'origin_id', targetEntity: FareRules::class)]
     private Collection $fareRules;
 
+    #[ORM\OneToMany(mappedBy: 'object_id', targetEntity: StopExtensions::class)]
+    private Collection $stopExtensions;
+
     public function __construct()
     {
         $this->stopTimes = new ArrayCollection();
         $this->pathways = new ArrayCollection();
         $this->transfers = new ArrayCollection();
         $this->fareRules = new ArrayCollection();
+        $this->stopExtensions = new ArrayCollection();
     }
 
     public function getProviderId(): ?Provider
@@ -261,6 +266,24 @@ class Stops
         return $this;
     }
 
+    public function getStop($lat = null, $lon = null): ?array
+    {
+        $stop = array(
+            'id'   =>       (string) $this->getStopId(),
+            'name' =>       (string) $this->getStopName(),
+            'type' =>       (string) $this->getLocationType() == 0 ? 'stop_point' : 'stop_area',
+            'town' =>       (string) '',
+            'zip_code' =>   (string) '',
+            'coord' => array(
+                'lat' =>    (float) $this->stop_lat,
+                'lon' =>    (float) $this->stop_lon,
+            ),
+            'distance' =>   (int)   ($lat != null && $lon != null) ? Functions::calculateDistance($this->stop_lat, $this->stop_lon, $lat, $lon) : 0
+        );
+
+        return $stop;
+    }
+
     /**
      * @return Collection<int, StopTimes>
      */
@@ -380,6 +403,60 @@ class Stops
         // set the owning side to null (unless already changed)
         if ($this->fareRules->removeElement($fareRule) && $fareRule->getOriginId() === $this) {
             $fareRule->setOriginId(null);
+        }
+
+        return $this;
+    }
+
+    public function clone(): Stops
+    {
+        $newStop = new Stops();
+
+        $newStop->setProviderId($this->provider_id   ?? ''   );
+        $newStop->setStopId($this->stop_id   ?? ''   );
+        $newStop->setStopCode($this->stop_code   ?? ''   );
+        $newStop->setStopName($this->stop_name   ?? ''   );
+        $newStop->setStopDesc($this->stop_desc   ?? ''   );
+        $newStop->setStopLat($this->stop_lat   ?? ''   );
+        $newStop->setStopLon($this->stop_lon   ?? ''   );
+        $newStop->setZoneId($this->zone_id   ?? ''   );
+        $newStop->setStopUrl($this->stop_url   ?? ''   );
+        $newStop->setLocationType($this->location_type   ?? ''   );
+        $newStop->setVehicleType($this->vehicle_type   ?? ''   );
+        $newStop->setStopTimezone($this->stop_timezone   ?? ''   );
+        $newStop->setWheelchairBoarding($this->wheelchair_boarding   ?? ''   );
+        // $newStop->setLevelId($this->level_id   ?? null   );
+        $newStop->setPlatformCode($this->platform_code   ?? ''   );
+        $newStop->setParentStation($this->parent_station   ?? ''   );
+
+        return $newStop;
+    }
+
+    /**
+     * @return Collection<int, StopExtensions>
+     */
+    public function getObjectSystem(): Collection
+    {
+        return $this->stopExtensions;
+    }
+
+    public function addObjectSystem(StopExtensions $objectSystem): static
+    {
+        if (!$this->stopExtensions->contains($objectSystem)) {
+            $this->stopExtensions->add($objectSystem);
+            $objectSystem->setObjectId($this);
+        }
+
+        return $this;
+    }
+
+    public function removeObjectSystem(StopExtensions $objectSystem): static
+    {
+        if ($this->stopExtensions->removeElement($objectSystem)) {
+            // set the owning side to null (unless already changed)
+            if ($objectSystem->getObjectId() === $this) {
+                $objectSystem->setObjectId(null);
+            }
         }
 
         return $this;

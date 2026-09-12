@@ -13,9 +13,14 @@ use Doctrine\ORM\Mapping as ORM;
 
 class CalendarDates
 {
+    // BIGINT UNSIGNED : cette table est reconstruite en boucle, son compteur
+    // AUTO_INCREMENT doit avoir de la marge même si la renumérotation opérée à
+    // chaque import (App\Service\DB::copyTable) le maintient au niveau du
+    // nombre de lignes. columnDefinition garde le type PHP en int : Doctrine
+    // continue d'hydrater et de générer l'id comme un entier.
     #[ORM\Id]
     #[ORM\GeneratedValue]
-    #[ORM\Column]
+    #[ORM\Column(columnDefinition: 'BIGINT UNSIGNED AUTO_INCREMENT NOT NULL')]
     private ?int $id = null;
 
     #[ORM\ManyToOne(inversedBy: 'calendarDates')]

@@ -95,6 +95,42 @@ class Index
             );
         }
 
+        // Travaux du 
+
+        // $messages[] = array(
+        //     "id"            =>  (string)    "ADMIN:heat_wave_alert",
+        //     "status"        =>  (string)    "active",
+        //     "severity"      =>  (int)       5,
+        //     "effect"        =>  (string)    "OTHER",
+        //     "updated_at"    =>  (string)    '2026-06-22T13:00:00Z',
+        //     "message"       =>  array(
+        //         "title"     =>      '️Vigilance canicule',
+        //         // "text"      =>      'Anticiper vos déplacements',
+        //         "icon"      =>      'https://app.navika.fr/img/modal/warning.png',
+        //         "img"       =>      'https://app.navika.fr/img/back/alert.png',
+        //         "is_reduced"=>       true,
+        //         "button"    =>      'En savoir plus',
+        //         "link"      =>      'https://vigilance.meteofrance.fr/fr',
+        //     ),
+        // );
+
+        // $messages[] = array(
+        //     "id"            =>  (string)    "ADMIN:work",
+        //     "status"        =>  (string)    "active",
+        //     "severity"      =>  (int)       2,
+        //     "effect"        =>  (string)    "OTHER",
+        //     "updated_at"    =>  (string)    '2026-06-22T13:00:00Z',
+        //     "message"       =>  array(
+        //         "title"     =>      'Travaux d’été ☀️​',
+        //         "text"      =>      'Cet été, certaines lignes sont impactées par des travaux de maintenance et de modernisation. Dates, lignes concernées, itinéraires alternatifs : retrouvez l’ensemble de ces informations ci-dessous',
+        //         "icon"      =>      'https://app.navika.fr/img/modal/work.png',
+        //         // "img"       =>      'https://app.navika.fr/img/back/alert.png',
+        //         "is_reduced"=>       false,
+        //         "button"    =>      'En savoir plus',
+        //         "link"      =>      'https://www.iledefrance-mobilites.fr/travaux',
+        //     ),
+        // );
+
         // --- Message de IDFM
         // $client = HttpClient::create();
         // 

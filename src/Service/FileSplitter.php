@@ -6,7 +6,9 @@ class FileSplitter
 {
     public static function exec($dir, $provider, $type): int
     {
-        $file = $dir . '/' . $provider . '/' . $type . '.txt';
+    $original = $dir . '/' . $provider . '/' . $type . '.txt';
+    $clean = $dir . '/' . $provider . '/clean_' . $type . '.txt';
+    $file = is_file($clean) ? $clean : $original;
 
         $csvData = file($file, FILE_IGNORE_NEW_LINES);
         $linesPerFile = 30000;

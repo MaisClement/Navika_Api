@@ -78,6 +78,7 @@ class Lines
         )
     )]
 
+
     #[OA\Parameter(
         name: "allowed_lines[]",
         in: "query",
@@ -233,39 +234,51 @@ class Lines
             return new JsonResponse(Functions::httpErrorMessage(400, 'Nothing where found for this route'), 400);
         }
 
-        $_terminus = Functions::getTerminusOfALine($db, $route);
+        $lineTerminus = Functions::getTerminusOfALine($db, $route);
 
         $terminus = [];
-        foreach ($_terminus as $terminu) {
+        foreach ($lineTerminus as $_terminus) {
             $terminus[] = array(
-                "id" => (String) $terminu['stop_id'],
-                "name" => (String) $terminu['stop_name'],
-            );
-        }// ----
-        $json = [];
-        $json['line'] = $route->getRouteAndTrafic(true);
-
-        // ----
-        $stops = Functions::getStopsOfRoutes($db, $id);
-
-        $json['line']['stops'] = [];
-
-        foreach ($stops as $stop) {
-            $json['line']['stops'][] = array(
-                'id' => $stop['stop_id'],
-                'name' => (string) $stop['stop_name'],
-                'type' => (string) $stop['location_type'] == 0 ? 'stop_point' : 'stop_area',
-                'distance' => (float) 0,
-                'town' => (string) isset($stop['town_name']) ? $stop['town_name'] : '',
-                'zip_code' => (string) isset($stop['zip_code']) ? $stop['zip_code'] : '',
-                'coord' => array(
-                    'lat' => (float) $stop['stop_lat'],
-                    'lon' => (float) $stop['stop_lon'],
-                ),
+                "id" => (String) $_terminus['stop_id'],
+                "name" => (String) $_terminus['stop_name'],
             );
         }
 
-        // ---        
+        $json = [];
+        $json['line'] = $route->getRouteAndTrafic(true);
+
+        // Récupérer les arrêts et leurs relations
+        $stops = Functions::getStopsOfRoutes($db, $id);
+        $stopRelations = Functions::getStopRelations($db, $id); // Nouvelle fonction pour récupérer les relations entre arrêts
+
+        // Construire le graphe des arrêts
+        $graph = [];
+        foreach ($stops as $stop) {
+            $graph[$stop['stop_id']] = [];
+        }
+        foreach ($stopRelations as $relation) {
+            if ($relation['to_stop_id'] != null) {
+                $from = $relation['from_stop_id'];
+                $to = $relation['to_stop_id'];
+                if (!isset($graph[$from])) {
+                    $graph[$from] = [];
+                }
+                if (!in_array($to, $graph[$from])) {
+                    $graph[$from][] = $to;
+                }
+            }
+        }
+
+        // Appliquer un tri topologique
+        $sortedStops = $this->topologicalSort($graph);
+        // dd($sortedStops);
+
+        $json['line']['stops'] = [];
+        foreach ($sortedStops as $stopId) {
+            $stop = $this->stopsRepository->findStopById($stopId);
+            $json['line']['stops'][] = $stop->getStop();
+        }
+
         $json['line']['terminus'] = $terminus;
 
         if ($request->get('flag') != null) {
@@ -273,6 +286,43 @@ class Lines
         }
 
         return new JsonResponse($json);
+    }
+
+    public function topologicalSort($graph)
+    {
+        $visited = [];
+        $stack = [];
+        $levels = [];
+
+        foreach ($graph as $node => $edges) {
+            if (!isset($visited[$node])) {
+                $this->topologicalSortUtil($node, $visited, $stack, $graph, $levels);
+            }
+        }
+
+        ksort($levels);
+        $sorted = [];
+        foreach ($levels as $level) {
+            $sorted = array_merge($sorted, $level);
+        }
+
+        return $sorted;
+    }
+
+    public function topologicalSortUtil($node, &$visited, &$stack, $graph, &$levels, $level = 0)
+    {
+        $visited[$node] = true;
+
+        if (!isset($levels[$level])) {
+            $levels[$level] = [];
+        }
+        $levels[$level][] = $node;
+
+        foreach ($graph[$node] as $neighbor) {
+            if (!isset($visited[$neighbor])) {
+                $this->topologicalSortUtil($neighbor, $visited, $stack, $graph, $levels, $level + 1);
+            }
+        }
     }
 
     /**
@@ -376,7 +426,7 @@ class Lines
                         $real_time[] = [
                             "id" => $trip_id,
                             "el" => $result->MonitoredVehicleJourney->FramedVehicleJourneyRef->DatedVehicleJourneyRef,
-                            "trip_name" => isset($result->trainNumber) ? $result->trainNumber : '',
+                            "name" => isset($result->trainNumber) ? $result->trainNumber : '',
                             "stop_name" => $dir,
                             "date_time" => Functions::getStopDateTime($call)
                         ];
@@ -415,7 +465,7 @@ class Lines
                 "direction" => (string) Functions::gareFormat($obj['trip_headsign']),
                 "stop_name" => (string) Functions::gareFormat($o['stop_name']),
                 "trip_id" => (string) substr($obj['trip_id'], strrpos($obj['trip_id'], '-') + 1),
-                "trip_name" => (string) $obj['trip_short_name'],
+                "name" => (string) $obj['trip_short_name'],
                 "id" => (string) $obj['trip_id'],
                 "date_time" => null,
             );

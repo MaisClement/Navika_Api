@@ -3,6 +3,9 @@
 namespace App\Entity;
 
 use App\Repository\ShapesRepository;
+use CrEOF\Spatial\ORM\Query\AST\Functions\PostgreSql\STAsGeoJSON;
+use CrEOF\Spatial\PHP\Types\Geometry\LineString;
+use CrEOF\Spatial\PHP\Types\Geometry\MultiLineString;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\DBAL\Types\Types;
@@ -11,9 +14,14 @@ use Doctrine\ORM\Mapping as ORM;
 #[ORM\Entity(repositoryClass: ShapesRepository::class)]
 class Shapes
 {
+    // BIGINT UNSIGNED : cette table est reconstruite en boucle, son compteur
+    // AUTO_INCREMENT doit avoir de la marge même si la renumérotation opérée à
+    // chaque import (App\Service\DB::copyTable) le maintient au niveau du
+    // nombre de lignes. columnDefinition garde le type PHP en int : Doctrine
+    // continue d'hydrater et de générer l'id comme un entier.
     #[ORM\Id]
     #[ORM\GeneratedValue]
-    #[ORM\Column]
+    #[ORM\Column(columnDefinition: 'BIGINT UNSIGNED AUTO_INCREMENT NOT NULL')]
     private ?int $id = null;
 
     #[ORM\ManyToOne(inversedBy: 'shapes')]
@@ -23,17 +31,14 @@ class Shapes
     #[ORM\Column(length: 255)]
     private ?string $shape_id = null;
 
-    #[ORM\Column(length: 255)]
-    private ?string $shape_pt_lat = null;
+    #[ORM\Column(type: 'linestring', nullable: true)]
+    private ?LineString $geometry = null;
 
-    #[ORM\Column(length: 255)]
-    private ?string $shape_pt_lon = null;
+    #[ORM\Column(length: 255, nullable: true)]
+    private ?string $route_id = null;
 
-    #[ORM\Column]
-    private ?int $shape_pt_sequence = null;
-
-    #[ORM\Column(type: Types::DECIMAL, precision: 15, scale: '0', nullable: true)]
-    private ?string $shape_dist_traveled = null;
+    // #[ORM\Column(type: Types::DECIMAL, precision: 15, scale: '0', nullable: true)]
+    // private ?string $shape_dist_traveled = null;
 
     public function getProviderId(): ?Provider
     {
@@ -59,51 +64,85 @@ class Shapes
         return $this;
     }
 
-    public function getShapePtLat(): ?string
+    public function getGeometry(): ?LineString
     {
-        return $this->shape_pt_lat;
+        return $this->geometry;
     }
 
-    public function setShapePtLat(string $shape_pt_lat): static
+    public function setGeometry(?LineString $geometry): static
     {
-        $this->shape_pt_lat = $shape_pt_lat;
+        $this->geometry = $geometry;
 
         return $this;
     }
 
-    public function getShapePtLon(): ?string
+    public function getLineId(): ?string
     {
-        return $this->shape_pt_lon;
+        return $this->route_id;
     }
 
-    public function setShapePtLon(string $shape_pt_lon): static
+    public function setLineId(?string $route_id): static
     {
-        $this->shape_pt_lon = $shape_pt_lon;
+        $this->route_id = $route_id;
 
         return $this;
     }
 
-    public function getShapePtSequence(): ?int
+    /**
+     * Get the geometry as GeoJSON array
+     */
+    public function getGeometryAsGeoJson(): ?array
     {
-        return $this->shape_pt_sequence;
+        if (!$this->geometry) {
+            return null;
+        }
+
+        // Pour CrEOF, nous devons utiliser getPoints() pour obtenir les coordonnées
+        $points = $this->geometry->getPoints();
+        $coordinates = [];
+        
+        foreach ($points as $point) {
+            // Convertir en float explicitement pour éviter les problèmes avec le lexer
+            $coordinates[] = [(float)$point->getX(), (float)$point->getY()];
+        }
+
+        return [
+            'type' => 'LineString',
+            'coordinates' => $coordinates
+        ];
     }
 
-    public function setShapePtSequence(int $shape_pt_sequence): static
+    /**
+     * Create LineString from coordinate array
+     */
+    public function setGeometryFromCoordinates(array $coordinates): static
     {
-        $this->shape_pt_sequence = $shape_pt_sequence;
+        if (empty($coordinates)) {
+            $this->geometry = null;
+            return $this;
+        }
 
+        // Convertir les coordonnées en string si elles ne le sont pas déjà
+        $stringCoordinates = [];
+        foreach ($coordinates as $coord) {
+            if (is_array($coord) && count($coord) >= 2) {
+                $stringCoordinates[] = [(string)$coord[0], (string)$coord[1]];
+            }
+        }
+
+        $this->geometry = new LineString($stringCoordinates);
         return $this;
     }
 
-    public function getShapeDistTraveled(): ?string
-    {
-        return $this->shape_dist_traveled;
-    }
+    // public function getShapeDistTraveled(): ?string
+    // {
+    //     return $this->shape_dist_traveled;
+    // }
 
-    public function setShapeDistTraveled(?string $shape_dist_traveled): static
-    {
-        $this->shape_dist_traveled = $shape_dist_traveled;
+    // public function setShapeDistTraveled(?string $shape_dist_traveled): static
+    // {
+    //     $this->shape_dist_traveled = $shape_dist_traveled;
 
-        return $this;
-    }
+    //     return $this;
+    // }
 }

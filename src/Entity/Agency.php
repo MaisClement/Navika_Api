@@ -21,10 +21,10 @@ class Agency
     #[ORM\Column(length: 255)]
     private ?string $agency_name = null;
 
-    #[ORM\Column(length: 255)]
+    #[ORM\Column(length: 255, nullable: true)]
     private ?string $agency_url = null;
 
-    #[ORM\Column(length: 255)]
+    #[ORM\Column(length: 255, nullable: true)]
     private ?string $agency_timezone = null;
 
     #[ORM\Column(length: 255, nullable: true)]
